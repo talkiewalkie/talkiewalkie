@@ -1,12 +1,13 @@
 import React, { useContext, useState } from "react";
+import { removeCookie } from "../utils";
 
-type AuthContext = {
+type AuthState = {
   state: "LOGGED_IN" | "LOGGED_OUT";
   login: (email: string, password: string) => void;
   logout: () => void;
 };
 
-const AuthContext = React.createContext<AuthContext | null>(null);
+const AuthContext = React.createContext<AuthState | null>(null);
 
 export const useAuth = () => {
   const auth = useContext(AuthContext);
@@ -15,7 +16,14 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [state, setState] = useState<AuthContext["state"]>("LOGGED_OUT");
+  const token = document.cookie
+    .split("; ")
+    .find((c) => c.startsWith("jwt="))
+    ?.replace("jwt=", "");
+
+  const [state, setState] = useState<AuthState["state"]>(
+    token ? "LOGGED_IN" : "LOGGED_OUT"
+  );
 
   return (
     <AuthContext.Provider
@@ -28,7 +36,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           }).then(() => {
             setState("LOGGED_IN");
           }),
-        logout: () => null,
+        logout: () => {
+          removeCookie("jwt");
+          setState("LOGGED_OUT");
+        },
         state,
       }}
     >

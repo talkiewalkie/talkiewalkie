@@ -7,12 +7,13 @@ import { Pill } from "../components";
 
 export const TopBar = () => {
   const { login, logout } = useAuth();
-  const { user } = useUser();
+  const { user, updateCachedUser } = useUser();
+
   const [showUserSpace, setShowUserSpace] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
+
   const isCreatingAccount = useMatch("/signin");
 
-  console.log("topbar", user);
   return (
     <div className="flex justify-between relative bg-black text-white p-16">
       <a href="/">TalkieWalkie</a>
@@ -28,12 +29,24 @@ export const TopBar = () => {
               {user ? (
                 <div>
                   <div style={{ display: "absolute" }}>{user.email}</div>
-                  <button onClick={logout}>logout</button>
+                  <button
+                    onClick={() => {
+                      logout();
+                      updateCachedUser(undefined);
+                      setShowUserSpace(false);
+                    }}
+                  >
+                    logout
+                  </button>
                 </div>
               ) : showLogin ? (
                 <Formik
                   initialValues={{ email: "", password: "" }}
-                  onSubmit={({ email, password }) => login?.(email, password)}
+                  onSubmit={({ email, password }) => {
+                    login(email, password);
+                    setShowLogin(false);
+                    setShowUserSpace(false);
+                  }}
                 >
                   <Form className="relative flex-col items-center">
                     <button

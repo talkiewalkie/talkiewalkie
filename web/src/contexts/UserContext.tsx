@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import useSWR from "swr/esm";
 import { useAuth } from "./AuthContext";
 
@@ -11,6 +11,7 @@ export type User = {
 
 type UserContextType = {
   user: User | undefined;
+  updateCachedUser: (data: User | undefined) => void;
   query: (endpoint: string) => void;
 };
 
@@ -23,22 +24,23 @@ export const useUser = () => {
 
 export const UserProvider = ({ children }: { children: React.ReactNode }) => {
   const { state } = useAuth();
-  const { data } = useSWR<{ user: User }>(
+  const { data: user, mutate } = useSWR<User>(
     state === "LOGGED_IN" ? "/auth/me" : null,
     () =>
       fetch("http://localhost:8080/auth/me", {
         credentials: "include",
       }).then((r) => r.json()),
     {
+      initialData: undefined,
       shouldRetryOnError: false,
     }
   );
-  console.log(data);
 
   return (
     <UserContext.Provider
       value={{
-        user: data?.user,
+        user,
+        updateCachedUser: mutate,
         query: (endpoint) => fetch(endpoint, { credentials: "include" }),
       }}
     >
