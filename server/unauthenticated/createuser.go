@@ -31,7 +31,7 @@ func CreateUserHandler(components *common.Components) http.HandlerFunc {
 			}
 
 			emailContent := fmt.Sprintf("bienvue sur takliewalkie, ton code de verif est %x", key)
-			if err := components.EmailClient.SendEmail(p.Email, []byte(emailContent)); err != nil {
+			if err := components.EmailClient.SendEmail([]byte(emailContent), []string{p.Email}); err != nil {
 				// TODO: fix email sending!
 				//common.Error(w, fmt.Sprintf("failed to send verification email: %v", err), http.StatusInternalServerError)
 				//return

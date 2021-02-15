@@ -17,4 +17,5 @@ func Setup(r *mux.Router, c *common.Components) {
 
 	authRouter.HandleFunc("/user/{handle}", UserListHandler()).Methods(http.MethodGet)
 	authRouter.HandleFunc("/me", MeHandler()).Methods(http.MethodGet)
+	authRouter.HandleFunc("/upload", UploadHandler(c)).Methods(http.MethodPost)
 }

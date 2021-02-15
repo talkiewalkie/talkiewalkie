@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Editor } from "./Editor";
 
 type Walk = {
   uuid: string;
@@ -18,19 +19,23 @@ export const Home = () => {
 
   return (
     <div className="p-12 bg-light-blue">
-      {walks ? (
+      {!!walks ? (
         <div className="flex-col space-y-24">
-          {walks.map((w) => (
-            <div
-              key={w.uuid}
-              className="p-12 bg-white shadow-sm-outlined hover:bg-light-gray"
-            >
-              {w.title}
-            </div>
-          ))}
+          {walks.length === 0 ? (
+            <div>no walks yet</div>
+          ) : (
+            walks.map((w) => (
+              <div
+                key={w.uuid}
+                className="p-12 bg-white shadow-sm-outlined hover:bg-light-gray"
+              >
+                {w.title}
+              </div>
+            ))
+          )}
         </div>
       ) : (
-        "loading"
+        <div>"loading"</div>
       )}
       <button
         onClick={() =>
@@ -39,9 +44,9 @@ export const Home = () => {
           })
         }
       >
-        {" "}
-        make auth call{" "}
+        make auth call
       </button>
+      <Editor />
     </div>
   );
 };

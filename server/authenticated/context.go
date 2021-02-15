@@ -13,9 +13,10 @@ import (
 )
 
 type authenticatedContext struct {
-	Db             *sqlx.DB
-	User           *repository.User
-	UserRepository repository.UserRepository
+	Db              *sqlx.DB
+	User            *repository.User
+	UserRepository  repository.UserRepository
+	AssetRepository repository.AssetRepository
 }
 
 func withAuthContext(w http.ResponseWriter, r *http.Request, block func(c authenticatedContext)) {
@@ -26,6 +27,7 @@ func withAuthContext(w http.ResponseWriter, r *http.Request, block func(c authen
 		return
 	}
 	userRepo := repository.PgUserRepository{Db: db}
+	assetRepo := repository.PgAssetRepository{Db: db}
 
 	_, claims, _ := jwtauth.FromContext(r.Context())
 	userUuid, ok := claims["userUuid"].(string)
@@ -39,5 +41,6 @@ func withAuthContext(w http.ResponseWriter, r *http.Request, block func(c authen
 		common.Error(w, fmt.Sprintf("failed to retrieve user '%v': %v", userUuid, err), http.StatusUnauthorized)
 		return
 	}
-	block(authenticatedContext{Db: db, User: user, UserRepository: userRepo})
+
+	block(authenticatedContext{Db: db, User: user, UserRepository: userRepo, AssetRepository: assetRepo})
 }
