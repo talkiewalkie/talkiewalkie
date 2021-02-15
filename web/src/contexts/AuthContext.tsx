@@ -37,8 +37,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             setState("LOGGED_IN");
           }),
         logout: () => {
-          removeCookie("jwt");
           setState("LOGGED_OUT");
+          removeCookie("jwt");
         },
         state,
       }}
