@@ -5,6 +5,7 @@ import (
 	"flag"
 	"log"
 	"net/http"
+	"os"
 
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/gorilla/handlers"
@@ -34,7 +35,9 @@ func main() {
 	router := mux.NewRouter()
 	router.Use(
 		//mux.CORSMethodMiddleware(router),
-		Logger,
+		func(next http.Handler) http.Handler {
+			return handlers.CombinedLoggingHandler(os.Stdout, next)
+		},
 		WithDbMiddleWare)
 
 	unauthenticated.Setup(router, &components)
