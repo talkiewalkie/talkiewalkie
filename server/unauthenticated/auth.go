@@ -2,12 +2,12 @@ package unauthenticated
 
 import (
 	"encoding/hex"
-	"encoding/json"
 	"fmt"
-	"log"
 	"math/rand"
 	"net/http"
 	"time"
+
+	"golang.org/x/crypto/bcrypt"
 
 	"github.com/talkiewalkie/talkiewalkie/common"
 )
@@ -21,9 +21,7 @@ func CreateUserHandler(components *common.Components) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		withUnauthContext(w, r, func(c unauthenticatedContext) {
 			var p signInPayload
-			if err := json.NewDecoder(r.Body).Decode(&p); err != nil {
-				log.Printf("could not decode post: %v", err)
-				http.Error(w, "", http.StatusInternalServerError)
+			if err := common.JsonIn(w, r, &p); err != nil {
 				return
 			}
 
@@ -32,21 +30,26 @@ func CreateUserHandler(components *common.Components) http.HandlerFunc {
 				http.Error(w, fmt.Sprintf("could not generate random key: %v", err), http.StatusInternalServerError)
 				return
 			}
+
 			emailContent := fmt.Sprintf("bienvue sur takliewalkie, ton code de verif est %x", key)
 			if err := components.EmailClient.SendEmail(p.Email, []byte(emailContent)); err != nil {
-				log.Printf("failed to send verification email: %v", err)
-				http.Error(w, "", http.StatusInternalServerError)
+				http.Error(w, fmt.Sprintf("failed to send verification email: %v", err), http.StatusInternalServerError)
 				return
 			}
 
-			dbU, err := c.UserRepository.CreateUser(p.Email, p.Password, hex.EncodeToString(key))
+			hashed, err := bcrypt.GenerateFromPassword([]byte(p.Password), bcrypt.DefaultCost)
 			if err != nil {
-				log.Printf("could not create user in db: %v", err)
-				http.Error(w, "", http.StatusInternalServerError)
+				http.Error(w, fmt.Sprintf("could not hash the password; %v", err), http.StatusInternalServerError)
 				return
 			}
 
-			common.Json(w, dbU)
+			dbU, err := c.UserRepository.CreateUser(p.Email, hex.EncodeToString(hashed), hex.EncodeToString(key))
+			if err != nil {
+				http.Error(w, fmt.Sprintf("could not create user in db: %v", err), http.StatusInternalServerError)
+				return
+			}
+
+			common.JsonOut(w, dbU)
 		})
 	}
 }
@@ -60,8 +63,7 @@ func LoginHandler(components *common.Components) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		withUnauthContext(w, r, func(c unauthenticatedContext) {
 			var p loginPayload
-			if err := json.NewDecoder(r.Body).Decode(&p); err != nil {
-				http.Error(w, fmt.Sprintf("could not decode post: %v", err), http.StatusInternalServerError)
+			if err := common.JsonIn(w, r, &p); err != nil {
 				return
 			}
 
@@ -71,7 +73,13 @@ func LoginHandler(components *common.Components) http.HandlerFunc {
 				return
 			}
 
-			if u.Password != p.Password {
+			hashed, err := bcrypt.GenerateFromPassword([]byte(p.Password), bcrypt.DefaultCost)
+			if err != nil {
+				http.Error(w, fmt.Sprintf("could not hash the password; %v", err), http.StatusInternalServerError)
+				return
+			}
+
+			if u.Password != hex.EncodeToString(hashed) {
 				http.Error(w, "passwords don't match", http.StatusUnauthorized)
 				return
 			}
@@ -89,7 +97,7 @@ func LoginHandler(components *common.Components) http.HandlerFunc {
 				Expires: time.Now().Add(time.Hour),
 			})
 
-			common.Json(w, u)
+			common.JsonOut(w, u)
 		})
 	}
 }
