@@ -60,7 +60,7 @@ func WithDbMiddleWare(next http.Handler) http.Handler {
 
 		if err != nil {
 			log.Printf("could not connect to db: %v", err)
-			w.WriteHeader(http.StatusInternalServerError)
+			http.Error(w, "", http.StatusInternalServerError)
 			return
 		}
 

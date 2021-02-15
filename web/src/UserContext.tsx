@@ -1,7 +1,5 @@
 import React, { useState } from "react";
 
-import { firebaseApp } from "./firebase";
-
 export type User = {
   email: string;
   handle: string;
@@ -33,11 +31,7 @@ export const UserContext = ({ children }: { children: React.ReactNode }) => {
             .then((r) => r.json())
             .then((u) => setUserAuth(u))
             .catch((r) => console.log(r)),
-        logout: () =>
-          firebaseApp
-            ?.auth()
-            ?.signOut()
-            ?.then(() => setUserAuth(undefined)),
+        logout: () => null,
       }}
     >
       {children}

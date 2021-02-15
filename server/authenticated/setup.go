@@ -3,6 +3,7 @@ package authenticated
 import (
 	"net/http"
 
+	"github.com/go-chi/jwtauth"
 	"github.com/gorilla/mux"
 
 	"github.com/talkiewalkie/talkiewalkie/common"
@@ -10,7 +11,9 @@ import (
 
 func Setup(r *mux.Router, c *common.Components) {
 	authRouter := r.PathPrefix("/auth").Subrouter()
-	authRouter.Use(NewFirebaseAuth(c.FirebaseAuth))
+	authRouter.Use(
+		jwtauth.Verifier(c.JwtAuth),
+		jwtauth.Authenticator)
 
 	authRouter.HandleFunc("/user/{handle}", UserListHandler()).Methods(http.MethodGet)
 }

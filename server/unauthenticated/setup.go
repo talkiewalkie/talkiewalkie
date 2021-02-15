@@ -11,6 +11,6 @@ import (
 func Setup(r *mux.Router, c *common.Components) {
 	unauthRouter := r.PathPrefix("/unauth").Subrouter()
 	unauthRouter.HandleFunc("/walks", WalksHandler()).Methods(http.MethodGet)
-	unauthRouter.HandleFunc("/signin", SignInHandler(c)).Methods(http.MethodPost)
+	unauthRouter.HandleFunc("/create", CreateUserHandler(c)).Methods(http.MethodPost)
 	unauthRouter.HandleFunc("/login", LoginHandler(c)).Methods(http.MethodPost)
 }

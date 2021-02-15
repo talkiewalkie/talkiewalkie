@@ -12,7 +12,7 @@ func WalksHandler() http.HandlerFunc {
 			walks, err := c.WalkRepository.GetAll()
 			if err != nil {
 				log.Printf("could not fetch walks: %v", err)
-				w.WriteHeader(http.StatusInternalServerError)
+				http.Error(w, "", http.StatusInternalServerError)
 				return
 			}
 			b, err := json.Marshal(walks)

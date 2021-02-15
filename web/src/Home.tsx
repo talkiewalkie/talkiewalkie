@@ -35,13 +35,7 @@ export const Home = () => {
       <button
         onClick={() =>
           fetch("http://localhost:8080/auth/user/bloub", {
-            headers: new Headers({
-              Authorization:
-                document.cookie
-                  .split("; ")
-                  .find((row) => row.startsWith("fbToken="))
-                  ?.split("=")[1] ?? "",
-            }),
+            credentials: "include",
           })
         }
       >

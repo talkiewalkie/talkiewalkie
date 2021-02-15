@@ -3,12 +3,12 @@ CREATE EXTENSION IF NOT EXISTS "citext";
 
 CREATE TABLE "user"
 (
-    id           SERIAL PRIMARY KEY,
-    uuid         UUID UNIQUE NOT NULL DEFAULT uuid_generate_v4(),
-    firebase_uid TEXT        NOT NULL UNIQUE,
-    handle       CITEXT      NOT NULL UNIQUE,
-    email        CITEXT      NOT NULL UNIQUE,
-    email_token  TEXT
+    id          SERIAL PRIMARY KEY,
+    uuid        UUID UNIQUE NOT NULL DEFAULT uuid_generate_v4(),
+    handle      CITEXT      NOT NULL UNIQUE,
+    email       CITEXT      NOT NULL UNIQUE,
+    password    TEXT        NOT NULL UNIQUE,
+    email_token TEXT
 );
 
 CREATE TABLE "walk"

@@ -1,30 +1,18 @@
 package common
 
 import (
-	"context"
-	"log"
+	"os"
 
-	firebase "firebase.google.com/go"
-	"firebase.google.com/go/auth"
+	"github.com/go-chi/jwtauth"
 )
 
 type Components struct {
-	FirebaseApp  *firebase.App
-	FirebaseAuth *auth.Client
-	EmailClient  *EmailClient
+	EmailClient *EmailClient
+	JwtAuth     *jwtauth.JWTAuth
 }
 
 func InitComponents() Components {
-	fbClient, err := firebase.NewApp(context.Background(), nil)
-	if err != nil {
-		log.Panicf("could not load firebase client: %v", err)
-	}
-
-	c, err := fbClient.Auth(context.Background())
-	if err != nil {
-		log.Panicf("could not load firebase auth: %v", err)
-	}
-
+	tokenAuth := jwtauth.New("HS256", []byte(os.Getenv("JWT_SECRET")), nil)
 	emailClient := initEmailClient()
-	return Components{FirebaseApp: fbClient, FirebaseAuth: c, EmailClient: &emailClient}
+	return Components{EmailClient: &emailClient, JwtAuth: tokenAuth}
 }

@@ -13,7 +13,7 @@ export const Signin = () => {
           password.trim() === "" ? new Error("empty password") : undefined
         }
         onSubmit={({ email, password }) => {
-          fetch("http://localhost:8080/unauth/signin", {
+          fetch("http://localhost:8080/unauth/create", {
             method: "POST",
             body: JSON.stringify({ email, password }),
           })

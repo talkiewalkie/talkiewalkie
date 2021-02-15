@@ -19,7 +19,7 @@ func withUnauthContext(w http.ResponseWriter, r *http.Request, block func(c unau
 	db, ok := r.Context().Value("db").(*sqlx.DB)
 	if !ok {
 		log.Print("no 'db' value in context")
-		w.WriteHeader(http.StatusInternalServerError)
+		http.Error(w, "no db value in context", http.StatusInternalServerError)
 		return
 	}
 	walkRepo := repository.PgWalkRepository{Db: db}
