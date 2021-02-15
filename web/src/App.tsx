@@ -1,25 +1,25 @@
 import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 
-import { UserContext } from "./UserContext";
-import { TopBar } from "./TopBar";
-import { ErrorBoundary } from "./ErrorBoundary";
-import { Home } from "./Home";
-import "./tailwind.output.css";
-import Signin from "./Signin";
+import { ErrorBoundary, AuthProvider, UserProvider } from "./contexts";
+import { Home, Signin, TopBar } from "./views";
+
+import "./styles/tailwind.output.css";
 
 const App = () => (
   <ErrorBoundary>
     <Router>
-      <UserContext>
-        <div className="flex flex-col">
-          <TopBar />
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/signin" element={<Signin />} />
-          </Routes>
-        </div>
-      </UserContext>
+      <AuthProvider>
+        <UserProvider>
+          <div className="flex flex-col">
+            <TopBar />
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/create" element={<Signin />} />
+            </Routes>
+          </div>
+        </UserProvider>
+      </AuthProvider>
     </Router>
   </ErrorBoundary>
 );

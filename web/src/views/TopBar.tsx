@@ -1,22 +1,28 @@
 import React, { useState } from "react";
-import { useUser } from "./UserContext";
 import { useMatch } from "react-router-dom";
 import { Field, Form, Formik } from "formik";
 
+import { useAuth, useUser } from "../contexts";
+import { Pill } from "../components";
+
 export const TopBar = () => {
-  const { user, login, logout } = useUser();
+  const { login, logout } = useAuth();
+  const { user } = useUser();
   const [showUserSpace, setShowUserSpace] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
   const isCreatingAccount = useMatch("/signin");
 
+  console.log("topbar", user);
   return (
     <div className="flex justify-between relative bg-black text-white p-16">
       <a href="/">TalkieWalkie</a>
       {!isCreatingAccount && (
         <>
-          <button onClick={() => setShowUserSpace(!showUserSpace)}>
-            {user ? user.handle : "login/create"}
-          </button>
+          <Pill
+            onClick={() => setShowUserSpace(!showUserSpace)}
+            label={user ? user.handle : "login/create"}
+          />
+
           {showUserSpace && (
             <div className="absolute top-44 right-16 z-1 p-12 bg-white border rounded-sm shadow-lg text-body">
               {user ? (
@@ -56,7 +62,7 @@ export const TopBar = () => {
                 </Formik>
               ) : (
                 <div className="flex-col">
-                  <a className="text-left" href="/signin">
+                  <a className="text-left" href="/create">
                     create
                   </a>
                   <button
