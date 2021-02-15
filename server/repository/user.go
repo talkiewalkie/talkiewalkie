@@ -7,18 +7,18 @@ import (
 )
 
 type User struct {
-	Id         int            `json:"-"`
-	Uuid       string         `json:"uuid"`
-	Handle     string         `json:"handle"`
-	Email      string         `json:"email"`
-	Password   string         `json:"password"`
+	Id         int            `json:"-" db:"id"`
+	Uuid       string         `json:"uuid" db:"uuid"`
+	Handle     string         `json:"handle" db:"handle"`
+	Email      string         `json:"email" db:"email"`
+	Password   []byte         `json:"-" db:"password"`
 	EmailToken sql.NullString `json:"-" db:"email_token"`
 }
 
 type UserRepository interface {
 	GetUserByEmail(email string) (*User, error)
 	GetUserByUuid(uid string) (*User, error)
-	CreateUser(email, password, emailToken string) (*User, error)
+	CreateUser(email string, password []byte, emailToken string) (*User, error)
 }
 
 var _ UserRepository = PgUserRepository{}
@@ -43,13 +43,12 @@ func (p PgUserRepository) GetUserByUuid(uid string) (*User, error) {
 	return &u, nil
 }
 
-func (p PgUserRepository) CreateUser(email, password, emailToken string) (*User, error) {
+func (p PgUserRepository) CreateUser(email string, password []byte, emailToken string) (*User, error) {
 	var u User
 	err := p.Db.QueryRowx(`
-	INSERT INTO "user" 
-	    (handle, email, password, email_token) VALUES 
-		(?, ?, ?, ?) RETURNING (id, uuid, handle, email)`,
-		email, email, password, emailToken,
+		INSERT INTO "user" (handle, email, password, email_token) 
+		VALUES ($1, $2, $3, $4) RETURNING *;
+		`, email, email, password, emailToken,
 	).StructScan(&u)
 	if err != nil {
 		return nil, err

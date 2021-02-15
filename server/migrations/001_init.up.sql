@@ -7,7 +7,7 @@ CREATE TABLE "user"
     uuid        UUID UNIQUE NOT NULL DEFAULT uuid_generate_v4(),
     handle      CITEXT      NOT NULL UNIQUE,
     email       CITEXT      NOT NULL UNIQUE,
-    password    TEXT        NOT NULL UNIQUE,
+    password    BYTEA        NOT NULL UNIQUE,
     email_token TEXT
 );
 

@@ -1,9 +1,10 @@
 package unauthenticated
 
 import (
-	"encoding/json"
-	"log"
+	"fmt"
 	"net/http"
+
+	"github.com/talkiewalkie/talkiewalkie/common"
 )
 
 func WalksHandler() http.HandlerFunc {
@@ -11,12 +12,10 @@ func WalksHandler() http.HandlerFunc {
 		withUnauthContext(w, r, func(c unauthenticatedContext) {
 			walks, err := c.WalkRepository.GetAll()
 			if err != nil {
-				log.Printf("could not fetch walks: %v", err)
-				http.Error(w, "", http.StatusInternalServerError)
+				common.Error(w, fmt.Sprintf("could not fetch walks: %v", err), http.StatusInternalServerError)
 				return
 			}
-			b, err := json.Marshal(walks)
-			w.Write(b)
+			common.JsonOut(w, walks)
 		})
 	}
 }

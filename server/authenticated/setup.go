@@ -16,4 +16,5 @@ func Setup(r *mux.Router, c *common.Components) {
 		jwtauth.Authenticator)
 
 	authRouter.HandleFunc("/user/{handle}", UserListHandler()).Methods(http.MethodGet)
+	authRouter.HandleFunc("/me", MeHandler()).Methods(http.MethodGet)
 }

@@ -8,6 +8,7 @@ import (
 	"github.com/go-chi/jwtauth"
 	"github.com/jmoiron/sqlx"
 
+	"github.com/talkiewalkie/talkiewalkie/common"
 	"github.com/talkiewalkie/talkiewalkie/repository"
 )
 
@@ -21,7 +22,7 @@ func withAuthContext(w http.ResponseWriter, r *http.Request, block func(c authen
 	db, ok := r.Context().Value("db").(*sqlx.DB)
 	if !ok {
 		log.Print("no 'db' value in context")
-		http.Error(w, "", http.StatusInternalServerError)
+		common.Error(w, "", http.StatusInternalServerError)
 		return
 	}
 	userRepo := repository.PgUserRepository{Db: db}
@@ -30,12 +31,12 @@ func withAuthContext(w http.ResponseWriter, r *http.Request, block func(c authen
 	userUuid, ok := claims["userUuid"].(string)
 	if !ok {
 		log.Printf("no 'userUid' value in context")
-		http.Error(w, "", http.StatusInternalServerError)
+		common.Error(w, "", http.StatusInternalServerError)
 		return
 	}
 	user, err := userRepo.GetUserByUuid(userUuid)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("failed to retrieve user '%v': %v", userUuid, err), http.StatusUnauthorized)
+		common.Error(w, fmt.Sprintf("failed to retrieve user '%v': %v", userUuid, err), http.StatusUnauthorized)
 		return
 	}
 	block(authenticatedContext{Db: db, User: user, UserRepository: userRepo})
