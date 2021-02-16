@@ -12,10 +12,7 @@ type meResponse struct {
 	Verified bool `json:"verified"`
 }
 
-func MeHandler() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		withAuthContext(w, r, func(c authenticatedContext) {
-			common.JsonOut(w, meResponse{User: c.User, Verified: !c.User.EmailToken.Valid})
-		})
-	}
+func MeHandler(r *http.Request, c *authenticatedContext) (interface{}, *common.HttpError) {
+	return meResponse{User: c.User, Verified: !c.User.EmailToken.Valid}, nil
+
 }

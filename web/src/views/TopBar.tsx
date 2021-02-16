@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useMatch } from "react-router-dom";
+import { useMatch, useNavigate } from "react-router-dom";
 import { Field, Form, Formik } from "formik";
 
 import { useAuth, useUser } from "../contexts";
@@ -8,6 +8,7 @@ import { Pill } from "../components";
 export const TopBar = () => {
   const { login, logout } = useAuth();
   const { user, updateCachedUser } = useUser();
+  const navigate = useNavigate();
 
   const [showUserSpace, setShowUserSpace] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
@@ -16,9 +17,10 @@ export const TopBar = () => {
 
   return (
     <div className="flex justify-between relative bg-black text-white p-16">
-      <a href="/">TalkieWalkie</a>
+      <button onClick={() => navigate("/")}>TalkieWalkie</button>
       {!isCreatingAccount && (
         <>
+          {user && <Pill onClick={() => navigate("/editor")} label="Editor" />}
           <Pill
             onClick={() => setShowUserSpace(!showUserSpace)}
             label={user ? user.handle : "login/create"}
@@ -46,6 +48,7 @@ export const TopBar = () => {
                     login(email, password);
                     setShowLogin(false);
                     setShowUserSpace(false);
+                    navigate("/");
                   }}
                 >
                   <Form className="relative flex-col items-center">

@@ -1,6 +1,7 @@
 import React from "react";
 import useSWR from "swr/esm";
 import { useAuth } from "./AuthContext";
+import { apiGet } from "../utils";
 
 export type User = {
   email: string;
@@ -12,7 +13,6 @@ export type User = {
 type UserContextType = {
   user: User | undefined;
   updateCachedUser: (data: User | undefined) => void;
-  query: (endpoint: string) => void;
 };
 
 const UserContext = React.createContext<UserContextType | null>(null);
@@ -24,16 +24,11 @@ export const useUser = () => {
 
 export const UserProvider = ({ children }: { children: React.ReactNode }) => {
   const { state } = useAuth();
+
+  // todo: bug - `state` changes are not propagated?
   const { data: user, mutate } = useSWR<User>(
-    state === "LOGGED_IN" ? "/auth/me" : null,
-    () =>
-      fetch("http://localhost:8080/auth/me", {
-        credentials: "include",
-      }).then((r) => r.json()),
-    {
-      initialData: undefined,
-      shouldRetryOnError: false,
-    }
+    state === "LOGGED_IN" ? "auth/me" : null,
+    apiGet
   );
 
   return (
@@ -41,7 +36,6 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
       value={{
         user,
         updateCachedUser: mutate,
-        query: (endpoint) => fetch(endpoint, { credentials: "include" }),
       }}
     >
       {children}

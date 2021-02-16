@@ -1,20 +1,24 @@
 package repository
 
 import (
-	"github.com/docker/distribution/uuid"
+	"time"
+
 	"github.com/jmoiron/sqlx"
+	"github.com/lib/pq"
+	"github.com/satori/go.uuid"
 )
 
 type Asset struct {
-	Id       int    `json:"-" db:"id"`
-	Uuid     string `json:"uuid" db:"uuid"`
-	FileName string `json:"fileName" db:"file_name"`
-	MimeType string `json:"mimeType" db:"mime_type"`
-	Url      string `json:"url" db:"-"`
+	Id         int       `db:"id" json:"-"`
+	Uuid       string    `db:"uuid" json:"uuid"`
+	FileName   string    `db:"file_name" json:"fileName"`
+	MimeType   string    `db:"mime_type" json:"mimeType"`
+	UploadedAt time.Time `db:"uploaded_at" json:"uploadedAt"`
 }
 
 type AssetRepository interface {
-	GetByUuid(uid uuid.UUID) (*Asset, error)
+	GetByUuid(uuid.UUID) (*Asset, error)
+	GetAllByUuid(uuids []uuid.UUID) ([]Asset, error)
 	Create(uid uuid.UUID, fileName, mimeType string) (*Asset, error)
 }
 
@@ -32,6 +36,18 @@ func (p PgAssetRepository) GetByUuid(uid uuid.UUID) (*Asset, error) {
 		return nil, err
 	}
 	return &a, nil
+}
+
+func (p PgAssetRepository) GetAllByUuid(uuids []uuid.UUID) ([]Asset, error) {
+	assets := []Asset{}
+	uuidsStr := []string{}
+	for _, u := range uuids {
+		uuidsStr = append(uuidsStr, u.String())
+	}
+	if err := p.Db.Select(&assets, `SELECT * FROM "asset" WHERE "uuid" = ANY($1);`, pq.Array(uuidsStr)); err != nil {
+		return nil, err
+	}
+	return assets, nil
 }
 
 func (p PgAssetRepository) Create(uid uuid.UUID, fileName, mimeType string) (*Asset, error) {

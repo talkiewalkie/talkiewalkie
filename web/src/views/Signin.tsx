@@ -1,6 +1,7 @@
 import React from "react";
 import { Field, Form, Formik } from "formik";
 import { useNavigate } from "react-router-dom";
+import { apiPostb } from "../utils";
 
 export const Signin = () => {
   const navigate = useNavigate();
@@ -12,16 +13,13 @@ export const Signin = () => {
         validate={({ password }) =>
           password.trim() === "" ? new Error("empty password") : undefined
         }
-        onSubmit={({ email, password }) => {
-          fetch("http://localhost:8080/unauth/create", {
-            method: "POST",
-            body: JSON.stringify({ email, password }),
-          })
-            .then(() => navigate("/"))
-            .catch((r) => console.log(r));
-        }}
+        onSubmit={({ email, password }) =>
+          apiPostb("unauth/user/create", { email, password }).then(() =>
+            navigate("/")
+          )
+        }
       >
-        <Form>
+        <Form className="flex-col">
           <label htmlFor="email">Email</label>
           <Field
             id="email"
@@ -29,10 +27,13 @@ export const Signin = () => {
             placeholder="john@acme.com"
             type="email"
           />
-
           <label htmlFor="password">Password</label>
-          <Field id="password" name="password" placeholder="admin1234" />
-
+          <Field
+            id="password"
+            name="password"
+            type="password"
+            placeholder="admin1234"
+          />
           <button type="submit">Submit</button>
         </Form>
       </Formik>

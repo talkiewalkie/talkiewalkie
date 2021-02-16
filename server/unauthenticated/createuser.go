@@ -16,40 +16,35 @@ type signInPayload struct {
 	Password string `json:"password"`
 }
 
-func CreateUserHandler(components *common.Components) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		withUnauthContext(w, r, func(c unauthenticatedContext) {
-			var p signInPayload
-			if err := common.JsonIn(w, r, &p); err != nil {
-				return
-			}
+func CreateUserHandler(components *common.Components) UnauthHandler {
+	return func(w http.ResponseWriter, r *http.Request, c *unauthenticatedContext) (interface{}, *common.HttpError) {
+		var p signInPayload
+		if err := common.JsonIn(r, &p); err != nil {
+			return nil, common.ServerError(err.Error())
+		}
 
-			key := make([]byte, 64)
-			if _, err := rand.Read(key); err != nil {
-				common.Error(w, fmt.Sprintf("could not generate random key: %v", err), http.StatusInternalServerError)
-				return
-			}
+		key := make([]byte, 64)
+		if _, err := rand.Read(key); err != nil {
+			return nil, common.ServerError("could not generate random key: %v", err)
+		}
 
-			emailContent := fmt.Sprintf("bienvue sur takliewalkie, ton code de verif est %x", key)
-			if err := components.EmailClient.SendEmail([]byte(emailContent), []string{p.Email}); err != nil {
-				// TODO: fix email sending!
-				//common.Error(w, fmt.Sprintf("failed to send verification email: %v", err), http.StatusInternalServerError)
-				//return
-			}
+		emailContent := fmt.Sprintf("bienvue sur takliewalkie, ton code de verif est %x", key)
+		if err := components.EmailClient.SendEmail([]byte(emailContent), []string{p.Email}); err != nil {
+			// TODO: fix email sending!
+			//common.Error(w, fmt.Sprintf("failed to send verification email: %v", err), http.StatusInternalServerError)
+			//return
+		}
 
-			hashed, err := bcrypt.GenerateFromPassword([]byte(p.Password), bcrypt.DefaultCost)
-			if err != nil {
-				common.Error(w, fmt.Sprintf("could not hash the password; %v", err), http.StatusInternalServerError)
-				return
-			}
+		hashed, err := bcrypt.GenerateFromPassword([]byte(p.Password), bcrypt.DefaultCost)
+		if err != nil {
+			return nil, common.ServerError("could not hash the password; %v", err)
+		}
 
-			dbU, err := c.UserRepository.CreateUser(p.Email, hashed, hex.EncodeToString(key))
-			if err != nil {
-				common.Error(w, fmt.Sprintf("could not create user in db: %v", err), http.StatusInternalServerError)
-				return
-			}
+		dbU, err := c.UserRepository.CreateUser(p.Email, hashed, hex.EncodeToString(key))
+		if err != nil {
+			return nil, common.ServerError("could not create user in db: %v", err)
+		}
 
-			common.JsonOut(w, dbU)
-		})
+		return dbU, nil
 	}
 }

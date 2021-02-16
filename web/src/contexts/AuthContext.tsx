@@ -1,5 +1,6 @@
 import React, { useContext, useState } from "react";
-import { removeCookie } from "../utils";
+
+import { apiPostb, removeCookie } from "../utils";
 
 type AuthState = {
   state: "LOGGED_IN" | "LOGGED_OUT";
@@ -29,13 +30,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     <AuthContext.Provider
       value={{
         login: (email, password) =>
-          fetch("http://localhost:8080/unauth/login", {
-            method: "POST",
-            credentials: "include",
-            body: JSON.stringify({ email, password }),
-          }).then(() => {
-            setState("LOGGED_IN");
-          }),
+          apiPostb("unauth/login", { email, password })
+            .then(() => setState("LOGGED_IN"))
+            .catch((r) => {
+              setState("LOGGED_OUT");
+            }),
         logout: () => {
           setState("LOGGED_OUT");
           removeCookie("jwt");

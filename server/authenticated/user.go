@@ -2,12 +2,11 @@ package authenticated
 
 import (
 	"net/http"
+
+	"github.com/talkiewalkie/talkiewalkie/common"
 )
 
-func UserListHandler() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		withAuthContext(w, r, func(c authenticatedContext) {
+func UserListHandler(r *http.Request, c *authenticatedContext) (interface{}, *common.HttpError) {
+	return nil, &common.HttpError{Code: http.StatusInternalServerError, Msg: "not implemented"}
 
-		})
-	}
 }

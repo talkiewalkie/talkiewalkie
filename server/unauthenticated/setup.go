@@ -1,6 +1,8 @@
 package unauthenticated
 
 import (
+	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -12,10 +14,10 @@ import (
 
 func Setup(r *mux.Router, c *common.Components) {
 	unauthRouter := r.PathPrefix("/unauth").Subrouter()
-	unauthRouter.HandleFunc("/walks", WalksHandler()).Methods(http.MethodGet)
-	unauthRouter.HandleFunc("/create", CreateUserHandler(c)).Methods(http.MethodPost)
-	unauthRouter.HandleFunc("/login", LoginHandler(c)).Methods(http.MethodPost)
-	unauthRouter.HandleFunc("/verify", VerifyHandler()).Methods(http.MethodGet)
+	unauthRouter.HandleFunc("/login", mountHandler(LoginHandler(c))).Methods(http.MethodPost)
+	unauthRouter.HandleFunc("/verify", mountHandler(VerifyHandler)).Methods(http.MethodGet)
+	unauthRouter.HandleFunc("/user/create", mountHandler(CreateUserHandler(c))).Methods(http.MethodPost)
+	unauthRouter.HandleFunc("/walks", mountHandler(WalksHandler(c))).Methods(http.MethodGet)
 }
 
 type unauthenticatedContext struct {
@@ -24,13 +26,39 @@ type unauthenticatedContext struct {
 	UserRepository repository.UserRepository
 }
 
-func withUnauthContext(w http.ResponseWriter, r *http.Request, block func(c unauthenticatedContext)) {
+type UnauthHandler func(http.ResponseWriter, *http.Request, *unauthenticatedContext) (interface{}, *common.HttpError)
+
+func mountHandler(handler UnauthHandler) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		c, err := buildUnauthContext(r)
+		if err != nil {
+			log.Printf("failed to build context: %v", err)
+			http.Error(w, fmt.Sprintf("failed to build context: %v", err), http.StatusInternalServerError)
+			return
+		}
+
+		response, httpError := handler(w, r, c)
+		if httpError != nil {
+			log.Println(httpError.Msg)
+			http.Error(w, httpError.Msg, httpError.Code)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+		err = common.JsonOut(w, response)
+		if err != nil {
+			log.Printf("failed to marshal response: %v", err)
+			http.Error(w, fmt.Sprintf("failed to marshal response: %v", err), http.StatusInternalServerError)
+		}
+	}
+}
+
+func buildUnauthContext(r *http.Request) (*unauthenticatedContext, error) {
 	db, ok := r.Context().Value("db").(*sqlx.DB)
 	if !ok {
-		common.Error(w, "no db value in context", http.StatusInternalServerError)
-		return
+		return nil, fmt.Errorf("no 'db' value in context")
 	}
 	walkRepo := repository.PgWalkRepository{Db: db}
 	userRepo := repository.PgUserRepository{Db: db}
-	block(unauthenticatedContext{Db: db, WalkRepository: walkRepo, UserRepository: userRepo})
+	return &unauthenticatedContext{Db: db, WalkRepository: walkRepo, UserRepository: userRepo}, nil
 }

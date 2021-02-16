@@ -69,8 +69,7 @@ func WithDbMiddleWare(next http.Handler) http.Handler {
 		db, err := sqlx.Connect("postgres", "user=theo dbname=talkiewalkie sslmode=disable")
 
 		if err != nil {
-			log.Printf("could not connect to db: %v", err)
-			common.Error(w, "", http.StatusInternalServerError)
+			http.Error(w, fmt.Sprintf("could not connect to db: %v", err), http.StatusInternalServerError)
 			return
 		}
 
