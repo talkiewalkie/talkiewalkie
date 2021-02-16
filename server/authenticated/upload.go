@@ -35,6 +35,7 @@ func UploadHandler(c *common.Components) http.HandlerFunc {
 				return
 			}
 
+			// https://stackoverflow.com/a/52266455
 			contentType := http.DetectContentType(p)
 			a, err := ctx.AssetRepository.Create(*uid, h.Filename, contentType)
 			if err != nil {

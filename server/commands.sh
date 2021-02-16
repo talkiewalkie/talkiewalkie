@@ -17,4 +17,8 @@ new_migration() {
   migrate create -ext sql -dir migrations/ -seq -digits 3 "$1"
 }
 
+new_secret() {
+  openssl rand -hex 32
+}
+
 "$@"

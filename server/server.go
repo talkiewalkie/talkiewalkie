@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -21,12 +22,21 @@ import (
 
 var (
 	port = flag.String("port", ":8080", "port to run")
+	env  = flag.String("env", "dev", "dev|prod")
 )
 
 func main() {
-	err := godotenv.Load()
+	err := godotenv.Load(fmt.Sprintf(".env.%s", *env))
 	if err != nil {
 		log.Panicf("could not load env: %v", err)
+	}
+
+	var host string
+	switch *env {
+	case "dev":
+		host = "http://localhost:3000"
+	case "prod":
+		host = "https://talkiewalkie.app"
 	}
 
 	checkMigrations()
@@ -46,7 +56,7 @@ func main() {
 	corsWrapper := handlers.CORS(
 		handlers.AllowCredentials(),
 		handlers.AllowedHeaders([]string{"Authorization"}),
-		handlers.AllowedOrigins([]string{"http://localhost:3000"}))
+		handlers.AllowedOrigins([]string{host}))
 
 	log.Printf("listening on port %s", *port)
 	if err := http.ListenAndServe(*port, corsWrapper(router)); err != nil {
