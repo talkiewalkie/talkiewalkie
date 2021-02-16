@@ -31,7 +31,7 @@ func UploadHandler(c *common.Components) AuthHandler {
 
 		// todo : extend to better detection - https://stackoverflow.com/a/52266455
 		contentType := http.DetectContentType(p)
-		a, err := ctx.AssetRepository.Create(*uid, h.Filename, contentType)
+		a, err := ctx.AssetRepository.Create(uid.String(), h.Filename, contentType)
 		if err != nil {
 			return nil, common.ServerError("could not register asset in db: %v", err)
 		}

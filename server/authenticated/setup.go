@@ -10,6 +10,7 @@ import (
 	"github.com/jmoiron/sqlx"
 
 	"github.com/talkiewalkie/talkiewalkie/common"
+	"github.com/talkiewalkie/talkiewalkie/models"
 	"github.com/talkiewalkie/talkiewalkie/repository"
 )
 
@@ -27,7 +28,7 @@ func Setup(r *mux.Router, c *common.Components) {
 
 type authenticatedContext struct {
 	Db              *sqlx.DB
-	User            *repository.User
+	User            *models.User
 	UserRepository  repository.UserRepository
 	AssetRepository repository.AssetRepository
 }

@@ -25,6 +25,8 @@ var (
 	env  = flag.String("env", "dev", "dev|prod")
 )
 
+//go:generate sqlboiler psql
+
 func main() {
 	err := godotenv.Load(fmt.Sprintf(".env.%s", *env))
 	if err != nil {

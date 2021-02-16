@@ -1,57 +1,48 @@
 package repository
 
 import (
-	"database/sql"
+	"context"
 
 	"github.com/jmoiron/sqlx"
+	"github.com/volatiletech/null/v8"
+	"github.com/volatiletech/sqlboiler/v4/boil"
+
+	"github.com/talkiewalkie/talkiewalkie/models"
 )
 
-type User struct {
-	Id         int            `json:"-" db:"id"`
-	Uuid       string         `json:"uuid" db:"uuid"`
-	Handle     string         `json:"handle" db:"handle"`
-	Email      string         `json:"email" db:"email"`
-	Password   []byte         `json:"-" db:"password"`
-	EmailToken sql.NullString `json:"-" db:"email_token"`
-}
-
 type UserRepository interface {
-	GetUserByEmail(email string) (*User, error)
-	GetUserByUuid(uid string) (*User, error)
-	CreateUser(email string, password []byte, emailToken string) (*User, error)
+	GetUserByEmail(email string) (*models.User, error)
+	GetUserByUuid(uid string) (*models.User, error)
+	CreateUser(handle, email, emailToken string, password []byte) (*models.User, error)
 }
 
 var _ UserRepository = PgUserRepository{}
 
 type PgUserRepository struct {
-	Db *sqlx.DB
+	Db  *sqlx.DB
+	Ctx context.Context
 }
 
-func (p PgUserRepository) GetUserByEmail(email string) (*User, error) {
-	var u User
-	if err := p.Db.QueryRowx(`SELECT * FROM "user" WHERE email = $1;`, email).StructScan(&u); err != nil {
-		return nil, err
-	}
-	return &u, nil
-}
-
-func (p PgUserRepository) GetUserByUuid(uid string) (*User, error) {
-	var u User
-	if err := p.Db.QueryRowx(`SELECT * FROM "user" WHERE "uuid" = $1;`, uid).StructScan(&u); err != nil {
-		return nil, err
-	}
-	return &u, nil
-}
-
-func (p PgUserRepository) CreateUser(email string, password []byte, emailToken string) (*User, error) {
-	var u User
-	err := p.Db.QueryRowx(`
-		INSERT INTO "user" (handle, email, password, email_token) 
-		VALUES ($1, $2, $3, $4) RETURNING *;
-		`, email, email, password, emailToken,
-	).StructScan(&u)
+func (p PgUserRepository) GetUserByEmail(email string) (*models.User, error) {
+	u, err := models.Users(models.UserWhere.Email.EQ(email)).One(p.Ctx, p.Db)
 	if err != nil {
 		return nil, err
 	}
-	return &u, nil
+	return u, nil
+}
+
+func (p PgUserRepository) GetUserByUuid(uid string) (*models.User, error) {
+	u, err := models.Users(models.UserWhere.UUID.EQ(uid)).One(p.Ctx, p.Db)
+	if err != nil {
+		return nil, err
+	}
+	return u, nil
+}
+
+func (p PgUserRepository) CreateUser(handle, email, emailToken string, password []byte) (*models.User, error) {
+	u := &models.User{Handle: handle, Email: email, Password: password, EmailToken: null.NewString(emailToken, true)}
+	if err := u.Insert(p.Ctx, p.Db, boil.Infer()); err != nil {
+		return nil, err
+	}
+	return u, nil
 }

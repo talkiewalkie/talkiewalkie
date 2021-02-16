@@ -4,11 +4,11 @@ import (
 	"net/http"
 
 	"github.com/talkiewalkie/talkiewalkie/common"
-	"github.com/talkiewalkie/talkiewalkie/repository"
+	"github.com/talkiewalkie/talkiewalkie/models"
 )
 
 type meResponse struct {
-	*repository.User
+	*models.User
 	Verified bool `json:"verified"`
 }
 

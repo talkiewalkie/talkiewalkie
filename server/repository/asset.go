@@ -1,61 +1,46 @@
 package repository
 
 import (
-	"time"
+	"context"
 
 	"github.com/jmoiron/sqlx"
-	"github.com/lib/pq"
-	"github.com/satori/go.uuid"
+	"github.com/volatiletech/sqlboiler/v4/boil"
+
+	"github.com/talkiewalkie/talkiewalkie/models"
 )
 
-type Asset struct {
-	Id         int       `db:"id" json:"-"`
-	Uuid       string    `db:"uuid" json:"uuid"`
-	FileName   string    `db:"file_name" json:"fileName"`
-	MimeType   string    `db:"mime_type" json:"mimeType"`
-	UploadedAt time.Time `db:"uploaded_at" json:"uploadedAt"`
-}
-
 type AssetRepository interface {
-	GetByUuid(uuid.UUID) (*Asset, error)
-	GetAllByUuid(uuids []uuid.UUID) ([]Asset, error)
-	Create(uid uuid.UUID, fileName, mimeType string) (*Asset, error)
+	GetByUuid(string) (*models.Asset, error)
+	GetAllByUuid(uuids []string) ([]*models.Asset, error)
+	Create(uid string, fileName, mimeType string) (*models.Asset, error)
 }
 
 var _ AssetRepository = PgAssetRepository{}
 
 type PgAssetRepository struct {
-	Db *sqlx.DB
+	Db  *sqlx.DB
+	Ctx context.Context
 }
 
-func (p PgAssetRepository) GetByUuid(uid uuid.UUID) (*Asset, error) {
-	var a Asset
-	if err := p.Db.QueryRowx(
-		`SELECT * FROM "asset" WHERE uuid = $1;`, uid.String(),
-	).StructScan(&a); err != nil {
+func (p PgAssetRepository) GetByUuid(uid string) (*models.Asset, error) {
+	a, err := models.Assets(models.AssetWhere.UUID.EQ(uid)).One(p.Ctx, p.Db)
+	if err != nil {
 		return nil, err
 	}
-	return &a, nil
+	return a, nil
 }
 
-func (p PgAssetRepository) GetAllByUuid(uuids []uuid.UUID) ([]Asset, error) {
-	assets := []Asset{}
-	uuidsStr := []string{}
-	for _, u := range uuids {
-		uuidsStr = append(uuidsStr, u.String())
-	}
-	if err := p.Db.Select(&assets, `SELECT * FROM "asset" WHERE "uuid" = ANY($1);`, pq.Array(uuidsStr)); err != nil {
+func (p PgAssetRepository) GetAllByUuid(uuids []string) ([]*models.Asset, error) {
+	a, err := models.Assets(models.AssetWhere.UUID.IN(uuids)).All(p.Ctx, p.Db)
+	if err != nil {
 		return nil, err
 	}
-	return assets, nil
+	return a, nil
 }
 
-func (p PgAssetRepository) Create(uid uuid.UUID, fileName, mimeType string) (*Asset, error) {
-	var a Asset
-	if err := p.Db.QueryRowx(
-		`INSERT INTO "asset" (uuid, file_name, mime_type) VALUES ($1, $2, $3) RETURNING *`,
-		uid.String(), fileName, mimeType,
-	).StructScan(&a); err != nil {
+func (p PgAssetRepository) Create(uid string, fileName, mimeType string) (*models.Asset, error) {
+	a := models.Asset{UUID: uid, FileName: fileName, MimeType: mimeType}
+	if err := a.Insert(p.Ctx, p.Db, boil.Infer()); err != nil {
 		return nil, err
 	}
 	return &a, nil

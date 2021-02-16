@@ -1,0 +1,12 @@
+output = "models"
+
+[psql]
+dbname = "talkiewalkie"
+host = "localhost"
+port = 5432
+user = "theo"
+pass = ""
+schema = "public"
+sslmode = "disable"
+add-global-variants	= false
+wipe = true

@@ -31,7 +31,7 @@ func LoginHandler(components *common.Components) UnauthHandler {
 			return nil, unauthErr
 		}
 
-		_, signed, err := components.JwtAuth.Encode(map[string]interface{}{"userUuid": u.Uuid})
+		_, signed, err := components.JwtAuth.Encode(map[string]interface{}{"userUuid": u.UUID})
 		if err != nil {
 			return nil, common.ServerError("failed to build jwt: %v", err)
 		}
