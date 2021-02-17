@@ -6,6 +6,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 
+	"github.com/talkiewalkie/talkiewalkie/common"
 	"github.com/talkiewalkie/talkiewalkie/models"
 )
 
@@ -18,6 +19,7 @@ type AssetRepository interface {
 var _ AssetRepository = PgAssetRepository{}
 
 type PgAssetRepository struct {
+	*common.Components
 	Db  *sqlx.DB
 	Ctx context.Context
 }

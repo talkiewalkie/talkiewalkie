@@ -20,13 +20,14 @@ func Setup(r *mux.Router, c *common.Components) {
 		jwtauth.Verifier(c.JwtAuth),
 		jwtauth.Authenticator)
 
-	authRouter.HandleFunc("/user/{handle}", mountHandler(UserListHandler)).Methods(http.MethodGet)
-	authRouter.HandleFunc("/me", mountHandler(MeHandler)).Methods(http.MethodGet)
-	authRouter.HandleFunc("/upload", mountHandler(UploadHandler(c))).Methods(http.MethodPost)
-	authRouter.HandleFunc("/walk/create", mountHandler(CreateWalkHandler)).Methods(http.MethodPost)
+	authRouter.HandleFunc("/user/{handle}", mountHandler(c, UserListHandler)).Methods(http.MethodGet)
+	authRouter.HandleFunc("/me", mountHandler(c, MeHandler)).Methods(http.MethodGet)
+	authRouter.HandleFunc("/upload", mountHandler(c, UploadHandler)).Methods(http.MethodPost)
+	authRouter.HandleFunc("/walk/create", mountHandler(c, CreateWalkHandler)).Methods(http.MethodPost)
 }
 
 type authenticatedContext struct {
+	*common.Components
 	Db              *sqlx.DB
 	User            *models.User
 	UserRepository  repository.UserRepository
@@ -35,10 +36,10 @@ type authenticatedContext struct {
 
 type AuthHandler func(*http.Request, *authenticatedContext) (interface{}, *common.HttpError)
 
-func mountHandler(handler AuthHandler) http.HandlerFunc {
+func mountHandler(components *common.Components, handler AuthHandler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
-		c, err := buildAuthContext(r)
+		c, err := buildAuthContext(components, r)
 		if err != nil {
 			log.Printf("failed to build context: %v", err)
 			http.Error(w, fmt.Sprintf("failed to build context: %v", err), http.StatusInternalServerError)
@@ -61,14 +62,14 @@ func mountHandler(handler AuthHandler) http.HandlerFunc {
 	}
 }
 
-func buildAuthContext(r *http.Request) (*authenticatedContext, error) {
+func buildAuthContext(c *common.Components, r *http.Request) (*authenticatedContext, error) {
 	db, ok := r.Context().Value("db").(*sqlx.DB)
 	if !ok {
 		return nil, fmt.Errorf("no 'db' value in context")
 	}
 
-	userRepo := repository.PgUserRepository{Db: db}
-	assetRepo := repository.PgAssetRepository{Db: db}
+	userRepo := repository.PgUserRepository{Components: c, Db: db, Ctx: r.Context()}
+	assetRepo := repository.PgAssetRepository{Components: c, Db: db, Ctx: r.Context()}
 
 	_, claims, _ := jwtauth.FromContext(r.Context())
 	userUuid, ok := claims["userUuid"].(string)
@@ -81,5 +82,11 @@ func buildAuthContext(r *http.Request) (*authenticatedContext, error) {
 		return nil, err
 	}
 
-	return &authenticatedContext{Db: db, User: user, UserRepository: userRepo, AssetRepository: assetRepo}, nil
+	return &authenticatedContext{
+		Components:      c,
+		Db:              db,
+		User:            user,
+		UserRepository:  userRepo,
+		AssetRepository: assetRepo,
+	}, nil
 }

@@ -4,6 +4,7 @@ go 1.15
 
 require (
 	cloud.google.com/go/storage v1.10.0
+	github.com/docker/distribution v2.7.1+incompatible
 	github.com/friendsofgo/errors v0.9.2
 	github.com/go-chi/jwtauth v1.2.0
 	github.com/golang-migrate/migrate/v4 v4.14.1

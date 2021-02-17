@@ -14,13 +14,15 @@ import (
 
 func Setup(r *mux.Router, c *common.Components) {
 	unauthRouter := r.PathPrefix("/unauth").Subrouter()
-	unauthRouter.HandleFunc("/login", mountHandler(LoginHandler(c))).Methods(http.MethodPost)
-	unauthRouter.HandleFunc("/verify", mountHandler(VerifyHandler)).Methods(http.MethodGet)
-	unauthRouter.HandleFunc("/user/create", mountHandler(CreateUserHandler(c))).Methods(http.MethodPost)
-	unauthRouter.HandleFunc("/walks", mountHandler(WalksHandler(c))).Methods(http.MethodGet)
+	unauthRouter.HandleFunc("/login", mountHandler(c, LoginHandler)).Methods(http.MethodPost)
+	unauthRouter.HandleFunc("/verify", mountHandler(c, VerifyHandler)).Methods(http.MethodGet)
+	unauthRouter.HandleFunc("/user/create", mountHandler(c, CreateUserHandler)).Methods(http.MethodPost)
+	unauthRouter.HandleFunc("/walks", mountHandler(c, WalksHandler)).Methods(http.MethodGet)
+	unauthRouter.HandleFunc("/walk/{uuid}", mountHandler(c, WalkHandler)).Methods(http.MethodGet)
 }
 
 type unauthenticatedContext struct {
+	*common.Components
 	Db             *sqlx.DB
 	WalkRepository repository.WalkRepository
 	UserRepository repository.UserRepository
@@ -28,9 +30,9 @@ type unauthenticatedContext struct {
 
 type UnauthHandler func(http.ResponseWriter, *http.Request, *unauthenticatedContext) (interface{}, *common.HttpError)
 
-func mountHandler(handler UnauthHandler) http.HandlerFunc {
+func mountHandler(components *common.Components, handler UnauthHandler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		c, err := buildUnauthContext(r)
+		c, err := buildUnauthContext(components, r)
 		if err != nil {
 			log.Printf("failed to build context: %v", err)
 			http.Error(w, fmt.Sprintf("failed to build context: %v", err), http.StatusInternalServerError)
@@ -53,12 +55,14 @@ func mountHandler(handler UnauthHandler) http.HandlerFunc {
 	}
 }
 
-func buildUnauthContext(r *http.Request) (*unauthenticatedContext, error) {
+func buildUnauthContext(components *common.Components, r *http.Request) (*unauthenticatedContext, error) {
 	db, ok := r.Context().Value("db").(*sqlx.DB)
 	if !ok {
 		return nil, fmt.Errorf("no 'db' value in context")
 	}
-	walkRepo := repository.PgWalkRepository{Db: db}
-	userRepo := repository.PgUserRepository{Db: db}
-	return &unauthenticatedContext{Db: db, WalkRepository: walkRepo, UserRepository: userRepo}, nil
+
+	walkRepo := repository.PgWalkRepository{Components: components, Db: db, Ctx: r.Context()}
+	userRepo := repository.PgUserRepository{Components: components, Db: db, Ctx: r.Context()}
+
+	return &unauthenticatedContext{components, db, walkRepo, userRepo}, nil
 }
