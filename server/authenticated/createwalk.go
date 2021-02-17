@@ -19,6 +19,11 @@ type createWalkInput struct {
 	AudioUuid    uuid.UUID `json:"audioUuid"`
 }
 
+type createWalkOutput struct {
+	Uuid  string `json:"uuid"`
+	Title string `json:"title"`
+}
+
 func CreateWalkHandler(r *http.Request, ctx *authenticatedContext) (interface{}, *common.HttpError) {
 	var p createWalkInput
 	if err := common.JsonIn(r, &p); err != nil {
@@ -49,5 +54,5 @@ func CreateWalkHandler(r *http.Request, ctx *authenticatedContext) (interface{},
 	if err := w.Insert(r.Context(), ctx.Db, boil.Infer()); err != nil {
 		return nil, common.ServerError(err.Error())
 	}
-	return w, nil
+	return createWalkOutput{w.UUID, w.Title}, nil
 }

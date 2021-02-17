@@ -1,33 +1,41 @@
 import React, { useState } from "react";
-import { useMatch, useNavigate } from "react-router-dom";
+import { Link, useMatch, useNavigate } from "react-router-dom";
 import { Field, Form, Formik } from "formik";
 
 import { useAuth, useUser } from "../contexts";
 import { Pill } from "../components";
+import { Popover } from "../components/Popover";
+import { useTargetState } from "../hooks";
 
 export const TopBar = () => {
   const { login, logout } = useAuth();
   const { user, updateCachedUser } = useUser();
   const navigate = useNavigate();
 
-  const [showUserSpace, setShowUserSpace] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
 
   const isCreatingAccount = useMatch("/signin");
+  const [target, setTarget] = useTargetState();
 
   return (
-    <div className="flex justify-between relative bg-black text-white p-16">
-      <button onClick={() => navigate("/")}>TalkieWalkie</button>
+    <div className="flex items-center justify-between relative p-16">
+      <Link to="/">TalkieWalkie</Link>
       {!isCreatingAccount && (
         <>
-          {user && <Pill onClick={() => navigate("/editor")} label="Editor" />}
+          {user && <Link to="/editor">Make something new!</Link>}
           <Pill
-            onClick={() => setShowUserSpace(!showUserSpace)}
+            onClick={setTarget}
             label={user ? user.handle : "login/create"}
           />
 
-          {showUserSpace && (
-            <div className="absolute top-44 right-16 z-1 p-12 bg-white border rounded-sm shadow-lg text-body">
+          {target && (
+            <Popover
+              target={target}
+              position="bottom-right"
+              onClose={() => setTarget(undefined)}
+              className="absolute top-44 right-0 z-1 p-12 bg-white border rounded-sm shadow-lg text-body"
+              style={{ width: user ? 100 : 200 }}
+            >
               {user ? (
                 <div>
                   <div style={{ display: "absolute" }}>{user.email}</div>
@@ -35,7 +43,7 @@ export const TopBar = () => {
                     onClick={() => {
                       logout();
                       updateCachedUser(undefined);
-                      setShowUserSpace(false);
+                      setTarget(undefined);
                     }}
                   >
                     logout
@@ -47,7 +55,7 @@ export const TopBar = () => {
                   onSubmit={({ email, password }) => {
                     login(email, password);
                     setShowLogin(false);
-                    setShowUserSpace(false);
+                    setTarget(undefined);
                     navigate("/");
                   }}
                 >
@@ -78,9 +86,13 @@ export const TopBar = () => {
                 </Formik>
               ) : (
                 <div className="flex-col">
-                  <a className="text-left" href="/create">
+                  <Link
+                    className="text-left"
+                    to="/create"
+                    onClick={() => setTarget(undefined)}
+                  >
                     create
-                  </a>
+                  </Link>
                   <button
                     className="text-left"
                     onClick={() => setShowLogin(true)}
@@ -89,7 +101,7 @@ export const TopBar = () => {
                   </button>
                 </div>
               )}
-            </div>
+            </Popover>
           )}
         </>
       )}

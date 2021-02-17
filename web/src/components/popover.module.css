@@ -1,0 +1,105 @@
+.arrowBox {
+  @apply fixed bg-white border shadow-lg z-popover rounded;
+}
+
+$popover-arrow-size: 11px;
+
+.common {
+  &:after,
+  &:before {
+    border: solid transparent;
+    content: " ";
+    height: 0;
+    width: 0;
+    position: absolute;
+    pointer-events: none;
+  }
+
+  &:after {
+    border-width: $popover-arrow-size;
+  }
+
+  &:before {
+    border-width: calc($popover-arrow-size + 1px);
+  }
+}
+
+.top {
+  @apply common;
+
+  &:after,
+  &:before {
+    bottom: 100%;
+    left: 50%;
+  }
+
+  &:after {
+    border-bottom-color: theme("colors.white");
+    margin-left: -$popover-arrow-size;
+  }
+
+  &:before {
+    border-bottom-color: theme("colors.stroke");
+    margin-left: calc(-$popover-arrow-size - 1px);
+  }
+}
+
+.right {
+  @apply common;
+
+  &:after,
+  &:before {
+    left: 100%;
+    top: 50%;
+  }
+
+  &:after {
+    border-left-color: theme("colors.white");
+    margin-top: -$popover-arrow-size;
+  }
+
+  &:before {
+    border-left-color: theme("colors.stroke");
+    margin-top: calc(-$popover-arrow-size - 1px);
+  }
+}
+
+.bottom {
+  @apply common;
+
+  &:after,
+  &:before {
+    top: 100%;
+    left: 50%;
+  }
+
+  &:after {
+    border-top-color: theme("colors.white");
+    margin-left: -$popover-arrow-size;
+  }
+
+  &:before {
+    border-top-color: theme("colors.stroke");
+    margin-left: calc(-$popover-arrow-size - 1px);
+  }
+}
+
+.left {
+  @apply common;
+
+  &:after,
+  &:before {
+    right: 100%;
+    top: 50%;
+  }
+
+  &:after {
+    border-right-color: theme("colors.white");
+    margin-top: -$popover-arrow-size;
+  }
+
+  &:before {
+    border-right-color: theme("colors.stroke");
+    margin-top: calc(-$popover-arrow-size - 1px);
+  }
+}

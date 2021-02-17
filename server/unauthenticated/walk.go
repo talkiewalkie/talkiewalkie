@@ -7,14 +7,11 @@ import (
 	"github.com/gorilla/mux"
 
 	"github.com/talkiewalkie/talkiewalkie/common"
-	"github.com/talkiewalkie/talkiewalkie/models"
 )
 
-type walkResponse struct {
-	*models.Walk
-	Author   *models.User `db:"author" json:"author"`
-	CoverUrl string       `json:"coverUrl"`
-	AudioUrl string       `json:"audioUrl"`
+type walkOutput struct {
+	listedWalkOutput
+	AudioUrl string `json:"audioUrl"`
 }
 
 func WalkHandler(w http.ResponseWriter, r *http.Request, c *unauthenticatedContext) (interface{}, *common.HttpError) {
@@ -42,6 +39,22 @@ func WalkHandler(w http.ResponseWriter, r *http.Request, c *unauthenticatedConte
 	if err != nil {
 		return nil, common.ServerError(err.Error())
 	}
+	audio, err := walk.Audio().One(r.Context(), c.Db)
+	if err != nil {
+		return nil, common.ServerError(err.Error())
+	}
+	audioUrl, err := c.Storage.Url(audio.UUID)
+	if err != nil {
+		return nil, common.ServerError(err.Error())
+	}
 
-	return walkResponse{Walk: walk, Author: u, CoverUrl: coverUrl, AudioUrl: ""}, nil
+	return walkOutput{
+		listedWalkOutput: listedWalkOutput{
+			Uuid:     walk.UUID,
+			Title:    walk.Title,
+			Author:   authorOutput{Uuid: u.UUID, Handle: u.Handle},
+			CoverUrl: coverUrl,
+		},
+		AudioUrl: audioUrl,
+	}, nil
 }

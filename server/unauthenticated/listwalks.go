@@ -9,9 +9,15 @@ import (
 	"github.com/talkiewalkie/talkiewalkie/models"
 )
 
-type walkItemResponse struct {
-	*models.Walk
-	Author   *models.User `db:"author" json:"author"`
+type authorOutput struct {
+	Uuid   string `json:"uuid"`
+	Handle string `json:"handle"`
+}
+
+type listedWalkOutput struct {
+	Uuid     string       `json:"uuid"`
+	Title    string       `json:"title"`
+	Author   authorOutput `json:"author"`
 	CoverUrl string       `json:"coverUrl"`
 }
 
@@ -26,16 +32,17 @@ func WalksHandler(w http.ResponseWriter, r *http.Request, c *unauthenticatedCont
 		return nil, common.ServerError("failed to fetch walks: %v", err)
 	}
 
-	responseWalks := []walkItemResponse{}
+	responseWalks := []listedWalkOutput{}
 	for _, walk := range walks {
 		coverUrl, err := c.Storage.Url(walk.R.Cover.UUID)
 		if err != nil {
 			return nil, common.ServerError("could not make a signed url: %v", err)
 		}
 
-		responseWalks = append(responseWalks, walkItemResponse{
-			Walk:     walk,
-			Author:   walk.R.Author,
+		responseWalks = append(responseWalks, listedWalkOutput{
+			Uuid:     walk.UUID,
+			Title:    walk.Title,
+			Author:   authorOutput{walk.R.Author.UUID, walk.R.Author.Handle},
 			CoverUrl: coverUrl,
 		})
 	}

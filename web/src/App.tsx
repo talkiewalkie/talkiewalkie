@@ -1,13 +1,12 @@
 import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import { SWRConfig } from "swr";
 
 import { AuthProvider, ErrorBoundary, UserProvider, useUser } from "./contexts";
 // todo: optimisation - split unauth screen and authed app: https://kentcdodds.com/blog/authentication-in-react-applications
-import { Home, Signin, TopBar } from "./views";
+import { Editor, Home, Signin, TopBar, Walk } from "./views";
 
 import "./styles/tailwind.output.css";
-import { Editor } from "./views/Editor";
-import { SWRConfig } from "swr";
 
 const App = () => (
   <ErrorBoundary>
@@ -17,8 +16,8 @@ const App = () => (
           <SWRConfig
             value={{
               revalidateOnFocus: false,
-              revalidateOnMount: false,
-              revalidateOnReconnect: false,
+              revalidateOnMount: true,
+              revalidateOnReconnect: true,
               refreshWhenOffline: true,
               refreshWhenHidden: true,
               refreshInterval: 0,
@@ -41,7 +40,8 @@ const AppView = () => {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/create" element={<Signin />} />
-        {user && <Route path="/editor" element={<Editor />} />}
+        <Route path="/walk/:uuid" element={<Walk />} />
+        <Route path="/editor" element={<Editor />} />
       </Routes>
     </div>
   );

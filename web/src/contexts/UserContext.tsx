@@ -4,9 +4,9 @@ import { useAuth } from "./AuthContext";
 import { apiGet } from "../utils";
 
 export type User = {
-  email: string;
-  handle: string;
   uuid: string;
+  handle: string;
+  email: string;
   verified: boolean;
 };
 

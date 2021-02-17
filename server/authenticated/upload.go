@@ -6,6 +6,10 @@ import (
 	"github.com/talkiewalkie/talkiewalkie/common"
 )
 
+type uploadOutput struct {
+	Uuid string `json:"uuid"`
+}
+
 func UploadHandler(r *http.Request, ctx *authenticatedContext) (interface{}, *common.HttpError) {
 	_, h, err := r.FormFile("main")
 	if err != nil {
@@ -35,5 +39,5 @@ func UploadHandler(r *http.Request, ctx *authenticatedContext) (interface{}, *co
 		return nil, common.ServerError("could not register asset in db: %v", err)
 	}
 
-	return a, nil
+	return uploadOutput{a.UUID}, nil
 }

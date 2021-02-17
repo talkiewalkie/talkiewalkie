@@ -9,13 +9,13 @@ import (
 	"github.com/talkiewalkie/talkiewalkie/common"
 )
 
-type loginPayload struct {
+type loginInput struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
 
 func LoginHandler(w http.ResponseWriter, r *http.Request, c *unauthenticatedContext) (interface{}, *common.HttpError) {
-	var p loginPayload
+	var p loginInput
 	if err := common.JsonIn(r, &p); err != nil {
 		return nil, common.ServerError(err.Error())
 	}

@@ -4,15 +4,15 @@ import (
 	"net/http"
 
 	"github.com/talkiewalkie/talkiewalkie/common"
-	"github.com/talkiewalkie/talkiewalkie/models"
 )
 
-type meResponse struct {
-	*models.User
-	Verified bool `json:"verified"`
+type meOutput struct {
+	UUID     string `json:"uuid"`
+	Handle   string `json:"handle"`
+	Email    string `json:"email"`
+	Verified bool   `json:"verified"`
 }
 
 func MeHandler(r *http.Request, c *authenticatedContext) (interface{}, *common.HttpError) {
-	return meResponse{User: c.User, Verified: !c.User.EmailToken.Valid}, nil
-
+	return meOutput{c.User.UUID, c.User.Handle, c.User.Email, !c.User.EmailToken.Valid}, nil
 }

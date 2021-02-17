@@ -1,9 +1,13 @@
 import { Field, Form, Formik } from "formik";
 import React from "react";
-import { apiPost, apiPostb, upload } from "../utils";
+import { apiPostb, upload } from "../utils";
+import { useUser } from "../contexts";
+import { Navigate } from "react-router-dom";
 
 export const Editor = () => {
-  return (
+  const { user } = useUser();
+
+  return user ? (
     <div>
       <Formik<{
         title: string;
@@ -17,6 +21,7 @@ export const Editor = () => {
           title: "",
           description: "",
         }}
+        // todo: validate files, verify ahead that they're of the expected type
         // validate={({ file }) => ({ file: !!file })}
         onSubmit={async ({ title, description, cover, audio }) => {
           const uploads = await Promise.all([upload(cover!), upload(audio!)]);
@@ -55,5 +60,7 @@ export const Editor = () => {
         )}
       </Formik>
     </div>
+  ) : (
+    <Navigate to="/" />
   );
 };

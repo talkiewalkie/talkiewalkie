@@ -19,6 +19,12 @@ type createUserInput struct {
 	Password string `json:"password"`
 }
 
+type createUserOutput struct {
+	Uuid   string `json:"uuid"`
+	Handle string `json:"handle"`
+	Email  string `json:"email"`
+}
+
 func CreateUserHandler(w http.ResponseWriter, r *http.Request, c *unauthenticatedContext) (interface{}, *common.HttpError) {
 	var p createUserInput
 	if err := common.JsonIn(r, &p); err != nil {
@@ -47,5 +53,5 @@ func CreateUserHandler(w http.ResponseWriter, r *http.Request, c *unauthenticate
 		return nil, common.ServerError("could not create user in db: %v", err)
 	}
 
-	return u, nil
+	return createUserOutput{u.UUID, u.Handle, u.Email}, nil
 }
