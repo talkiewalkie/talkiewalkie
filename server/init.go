@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"log"
+	"os"
 
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
@@ -11,7 +13,13 @@ import (
 func checkMigrations() {
 	m, err := migrate.New(
 		"file://migrations",
-		"postgres://theo:@localhost:5432/talkiewalkie?sslmode=disable")
+		fmt.Sprintf(
+			"postgres://%s:%s@%s:5432/%s?sslmode=disable",
+			os.Getenv("POSTGRES_USER"),
+			os.Getenv("POSTGRES_PASSWORD"),
+			os.Getenv("POSTGRES_HOST"),
+			os.Getenv("POSTGRES_DB"),
+		))
 	if err != nil {
 		log.Fatal(err)
 	}

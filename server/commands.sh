@@ -28,4 +28,12 @@ install_sqlboiler_cli() {
   mv "${GOPATH}/bin/sqlboiler-psql" .
 }
 
+push_back() {
+  docker push gcr.io/talkiewalkie-305117/talkiewalkie-back:latest
+}
+
+kube_back() {
+  kubectl create deployment talkiewalkie-back --image=gcr.io/talkiewalkie-305117/talkiewalkie-back:latest
+}
+
 "$@"

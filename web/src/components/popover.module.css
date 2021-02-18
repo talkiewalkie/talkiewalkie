@@ -1,5 +1,5 @@
 .arrowBox {
-  @apply fixed bg-white border shadow-lg z-popover rounded;
+  @apply fixed bg-white border-4 shadow-lg z-popover rounded-sm;
 }
 
 $popover-arrow-size: 11px;

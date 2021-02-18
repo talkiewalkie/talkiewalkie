@@ -100,12 +100,10 @@ defineArrayProperty("last", function () {
 });
 
 defineArrayProperty("immutableSort", function (compareFn) {
-  // eslint-disable-next-line nabla/no-array-sort
   return this.slice().sort(compareFn);
 });
 
 defineArrayProperty("isEmpty", function () {
-  // eslint-disable-next-line nabla/use-array-is-empty
   return this.length === 0;
 });
 
@@ -131,7 +129,6 @@ defineArrayProperty("sortDesc", function (getValue) {
 });
 
 defineArrayProperty("count", function (predicate) {
-  // eslint-disable-next-line nabla/use-array-count
   return this.filter(predicate).length;
 });
 
@@ -140,7 +137,6 @@ defineArrayProperty("filterNotNull", function () {
 });
 
 defineArrayProperty("mapNotNull", function (predicate) {
-  // eslint-disable-next-line nabla/use-map-not-null
   return this.map(predicate).filterNotNull();
 });
 

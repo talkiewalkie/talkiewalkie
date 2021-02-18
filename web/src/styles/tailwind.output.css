@@ -450,11 +450,6 @@ input:-ms-input-placeholder, textarea:-ms-input-placeholder {
   color: #a1a1aa;
 }
 
-input::-ms-input-placeholder, textarea::-ms-input-placeholder {
-  opacity: 1;
-  color: #a1a1aa;
-}
-
 input::placeholder,
 textarea::placeholder {
   opacity: 1;

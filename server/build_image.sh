@@ -10,16 +10,24 @@ set -Eex
 go generate
 
 cat <<EOF >>Dockerfile
-FROM golang:1.16
-ENV GO111MODULE=on
-RUN mkdir -p /app $GOPATH/src/github.com/talkiewalkie/talkiewalkie/
-WORKDIR /app
-COPY authenticated common migrations models repository unauthenticated $GOPATH/src/github.com/talkiewalkie/talkiewalkie/
-COPY go.mod go.sum init.go server.go .env.prod /app
-#RUN go mod download
-RUN go get
-RUN go build
-CMD ["./talkiewalkie -env prod"]
+FROM golang:1.16 AS builder
+
+WORKDIR /go/src/app
+COPY .env.prod .
+COPY . .
+
+RUN go get -d -v ./...
+RUN GOOS=linux GOARCH=amd64 go build -o talkiewalkie
+
+FROM scratch
+
+COPY --from=builder /go/src/app/migrations migrations
+COPY --from=builder /go/src/app/.env.prod .env.prod
+COPY --from=builder /go/src/app/.secrets .secrets
+COPY --from=builder /go/src/app/talkiewalkie talkiewalkie
+EXPOSE 8080
+
+CMD ["./talkiewalkie", "-env", "prod"]
 EOF
 
-docker build .
+docker build --platform linux/amd64 -t gcr.io/talkiewalkie-305117/talkiewalkie-back:1 .

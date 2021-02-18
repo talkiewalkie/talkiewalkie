@@ -6,7 +6,6 @@ declare global {
   const storage: Storage;
 }
 
-// eslint-disable-next-line nabla/no-local-storage
 window.storage = window.E2E ? sessionStorage : localStorage;
 
 export {};
