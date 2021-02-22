@@ -1,0 +1,30 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: basic-ingress
+  annotations:
+    kubernetes.io/ingress.class: "gce"
+    kubernetes.io/ingress.global-static-ip-name: tw-ip
+#    networking.gke.io/managed-certificates: talkiewalkie-app-certs
+spec:
+#  tls:
+#    - secretName: twappcert
+#    - secretName: apitwappcert
+#    - hosts:
+#        - api.talkiewalkie.app
+#        - talkiewalkie.app
+  rules:
+    - host: talkiewalkie.app
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: front-service
+              servicePort: 80
+    - host: api.talkiewalkie.app
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: back-service
+              servicePort: 8080

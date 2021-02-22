@@ -30,6 +30,7 @@ var (
 func main() {
 	flag.Parse()
 
+	// todo: should remove prod env file, kubernetes secrets do the job or service accounts will
 	err := godotenv.Load(fmt.Sprintf(".env.%s", *env))
 	if err != nil {
 		log.Panicf("could not load env: %v", err)
@@ -71,11 +72,10 @@ func main() {
 func WithDbMiddleWare(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		dsName := fmt.Sprintf(
-			"postgres://%s:%s@%s/%s?sslmode=disable",
+			"postgres://%s:%s@%s/talkiewalkie?sslmode=disable",
 			os.Getenv("POSTGRES_USER"),
 			os.Getenv("POSTGRES_PASSWORD"),
 			os.Getenv("POSTGRES_HOST"),
-			os.Getenv("POSTGRES_DB"),
 		)
 		db, err := sqlx.Connect("postgres", dsName)
 
