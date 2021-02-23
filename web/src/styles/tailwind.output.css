@@ -3175,6 +3175,10 @@ video {
   height: 100%;
 }
 
+.h-screen {
+  height: 100vh;
+}
+
 .text-10 {
   font-size: 10px;
 }
@@ -10931,6 +10935,8 @@ html,
 body,
 #root {
   height: 100%;
+  margin: 0 auto;
+  max-width: 500px;
   overflow: hidden;
   font-size: 15px;
   color: #6d758d;
@@ -12309,6 +12315,10 @@ body,
 
   .lg\:h-full {
     height: 100%;
+  }
+
+  .lg\:h-screen {
+    height: 100vh;
   }
 
   .lg\:text-10 {

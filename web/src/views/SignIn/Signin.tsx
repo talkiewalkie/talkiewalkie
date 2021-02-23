@@ -8,37 +8,35 @@ export const Signin = () => {
   const navigate = useNavigate();
 
   return (
-    <div>
-      <Formik
-        initialValues={{ email: "", password: "" }}
-        validate={({ password }) =>
-          password.trim() === "" ? new Error("empty password") : undefined
-        }
-        onSubmit={({ email, password }) =>
-          apiPostb("unauth/user/create", { email, password }).then(() =>
-            navigate("/")
-          )
-        }
-      >
-        <Form className="flex-col">
-          <label htmlFor="email">Email</label>
-          <Field
-            id="email"
-            name="email"
-            placeholder="john@acme.com"
-            type="email"
-          />
-          <label htmlFor="password">Password</label>
-          <Field
-            id="password"
-            name="password"
-            type="password"
-            placeholder="admin1234"
-          />
-          <button type="submit">Submit</button>
-        </Form>
-      </Formik>
-    </div>
+    <Formik
+      initialValues={{ email: "", password: "", handle: "" }}
+      validate={({ password }) =>
+        password.trim() === "" ? new Error("empty password") : undefined
+      }
+      onSubmit={(values) =>
+        apiPostb("unauth/user/create", values).then(() => navigate("/"))
+      }
+    >
+      <Form className="p-24 m-24 flex-col space-y-8 bg-white rounded-sm border">
+        <label htmlFor="email">Email</label>
+        <Field
+          id="email"
+          name="email"
+          placeholder="john@acme.com"
+          type="email"
+        />
+        <label htmlFor="handle">Handle</label>
+        <Field id="handle" name="handle" type="text" placeholder="totoLeBg" />
+        <label htmlFor="password">Password</label>
+        <Field
+          id="password"
+          name="password"
+          type="password"
+          placeholder="admin1234"
+        />
+        <button type="submit">Submit</button>
+      </Form>
+    </Formik>
   );
 };
 

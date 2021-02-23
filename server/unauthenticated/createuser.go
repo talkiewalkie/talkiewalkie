@@ -16,6 +16,7 @@ import (
 
 type createUserInput struct {
 	Email    string `json:"email"`
+	Handle   string `json:"handle"`
 	Password string `json:"password"`
 }
 
@@ -48,7 +49,7 @@ func CreateUserHandler(w http.ResponseWriter, r *http.Request, c *unauthenticate
 		return nil, common.ServerError("could not hash the password; %v", err)
 	}
 
-	u := &models.User{Handle: p.Email, Email: p.Email, Password: hashed, EmailToken: null.NewString(hex.EncodeToString(key), true)}
+	u := &models.User{Handle: p.Handle, Email: p.Email, Password: hashed, EmailToken: null.NewString(hex.EncodeToString(key), true)}
 	if err = u.Insert(r.Context(), c.Db, boil.Infer()); err != nil {
 		return nil, common.ServerError("could not create user in db: %v", err)
 	}

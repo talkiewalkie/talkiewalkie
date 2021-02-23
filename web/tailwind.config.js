@@ -115,6 +115,7 @@ module.exports = {
       2: "2px",
       auto: "auto",
       full: "100%",
+      screen: "100vh",
     }),
     width: (theme) => ({
       ...theme("spacing"),
@@ -296,7 +297,7 @@ module.exports = {
             [`.${e(`space-x-${k}`)} > * + *`]: { marginLeft: v },
             [`.${e(`space-y-${k}`)} > * + *`]: { marginTop: v },
           }),
-          {}
+          {},
         );
       // The problem is that custom utilities are injected at the end
       // Will be resolved with this feature request: https://github.com/tailwindcss/tailwindcss/issues/1069
@@ -350,7 +351,7 @@ module.exports = {
             flex: "1 1 50%",
           },
         },
-        ["responsive"]
+        ["responsive"],
       );
     },
     // Avoid creating visible & scroll versions, that are 99% of the time not desired
@@ -364,7 +365,7 @@ module.exports = {
           ".overflow-x-hidden": { "overflow-x": "hidden" },
           ".overflow-y-hidden": { "overflow-y": "hidden" },
         },
-        ["responsive"]
+        ["responsive"],
       );
     },
   ],

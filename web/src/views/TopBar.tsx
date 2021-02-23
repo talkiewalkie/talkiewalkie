@@ -18,27 +18,25 @@ export const TopBar = () => {
   const [target, setTarget] = useTargetState();
 
   return (
-    <div className="flex items-center justify-between relative p-16">
+    <div className="flex items-center justify-between relative px-24 py-12 border-b shadow-lg">
       <Link to="/">TalkieWalkie</Link>
       {!isCreatingAccount && (
         <>
-          {user && <Link to="/editor">Make something new!</Link>}
-          <Pill
-            onClick={setTarget}
-            label={user ? user.handle : "login/create"}
-          />
+          <button onClick={setTarget} className="">
+            {user ? user.handle : "login/create"}
+          </button>
 
           {target && (
             <Popover
               target={target}
               position="bottom-right"
               onClose={() => setTarget(undefined)}
-              className="absolute top-44 right-0 z-1 p-12 bg-white border rounded-sm shadow-lg text-body"
+              className="absolute text-right top-44 right-0 z-1 p-12 bg-white border rounded-sm shadow-lg text-body"
               style={{ width: user ? 100 : 200 }}
             >
               {user ? (
                 <div>
-                  <div style={{ display: "absolute" }}>{user.email}</div>
+                  <div>{user.email}</div>
                   <button
                     onClick={() => {
                       logout();

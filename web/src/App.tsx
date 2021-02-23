@@ -2,7 +2,7 @@ import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import { SWRConfig } from "swr";
 
-import { AuthProvider, ErrorBoundary, UserProvider, useUser } from "./contexts";
+import { AuthProvider, ErrorBoundary, UserProvider } from "./contexts";
 // todo: optimisation - split unauth screen and authed app: https://kentcdodds.com/blog/authentication-in-react-applications
 import { Editor, Home, Signin, TopBar, Walk } from "./views";
 
@@ -31,12 +31,10 @@ const App = () => (
   </ErrorBoundary>
 );
 
-const AppView = () => {
-  const { user } = useUser();
-
-  return (
-    <div className="flex flex-col">
-      <TopBar />
+const AppView = () => (
+  <div className="h-screen flex-col">
+    <TopBar />
+    <div className="flex-fill overflow-y-auto bg-light-blue">
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/create" element={<Signin />} />
@@ -44,7 +42,7 @@ const AppView = () => {
         <Route path="/editor" element={<Editor />} />
       </Routes>
     </div>
-  );
-};
+  </div>
+);
 
 export default App;
