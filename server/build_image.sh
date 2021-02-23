@@ -9,7 +9,6 @@ set -Eex
 
 go generate
 
-# TODO: needs imagemagick for compressions
 cat <<EOF >>Dockerfile
 FROM golang:1.16 AS builder
 
@@ -20,7 +19,10 @@ COPY . .
 RUN go get -d -v ./...
 RUN GOOS=linux GOARCH=amd64 go build -o talkiewalkie
 
-FROM scratch
+FROM amd64/alpine
+
+RUN apk update
+RUN apk add --no-cache imagemagick
 
 COPY --from=builder /go/src/app/migrations migrations
 COPY --from=builder /go/src/app/.env.prod .env.prod
@@ -31,4 +33,4 @@ EXPOSE 8080
 CMD ["./talkiewalkie", "-env", "prod"]
 EOF
 
-docker build --platform linux/amd64 -t gcr.io/talkiewalkie-305117/talkiewalkie-back:1 .
+docker build --platform linux/amd64 -t gcr.io/talkiewalkie-305117/talkiewalkie-back:2 -t talkiewalkie-back .
