@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"log"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/volatiletech/null/v8"
@@ -35,7 +34,6 @@ func (p PgUserRepository) GetUserByEmail(email string) (*models.User, error) {
 }
 
 func (p PgUserRepository) GetUserByUuid(uid string) (*models.User, error) {
-	log.Printf("uid: %v", uid)
 	u, err := models.Users(models.UserWhere.UUID.EQ(uid)).One(p.Ctx, p.Db)
 	if err != nil {
 		return nil, err

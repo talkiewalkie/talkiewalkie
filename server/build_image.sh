@@ -9,6 +9,7 @@ set -Eex
 
 go generate
 
+# TODO: needs imagemagick for compressions
 cat <<EOF >>Dockerfile
 FROM golang:1.16 AS builder
 
