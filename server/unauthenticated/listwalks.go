@@ -1,6 +1,7 @@
 package unauthenticated
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
@@ -26,6 +27,7 @@ func WalksHandler(w http.ResponseWriter, r *http.Request, c *unauthenticatedCont
 		qm.Load(models.WalkRels.Author),
 		qm.Load(models.WalkRels.Cover),
 		qm.Load(models.WalkRels.Audio),
+		qm.OrderBy(fmt.Sprintf("%s DESC", models.WalkColumns.CreatedAt)),
 		qm.Limit(20)).
 		All(r.Context(), c.Db)
 	if err != nil {
