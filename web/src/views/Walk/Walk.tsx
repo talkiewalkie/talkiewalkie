@@ -69,7 +69,7 @@ export const Walk = () => {
             setIsPlaying(!isPlaying);
           }}
         >
-          {isPlaying ? "pause" : "play"}
+          {isPlaying ? "⏸" : "▶"}
         </button>
       </div>
       <div className="mt-16 px-16">
