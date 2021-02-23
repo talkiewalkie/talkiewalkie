@@ -10,6 +10,8 @@ import (
 	"strconv"
 
 	"github.com/go-chi/jwtauth"
+
+	"github.com/talkiewalkie/talkiewalkie/pb"
 )
 
 type Components struct {
@@ -17,6 +19,7 @@ type Components struct {
 	JwtAuth     *jwtauth.JWTAuth
 	Storage     StorageClient
 	CompressImg func(string, int) (string, error)
+	Audio       pb.CompressionClient
 }
 
 func InitComponents() Components {
@@ -25,13 +28,19 @@ func InitComponents() Components {
 
 	storageClient, err := initStorageClient(context.Background())
 	if err != nil {
-		log.Panicf("could not init the storage ")
+		log.Panicf("could not init the storage: %+v", err)
+	}
+
+	audioClient, err := NewAudioClient()
+	if err != nil {
+		log.Panicf("could not initiate the audio client: %+v", err)
 	}
 
 	return Components{
 		EmailClient: emailClient,
 		JwtAuth:     tokenAuth,
 		Storage:     storageClient,
+		Audio:       audioClient,
 		CompressImg: func(path string, width int) (string, error) {
 			output := fmt.Sprintf("/tmp/%s.png", strconv.FormatInt(rand.Int63(), 10))
 

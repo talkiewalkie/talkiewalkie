@@ -1,6 +1,7 @@
 package authenticated
 
 import (
+	"bytes"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -8,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/talkiewalkie/talkiewalkie/common"
+	"github.com/talkiewalkie/talkiewalkie/pb"
 )
 
 type uploadOutput struct {
@@ -50,6 +52,22 @@ func UploadHandler(r *http.Request, ctx *authenticatedContext) (interface{}, *co
 		}
 
 		uploadedF = uf
+	} else if strings.HasPrefix(contentType, "video/") {
+		var content []byte
+		if _, err = f.Read(content); err != nil {
+			return nil, common.ServerError("could not read file: %+v", err)
+		}
+
+		output, err := ctx.Audio.FormatAndCompress(r.Context(), &pb.FormatAndCompressInput{
+			Content:  content,
+			FileName: h.Filename,
+			MimeType: contentType,
+		})
+		if err != nil {
+			return nil, common.ServerError("failed to compress audio: %+v", err)
+		}
+
+		uploadedF = bytes.NewReader(output.Content)
 	} else {
 		uploadedF = f
 	}

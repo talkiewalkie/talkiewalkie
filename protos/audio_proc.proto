@@ -1,0 +1,19 @@
+syntax = "proto3";
+package audioproc;
+
+
+option go_package = "github.com/talkiewalkie/talkiewalkie/pb";
+
+message  FormatAndCompressInput {
+  bytes content = 1;
+  string fileName = 2;
+  string mimeType = 3;
+}
+
+message FormatAndCompressOutput {
+  bytes content = 1;
+}
+
+service Compression {
+  rpc FormatAndCompress(FormatAndCompressInput) returns (FormatAndCompressOutput) {}
+}

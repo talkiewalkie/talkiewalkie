@@ -26,6 +26,7 @@ var (
 )
 
 //go:generate sqlboiler psql
+//go:generate protoc -I=protos/ --go_out=pb --go-grpc_out=pb --go_opt=paths=source_relative --go-grpc_opt=paths=source_relative,require_unimplemented_servers=false protos/audio_proc.proto
 
 func main() {
 	flag.Parse()
