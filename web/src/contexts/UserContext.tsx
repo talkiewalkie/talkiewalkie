@@ -26,9 +26,10 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
   const { state } = useAuth();
 
   // todo: bug - `state` changes are not propagated?
+  // todo: page refresh sends a null user, we should wait for the data to be fetched
   const { data: user, mutate } = useSWR<User>(
     state === "LOGGED_IN" ? "auth/me" : null,
-    apiGet
+    apiGet,
   );
 
   return (

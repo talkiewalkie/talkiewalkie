@@ -1,7 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import classNames from "classnames";
-import hash from "swr/dist/libs/hash";
 
 export type IWalk = {
   uuid: string;
@@ -23,7 +22,7 @@ export const Walk = ({ walk }: { walk: IWalk }) => {
               "h-32 w-32 rounded-full flex-center text-white",
               walk.author.uuid.charCodeAt(0) % 3 === 0
                 ? "bg-danger"
-                : "bg-light-gray",
+                : "bg-orange",
             )}
           >
             {walk.author.handle.slice(0, 1)}

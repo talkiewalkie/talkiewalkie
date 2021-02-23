@@ -3,7 +3,6 @@ import { Link, useMatch, useNavigate } from "react-router-dom";
 import { Field, Form, Formik } from "formik";
 
 import { useAuth, useUser } from "../contexts";
-import { Pill } from "../components";
 import { Popover } from "../components/Popover";
 import { useTargetState } from "../hooks";
 
