@@ -43,7 +43,7 @@
   "scripts": {
     "build:tailwind": "tailwindcss build src/styles/tailwind.css -o src/styles/tailwind.output.css",
     "prestart": "npm run build:tailwind",
-    "start": "react-scripts start",
+    "start": "react-app-rewired start",
     "build": "react-app-rewired build",
     "push-image": "docker push gcr.io/talkiewalkie-305117/talkiewalkie-front:latest",
     "test": "react-scripts test",

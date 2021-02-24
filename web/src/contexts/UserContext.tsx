@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
+
 import { useAuth } from "./AuthContext";
 import { apiGet } from "../utils";
+import { Spinner } from "../components";
 
 export type User = {
   uuid: string;
@@ -35,12 +37,15 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
         setLoading(false);
       });
     } else {
+      setUser(undefined);
       setLoading(false);
     }
-  }, []);
+  }, [state]);
 
   return loading ? (
-    <div>loading</div>
+    <div className="h-screen flex">
+      <Spinner className="" />
+    </div>
   ) : (
     <UserContext.Provider
       value={{
