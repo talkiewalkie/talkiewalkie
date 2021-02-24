@@ -52,9 +52,10 @@ func UploadHandler(r *http.Request, ctx *authenticatedContext) (interface{}, *co
 		}
 
 		uploadedF = uf
-	} else if strings.HasPrefix(contentType, "video/") {
-		var content []byte
-		if _, err = f.Read(content); err != nil {
+	} else if strings.HasPrefix(contentType, "video/") || strings.HasPrefix(contentType, "audio/") {
+		_, _ = f.Seek(0, io.SeekStart)
+		content, err := ioutil.ReadAll(f)
+		if err != nil {
 			return nil, common.ServerError("could not read file: %+v", err)
 		}
 
@@ -67,6 +68,9 @@ func UploadHandler(r *http.Request, ctx *authenticatedContext) (interface{}, *co
 			return nil, common.ServerError("failed to compress audio: %+v", err)
 		}
 
+		if len(output.Content) != len(content) {
+			return nil, common.ServerError("audio service error: sent %v bytes received %v", len(content), len(output.Content))
+		}
 		uploadedF = bytes.NewReader(output.Content)
 	} else {
 		uploadedF = f

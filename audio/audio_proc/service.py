@@ -14,12 +14,12 @@ class Compression(CompressionServicer):
     def FormatAndCompress(self, request: FormatAndCompressInput, context) -> FormatAndCompressOutput:
         log.debug("FormatAndCompress")
         # do things
-        return FormatAndCompressOutput(content=request.Content)
+        return FormatAndCompressOutput(content=request.content)
 
 
 def build_server(port: str):
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-    cs = CompressionServicer()
+    cs = Compression()
     add_CompressionServicer_to_server(cs, server)
     server.add_insecure_port(port)
     log.debug(f"built server for port '{port}'")
@@ -27,7 +27,7 @@ def build_server(port: str):
 
 
 if __name__ == '__main__':
-    srv = build_server("[::]:50051")
+    srv = build_server("localhost:50051")
     log.debug("listening to calls")
     srv.start()
     srv.wait_for_termination()
