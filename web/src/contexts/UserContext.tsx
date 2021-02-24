@@ -1,5 +1,4 @@
-import React from "react";
-import useSWR from "swr/esm";
+import React, { useEffect, useState } from "react";
 import { useAuth } from "./AuthContext";
 import { apiGet } from "../utils";
 
@@ -25,18 +24,28 @@ export const useUser = () => {
 export const UserProvider = ({ children }: { children: React.ReactNode }) => {
   const { state } = useAuth();
 
-  // todo: bug - `state` changes are not propagated?
-  // todo: page refresh sends a null user, we should wait for the data to be fetched
-  const { data: user, mutate } = useSWR<User>(
-    state === "LOGGED_IN" ? "auth/me" : null,
-    apiGet,
-  );
+  const [user, setUser] = useState<User>();
+  const [loading, setLoading] = useState(() => state === "LOGGED_IN");
 
-  return (
+  useEffect(() => {
+    if (state === "LOGGED_IN") {
+      setLoading(true);
+      apiGet<User>("auth/me").then((u) => {
+        setUser(u);
+        setLoading(false);
+      });
+    } else {
+      setLoading(false);
+    }
+  }, []);
+
+  return loading ? (
+    <div>loading</div>
+  ) : (
     <UserContext.Provider
       value={{
         user,
-        updateCachedUser: mutate,
+        updateCachedUser: () => null,
       }}
     >
       {children}
