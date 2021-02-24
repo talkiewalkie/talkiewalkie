@@ -2,6 +2,7 @@ import { BaseSyntheticEvent, useCallback, useRef, useState } from "react";
 import { useOn } from "./useOn";
 
 export * from "./useOn";
+export * from "./useRecorder";
 
 export const useClickOutside = <Element extends HTMLElement = HTMLDivElement>(
   onClickOutside: () => void,

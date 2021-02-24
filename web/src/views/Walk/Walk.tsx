@@ -1,10 +1,11 @@
 import React, { useRef, useState } from "react";
+import classNames from "classnames";
 import { Link, useParams } from "react-router-dom";
 import useSWR from "swr";
 
 import { apiGet } from "../../utils";
-import classNames from "classnames";
 import { useUser } from "../../contexts";
+import { Spinner } from "../../components";
 
 type WalkOutput = {
   uuid: string;
@@ -24,7 +25,12 @@ export const Walk = () => {
   const aref = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
 
-  if (!walk) return <div>spinning</div>;
+  if (!walk)
+    return (
+      <div className="h-full flex">
+        <Spinner />
+      </div>
+    );
 
   return (
     <div className="flex-col m-24 py-16 bg-white rounded shadow-sm">

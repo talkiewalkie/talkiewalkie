@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useState } from "react";
 
-export const useRecorder = () => {
-  const [audio, setAudio] = useState<Blob>();
+export const useRecorder = (onAudioCompletion: (audio: Blob) => void) => {
   const [isRecording, setIsRecording] = useState(false);
   const [recorder, setRecorder] = useState<MediaRecorder>();
 
-  const handleData = useCallback((e: BlobEvent) => setAudio(e.data), []);
+  const handleData = useCallback((e: BlobEvent) => {
+    onAudioCompletion(e.data);
+  }, []);
+
   useEffect(() => {
     // Lazily obtain recorder first time we're recording.
     if (!recorder) {
@@ -19,12 +21,12 @@ export const useRecorder = () => {
 
     // Obtain the audio when ready.
     recorder.addEventListener("dataavailable", handleData);
-    return () => recorder.removeEventListener("dataavailable", handleData);
+    return () => {
+      recorder.removeEventListener("dataavailable", handleData);
+    };
   }, [isRecording, recorder, handleData]);
-  console.log("recostate", recorder?.state);
 
   return {
-    audio,
     isRecording,
     startRecording: () => setIsRecording(true),
     stopRecording: () => setIsRecording(false),
