@@ -17,7 +17,11 @@ export const useRecorder = (onAudioCompletion: (audio: Blob) => void) => {
 
     // Manage recorder state.
     if (isRecording) recorder.start();
-    else recorder.stop();
+    else {
+      recorder.stop();
+      // https://stackoverflow.com/questions/44274410
+      recorder.stream.getTracks().map((t) => t.stop());
+    }
 
     // Obtain the audio when ready.
     recorder.addEventListener("dataavailable", handleData);
