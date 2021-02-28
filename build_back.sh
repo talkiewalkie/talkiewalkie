@@ -13,15 +13,14 @@ COPY protos .
 COPY server .
 
 RUN go get -d -v ./...
-RUN GOOS=linux GOARCH=amd64 go build -o talkiewalkie
+RUN GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o talkiewalkie
 
-FROM amd64/alpine
+FROM alpine
 
 RUN apk update
 RUN apk add --no-cache imagemagick
 
 COPY --from=builder /go/src/app/migrations migrations
-COPY --from=builder /go/src/app/.secrets .secrets
 COPY --from=builder /go/src/app/talkiewalkie talkiewalkie
 EXPOSE 8080
 
@@ -34,4 +33,4 @@ pushd server
 go generate
 popd
 
-docker build --platform linux/amd64 -t gcr.io/talkiewalkie-305117/talkiewalkie-back:2 -t talkiewalkie-back .
+docker build -t gcr.io/talkiewalkie-305117/talkiewalkie-back:2 -t talkiewalkie-back .

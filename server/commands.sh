@@ -10,7 +10,7 @@ install_golang_migrate_cli() {
 
 nukedb() {
   dropdb talkiewalkie && createdb talkiewalkie
-  migrate -path migrations -database postgres://theo@localhost:5432/talkiewalkie?sslmode=disable up
+  migrate -path migrations -database postgres://theo:pinguy@localhost:5432/talkiewalkie?sslmode=disable up
 }
 
 new_migration() {
@@ -34,6 +34,10 @@ push_back() {
 
 kube_back() {
   kubectl create deployment talkiewalkie-back --image=gcr.io/talkiewalkie-305117/talkiewalkie-back:latest
+}
+
+install_proto_plugins() {
+  go get google.golang.org/protobuf/cmd/protoc-gen-go  google.golang.org/grpc/cmd/protoc-gen-go-grpc
 }
 
 grpc() {
