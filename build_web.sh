@@ -1,22 +1,23 @@
 #!/usr/bin/env bash
 
-cleanup () {
+cleanup() {
   rm -f Dockerfile
 }
-
 trap cleanup ERR EXIT
 
-cat << EOF >> Dockerfile
+cat <<EOF >>Dockerfile
 FROM nginx:alpine
 RUN apk --no-cache add ca-certificates
 WORKDIR /usr/share/nginx/html
-COPY build/ .
-#COPY nginx /etc/nginx/
+COPY web/build/ .
+COPY nginx /etc/nginx/
 CMD ["nginx", "-g", "daemon off;"]
 EOF
 
 set -eEx
 
+pushd web
 yarn && yarn build
+popd
 
-docker build --platform linux/amd64 -t gcr.io/talkiewalkie-305117/talkiewalkie-front:1 .
+docker build --platform linux/amd64 -t gcr.io/talkiewalkie-305117/talkiewalkie-front:2 -t talkiewalkie-front .

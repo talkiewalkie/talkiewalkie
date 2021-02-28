@@ -1,0 +1,9 @@
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: talkiewalkie-app-certs
+spec:
+  domains:
+    - api.talkiewalkie.app
+    - www.talkiewalkie.app
+    - talkiewalkie.app

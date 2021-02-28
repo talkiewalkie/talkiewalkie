@@ -7,3 +7,6 @@
   (local processing)
 - https://p1wmc.csb.app/ 
   (cool background css tricks)
+- https://github.com/GoogleCloudPlatform/gke-managed-certs/issues/13
+  (my dns issue with LB&ingress)
+  also relevant: https://stackoverflow.com/questions/53886750/google-managed-ssl-certificate-stuck-on-failed-not-visible
