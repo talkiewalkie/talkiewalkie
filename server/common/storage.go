@@ -32,8 +32,13 @@ type GoogleStorage struct {
 
 func initStorageClient(ctx context.Context) (StorageClient, error) {
 	serviceAccountFile := os.Getenv("GOOGLE_APPLICATION_CREDENTIALS")
-	opts := option.WithCredentialsFile(serviceAccountFile)
-	client, err := storage.NewClient(ctx, opts)
+	var opts []option.ClientOption
+	if serviceAccountFile == "" {
+		opts = []option.ClientOption{}
+	} else {
+		opts = []option.ClientOption{option.WithCredentialsFile(serviceAccountFile)}
+	}
+	client, err := storage.NewClient(ctx, opts...)
 	if err != nil {
 		log.Fatal(err)
 	}
