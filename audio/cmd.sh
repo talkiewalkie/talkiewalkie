@@ -1,4 +1,4 @@
-#!/usr/bin/env zsh
+#!/usr/bin/env bash
 
 codegen() {
   python -m grpc_tools.protoc -I=protos/ \

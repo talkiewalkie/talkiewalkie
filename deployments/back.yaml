@@ -36,7 +36,7 @@ spec:
         app: talkiewalkie-back
     spec:
       containers:
-      - image: gcr.io/talkiewalkie-305117/talkiewalkie-back:0
+      - image: gcr.io/talkiewalkie-305117/talkiewalkie-back:3
         imagePullPolicy: IfNotPresent
         name: talkiewalkie-back
         ports:

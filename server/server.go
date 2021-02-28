@@ -31,16 +31,13 @@ var (
 func main() {
 	flag.Parse()
 
-	// todo: should remove prod env file, kubernetes secrets do the job or service accounts will
-	err := godotenv.Load(fmt.Sprintf(".env.%s", *env))
-	if err != nil {
-		log.Panicf("could not load env: %v", err)
-	}
-
 	var host string
 	switch *env {
 	case "dev":
 		host = "http://localhost:3000"
+		if err := godotenv.Load(fmt.Sprintf(".env.%s", *env)); err != nil {
+			log.Panicf("could not load env: %v", err)
+		}
 	case "prod":
 		host = "https://talkiewalkie.app"
 	}
@@ -50,7 +47,6 @@ func main() {
 
 	router := mux.NewRouter()
 	router.Use(
-		//mux.CORSMethodMiddleware(router),
 		func(next http.Handler) http.Handler {
 			return handlers.CombinedLoggingHandler(os.Stdout, next)
 		},

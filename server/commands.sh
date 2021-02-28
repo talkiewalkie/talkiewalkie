@@ -1,4 +1,4 @@
-#!/usr/bin/env zsh
+#!/usr/bin/env bash
 
 start_postgres() {
   pg_ctl -D /opt/homebrew/var/postgresql@12 start
