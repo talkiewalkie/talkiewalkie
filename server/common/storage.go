@@ -32,25 +32,19 @@ type GoogleStorage struct {
 
 func initStorageClient(ctx context.Context) (StorageClient, error) {
 	serviceAccountFile := os.Getenv("GOOGLE_APPLICATION_CREDENTIALS")
-	var opts []option.ClientOption
-	if serviceAccountFile == "" {
-		opts = []option.ClientOption{}
-	} else {
-		opts = []option.ClientOption{option.WithCredentialsFile(serviceAccountFile)}
-	}
-	client, err := storage.NewClient(ctx, opts...)
+	client, err := storage.NewClient(ctx, option.WithCredentialsFile(serviceAccountFile))
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("could not init storage client: %+v", err)
 	}
 
 	saKey, err := ioutil.ReadFile(serviceAccountFile)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("could not read service account file: %+v", err)
 	}
 
 	cfg, err := google.JWTConfigFromJSON(saKey)
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatalf("could not build jwt config from service account file: %+v", err)
 	}
 
 	g := GoogleStorage{Client: client, Cfg: cfg, BucketName: os.Getenv("BUCKET_NAME")}
