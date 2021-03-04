@@ -3,7 +3,7 @@ import classNames from "classnames";
 import { Link, useParams } from "react-router-dom";
 import useSWR from "swr";
 
-import { apiGet } from "../../utils";
+import { apiGet, apiPostb } from "../../utils";
 import { useUser } from "../../contexts";
 import { Spinner } from "../../components";
 
@@ -13,13 +13,15 @@ type WalkOutput = {
   coverUrl: string;
   audioUrl: string;
   author: { handle: string; uuid: string };
+  likeCount: number;
+  isLiked?: boolean;
 };
 
 export const Walk = () => {
   const { user } = useUser();
   const params = useParams();
-  const { data: walk } = useSWR<WalkOutput>(
-    `unauth/walk/${params.uuid}`,
+  const { data: walk, mutate } = useSWR<WalkOutput>(
+    user ? `auth/walk/${params.uuid}` : `unauth/walk/${params.uuid}`,
     apiGet,
   );
   const aref = useRef<HTMLAudioElement>(null);
@@ -83,8 +85,18 @@ export const Walk = () => {
           <div className="flex-fill font-medium text-18">{walk.title}</div>
           {user && (
             <div className="flex items-center space-x-8">
-              <CTA label="♡" />
-              <CTA label="💬" />
+              <CTA
+                label={`${walk.likeCount > 0 ? `${walk.likeCount} ` : ""}${
+                  walk.isLiked ? "x" : "♡"
+                }`}
+                onClick={() =>
+                  apiPostb(`auth/walk/like/${walk.uuid}`, null).then(() =>
+                    mutate({ isLiked: true, ...walk }),
+                  )
+                }
+                disabled={!!walk.isLiked}
+              />
+              <CTA label="💬" disabled />
             </div>
           )}
         </div>
@@ -108,6 +120,14 @@ export const Walk = () => {
   );
 };
 
-const CTA = ({ label }: { label: string }) => (
-  <div className="bg-light-gray rounded-full px-16 py-4">{label}</div>
+const CTA = ({
+  label,
+  ...btnProps
+}: { label: string } & Omit<
+  React.ButtonHTMLAttributes<HTMLButtonElement>,
+  "className"
+>) => (
+  <button className="bg-light-gray rounded-full px-16 py-4" {...btnProps}>
+    {label}
+  </button>
 );

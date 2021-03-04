@@ -70,9 +70,11 @@ func (g GoogleStorage) Upload(c context.Context, blob io.Reader) (*uuid.UUID, er
 func (g GoogleStorage) Url(dest string) (string, error) {
 	url, err := storage.SignedURL(g.BucketName, dest, &storage.SignedURLOptions{
 		GoogleAccessID: g.Cfg.Email,
-		PrivateKey:     g.Cfg.PrivateKey,
-		Method:         http.MethodGet,
-		Expires:        time.Now().Add(3 * time.Hour),
+		// TODO: the only reason we keep loading explicit service account file is here, relevant issue:
+		// 	https://github.com/googleapis/google-cloud-go/issues/1130
+		PrivateKey: g.Cfg.PrivateKey,
+		Method:     http.MethodGet,
+		Expires:    time.Now().Add(3 * time.Hour),
 	})
 	return url, err
 }

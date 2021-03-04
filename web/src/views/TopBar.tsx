@@ -26,14 +26,15 @@ export const TopBar = () => {
 
   return (
     <div className="flex items-center space-x-16 relative px-24 py-12 border-b shadow-lg">
-      <Link to="/">TalkieWalkie</Link>
-
-      <Link
-        to="/editor"
-        className="px-8 py-4 ml-auto shadow-sm-outlined rounded-sm"
-      >
-        +
+      <Link to="/" className="mr-auto">
+        TalkieWalkie
       </Link>
+
+      {user && (
+        <Link to="/editor" className="px-8 py-4 shadow-sm-outlined rounded-sm">
+          +
+        </Link>
+      )}
       <button onClick={setTarget}>
         {user ? (
           <div className="h-32 w-32 rounded-full bg-light-blue shadow-sm-outlined text-body flex-center">

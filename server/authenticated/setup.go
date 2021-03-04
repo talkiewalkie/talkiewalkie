@@ -20,10 +20,13 @@ func Setup(r *mux.Router, c *common.Components) {
 		jwtauth.Verifier(c.JwtAuth),
 		jwtauth.Authenticator)
 
-	authRouter.HandleFunc("/user/{handle}", mountHandler(c, UserListHandler)).Methods(http.MethodGet)
+	authRouter.HandleFunc("/user/{uuid}", mountHandler(c, UserByUuidHandler)).Methods(http.MethodGet)
+	authRouter.HandleFunc("/walk/{uuid}", mountHandler(c, WalkHandler)).Methods(http.MethodGet)
 	authRouter.HandleFunc("/me", mountHandler(c, MeHandler)).Methods(http.MethodGet)
+
 	authRouter.HandleFunc("/upload", mountHandler(c, UploadHandler)).Methods(http.MethodPost)
 	authRouter.HandleFunc("/walk/create", mountHandler(c, CreateWalkHandler)).Methods(http.MethodPost)
+	authRouter.HandleFunc("/walk/like/{uuid}", mountHandler(c, LikeWalkByUuid)).Methods(http.MethodPost)
 }
 
 type authenticatedContext struct {

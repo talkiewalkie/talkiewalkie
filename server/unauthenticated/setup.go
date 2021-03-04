@@ -14,11 +14,12 @@ import (
 
 func Setup(r *mux.Router, c *common.Components) {
 	unauthRouter := r.PathPrefix("/unauth").Subrouter()
-	unauthRouter.HandleFunc("/login", mountHandler(c, LoginHandler)).Methods(http.MethodPost)
 	unauthRouter.HandleFunc("/verify", mountHandler(c, VerifyHandler)).Methods(http.MethodGet)
-	unauthRouter.HandleFunc("/user/create", mountHandler(c, CreateUserHandler)).Methods(http.MethodPost)
-	unauthRouter.HandleFunc("/walks", mountHandler(c, WalksHandler)).Methods(http.MethodGet)
 	unauthRouter.HandleFunc("/walk/{uuid}", mountHandler(c, WalkHandler)).Methods(http.MethodGet)
+	unauthRouter.HandleFunc("/walks", mountHandler(c, WalksHandler)).Methods(http.MethodGet)
+
+	unauthRouter.HandleFunc("/login", mountHandler(c, LoginHandler)).Methods(http.MethodPost)
+	unauthRouter.HandleFunc("/user/create", mountHandler(c, CreateUserHandler)).Methods(http.MethodPost)
 }
 
 type unauthenticatedContext struct {

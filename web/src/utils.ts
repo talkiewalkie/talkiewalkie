@@ -6,7 +6,7 @@ export const removeCookie = (name: string) => {
 
 export const apiGet: <T>(
   endpoint: string,
-  init?: Omit<RequestInit, "method">
+  init?: Omit<RequestInit, "method">,
 ) => Promise<T> = (endpoint: string, init?: Omit<RequestInit, "method">) =>
   fetch(`${apiUrl}/${endpoint}`, {
     ...init,
@@ -22,11 +22,11 @@ export const apiGet: <T>(
 export const apiPost: <T>(
   endpoint: string,
   body: BodyInit,
-  init?: Omit<RequestInit, "method" | "body">
+  init?: Omit<RequestInit, "method" | "body">,
 ) => Promise<T> = (
   endpoint: string,
   body: BodyInit,
-  init?: Omit<RequestInit, "method" | "body">
+  init?: Omit<RequestInit, "method" | "body">,
 ) =>
   fetch(`${apiUrl}/${endpoint}`, {
     ...init,
@@ -42,8 +42,8 @@ export const apiPost: <T>(
 
 export const apiPostb = (
   endpoint: string,
-  body: Record<string, any>,
-  init?: Omit<RequestInit, "method" | "body">
+  body: Record<string, any> | null,
+  init?: Omit<RequestInit, "method" | "body">,
 ) => apiPost(endpoint, JSON.stringify(body), init);
 
 export const upload = (f: File) => {
@@ -51,6 +51,6 @@ export const upload = (f: File) => {
   data.append("main", new Blob([f], { type: f.type }), f.name);
   return apiPost<{ uuid: string; fileName: string; url: string }>(
     "auth/upload",
-    data
+    data,
   );
 };

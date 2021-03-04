@@ -1,4 +1,4 @@
-package unauthenticated
+package authenticated
 
 import (
 	"net/http"
@@ -7,15 +7,25 @@ import (
 	"github.com/gorilla/mux"
 
 	"github.com/talkiewalkie/talkiewalkie/common"
+	"github.com/talkiewalkie/talkiewalkie/models"
 )
 
-type walkOutput struct {
-	listedWalkOutput
-	AudioUrl  string `json:"audioUrl"`
-	LikeCount int64  `json:"likeCount"`
+type authorOutput struct {
+	Uuid   string `json:"uuid"`
+	Handle string `json:"handle"`
 }
 
-func WalkHandler(w http.ResponseWriter, r *http.Request, c *unauthenticatedContext) (interface{}, *common.HttpError) {
+type walkOutput struct {
+	Uuid      string       `json:"uuid"`
+	Title     string       `json:"title"`
+	Author    authorOutput `json:"author"`
+	CoverUrl  string       `json:"coverUrl"`
+	AudioUrl  string       `json:"audioUrl"`
+	LikeCount int64        `json:"likeCount"`
+	IsLiked   bool         `json:"isLiked"`
+}
+
+func WalkHandler(r *http.Request, c *authenticatedContext) (interface{}, *common.HttpError) {
 	uid, ok := mux.Vars(r)["uuid"]
 	if !ok {
 		return nil, common.ServerError("bad route")
@@ -24,7 +34,7 @@ func WalkHandler(w http.ResponseWriter, r *http.Request, c *unauthenticatedConte
 		return nil, common.ServerError("bad route")
 	}
 
-	walk, err := c.WalkRepository.GetByUuid(uid)
+	walk, err := models.Walks(models.WalkWhere.UUID.EQ(uid)).One(r.Context(), c.Db)
 	if err != nil {
 		return nil, common.ServerError(err.Error())
 	}
@@ -54,14 +64,18 @@ func WalkHandler(w http.ResponseWriter, r *http.Request, c *unauthenticatedConte
 		return nil, common.ServerError("could not count likes: %+v", err)
 	}
 
+	uw, err := models.UserWalks(models.UserWalkWhere.UserID.EQ(c.User.ID), models.UserWalkWhere.WalkID.EQ(walk.ID)).Exists(r.Context(), c.Db)
+	if err != nil {
+		return nil, common.ServerError("could not retrieve user walk: %+v", err)
+	}
+
 	return walkOutput{
-		listedWalkOutput: listedWalkOutput{
-			Uuid:     walk.UUID,
-			Title:    walk.Title,
-			Author:   authorOutput{Uuid: u.UUID, Handle: u.Handle},
-			CoverUrl: coverUrl,
-		},
+		Uuid:      walk.UUID,
+		Title:     walk.Title,
+		Author:    authorOutput{Uuid: u.UUID, Handle: u.Handle},
+		CoverUrl:  coverUrl,
 		AudioUrl:  audioUrl,
 		LikeCount: cnt,
+		IsLiked:   uw,
 	}, nil
 }
