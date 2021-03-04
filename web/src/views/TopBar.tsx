@@ -27,7 +27,7 @@ export const TopBar = () => {
   return (
     <div className="flex items-center space-x-16 relative px-24 py-12 border-b shadow-lg">
       <Link to="/" className="mr-auto">
-        TalkieWalkie
+        🎙 TalkieWalkie
       </Link>
 
       {user && (
