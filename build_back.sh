@@ -33,4 +33,5 @@ pushd server
 go generate
 popd
 
-docker build -t gcr.io/talkiewalkie-305117/talkiewalkie-back:2 -t talkiewalkie-back .
+sha="$(git rev-parse HEAD)"
+docker build -t gcr.io/talkiewalkie-305117/talkiewalkie-back:${sha} -t talkiewalkie-back .

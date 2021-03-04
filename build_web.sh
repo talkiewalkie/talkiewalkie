@@ -20,4 +20,5 @@ pushd web
 yarn && yarn build
 popd
 
-docker build --platform linux/amd64 -t gcr.io/talkiewalkie-305117/talkiewalkie-front:2 -t talkiewalkie-front .
+sha="$(git rev-parse HEAD)"
+docker build --platform linux/amd64 -t gcr.io/talkiewalkie-305117/talkiewalkie-front:${sha} -t talkiewalkie-front .
