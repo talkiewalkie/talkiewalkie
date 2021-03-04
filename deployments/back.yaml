@@ -36,20 +36,22 @@ spec:
         app: talkiewalkie-back
     spec:
       containers:
-      - image: gcr.io/talkiewalkie-305117/talkiewalkie-back:3
-        imagePullPolicy: IfNotPresent
+      - image: gcr.io/talkiewalkie-305117/talkiewalkie-back:4
+        imagePullPolicy: Always
         name: talkiewalkie-back
         ports:
           - containerPort: 8080
         env:
-          - name: PG_PASSWORD
+          - name: POSTGRES_PASSWORD
             valueFrom:
               secretKeyRef:
                 key: pg_password
                 name: mysecrets
-          - name: PG_HOST
+          - name: POSTGRES_HOST
             value: "pgsql"
-          - name: PG_USER
+#          - name: GOOGLE_APPLICATION_CREDENTIALS
+#            value: "/var/run/secrets/kubernetes.io/serviceaccount"
+          - name: POSTGRES_USER
             value: "postgres"
           - name: JWT_SECRET
             valueFrom:

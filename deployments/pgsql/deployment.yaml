@@ -18,6 +18,8 @@ spec:
         - image: postgres:11-alpine
           name: pgsql
           env:
+            - name: POSTGRES_DB
+              value: talkiewalkie
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
