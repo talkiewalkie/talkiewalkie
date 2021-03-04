@@ -35,12 +35,21 @@ spec:
       labels:
         app: talkiewalkie-back
     spec:
+
+      volumes:
+        - name: google-cloud-key
+          secret:
+            secretName: backend-service-account
+
       containers:
-      - image: gcr.io/talkiewalkie-305117/talkiewalkie-back:4
+      - image: gcr.io/talkiewalkie-305117/talkiewalkie-back:852b7cc3d04c98eb92e69a1ebbe02b49301075db
         imagePullPolicy: Always
         name: talkiewalkie-back
         ports:
           - containerPort: 8080
+        volumeMounts:
+          - name: google-cloud-key
+            mountPath: /var/secrets/google
         env:
           - name: POSTGRES_PASSWORD
             valueFrom:
@@ -49,8 +58,8 @@ spec:
                 name: mysecrets
           - name: POSTGRES_HOST
             value: "pgsql"
-#          - name: GOOGLE_APPLICATION_CREDENTIALS
-#            value: "/var/run/secrets/kubernetes.io/serviceaccount"
+          - name: GOOGLE_APPLICATION_CREDENTIALS
+            value: "/var/secrets/google/key.json"
           - name: POSTGRES_USER
             value: "postgres"
           - name: JWT_SECRET
@@ -65,9 +74,9 @@ spec:
                 name: mysecrets
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
+
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       schedulerName: default-scheduler
       securityContext: {}
       terminationGracePeriodSeconds: 30
-
