@@ -12,10 +12,10 @@ spec:
     - host: talkiewalkie.app
       http:
         paths:
-          - backend:
+          - path: /*
+            backend:
               serviceName: front-service
               servicePort: 80
-            path: /*
     - host: api.talkiewalkie.app
       http:
         paths:

@@ -40,6 +40,8 @@ func main() {
 		}
 	case "prod":
 		host = "https://talkiewalkie.app"
+	default:
+		log.Panicf("bad env: %s", *env)
 	}
 
 	checkMigrations()
@@ -57,7 +59,7 @@ func main() {
 
 	corsWrapper := handlers.CORS(
 		handlers.AllowCredentials(),
-		handlers.AllowedHeaders([]string{"Authorization"}),
+		handlers.AllowedHeaders([]string{"Authorization", "Content-Type"}),
 		handlers.AllowedOrigins([]string{host}))
 
 	log.Printf("listening on port %s", *port)

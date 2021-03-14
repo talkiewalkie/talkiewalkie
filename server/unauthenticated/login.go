@@ -36,10 +36,12 @@ func LoginHandler(w http.ResponseWriter, r *http.Request, c *unauthenticatedCont
 	}
 
 	http.SetCookie(w, &http.Cookie{
-		Name:    "jwt",
-		Value:   signed,
-		Path:    "/",
-		Expires: time.Now().Add(time.Hour),
+		Name:     "jwt",
+		Value:    signed,
+		Path:     "/",
+		Expires:  time.Now().Add(time.Hour),
+		Secure:   true,
+		HttpOnly: true,
 	})
 
 	return nil, nil

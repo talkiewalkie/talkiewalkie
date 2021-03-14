@@ -36,8 +36,8 @@ spec:
         app: talkiewalkie-front
     spec:
       containers:
-      - image: gcr.io/talkiewalkie-305117/talkiewalkie-front:2
-        imagePullPolicy: IfNotPresent
+      - image: gcr.io/talkiewalkie-305117/talkiewalkie-front:852b7cc3d04c98eb92e69a1ebbe02b49301075db
+        imagePullPolicy: Always
         name: talkiewalkie-front
         resources: {}
         ports:
