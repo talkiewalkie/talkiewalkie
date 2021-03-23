@@ -14,9 +14,9 @@ spec:
       labels:
         app: handler
     spec:
-      restartPolicy: Never
+      restartPolicy: Always
       containers:
-        - image: alpine
+        - image: ubuntu
           name: handler
           command: ["sleep", "300"]
           volumeMounts:

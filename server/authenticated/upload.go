@@ -52,7 +52,7 @@ func UploadHandler(r *http.Request, ctx *authenticatedContext) (interface{}, *co
 		}
 
 		uploadedF = uf
-	} else if strings.HasPrefix(contentType, "video/") || strings.HasPrefix(contentType, "audio/") {
+	} else if ctx.Audio != nil && (strings.HasPrefix(contentType, "video/") || strings.HasPrefix(contentType, "audio/")) {
 		_, _ = f.Seek(0, io.SeekStart)
 		content, err := ioutil.ReadAll(f)
 		if err != nil {

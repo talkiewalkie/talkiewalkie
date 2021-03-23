@@ -3,10 +3,12 @@ kind: Ingress
 metadata:
   name: basic-ingress
   annotations:
-    kubernetes.io/ingress.class: "gce"
+    kubernetes.io/ingress.class: "nginx"
     kubernetes.io/ingress.allow-http: "true"
     kubernetes.io/ingress.global-static-ip-name: tw-ip
-    networking.gke.io/managed-certificates: talkiewalkie-app-certs
+#    networking.gke.io/managed-certificates: talkiewalkie-app-certs
+#    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    cert-manager.io/issuer: "letsencrypt-prod"
 spec:
   rules:
     - host: talkiewalkie.app
@@ -23,3 +25,9 @@ spec:
             backend:
               serviceName: back-service
               servicePort: 8080
+
+  tls:
+    - hosts:
+        - api.talkiewalkie.app
+        - talkiewalkie.app
+      secretName: letsencrypt-prod

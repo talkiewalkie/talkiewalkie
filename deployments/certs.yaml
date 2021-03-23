@@ -7,3 +7,32 @@ spec:
     - api.talkiewalkie.app
     - www.talkiewalkie.app
     - talkiewalkie.app
+---
+# https://medium.com/bluekiri/deploy-a-nginx-ingress-and-a-certitificate-manager-controller-on-gke-using-helm-3-8e2802b979ec
+# https://artifacthub.io/packages/helm/jetstack/cert-manager
+# facing this atm? https://github.com/jetstack/cert-manager/issues/656
+apiVersion: cert-manager.io/v1alpha2
+kind: Issuer
+metadata:
+  name: letsencrypt-prod
+spec:
+  acme:
+    # The ACME server URL
+    server: https://acme-v02.api.letsencrypt.org/directory
+    # Email address used for ACME registration
+    email: theo@talkiewalkie.app
+    # Name of a secret used to store the ACME account private key
+    privateKeySecretRef:
+      name: letsencrypt-prod
+    solvers:
+      - selector: {}
+        http01:
+          ingress:
+            class: nginx
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cert-manager
+  labels:
+    name: cert-manager

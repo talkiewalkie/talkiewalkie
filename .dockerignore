@@ -1,0 +1,4 @@
+deployments
+web/node_modules
+venv
+.git

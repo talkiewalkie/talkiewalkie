@@ -1,0 +1,48 @@
+index  index.html index.htm;
+
+# First attempt to serve request as file, then
+# as directory, then fall back to displaying a 404.
+try_files $uri $uri/ =404;
+
+location ~* (serviceworker\.js)$ {
+    access_log      off;
+    log_not_found   off;
+    add_header      Cache-Control "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0";
+    expires off;
+    proxy_no_cache 1;
+}
+
+location ~* \.(?:css|js)$ {
+    access_log      off;
+    log_not_found   off;
+    add_header      Cache-Control "no-cache, public, must-revalidate, proxy-revalidate";
+}
+
+location ~* \.(?:jpg|jpeg|gif|png|ico|xml|svg)$ {
+    access_log      off;
+    log_not_found   off;
+    expires         5m;
+    add_header      Cache-Control "public";
+}
+
+location ~* \.(?:eot|woff|woff2|ttf|otf)$ {
+    access_log      off;
+    log_not_found   off;
+    expires         5m;
+    add_header      Cache-Control "public";
+    # Not needed for now
+    # add_header      Access-Control-Allow-Origin *;
+
+    types           {font/opentype otf;}
+    types           {application/vnd.ms-fontobject eot;}
+    types           {font/truetype ttf;}
+    types           {application/font-woff woff;}
+    types           {font/x-woff woff2;}
+}
+
+# Prevent hidden files from being served
+location ~ /\. {
+    access_log      off;
+    log_not_found   off;
+    deny            all;
+}

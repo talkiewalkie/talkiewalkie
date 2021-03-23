@@ -33,7 +33,8 @@ func InitComponents() Components {
 
 	audioClient, err := NewAudioClient()
 	if err != nil {
-		log.Panicf("could not initiate the audio client: %+v", err)
+		// TODO do fail when no audio client
+		log.Printf("could not initiate the audio client: %+v", err)
 	}
 
 	return Components{

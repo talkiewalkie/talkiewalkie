@@ -40,6 +40,9 @@ func main() {
 		}
 	case "prod":
 		host = "https://talkiewalkie.app"
+		if err := godotenv.Load(fmt.Sprintf(".env.dev")); err != nil {
+			log.Panicf("could not load env: %v", err)
+		}
 	default:
 		log.Panicf("bad env: %s", *env)
 	}
@@ -60,7 +63,8 @@ func main() {
 	corsWrapper := handlers.CORS(
 		handlers.AllowCredentials(),
 		handlers.AllowedHeaders([]string{"Authorization", "Content-Type"}),
-		handlers.AllowedOrigins([]string{host}))
+		handlers.AllowedOrigins([]string{host}),
+		handlers.AllowedMethods([]string{http.MethodPost, http.MethodGet, http.MethodOptions, http.MethodHead}))
 
 	log.Printf("listening on port %s", *port)
 	if err := http.ListenAndServe(*port, corsWrapper(router)); err != nil {
