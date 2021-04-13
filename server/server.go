@@ -39,10 +39,7 @@ func main() {
 			log.Panicf("could not load env: %v", err)
 		}
 	case "prod":
-		host = "https://talkiewalkie.app"
-		if err := godotenv.Load(fmt.Sprintf(".env.dev")); err != nil {
-			log.Panicf("could not load env: %v", err)
-		}
+		host = "https://web.talkiewalkie.app"
 	default:
 		log.Panicf("bad env: %s", *env)
 	}
@@ -51,6 +48,9 @@ func main() {
 	components := common.InitComponents()
 
 	router := mux.NewRouter()
+	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	})
 	router.Use(
 		func(next http.Handler) http.Handler {
 			return handlers.CombinedLoggingHandler(os.Stdout, next)

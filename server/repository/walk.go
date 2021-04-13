@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 
+	"github.com/cridenour/go-postgis"
 	"github.com/jmoiron/sqlx"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 
@@ -37,4 +38,9 @@ func (p PgWalkRepository) GetByUuid(uuid string) (*models.Walk, error) {
 		return nil, err
 	}
 	return w, nil
+}
+
+func (p PgWalkRepository) GetInRadius(pt postgis.Point, r float32) ([]*models.Walk, error) {
+	rows, err := p.Db.Query(`SELECT * FROM walk WHERE st_distance(start_at, $1) < $2`, pt, r)
+	return nil, err
 }

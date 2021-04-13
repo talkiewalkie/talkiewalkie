@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/go-chi/jwtauth"
 	"github.com/gorilla/mux"
@@ -44,8 +45,8 @@ func mountHandler(components *common.Components, handler AuthHandler) http.Handl
 
 		c, err := buildAuthContext(components, r)
 		if err != nil {
-			log.Printf("failed to build context: %v", err)
-			http.Error(w, fmt.Sprintf("failed to build context: %v", err), http.StatusInternalServerError)
+			log.Printf("failed to build context: %+v", err)
+			http.Error(w, fmt.Sprintf("failed to build context: %+v", err), http.StatusInternalServerError)
 			return
 		}
 
@@ -55,6 +56,21 @@ func mountHandler(components *common.Components, handler AuthHandler) http.Handl
 			http.Error(w, httpError.Msg, httpError.Code)
 			return
 		}
+
+		_, signed, err := c.JwtAuth.Encode(map[string]interface{}{"userUuid": c.User.UUID})
+		if err != nil {
+			log.Printf("failed to build jwt: %+v", err)
+			http.Error(w, fmt.Sprintf("failed to build jwt: %+v", err), http.StatusInternalServerError)
+			return
+		}
+		http.SetCookie(w, &http.Cookie{
+			Name:     "jwt",
+			Value:    signed,
+			Path:     "/",
+			Expires:  time.Now().Add(time.Hour),
+			Secure:   true,
+			HttpOnly: true,
+		})
 
 		w.WriteHeader(http.StatusOK)
 		err = common.JsonOut(w, response)

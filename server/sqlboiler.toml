@@ -10,3 +10,19 @@ schema = "public"
 sslmode = "disable"
 add-global-variants	= false
 wipe = true
+
+# does not work..
+[[types]]
+  [types.match]
+    name = "start_point"
+  [types.replace]
+    type = "postgis.Point"
+  [types.imports]
+    third_party = ['"github.com/cridenour/go-postgis"']
+[[types]]
+  [types.match]
+    name = "end_point"
+  [types.replace]
+    type = "postgis.Point"
+  [types.imports]
+    third_party = ['"github.com/cridenour/go-postgis"']
