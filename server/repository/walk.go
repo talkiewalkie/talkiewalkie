@@ -41,6 +41,6 @@ func (p PgWalkRepository) GetByUuid(uuid string) (*models.Walk, error) {
 }
 
 func (p PgWalkRepository) GetInRadius(pt postgis.Point, r float32) ([]*models.Walk, error) {
-	rows, err := p.Db.Query(`SELECT * FROM walk WHERE st_distance(start_at, $1) < $2`, pt, r)
+	_, err := p.Db.Query(`SELECT * FROM walk WHERE st_distance(start_at, $1) < $2`, pt, r)
 	return nil, err
 }
