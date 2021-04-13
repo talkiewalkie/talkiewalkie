@@ -35,6 +35,7 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
       apiGet<User>("auth/me").then((u) => {
         setUser(u);
         setLoading(false);
+        // todo: refresh token every n times
       });
     } else {
       setUser(undefined);

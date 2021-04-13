@@ -1,5 +1,6 @@
 .arrowBox {
   @apply fixed bg-white border-4 shadow-lg z-popover rounded-sm;
+  transition: all .5s ease-in-out; /*make it smooth TODO: doesnt work*/
 }
 
 $popover-arrow-size: 11px;
