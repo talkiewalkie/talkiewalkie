@@ -5,7 +5,7 @@ import * as React from "react";
 
 import Colors from "../constants/Colors";
 import useColorScheme from "../hooks/useColorScheme";
-import TabOneScreen from "../screens/TabOneScreen";
+import { TabOneScreen } from "../screens/TabOneScreen";
 import TabTwoScreen from "../screens/TabTwoScreen";
 import { BottomTabParamList, TabOneParamList, TabTwoParamList } from "../types";
 
@@ -20,7 +20,7 @@ export default function BottomTabNavigator() {
       tabBarOptions={{
         activeTintColor: Colors[colorScheme].tint,
         style: { height: "full" },
-        tabStyle: { height: "70px", paddingVertical: "10px" },
+        tabStyle: { height: "70", paddingVertical: "10pt" },
       }}
     >
       <BottomTab.Screen
