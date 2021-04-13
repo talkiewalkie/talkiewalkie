@@ -4,7 +4,7 @@ server {
     include proxy.nginx;
 
     location / {
-        proxy_pass http://localhost:3000/;
+        proxy_pass http://127.0.0.1:3000/;
     }
 
     ssl_certificate /etc/letsencrypt/live/talkiewalkie.app/fullchain.pem; # managed by Certbot
@@ -26,10 +26,40 @@ server {
     include proxy.nginx;
 
     location / {
-        proxy_pass http://localhost:8080/;
+        proxy_pass http://127.0.0.1:8080/;
     }
 
     client_max_body_size 8m; # Raise the default a bit for image uploads
+
+    ssl_certificate /etc/letsencrypt/live/talkiewalkie.app/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/talkiewalkie.app/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+}
+
+server {
+    server_name dev.talkiewalkie.app;
+    listen 443 ssl;
+    include proxy.nginx;
+
+    location / {
+        proxy_pass http://127.0.0.1:8001/;
+    }
+
+    ssl_certificate /etc/letsencrypt/live/talkiewalkie.app/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/talkiewalkie.app/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+}
+
+server {
+    server_name tunnel.talkiewalkie.app;
+    listen 443 ssl;
+    include proxy.nginx;
+
+    location / {
+        proxy_pass http://127.0.0.1:8002/;
+    }
 
     ssl_certificate /etc/letsencrypt/live/talkiewalkie.app/fullchain.pem; # managed by Certbot
     ssl_certificate_key /etc/letsencrypt/live/talkiewalkie.app/privkey.pem; # managed by Certbot
