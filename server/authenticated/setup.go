@@ -9,6 +9,7 @@ import (
 	"github.com/go-chi/jwtauth"
 	"github.com/gorilla/mux"
 	"github.com/jmoiron/sqlx"
+	uuid "github.com/satori/go.uuid"
 
 	"github.com/talkiewalkie/talkiewalkie/common"
 	"github.com/talkiewalkie/talkiewalkie/models"
@@ -96,7 +97,12 @@ func buildAuthContext(c *common.Components, r *http.Request) (*authenticatedCont
 		return nil, fmt.Errorf("no 'userUid' value in context")
 	}
 
-	user, err := userRepo.GetUserByUuid(userUuid)
+	uid, err := uuid.FromString(userUuid)
+	if err != nil {
+		return nil, fmt.Errorf("invalid uuid: '%s': %+v", userUuid, err)
+	}
+
+	user, err := userRepo.GetUserByUuid(uid)
 	if err != nil {
 		return nil, err
 	}

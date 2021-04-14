@@ -5,6 +5,7 @@ import (
 
 	"github.com/cridenour/go-postgis"
 	"github.com/jmoiron/sqlx"
+	uuid "github.com/satori/go.uuid"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 
 	"github.com/talkiewalkie/talkiewalkie/common"
@@ -13,7 +14,7 @@ import (
 
 type WalkRepository interface {
 	GetAll() ([]*models.Walk, error)
-	GetByUuid(string) (*models.Walk, error)
+	GetByUuid(uuid.UUID) (*models.Walk, error)
 }
 
 var _ WalkRepository = PgWalkRepository{}
@@ -32,8 +33,8 @@ func (p PgWalkRepository) GetAll() ([]*models.Walk, error) {
 	return walks, nil
 }
 
-func (p PgWalkRepository) GetByUuid(uuid string) (*models.Walk, error) {
-	w, err := models.Walks(models.WalkWhere.UUID.EQ(uuid)).One(p.Ctx, p.Db)
+func (p PgWalkRepository) GetByUuid(uid uuid.UUID) (*models.Walk, error) {
+	w, err := models.Walks(models.WalkWhere.UUID.EQ(uid)).One(p.Ctx, p.Db)
 	if err != nil {
 		return nil, err
 	}

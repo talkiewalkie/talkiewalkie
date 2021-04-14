@@ -3,8 +3,8 @@ package unauthenticated
 import (
 	"net/http"
 
-	"github.com/docker/distribution/uuid"
 	"github.com/gorilla/mux"
+	uuid "github.com/satori/go.uuid"
 
 	"github.com/talkiewalkie/talkiewalkie/common"
 )
@@ -16,11 +16,12 @@ type walkOutput struct {
 }
 
 func WalkHandler(w http.ResponseWriter, r *http.Request, c *unauthenticatedContext) (interface{}, *common.HttpError) {
-	uid, ok := mux.Vars(r)["uuid"]
+	uidRaw, ok := mux.Vars(r)["uuid"]
 	if !ok {
 		return nil, common.ServerError("bad route")
 	}
-	if _, err := uuid.Parse(uid); err != nil {
+	uid, err := uuid.FromString(uidRaw)
+	if err != nil {
 		return nil, common.ServerError("bad route")
 	}
 
@@ -36,7 +37,7 @@ func WalkHandler(w http.ResponseWriter, r *http.Request, c *unauthenticatedConte
 	if err != nil {
 		return nil, common.ServerError("failed to load cover", err)
 	}
-	coverUrl, err := c.Storage.Url(cover.UUID)
+	coverUrl, err := c.Storage.Url(cover.UUID.String())
 	if err != nil {
 		return nil, common.ServerError(err.Error())
 	}
@@ -44,7 +45,7 @@ func WalkHandler(w http.ResponseWriter, r *http.Request, c *unauthenticatedConte
 	if err != nil {
 		return nil, common.ServerError(err.Error())
 	}
-	audioUrl, err := c.Storage.Url(audio.UUID)
+	audioUrl, err := c.Storage.Url(audio.UUID.String())
 	if err != nil {
 		return nil, common.ServerError(err.Error())
 	}

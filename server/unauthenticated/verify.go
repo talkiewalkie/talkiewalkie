@@ -3,6 +3,8 @@ package unauthenticated
 import (
 	"net/http"
 
+	uuid "github.com/satori/go.uuid"
+
 	"github.com/talkiewalkie/talkiewalkie/common"
 )
 
@@ -20,7 +22,11 @@ func VerifyHandler(w http.ResponseWriter, r *http.Request, c *unauthenticatedCon
 		return nil, badQueryErr
 	}
 
-	u, err := c.UserRepository.GetUserByUuid(users[0])
+	uid, err := uuid.FromString(users[0])
+	if err != nil {
+		return nil, common.ServerError("failed to parse uuid: '%s': %+v", users[0], err)
+	}
+	u, err := c.UserRepository.GetUserByUuid(uid)
 	if err != nil {
 		return nil, common.ServerError(err.Error())
 	}

@@ -20,8 +20,8 @@ type createWalkInput struct {
 }
 
 type createWalkOutput struct {
-	Uuid  string `json:"uuid"`
-	Title string `json:"title"`
+	Uuid  uuid.UUID `json:"uuid"`
+	Title string    `json:"title"`
 }
 
 func CreateWalkHandler(r *http.Request, ctx *authenticatedContext) (interface{}, *common.HttpError) {
@@ -30,7 +30,7 @@ func CreateWalkHandler(r *http.Request, ctx *authenticatedContext) (interface{},
 		return nil, common.ServerError(err.Error())
 	}
 
-	assets, err := ctx.AssetRepository.GetAllByUuid([]string{p.AudioUuid.String(), p.CoverArtUuid.String()})
+	assets, err := ctx.AssetRepository.GetAllByUuid([]uuid.UUID{p.AudioUuid, p.CoverArtUuid})
 	if err != nil {
 		return nil, common.ServerError("could not find assets in db: %v", err)
 	}

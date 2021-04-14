@@ -15,13 +15,14 @@ type likeWalkOutput struct {
 }
 
 func LikeWalkByUuid(r *http.Request, c *authenticatedContext) (interface{}, *common.HttpError) {
-	uid, ok := mux.Vars(r)["uuid"]
-	if !ok {
-		return nil, common.ServerError("could not parse request")
+	uidRaw, ok := mux.Vars(r)["uuid"]
+	uid, err := uuid.FromString(uidRaw)
+	if err != nil {
+		return nil, common.ServerError("failed to parse uuid: '%s': %+v", uidRaw, err)
 	}
 
-	if _, err := uuid.FromString(uid); err != nil {
-		return nil, common.ServerError("could not parse request: %+v", err)
+	if !ok {
+		return nil, common.ServerError("could not parse request")
 	}
 
 	w, err := models.Walks(models.WalkWhere.UUID.EQ(uid)).One(r.Context(), c.Db)

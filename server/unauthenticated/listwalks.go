@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
+	uuid "github.com/satori/go.uuid"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 
 	"github.com/talkiewalkie/talkiewalkie/common"
@@ -11,12 +12,12 @@ import (
 )
 
 type authorOutput struct {
-	Uuid   string `json:"uuid"`
-	Handle string `json:"handle"`
+	Uuid   uuid.UUID `json:"uuid"`
+	Handle string    `json:"handle"`
 }
 
 type listedWalkOutput struct {
-	Uuid     string       `json:"uuid"`
+	Uuid     uuid.UUID    `json:"uuid"`
 	Title    string       `json:"title"`
 	Author   authorOutput `json:"author"`
 	CoverUrl string       `json:"coverUrl"`
@@ -36,7 +37,7 @@ func WalksHandler(w http.ResponseWriter, r *http.Request, c *unauthenticatedCont
 
 	responseWalks := []listedWalkOutput{}
 	for _, walk := range walks {
-		coverUrl, err := c.Storage.Url(walk.R.Cover.UUID)
+		coverUrl, err := c.Storage.Url(walk.R.Cover.UUID.String())
 		if err != nil {
 			return nil, common.ServerError("could not make a signed url: %v", err)
 		}

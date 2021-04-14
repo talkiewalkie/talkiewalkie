@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/jmoiron/sqlx"
+	uuid "github.com/satori/go.uuid"
 	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 
@@ -13,7 +14,7 @@ import (
 
 type UserRepository interface {
 	GetUserByEmail(email string) (*models.User, error)
-	GetUserByUuid(uid string) (*models.User, error)
+	GetUserByUuid(uuid.UUID) (*models.User, error)
 	CreateUser(handle, email, emailToken string, password []byte) (*models.User, error)
 }
 
@@ -33,7 +34,7 @@ func (p PgUserRepository) GetUserByEmail(email string) (*models.User, error) {
 	return u, nil
 }
 
-func (p PgUserRepository) GetUserByUuid(uid string) (*models.User, error) {
+func (p PgUserRepository) GetUserByUuid(uid uuid.UUID) (*models.User, error) {
 	u, err := models.Users(models.UserWhere.UUID.EQ(uid)).One(p.Ctx, p.Db)
 	if err != nil {
 		return nil, err

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 
+	uuid "github.com/satori/go.uuid"
 	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"golang.org/x/crypto/bcrypt"
@@ -21,9 +22,9 @@ type createUserInput struct {
 }
 
 type createUserOutput struct {
-	Uuid   string `json:"uuid"`
-	Handle string `json:"handle"`
-	Email  string `json:"email"`
+	Uuid   uuid.UUID `json:"uuid"`
+	Handle string    `json:"handle"`
+	Email  string    `json:"email"`
 }
 
 func CreateUserHandler(w http.ResponseWriter, r *http.Request, c *unauthenticatedContext) (interface{}, *common.HttpError) {

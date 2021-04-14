@@ -10,23 +10,24 @@ import (
 )
 
 type userByUuidWalkOutput struct {
-	Uuid  string `json:"uuid"`
-	Title string `json:"title"`
+	Uuid  uuid.UUID `json:"uuid"`
+	Title string    `json:"title"`
 }
 
 type userByUuidOutput struct {
-	Uuid         string                 `json:"uuid"`
+	Uuid         uuid.UUID              `json:"uuid"`
 	Handle       string                 `json:"handle"`
 	WalksCreated []userByUuidWalkOutput `json:"walks"`
 }
 
 func UserByUuidHandler(r *http.Request, c *authenticatedContext) (interface{}, *common.HttpError) {
-	uid, ok := mux.Vars(r)["uuid"]
+	uidRaw, ok := mux.Vars(r)["uuid"]
 	if !ok {
 		return nil, common.ServerError("bad request, could not get uuid")
 	}
-	if _, err := uuid.FromString(uid); err != nil {
-		return nil, common.ServerError("bad request, could not parse uuid: %+v", err)
+	uid, err := uuid.FromString(uidRaw)
+	if err != nil {
+		return nil, common.ServerError("bad uuid '%s': %+v", uidRaw, err)
 	}
 
 	u, err := c.UserRepository.GetUserByUuid(uid)

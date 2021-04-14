@@ -8,12 +8,14 @@ import (
 	"os"
 	"strings"
 
+	uuid "github.com/satori/go.uuid"
+
 	"github.com/talkiewalkie/talkiewalkie/common"
 	"github.com/talkiewalkie/talkiewalkie/pb"
 )
 
 type uploadOutput struct {
-	Uuid string `json:"uuid"`
+	Uuid uuid.UUID `json:"uuid"`
 }
 
 func UploadHandler(r *http.Request, ctx *authenticatedContext) (interface{}, *common.HttpError) {
@@ -81,7 +83,7 @@ func UploadHandler(r *http.Request, ctx *authenticatedContext) (interface{}, *co
 		return nil, common.ServerError("could not upload file: %v", err)
 	}
 
-	a, err := ctx.AssetRepository.Create(uid.String(), h.Filename, contentType)
+	a, err := ctx.AssetRepository.Create(*uid, h.Filename, contentType)
 	if err != nil {
 		return nil, common.ServerError("could not register asset in db: %v", err)
 	}

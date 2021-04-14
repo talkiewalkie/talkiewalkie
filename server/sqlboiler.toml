@@ -11,18 +11,27 @@ sslmode = "disable"
 add-global-variants	= false
 wipe = true
 
-# does not work..
 [[types]]
   [types.match]
-    name = "start_point"
+    name = "uuid"
   [types.replace]
-    type = "postgis.Point"
+    type = "uuid.UUID"
   [types.imports]
-    third_party = ['"github.com/cridenour/go-postgis"']
-[[types]]
-  [types.match]
-    name = "end_point"
-  [types.replace]
-    type = "postgis.Point"
-  [types.imports]
-    third_party = ['"github.com/cridenour/go-postgis"']
+    third_party = ['"github.com/satori/go.uuid"']
+
+#[[types]]
+#  [types.match]
+#    name = "start_point"
+#  [types.replace]
+#    type = "postgis.PointS"
+#  [types.imports]
+#    third_party = ['"github.com/cridenour/go-postgis"']
+#
+#[[types]]
+#  [types.match]
+#    name = "end_point"
+#  [types.replace]
+#    type = "postgis.PointS"
+#  [types.imports]
+#    third_party = ['"github.com/cridenour/go-postgis"']
+
