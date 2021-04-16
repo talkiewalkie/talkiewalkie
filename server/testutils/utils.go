@@ -1,0 +1,74 @@
+package testutils
+
+import (
+	"context"
+	"fmt"
+	"log"
+	"math/rand"
+	"testing"
+	"time"
+
+	"github.com/jmoiron/sqlx"
+	"github.com/volatiletech/null/v8"
+	"github.com/volatiletech/sqlboiler/v4/boil"
+	"github.com/volatiletech/sqlboiler/v4/types/pgeo"
+
+	"github.com/talkiewalkie/talkiewalkie/common"
+	"github.com/talkiewalkie/talkiewalkie/models"
+)
+
+func SetupDb() *sqlx.DB {
+	dbUrl := common.DbUrl("talkiewalkie-test", "theo", "", "localhost", "5432", false)
+	db := sqlx.MustConnect("postgres", dbUrl)
+	common.RunMigrations("../migrations", dbUrl)
+	return db
+}
+
+func TearDownDb(db *sqlx.DB) {
+	tx := db.MustBegin()
+	tx.MustExec(`DELETE FROM "user";`)
+	tx.MustExec(`DELETE FROM "walk";`)
+	tx.MustExec(`DELETE FROM "user_walk";`)
+	tx.MustExec(`DELETE FROM "asset";`)
+	if err := tx.Commit(); err != nil {
+		log.Panicf("could not reset db state: %+v", err)
+	}
+}
+
+func AddMockUser(db common.DBLogger, t *testing.T) *models.User {
+	rng := rand.New(rand.NewSource(time.Now().UnixNano()))
+	rnd := fmt.Sprintf("%f", rng.Float32())
+	rndId := rnd[len(rnd)-6:]
+	u := &models.User{
+		Handle:     fmt.Sprintf("test-user-%s", rndId),
+		Email:      fmt.Sprintf("test-user-%s@gmail.com", rndId),
+		Password:   []byte("abc123"),
+		EmailToken: null.String{},
+	}
+	if err := u.Insert(context.Background(), db, boil.Infer()); err != nil {
+		t.Log(err)
+		t.Fail()
+	}
+	return u
+}
+
+var (
+	IPPUDO = pgeo.Point{X: 48.8645814, Y: 2.3425034} // yumyum tasty ramens
+)
+
+func AddMockWalk(u *models.User, db common.DBLogger, t *testing.T) *models.Walk {
+	w := &models.Walk{
+		Title:      "some title",
+		CoverID:    null.Int{Valid: false},
+		AudioID:    null.Int{Valid: false},
+		AuthorID:   u.ID,
+		StartPoint: IPPUDO,
+		EndPoint:   IPPUDO,
+	}
+	err := w.Insert(context.Background(), db, boil.Infer())
+	if err != nil {
+		t.Log(err)
+		t.Fail()
+	}
+	return w
+}

@@ -3,10 +3,10 @@ package repository
 import (
 	"context"
 
-	"github.com/cridenour/go-postgis"
 	"github.com/jmoiron/sqlx"
 	uuid "github.com/satori/go.uuid"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
+	"github.com/volatiletech/sqlboiler/v4/types/pgeo"
 
 	"github.com/talkiewalkie/talkiewalkie/common"
 	"github.com/talkiewalkie/talkiewalkie/models"
@@ -21,7 +21,7 @@ var _ WalkRepository = PgWalkRepository{}
 
 type PgWalkRepository struct {
 	*common.Components
-	Db  *sqlx.DB
+	Db  common.DBLogger
 	Ctx context.Context
 }
 
@@ -41,7 +41,16 @@ func (p PgWalkRepository) GetByUuid(uid uuid.UUID) (*models.Walk, error) {
 	return w, nil
 }
 
-func (p PgWalkRepository) GetInRadius(pt postgis.Point, r float32) ([]*models.Walk, error) {
-	_, err := p.Db.Query(`SELECT * FROM walk WHERE st_distance(start_at, $1) < $2`, pt, r)
-	return nil, err
+func (p PgWalkRepository) GetInRadius(pt pgeo.Point, r float64) ([]*models.Walk, error) {
+	qs := common.SqlFmt(`
+SELECT * FROM "walk" 
+WHERE earth_distance(ll_to_earth(walk.start_point[0], walk.start_point[1]),  ll_to_earth($1, $2)) < $3
+`)
+	walks := []*models.Walk{}
+
+	err := sqlx.Select(p.Db, &walks, qs, pt.X, pt.Y, r)
+	if err != nil {
+		return nil, err
+	}
+	return walks, nil
 }
