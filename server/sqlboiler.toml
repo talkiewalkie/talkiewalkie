@@ -1,4 +1,8 @@
 output = "models"
+add-global-variants	= false
+wipe = true
+tag = ["db"]
+
 
 [psql]
 dbname = "talkiewalkie"
@@ -8,8 +12,7 @@ user = "theo"
 pass = ""
 schema = "public"
 sslmode = "disable"
-add-global-variants	= false
-wipe = true
+blacklist = ["migrations"]
 
 [[types]]
   [types.match]
@@ -18,20 +21,3 @@ wipe = true
     type = "uuid.UUID"
   [types.imports]
     third_party = ['"github.com/satori/go.uuid"']
-
-#[[types]]
-#  [types.match]
-#    name = "start_point"
-#  [types.replace]
-#    type = "postgis.PointS"
-#  [types.imports]
-#    third_party = ['"github.com/cridenour/go-postgis"']
-#
-#[[types]]
-#  [types.match]
-#    name = "end_point"
-#  [types.replace]
-#    type = "postgis.PointS"
-#  [types.imports]
-#    third_party = ['"github.com/cridenour/go-postgis"']
-

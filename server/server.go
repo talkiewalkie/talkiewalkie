@@ -44,7 +44,12 @@ func main() {
 		log.Panicf("bad env: %s", *env)
 	}
 
-	checkMigrations()
+	dbUrl := common.DbUrl(
+		"talkiewalkie",
+		os.Getenv("POSTGRES_USER"), os.Getenv("POSTGRES_PASSWORD"),
+		os.Getenv("POSTGRES_HOST"), "5432",
+		false)
+	common.RunMigrations("./migrations", dbUrl)
 	components := common.InitComponents()
 
 	router := mux.NewRouter()
