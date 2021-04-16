@@ -1,31 +1,35 @@
-package repository
+package repository_test
 
 import (
-	"log"
+	"context"
+	"testing"
 
-	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
+
+	"github.com/talkiewalkie/talkiewalkie/common"
+	"github.com/talkiewalkie/talkiewalkie/repository"
+	"github.com/talkiewalkie/talkiewalkie/testutils"
 )
 
-func setup() PgUserRepository {
-	db, err := sqlx.Connect("postgres", "user=theo dbname=talkiewalkie sslmode=disable")
-
-	if err != nil {
-		log.Printf("could not connect to db: %v", err)
+func TestUserRepository(t *testing.T) {
+	db := testutils.SetupDb()
+	ql := common.NewDbLogger(db)
+	repo := repository.PgUserRepository{
+		Components: &common.Components{},
+		Db:         ql,
+		Ctx:        context.Background(),
 	}
-	return PgUserRepository{Db: db}
+
+	t.Run("can create user", createUserTest(repo))
+	testutils.TearDownDb(db)
 }
 
-var (
-	userRepo = setup()
-)
-
-//
-//func TestPgUserRepository_CreateUser(t *testing.T) {
-//	//mock.ExpectQuery()
-//	_, err := userRepo.CreateUser("test_email@example.com", "onw", "oin", []byte("ab1239de"))
-//	if err != nil {
-//		log.Panicf("floutch %v", err)
-//	}
-//
-//}
+func createUserTest(repo repository.PgUserRepository) func(t *testing.T) {
+	return func(t *testing.T) {
+		_, err := repo.CreateUser("bibou", "bibou.doux@doudou.dou", "sometoken", []byte("kd"))
+		if err != nil {
+			t.Log(err)
+			t.Fail()
+		}
+	}
+}

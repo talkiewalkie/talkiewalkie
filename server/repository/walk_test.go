@@ -15,7 +15,6 @@ import (
 	"github.com/talkiewalkie/talkiewalkie/testutils"
 )
 
-// https://stackoverflow.com/a/40748810
 func TestWalkRepository(t *testing.T) {
 	db := testutils.SetupDb()
 	ql := common.NewDbLogger(db)

@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 
-	"github.com/jmoiron/sqlx"
 	uuid "github.com/satori/go.uuid"
 	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
@@ -22,7 +21,7 @@ var _ UserRepository = PgUserRepository{}
 
 type PgUserRepository struct {
 	*common.Components
-	Db  *sqlx.DB
+	Db  common.DBLogger
 	Ctx context.Context
 }
 
