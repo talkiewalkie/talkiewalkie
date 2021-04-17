@@ -21,6 +21,17 @@ jobs:
     name: Backend test & deployment
     runs-on: ubuntu-latest
 
+    services:
+      test-db:
+        image: postgres:13
+        env:
+          POSTGRES_PASSWORD: ''
+          POSTGRES_USER: theo
+          POSTGRES_PORT: 5432
+          POSTGRES_DB: talkiewalkie-test
+        ports:
+          - 5432:5432
+
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -46,12 +57,6 @@ jobs:
           curl -LO https://golang.org/dl/go1.16.3.linux-amd64.tar.gz
           rm -rf /usr/local/go && sudo tar -C /usr/local -xzf go1.16.3.linux-amd64.tar.gz
           export PATH=$PATH:/usr/local/go/bin
-
-          # POSTGRES - https://www.postgresql.org/download/linux/ubuntu/
-          sudo systemctl start postgresql
-
-          # TEST DB
-          createdb talkiewalkie-test
 
       - name: Test
         run: |
