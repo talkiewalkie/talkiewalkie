@@ -26,12 +26,12 @@ jobs:
       test-db:
         image: postgres:13
         env:
-          POSTGRES_PASSWORD: $TEST_DB_PASSWORD
+          POSTGRES_PASSWORD: hello-this-is-test-password
           POSTGRES_USER: theo
           POSTGRES_PORT: 5432
           POSTGRES_DB: talkiewalkie-test
         ports:
-          - 5432/tcp
+          - 5432:5432
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
