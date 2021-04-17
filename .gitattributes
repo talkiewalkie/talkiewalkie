@@ -1,1 +1,2 @@
 server/models/*.go linguist-generated=true
+server/models/*.go -diff -merge
