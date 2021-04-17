@@ -57,7 +57,7 @@ jobs:
           export PATH=$PATH:/usr/local/go/bin
 
       - run: |
-          cd sqlboiler && ./install-fork.sh
+          cd sqlboiler && sudo ./install-fork.sh
 
       # Build the Docker image
       - name: Build
