@@ -51,13 +51,6 @@ jobs:
           # Set up docker to authenticate
           # via gcloud command-line tool.
           gcloud auth configure-docker
-          # install go
-          curl -LO https://golang.org/dl/go1.16.3.linux-amd64.tar.gz
-          rm -rf /usr/local/go && sudo tar -C /usr/local -xzf go1.16.3.linux-amd64.tar.gz
-          export PATH=$PATH:/usr/local/go/bin
-
-      - run: |
-          cd sqlboiler && sudo ./install-fork.sh
 
       # Build the Docker image
       - name: Build

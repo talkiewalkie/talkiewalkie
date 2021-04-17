@@ -12,7 +12,7 @@ user = "theo"
 pass = ""
 schema = "public"
 sslmode = "disable"
-blacklist = ["migrations"]
+blacklist = ["schema_migrations"]
 
 [[types]]
   [types.match]
