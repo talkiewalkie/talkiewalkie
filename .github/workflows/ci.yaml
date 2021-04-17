@@ -60,7 +60,7 @@ jobs:
 
       - name: Test
         run: |
-          go test ./repository
+          pushd server && go test ./repository && popd
 
       # Build the Docker image
       - name: Build
