@@ -9,6 +9,7 @@ on:
 env:
   GKE_PROJECT: ${{ secrets.GKE_PROJECT }}
   GKE_EMAIL: ${{ secrets.GKE_EMAIL }}
+  TEST_DB_PASSWORD: hello-this-is-test-password
   GITHUB_SHA: ${{ github.sha }}
   GKE_ZONE: europe-west1-b
   GKE_CLUSTER: talkiewalkie-main
@@ -25,12 +26,17 @@ jobs:
       test-db:
         image: postgres:13
         env:
-          POSTGRES_PASSWORD: ''
+          POSTGRES_PASSWORD: $TEST_DB_PASSWORD
           POSTGRES_USER: theo
           POSTGRES_PORT: 5432
           POSTGRES_DB: talkiewalkie-test
         ports:
-          - 5432:5432
+          - 5432/tcp
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
       - name: Checkout
@@ -57,6 +63,7 @@ jobs:
           curl -LO https://golang.org/dl/go1.16.3.linux-amd64.tar.gz
           sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf go1.16.3.linux-amd64.tar.gz
           export PATH=$PATH:/usr/local/go/bin
+          pushd server && go get -d -v ./... && popd
 
       - name: Test
         run: |

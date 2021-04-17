@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
+	"os"
 	"testing"
 	"time"
 
@@ -18,7 +19,7 @@ import (
 )
 
 func SetupDb() *sqlx.DB {
-	dbUrl := common.DbUrl("talkiewalkie-test", "theo", "", "localhost", "5432", false)
+	dbUrl := common.DbUrl("talkiewalkie-test", "theo", os.Getenv("TEST_DB_PASSWORD"), "localhost", "5432", false)
 	db := sqlx.MustConnect("postgres", dbUrl)
 	common.RunMigrations("../migrations", dbUrl)
 	return db
