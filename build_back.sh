@@ -35,3 +35,4 @@ popd
 
 sha="$(git rev-parse HEAD)"
 docker build -t gcr.io/talkiewalkie-305117/talkiewalkie-back:${sha} -t talkiewalkie-back .
+echo "built docker image 'gcr.io/talkiewalkie-305117/talkiewalkie-back:${sha}'"

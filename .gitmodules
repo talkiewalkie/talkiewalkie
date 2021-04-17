@@ -1,0 +1,3 @@
+[submodule "sqlboiler"]
+	path = sqlboiler
+	url = git@github.com:theo-m/sqlboiler.git
