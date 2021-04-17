@@ -44,19 +44,6 @@ jobs:
         with:
           submodules: 'recursive'
 
-      # Setup gcloud CLI
-      - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
-        with:
-          version: '336.0.0'
-          service_account_email: ${{ secrets.GKE_EMAIL }}
-          service_account_key: ${{ secrets.GKE_SA_B64 }}
-
-      # Configure docker to use the gcloud command-line tool as a credential helper
-      - run: |
-          # Set up docker to authenticate
-          # via gcloud command-line tool.
-          gcloud auth configure-docker
-
       - name: Test deps
         run: |
           # GO INSTALLL
@@ -69,9 +56,20 @@ jobs:
         run: |
           pushd server && go test ./repository && popd
 
+
+      # Setup gcloud CLI
+      - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+        with:
+          version: '336.0.0'
+          service_account_email: ${{ secrets.GKE_EMAIL }}
+          service_account_key: ${{ secrets.GKE_SA_B64 }}
+
       # Build the Docker image
       - name: Build
         run: |
+          # Set up docker to authenticate
+          # via gcloud command-line tool.
+          gcloud auth configure-docker
           ./build_back.sh
 
       # Push the Docker image to Google Container Registry
