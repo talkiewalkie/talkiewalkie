@@ -3,6 +3,8 @@ import { Button, StyleSheet, TouchableOpacity } from "react-native";
 
 import EditScreenInfo from "../components/EditScreenInfo";
 import { Text, View } from "../components/Themed";
+import { ApiProvider } from "../api/ApiContext";
+import { Query } from "../api/Query";
 
 export const TabOneScreen = () => {
   return (
@@ -23,6 +25,22 @@ export const TabOneScreen = () => {
         lightColor="#eee"
         darkColor="rgba(255,255,255,0.1)"
       />
+      <ApiProvider>
+        <Query path="unauth/walks">
+          {(walks, refetch) => (
+            <View>
+              {walks.map((w) => (
+                <View key={w.uuid}>
+                  <Text>{w.title}</Text>
+                  <TouchableOpacity onPress={refetch}>
+                    <Text>Refetch</Text>
+                  </TouchableOpacity>
+                </View>
+              )) ?? <Text>no walks yet</Text>}
+            </View>
+          )}
+        </Query>
+      </ApiProvider>
       <EditScreenInfo path="/screens/TabOneScreen.tsx" />
     </View>
   );
