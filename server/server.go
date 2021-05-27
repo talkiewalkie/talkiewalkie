@@ -34,7 +34,7 @@ func main() {
 	var host string
 	switch *env {
 	case "dev":
-		host = "http://localhost:3000"
+		host = "http://localhost:19006"
 		if err := godotenv.Load(fmt.Sprintf(".env.%s", *env)); err != nil {
 			log.Panicf("could not load env: %v", err)
 		}

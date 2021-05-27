@@ -37,11 +37,13 @@ func WalksHandler(w http.ResponseWriter, r *http.Request, c *unauthenticatedCont
 
 	responseWalks := []listedWalkOutput{}
 	for _, walk := range walks {
-		coverUrl, err := c.Storage.Url(walk.R.Cover.UUID.String())
-		if err != nil {
-			return nil, common.ServerError("could not make a signed url: %v", err)
+		var coverUrl string
+		if walk.R.Cover != nil {
+			coverUrl, err = c.Storage.Url(walk.R.Cover.UUID.String())
+			if err != nil {
+				return nil, common.ServerError("could not make a signed url: %v", err)
+			}
 		}
-
 		responseWalks = append(responseWalks, listedWalkOutput{
 			Uuid:     walk.UUID,
 			Title:    walk.Title,
