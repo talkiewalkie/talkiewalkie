@@ -33,14 +33,26 @@ func WalkHandler(w http.ResponseWriter, r *http.Request, c *unauthenticatedConte
 	if err != nil {
 		return nil, common.ServerError("failed to load attached: %v", err)
 	}
-	cover, err := walk.Cover().One(r.Context(), c.Db)
+
+	exists, err := walk.Cover().Exists(r.Context(), c.Db)
 	if err != nil {
-		return nil, common.ServerError("failed to load cover", err)
+		return nil, common.ServerError("failed to check existence of cover", err)
 	}
-	coverUrl, err := c.Storage.Url(cover.UUID.String())
-	if err != nil {
-		return nil, common.ServerError(err.Error())
+
+	var coverUrl string
+	if exists {
+
+		cover, err := walk.Cover().One(r.Context(), c.Db)
+		if err != nil {
+			return nil, common.ServerError("failed to load cover", err)
+		}
+
+		coverUrl, err = c.Storage.Url(cover.UUID.String())
+		if err != nil {
+			return nil, common.ServerError(err.Error())
+		}
 	}
+
 	audio, err := walk.Audio().One(r.Context(), c.Db)
 	if err != nil {
 		return nil, common.ServerError(err.Error())

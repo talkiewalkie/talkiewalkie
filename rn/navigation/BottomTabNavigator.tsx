@@ -8,8 +8,10 @@ import useColorScheme from "../hooks/useColorScheme";
 import { TabOneScreen } from "../screens/TabOneScreen";
 import TabTwoScreen from "../screens/TabTwoScreen";
 import { BottomTabParamList, TabOneParamList, TabTwoParamList } from "../types";
+import { createNativeStackNavigator } from "react-native-screens/native-stack";
 
 const BottomTab = createBottomTabNavigator<BottomTabParamList>();
+const TTTb = createNativeStackNavigator();
 
 export default function BottomTabNavigator() {
   const colorScheme = useColorScheme();
@@ -19,8 +21,8 @@ export default function BottomTabNavigator() {
       initialRouteName="TabOne"
       tabBarOptions={{
         activeTintColor: Colors[colorScheme].tint,
-        style: { height: "full" },
-        tabStyle: { height: "70", paddingVertical: "10pt" },
+        style: { height: "200" },
+        tabStyle: { height: "170pt", paddingVertical: "10pt" },
       }}
     >
       <BottomTab.Screen
@@ -65,7 +67,7 @@ function TabOneNavigator() {
         name="TabOneScreen"
         component={TabOneScreen}
         options={{
-          headerTitle: "Tab One Title",
+          headerTitle: "TalkieWalkie",
         }}
       />
     </TabOneStack.Navigator>

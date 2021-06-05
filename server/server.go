@@ -14,6 +14,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
+	"github.com/volatiletech/sqlboiler/v4/boil"
 
 	"github.com/talkiewalkie/talkiewalkie/authenticated"
 	"github.com/talkiewalkie/talkiewalkie/common"
@@ -51,6 +52,8 @@ func main() {
 		false)
 	common.RunMigrations("./migrations", dbUrl)
 	components := common.InitComponents()
+
+	boil.DebugMode = true
 
 	router := mux.NewRouter()
 	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {

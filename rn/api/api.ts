@@ -17,6 +17,9 @@ export type API = {
       in: never;
       out: (Omit<Walk, "author"> & { author: Pick<User, "uuid" | "handle"> })[];
     };
+    "unauth/walk": {
+      out: Omit<Walk, "author"> & { author: Pick<User, "uuid" | "handle"> };
+    };
     "auth/me": {
       in: never;
       out: {}[];

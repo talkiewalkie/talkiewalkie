@@ -5,6 +5,9 @@ import EditScreenInfo from "../components/EditScreenInfo";
 import { Text, View } from "../components/Themed";
 import { ApiProvider } from "../api/ApiContext";
 import { Query } from "../api/Query";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { RootStackParamList } from "../types";
+import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 
 export const TabOneScreen = () => {
   return (
@@ -35,6 +38,9 @@ export const TabOneScreen = () => {
                   <TouchableOpacity onPress={refetch}>
                     <Text>Refetch</Text>
                   </TouchableOpacity>
+                  {/*<TouchableOpacity onPress={() => navigation.navigate("")}>*/}
+                  {/*  <Text>Change screen</Text>*/}
+                  {/*</TouchableOpacity>*/}
                 </View>
               )) ?? <Text>no walks yet</Text>}
             </View>
