@@ -67,6 +67,7 @@ func main() {
 
 	unauthenticated.Setup(router, &components)
 	authenticated.Setup(router, &components)
+	router.HandleFunc("/ws", ws)
 
 	corsWrapper := handlers.CORS(
 		handlers.AllowCredentials(),
