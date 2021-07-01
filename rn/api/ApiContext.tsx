@@ -7,7 +7,7 @@ const AxiosContext = createContext(
 
 export const useApi = () => useContext(AxiosContext);
 
-export const ApiProvider = ({ children }: { children: JSX.Element }) => (
+export const ApiProvider = ({ children }: { children: React.ReactNode }) => (
   <AxiosContext.Provider
     value={axios.create({
       baseURL: "http://localhost:8080",

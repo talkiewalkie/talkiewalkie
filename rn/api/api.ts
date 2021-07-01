@@ -13,7 +13,7 @@ export type Walk = {
 
 export type API = {
   query: {
-    "unauth/walks": {
+    walks: {
       in: never;
       out: (Omit<Walk, "author"> & { author: Pick<User, "uuid" | "handle"> })[];
     };

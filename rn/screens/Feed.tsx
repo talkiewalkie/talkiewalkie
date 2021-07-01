@@ -1,14 +1,17 @@
 import { MainNavigatorProps } from "../navigation/MainNavigator";
 import {
+  Button,
   ScrollView,
   StyleSheet,
-  View,
   Text,
   TouchableOpacity,
+  View,
 } from "react-native";
-import React from "react";
+import { Audio } from "expo-av";
+import React, { useEffect, useState } from "react";
 import { ApiProvider } from "../api/ApiContext";
 import { Query } from "../api/Query";
+import { Recorder } from "../components/Recorder";
 
 const styles = StyleSheet.create({
   container: {
@@ -41,7 +44,7 @@ export const Feed = ({ navigation }: { navigation: MainNavigatorProps }) => (
   <View style={styles.container}>
     <ScrollView style={{ flexDirection: "column" }}>
       <ApiProvider>
-        <Query path="unauth/walks">
+        <Query path="walks">
           {(data) => (
             <>
               {data.map((w, idx) => (
@@ -70,6 +73,7 @@ export const Feed = ({ navigation }: { navigation: MainNavigatorProps }) => (
             </>
           )}
         </Query>
+        <Recorder />
       </ApiProvider>
     </ScrollView>
   </View>

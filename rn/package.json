@@ -20,6 +20,7 @@
     "axios": "^0.21.1",
     "expo": "~40.0.0",
     "expo-asset": "~8.2.1",
+    "expo-av": "^9.1.2",
     "expo-constants": "~9.3.0",
     "expo-font": "~8.4.0",
     "expo-linking": "~2.0.0",
