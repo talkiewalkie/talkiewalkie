@@ -2,7 +2,9 @@ package common
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
+	"log"
 	"net/http"
 )
 
@@ -36,4 +38,28 @@ func ServerError(msg string, a ...interface{}) *HttpError {
 		Code: http.StatusInternalServerError,
 		Msg:  fmt.Sprintf(msg, a...),
 	}
+}
+
+// RecoverMiddleWare from https://stackoverflow.com/a/28746725
+func RecoverMiddleWare(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		defer func() {
+			r := recover()
+			if r != nil {
+				var err error
+				switch t := r.(type) {
+				case string:
+					err = errors.New(t)
+				case error:
+					err = t
+				default:
+					err = errors.New("Unknown error")
+				}
+				log.Println(err.Error())
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+			}
+		}()
+
+		next.ServeHTTP(w, r)
+	})
 }

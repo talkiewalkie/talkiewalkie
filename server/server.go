@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"flag"
 	"fmt"
 	"log"
@@ -11,14 +10,12 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
-	"github.com/jmoiron/sqlx"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
+	"github.com/talkiewalkie/talkiewalkie/routes"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 
-	"github.com/talkiewalkie/talkiewalkie/authenticated"
 	"github.com/talkiewalkie/talkiewalkie/common"
-	"github.com/talkiewalkie/talkiewalkie/unauthenticated"
 )
 
 var (
@@ -51,7 +48,11 @@ func main() {
 		os.Getenv("POSTGRES_HOST"), "5432",
 		false)
 	common.RunMigrations("./migrations", dbUrl)
-	components := common.InitComponents()
+
+	components, err := common.InitComponents()
+	if err != nil {
+		panic(err)
+	}
 
 	boil.DebugMode = true
 
@@ -63,10 +64,12 @@ func main() {
 		func(next http.Handler) http.Handler {
 			return handlers.CombinedLoggingHandler(os.Stdout, next)
 		},
-		WithDbMiddleWare)
+		common.WithContextMiddleWare(components),
+		common.RecoverMiddleWare)
 
-	unauthenticated.Setup(router, &components)
-	authenticated.Setup(router, &components)
+	router.HandleFunc("/walk", routes.CreateWalk).Methods(http.MethodPost)
+	router.HandleFunc("/walks", routes.Walks).Methods(http.MethodGet)
+	router.HandleFunc("/asset", routes.UploadHandler).Methods(http.MethodPost)
 	router.HandleFunc("/ws", ws)
 
 	corsWrapper := handlers.CORS(
@@ -79,27 +82,4 @@ func main() {
 	if err := http.ListenAndServe(*port, corsWrapper(router)); err != nil {
 		log.Printf("could not serve: %v", err)
 	}
-}
-
-func WithDbMiddleWare(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		dsName := fmt.Sprintf(
-			"postgres://%s:%s@%s/talkiewalkie?sslmode=disable",
-			os.Getenv("POSTGRES_USER"),
-			os.Getenv("POSTGRES_PASSWORD"),
-			os.Getenv("POSTGRES_HOST"),
-		)
-		db, err := sqlx.Connect("postgres", dsName)
-
-		if err != nil {
-			http.Error(w, fmt.Sprintf("could not connect to db: %v", err), http.StatusInternalServerError)
-			return
-		}
-
-		defer db.Close()
-
-		ctx := context.WithValue(r.Context(), "db", db)
-		newR := r.WithContext(ctx)
-		next.ServeHTTP(w, newR)
-	})
 }

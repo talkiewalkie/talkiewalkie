@@ -10,19 +10,22 @@ import (
 	"strconv"
 
 	"github.com/go-chi/jwtauth"
+	"github.com/jmoiron/sqlx"
 
 	"github.com/talkiewalkie/talkiewalkie/pb"
 )
 
 type Components struct {
+	Db          *sqlx.DB
 	EmailClient EmailClient
 	JwtAuth     *jwtauth.JWTAuth
 	Storage     StorageClient
+	Audio       *pb.CompressionClient
+
 	CompressImg func(string, int) (string, error)
-	Audio       pb.CompressionClient
 }
 
-func InitComponents() Components {
+func InitComponents() (*Components, error) {
 	tokenAuth := jwtauth.New("HS256", []byte(os.Getenv("JWT_SECRET")), nil)
 	emailClient := initEmailClient()
 
@@ -37,11 +40,24 @@ func InitComponents() Components {
 		log.Printf("could not initiate the audio client: %+v", err)
 	}
 
-	return Components{
+	dsName := fmt.Sprintf(
+		"postgres://%s:%s@%s/talkiewalkie?sslmode=disable",
+		os.Getenv("POSTGRES_USER"),
+		os.Getenv("POSTGRES_PASSWORD"),
+		os.Getenv("POSTGRES_HOST"),
+	)
+	db, err := sqlx.Connect("postgres", dsName)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &Components{
+		Db:          db,
 		EmailClient: emailClient,
 		JwtAuth:     tokenAuth,
 		Storage:     storageClient,
-		Audio:       audioClient,
+		Audio:       &audioClient,
 		CompressImg: func(path string, width int) (string, error) {
 			output := fmt.Sprintf("/tmp/%s.png", strconv.FormatInt(rand.Int63(), 10))
 
@@ -70,5 +86,5 @@ func InitComponents() Components {
 			}
 			return output, nil
 		},
-	}
+	}, nil
 }
