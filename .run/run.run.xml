@@ -1,0 +1,12 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="run" type="GoApplicationRunConfiguration" factoryName="Go Application">
+    <module name="talkiewalkie" />
+    <working_directory value="$PROJECT_DIR$/server" />
+    <kind value="DIRECTORY" />
+    <directory value="$PROJECT_DIR$/server" />
+    <filePath value="$PROJECT_DIR$/server/server.go" />
+    <method v="2">
+      <option name="GoBeforeRunTask" command="generate" />
+    </method>
+  </configuration>
+</component>

@@ -1,0 +1,14 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="go test" type="GoTestRunConfiguration" factoryName="Go Test">
+    <module name="talkiewalkie" />
+    <working_directory value="$PROJECT_DIR$/server/" />
+    <go_parameters value="-i" />
+    <kind value="DIRECTORY" />
+    <directory value="$PROJECT_DIR$/server" />
+    <filePath value="$PROJECT_DIR$" />
+    <framework value="gotest" />
+    <method v="2">
+      <option name="GoBeforeRunTask" command="generate" />
+    </method>
+  </configuration>
+</component>
