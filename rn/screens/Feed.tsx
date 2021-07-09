@@ -12,6 +12,7 @@ import React, { useEffect, useState } from "react";
 import { ApiProvider } from "../api/ApiContext";
 import { Query } from "../api/Query";
 import { Recorder } from "../components/Recorder";
+import AllBandButton from "../components/AllBandButton";
 
 const styles = StyleSheet.create({
   container: {
@@ -45,8 +46,9 @@ export const Feed = ({ navigation }: { navigation: MainNavigatorProps }) => (
     <ScrollView style={{ flexDirection: "column" }}>
       <ApiProvider>
         <Query path="walks">
-          {(data) => (
+          {(data, refetch) => (
             <>
+              <AllBandButton label="refetch" onPress={refetch} />
               {data.map((w, idx) => (
                 <TouchableOpacity
                   key={w.uuid}

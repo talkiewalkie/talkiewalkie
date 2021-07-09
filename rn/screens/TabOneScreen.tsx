@@ -29,7 +29,7 @@ export const TabOneScreen = () => {
         darkColor="rgba(255,255,255,0.1)"
       />
       <ApiProvider>
-        <Query path="unauth/walks">
+        <Query path="walks">
           {(walks, refetch) => (
             <View>
               {walks.map((w) => (
