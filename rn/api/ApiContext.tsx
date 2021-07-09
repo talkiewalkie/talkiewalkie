@@ -2,7 +2,7 @@ import React, { createContext, useContext } from "react";
 import axios from "axios";
 
 const AxiosContext = createContext(
-  axios.create({ url: "https://localhost:8080/" })
+  axios.create({ url: "https://dev.talkiewalkie.app/" })
 );
 
 export const useApi = () => useContext(AxiosContext);
@@ -10,7 +10,7 @@ export const useApi = () => useContext(AxiosContext);
 export const ApiProvider = ({ children }: { children: React.ReactNode }) => (
   <AxiosContext.Provider
     value={axios.create({
-      baseURL: "http://localhost:8080",
+      baseURL: "https://dev.talkiewalkie.app",
     })}
   >
     {children}

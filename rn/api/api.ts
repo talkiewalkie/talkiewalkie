@@ -14,14 +14,15 @@ export type Walk = {
 export type API = {
   query: {
     walks: {
-      in: never;
+      in: null;
       out: (Omit<Walk, "author"> & { author: Pick<User, "uuid" | "handle"> })[];
     };
     "unauth/walk": {
+      in: { uuid: string };
       out: Omit<Walk, "author"> & { author: Pick<User, "uuid" | "handle"> };
     };
     "auth/me": {
-      in: never;
+      in: null;
       out: {}[];
     };
   };
