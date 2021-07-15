@@ -3,13 +3,18 @@ package testutils
 import (
 	"context"
 	"fmt"
+	"io"
+	"io/ioutil"
 	"log"
 	"math/rand"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"testing"
 	"time"
 
 	"github.com/jmoiron/sqlx"
+	uuid "github.com/satori/go.uuid"
 	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/types/pgeo"
@@ -34,6 +39,37 @@ func TearDownDb(db *sqlx.DB) {
 	if err := tx.Commit(); err != nil {
 		log.Panicf("could not reset db state: %+v", err)
 	}
+}
+
+type FakeStorageClient struct{}
+
+func (f FakeStorageClient) Upload(ctx context.Context, blob io.Reader) (*uuid.UUID, error) {
+	uid := uuid.NewV4()
+	return &uid, nil
+}
+
+func (f FakeStorageClient) Url(dest string) (string, error) {
+	return "https://some.fake.url/123", nil
+}
+
+var _ common.StorageClient = FakeStorageClient{}
+
+func MakeRequest(u *models.User, db *sqlx.DB, method, target string, body io.Reader) *http.Request {
+	req := httptest.NewRequest(method, target, body)
+
+	twCtx := common.Context{
+		Components: &common.Components{
+			Db:      db,
+			Storage: FakeStorageClient{},
+			CompressImg: func(s string, i int) (string, error) {
+				f, _ := ioutil.TempFile("", "")
+				return f.Name(), nil
+			}},
+		User: u,
+	}
+	ctx := context.WithValue(req.Context(), "context", twCtx)
+
+	return req.WithContext(ctx)
 }
 
 func AddMockUser(db common.DBLogger, t *testing.T) *models.User {
@@ -66,10 +102,18 @@ func AddMockWalk(u *models.User, db common.DBLogger, t *testing.T) *models.Walk 
 		StartPoint: IPPUDO,
 		EndPoint:   IPPUDO,
 	}
-	err := w.Insert(context.Background(), db, boil.Infer())
-	if err != nil {
+	if err := w.Insert(context.Background(), db, boil.Infer()); err != nil {
 		t.Log(err)
 		t.Fail()
 	}
 	return w
+}
+
+func AddMockAsset(mimeType string, db common.DBLogger, t *testing.T) *models.Asset {
+	a := &models.Asset{MimeType: mimeType}
+	if err := a.Insert(context.Background(), db, boil.Infer()); err != nil {
+		t.Log(err)
+		t.Fail()
+	}
+	return a
 }

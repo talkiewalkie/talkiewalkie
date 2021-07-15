@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/gorilla/mux"
 	uuid "github.com/satori/go.uuid"
 	"github.com/talkiewalkie/talkiewalkie/common"
 	"github.com/talkiewalkie/talkiewalkie/models"
@@ -11,6 +12,8 @@ import (
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
+
+// ------------
 
 type CreateWalkInput struct {
 	Title        string    `json:"title"`
@@ -89,9 +92,7 @@ func Walks(w http.ResponseWriter, r *http.Request) {
 		qm.Offset(0),
 		qm.OrderBy(models.WalkColumns.CreatedAt),
 		qm.Load(models.WalkRels.Author),
-		qm.Load(models.WalkRels.Cover),
-		qm.Load(models.WalkRels.Audio),
-	).All(r.Context(), ctx.Components.Db)
+		qm.Load(models.WalkRels.Cover)).All(r.Context(), ctx.Components.Db)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -115,4 +116,61 @@ func Walks(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 	common.JsonOut(w, responseWalks)
+}
+
+// ------------
+
+type WalkByUuidOutput struct {
+	Uuid     uuid.UUID             `json:"uuid"`
+	Title    string                `json:"title"`
+	Author   AuthorWalksItemOutput `json:"author"`
+	CoverUrl string                `json:"coverUrl"`
+	// TODO: audio url lol
+}
+
+func WalkByUuid(w http.ResponseWriter, r *http.Request) {
+	ctx := common.WithContext(r)
+
+	vars := mux.Vars(r)
+	uuid_url, ok := vars["uuid"]
+	if !ok {
+		http.Error(w, "expects a well formed uuid", http.StatusBadRequest)
+		return
+	}
+
+	uid, err := uuid.FromString(uuid_url)
+	if err != nil {
+		http.Error(w, "expects a well formed uuid", http.StatusBadRequest)
+		return
+	}
+
+	walk, err := models.Walks(
+		qm.Where("uuid = ?", uid),
+		qm.Load(models.WalkRels.Author),
+		qm.Load(models.WalkRels.Cover),
+		qm.Load(models.WalkRels.Audio)).One(r.Context(), ctx.Components.Db)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+	if walk == nil {
+		http.Error(w, "no walk found", http.StatusBadRequest)
+		return
+	}
+
+	var coverUrl string
+	if walk.R.Cover != nil {
+		coverUrl, err = ctx.Components.Storage.Url(walk.R.Cover.UUID.String())
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+
+	out := WalkByUuidOutput{
+		Uuid:     walk.UUID,
+		Title:    walk.Title,
+		Author:   AuthorWalksItemOutput{Uuid: walk.R.Author.UUID, Handle: walk.R.Author.Handle},
+		CoverUrl: coverUrl,
+	}
+	common.JsonOut(w, out)
 }

@@ -2,75 +2,80 @@ package routes
 
 import (
 	"bytes"
-	"context"
-	"encoding/json"
-	"io"
+	"fmt"
+	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
+	"net/textproto"
 	"testing"
 
 	"github.com/jmoiron/sqlx"
-	uuid "github.com/satori/go.uuid"
 	"github.com/stretchr/testify/assert"
-	"github.com/talkiewalkie/talkiewalkie/common"
 	"github.com/talkiewalkie/talkiewalkie/models"
 	"github.com/talkiewalkie/talkiewalkie/testutils"
 )
 
-type FakeStorageClient struct{}
-
-func (f FakeStorageClient) Upload(ctx context.Context, blob io.Reader) (*uuid.UUID, error) {
-	uid := uuid.NewV4()
-	return &uid, nil
-}
-
-func (f FakeStorageClient) Url(dest string) (string, error) {
-	return "https://some.fake.url/123", nil
-}
-
-var _ common.StorageClient = FakeStorageClient{}
-
 func TestAssets(t *testing.T) {
 	db := testutils.SetupDb()
 
-	t.Run("can create assets", createAssetTest(db))
+	t.Run("can create assets (image)", createImageAssetUploadTest(db))
+	t.Run("can create assets (audio)", createAudioAssetUploadTest(db))
 	testutils.TearDownDb(db)
-	//t.Run("can list walk", listWalkTest(repo))
-	//testutils.TearDownDb(db)
-	//t.Run("can list walk near point", listWalkInRadiusTest(repo))
-	//testutils.TearDownDb(db)
 }
 
-func createAssetTest(db *sqlx.DB) func(t *testing.T) {
+var (
+	pngMagicBytes  = "\x89PNG\r\n\x1a\n"
+	webmMagicBytes = "\x1A\x45\xDF\xA3"
+)
+
+func createImageAssetUploadTest(db *sqlx.DB) func(t *testing.T) {
 	return func(t *testing.T) {
-		u := testutils.AddMockUser(db, t)
+		user := testutils.AddMockUser(db, t)
 
+		body := new(bytes.Buffer)
+		formWriter := multipart.NewWriter(body)
+		mimeHeader := textproto.MIMEHeader{}
+		mimeHeader.Set("content-type", "image/png")
+		formWriter.CreatePart(mimeHeader)
+		fileWriter, _ := formWriter.CreateFormFile("main", "test.png")
+		fileWriter.Write([]byte(pngMagicBytes))
+		formWriter.Close()
+
+		req := testutils.MakeRequest(user, db, http.MethodPost, "/asset", body)
+		req.Header.Set("Content-Type", fmt.Sprintf(formWriter.FormDataContentType()))
 		w := &httptest.ResponseRecorder{}
-		bb, _ := json.Marshal(CreateWalkInput{
-			Title:        "test walk",
-			Description:  "",
-			CoverArtUuid: uuid.UUID{},
-			AudioUuid:    uuid.UUID{},
-		})
-		r := httptest.NewRequest(http.MethodGet, "/walk", bytes.NewReader(bb))
-		mctx := common.Context{
-			Components: &common.Components{Db: db, Storage: FakeStorageClient{}},
-			User:       u,
-		}
-		ctx := context.WithValue(r.Context(), "context", mctx)
-		r = r.WithContext(ctx)
 
-		UploadHandler(w, r)
+		UploadHandler(w, req)
 
 		assert.Equal(t, http.StatusOK, w.Result().StatusCode)
-		buf := new(bytes.Buffer)
-		buf.ReadFrom(w.Result().Body)
-		newStr := buf.String()
-		t.Log(w.Result().Status)
-		t.Log(newStr)
-		t.Log(w.Body)
 
-		assets, _ := models.Assets().All(r.Context(), mctx.Components.Db)
+		assets, _ := models.Assets().All(req.Context(), db)
+		assert.NotEmptyf(t, assets, "no asset in db")
+	}
+}
+
+func createAudioAssetUploadTest(db *sqlx.DB) func(t *testing.T) {
+	return func(t *testing.T) {
+		user := testutils.AddMockUser(db, t)
+
+		body := new(bytes.Buffer)
+		formWriter := multipart.NewWriter(body)
+		mimeHeader := textproto.MIMEHeader{}
+		mimeHeader.Set("content-type", "image/png")
+		formWriter.CreatePart(mimeHeader)
+		fileWriter, _ := formWriter.CreateFormFile("main", "test.png")
+		fileWriter.Write([]byte(webmMagicBytes))
+		formWriter.Close()
+
+		req := testutils.MakeRequest(user, db, http.MethodPost, "/asset", body)
+		req.Header.Set("Content-Type", fmt.Sprintf(formWriter.FormDataContentType()))
+		w := &httptest.ResponseRecorder{}
+
+		UploadHandler(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Result().StatusCode)
+
+		assets, _ := models.Assets().All(req.Context(), db)
 		assert.NotEmptyf(t, assets, "no asset in db")
 	}
 }

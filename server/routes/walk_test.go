@@ -9,7 +9,6 @@ import (
 	"testing"
 
 	"github.com/jmoiron/sqlx"
-	uuid "github.com/satori/go.uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/talkiewalkie/talkiewalkie/common"
 	"github.com/talkiewalkie/talkiewalkie/testutils"
@@ -29,13 +28,15 @@ func TestWalkRepository(t *testing.T) {
 func createWalkTest(db *sqlx.DB) func(t *testing.T) {
 	return func(t *testing.T) {
 		u := testutils.AddMockUser(db, t)
+		coverArt := testutils.AddMockAsset("image/png", db, t)
+		audio := testutils.AddMockAsset("video/ogg", db, t)
 
 		w := &httptest.ResponseRecorder{}
 		bb, _ := json.Marshal(CreateWalkInput{
 			Title:        "test walk",
 			Description:  "",
-			CoverArtUuid: uuid.UUID{},
-			AudioUuid:    uuid.UUID{},
+			CoverArtUuid: coverArt.UUID,
+			AudioUuid:    audio.UUID,
 		})
 		r := httptest.NewRequest(http.MethodGet, "/walk", bytes.NewReader(bb))
 		mctx := common.Context{
