@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package talkiewalkie;
+
+message VolumeEffect {
+  int64 start = 1;
+  int64 end = 2;
+  float volume_start = 3;
+  float volume_end = 4;
+}
+
+message StudioSound {
+  bytes audio = 1;
+}
+
+message Effect {
+  oneof effect {
+    VolumeEffect volume = 2;
+    StudioSound studio_sound = 3;
+  }
+}
+
+message ClipMetadata {
+  oneof source {
+    string prerecorded_uuid = 1;
+    int64 microphone_bitrate = 2;
+  }
+}
+
+message Clip {
+  int64 offset = 1; // ms
+  bytes audio = 2;
+  repeated Effect effects = 3;
+
+  int64 length = 4; // ms
+  ClipMetadata metadata = 5;
+}
+
+message Walk {
+  string title = 1;
+  string author_uuid = 2;
+  repeated Clip clips = 3;
+}
