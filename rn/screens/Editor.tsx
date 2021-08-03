@@ -101,9 +101,14 @@ export const WrappedEditor = ({
           }}
         />
       )}
-      {/*// TODO: make this draggable */}
-      {/*//  https://www.youtube.com/watch?v=tHWGKdpj1rs*/}
-      {/*    https://snack.expo.io/@yoobidev/draggable-component*/}
+      {/* TODO: show the waveform */}
+      {/*   https://github.com/juananime/react-native-audiowaveform*/}
+      {/*   https://tchryssos.medium.com/building-an-audio-waveform-progress-bar-with-react-for-quadio-132223928b14*/}
+      {/*   https://github.com/bbc/audiowaveform*/}
+      {/*   https://medium.com/trackstack/simple-audio-waveform-with-wavesurfer-js-and-react-ae6c0653b240*/}
+      {/* TODO: make this draggable */}
+      {/*   https://www.youtube.com/watch?v=tHWGKdpj1rs*/}
+      {/*   https://snack.expo.io/@yoobidev/draggable-component*/}
       {sound && duration && (
         <TouchableOpacity
           style={{
