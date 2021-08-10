@@ -16,3 +16,6 @@ class AudiotoursItem(scrapy.Item):
     audio_url = scrapy.Field()
     tour_url = scrapy.Field()
     cover_url = scrapy.Field()
+
+    file_urls = scrapy.Field()
+    files = scrapy.Field()

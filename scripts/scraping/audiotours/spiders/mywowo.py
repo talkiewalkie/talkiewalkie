@@ -54,5 +54,6 @@ class MywowoSpider(scrapy.Spider):
                 audio_url=audio_url,
                 tour_url=response.url,
                 cover_url=cover_url,
+                file_urls=[audio_url, cover_url],
             )
         )
