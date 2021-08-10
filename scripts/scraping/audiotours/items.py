@@ -15,3 +15,4 @@ class AudiotoursItem(scrapy.Item):
     audio_length = scrapy.Field()
     audio_url = scrapy.Field()
     tour_url = scrapy.Field()
+    cover_url = scrapy.Field()

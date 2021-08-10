@@ -43,6 +43,7 @@ class MywowoSpider(scrapy.Spider):
         author = authors[0] if len(authors) > 0 else None
 
         audio_url = response.css(".audioguide__player::attr(data-audio)").get()
+        cover_url = response.urljoin(response.css(".audioguide__wrapper > img ::attr(src)").get())
 
         yield AudiotoursItem(
             dict(
@@ -52,5 +53,6 @@ class MywowoSpider(scrapy.Spider):
                 author=author,
                 audio_url=audio_url,
                 tour_url=response.url,
+                cover_url=cover_url,
             )
         )
