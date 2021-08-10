@@ -9,7 +9,7 @@ GOOGLE_APPLICATION_CREDENTIALS='./.secrets/talkiewalkie-305117-1a6c005507ac.json
 ```
 
 However this command wouldn't need to be run again, as results are available
-at `gs://talkiewalkie-dev/scraping/audiotours/mywowo.jl` and all files are reuploaded with
+at `gs://talkiewalkie-dev/scraping/audiotours/mywowo-full-run.jl` and all files are reuploaded with
 prefix `gs://talkiewalkie-dev/scraping/audiotours`.
 
 In the `.jl` file are items like this:
