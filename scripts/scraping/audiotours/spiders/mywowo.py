@@ -16,7 +16,6 @@ class MywowoSpider(scrapy.Spider):
             if city is None or not city.startswith("https://mywowo.net/en"):
                 continue
             yield scrapy.Request(city, callback=self.parse_city_page)
-            break
 
     def parse_city_page(self, response):
         tours = response.css(".audioguide-list-item::attr(href)").getall()
