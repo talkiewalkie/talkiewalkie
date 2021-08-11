@@ -43,8 +43,17 @@ func TearDownDb(db *sqlx.DB) {
 
 type FakeStorageClient struct{}
 
+func (f FakeStorageClient) AssetUrl(asset *models.Asset) (string, error) {
+	return "https://some.fake.url/123", nil
+}
+
+func (f FakeStorageClient) DefaultBucket() string {
+	return "test-bucket"
+}
+
 func (f FakeStorageClient) Download(blobName string, writer io.Writer) error {
-	panic("implement me")
+	_, err := writer.Write([]byte("hello this is test content"))
+	return err
 }
 
 func (f FakeStorageClient) Upload(ctx context.Context, blob io.Reader) (*uuid.UUID, error) {
@@ -52,7 +61,7 @@ func (f FakeStorageClient) Upload(ctx context.Context, blob io.Reader) (*uuid.UU
 	return &uid, nil
 }
 
-func (f FakeStorageClient) Url(dest string) (string, error) {
+func (f FakeStorageClient) SignedUrl(bucket, blobName string) (string, error) {
 	return "https://some.fake.url/123", nil
 }
 
@@ -104,7 +113,6 @@ func AddMockWalk(u *models.User, db common.DBLogger, t *testing.T) *models.Walk 
 		AudioID:    null.Int{Valid: false},
 		AuthorID:   u.ID,
 		StartPoint: IPPUDO,
-		EndPoint:   IPPUDO,
 	}
 	if err := w.Insert(context.Background(), db, boil.Infer()); err != nil {
 		t.Log(err)

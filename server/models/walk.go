@@ -26,40 +26,40 @@ import (
 
 // Walk is an object representing the database table.
 type Walk struct {
-	ID         int        `db:"id" boil:"id" json:"id" toml:"id" yaml:"id"`
-	UUID       uuid.UUID  `db:"uuid" boil:"uuid" json:"uuid" toml:"uuid" yaml:"uuid"`
-	Title      string     `db:"title" boil:"title" json:"title" toml:"title" yaml:"title"`
-	CoverID    null.Int   `db:"cover_id" boil:"cover_id" json:"cover_id,omitempty" toml:"cover_id" yaml:"cover_id,omitempty"`
-	AudioID    null.Int   `db:"audio_id" boil:"audio_id" json:"audio_id,omitempty" toml:"audio_id" yaml:"audio_id,omitempty"`
-	AuthorID   int        `db:"author_id" boil:"author_id" json:"author_id" toml:"author_id" yaml:"author_id"`
-	CreatedAt  time.Time  `db:"created_at" boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
-	StartPoint pgeo.Point `db:"start_point" boil:"start_point" json:"start_point" toml:"start_point" yaml:"start_point"`
-	EndPoint   pgeo.Point `db:"end_point" boil:"end_point" json:"end_point" toml:"end_point" yaml:"end_point"`
+	ID          int         `db:"id" boil:"id" json:"id" toml:"id" yaml:"id"`
+	UUID        uuid.UUID   `db:"uuid" boil:"uuid" json:"uuid" toml:"uuid" yaml:"uuid"`
+	Title       string      `db:"title" boil:"title" json:"title" toml:"title" yaml:"title"`
+	CoverID     null.Int    `db:"cover_id" boil:"cover_id" json:"cover_id,omitempty" toml:"cover_id" yaml:"cover_id,omitempty"`
+	AudioID     null.Int    `db:"audio_id" boil:"audio_id" json:"audio_id,omitempty" toml:"audio_id" yaml:"audio_id,omitempty"`
+	AuthorID    int         `db:"author_id" boil:"author_id" json:"author_id" toml:"author_id" yaml:"author_id"`
+	CreatedAt   time.Time   `db:"created_at" boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
+	StartPoint  pgeo.Point  `db:"start_point" boil:"start_point" json:"start_point" toml:"start_point" yaml:"start_point"`
+	Description null.String `db:"description" boil:"description" json:"description,omitempty" toml:"description" yaml:"description,omitempty"`
 
 	R *walkR `db:"-" boil:"-" json:"-" toml:"-" yaml:"-"`
 	L walkL  `db:"-" boil:"-" json:"-" toml:"-" yaml:"-"`
 }
 
 var WalkColumns = struct {
-	ID         string
-	UUID       string
-	Title      string
-	CoverID    string
-	AudioID    string
-	AuthorID   string
-	CreatedAt  string
-	StartPoint string
-	EndPoint   string
+	ID          string
+	UUID        string
+	Title       string
+	CoverID     string
+	AudioID     string
+	AuthorID    string
+	CreatedAt   string
+	StartPoint  string
+	Description string
 }{
-	ID:         "id",
-	UUID:       "uuid",
-	Title:      "title",
-	CoverID:    "cover_id",
-	AudioID:    "audio_id",
-	AuthorID:   "author_id",
-	CreatedAt:  "created_at",
-	StartPoint: "start_point",
-	EndPoint:   "end_point",
+	ID:          "id",
+	UUID:        "uuid",
+	Title:       "title",
+	CoverID:     "cover_id",
+	AudioID:     "audio_id",
+	AuthorID:    "author_id",
+	CreatedAt:   "created_at",
+	StartPoint:  "start_point",
+	Description: "description",
 }
 
 // Generated where
@@ -109,25 +109,25 @@ func (w whereHelperpgeo_Point) GTE(x pgeo.Point) qm.QueryMod {
 }
 
 var WalkWhere = struct {
-	ID         whereHelperint
-	UUID       whereHelperuuid_UUID
-	Title      whereHelperstring
-	CoverID    whereHelpernull_Int
-	AudioID    whereHelpernull_Int
-	AuthorID   whereHelperint
-	CreatedAt  whereHelpertime_Time
-	StartPoint whereHelperpgeo_Point
-	EndPoint   whereHelperpgeo_Point
+	ID          whereHelperint
+	UUID        whereHelperuuid_UUID
+	Title       whereHelperstring
+	CoverID     whereHelpernull_Int
+	AudioID     whereHelpernull_Int
+	AuthorID    whereHelperint
+	CreatedAt   whereHelpertime_Time
+	StartPoint  whereHelperpgeo_Point
+	Description whereHelpernull_String
 }{
-	ID:         whereHelperint{field: "\"walk\".\"id\""},
-	UUID:       whereHelperuuid_UUID{field: "\"walk\".\"uuid\""},
-	Title:      whereHelperstring{field: "\"walk\".\"title\""},
-	CoverID:    whereHelpernull_Int{field: "\"walk\".\"cover_id\""},
-	AudioID:    whereHelpernull_Int{field: "\"walk\".\"audio_id\""},
-	AuthorID:   whereHelperint{field: "\"walk\".\"author_id\""},
-	CreatedAt:  whereHelpertime_Time{field: "\"walk\".\"created_at\""},
-	StartPoint: whereHelperpgeo_Point{field: "\"walk\".\"start_point\""},
-	EndPoint:   whereHelperpgeo_Point{field: "\"walk\".\"end_point\""},
+	ID:          whereHelperint{field: "\"walk\".\"id\""},
+	UUID:        whereHelperuuid_UUID{field: "\"walk\".\"uuid\""},
+	Title:       whereHelperstring{field: "\"walk\".\"title\""},
+	CoverID:     whereHelpernull_Int{field: "\"walk\".\"cover_id\""},
+	AudioID:     whereHelpernull_Int{field: "\"walk\".\"audio_id\""},
+	AuthorID:    whereHelperint{field: "\"walk\".\"author_id\""},
+	CreatedAt:   whereHelpertime_Time{field: "\"walk\".\"created_at\""},
+	StartPoint:  whereHelperpgeo_Point{field: "\"walk\".\"start_point\""},
+	Description: whereHelpernull_String{field: "\"walk\".\"description\""},
 }
 
 // WalkRels is where relationship names are stored.
@@ -160,8 +160,8 @@ func (*walkR) NewStruct() *walkR {
 type walkL struct{}
 
 var (
-	walkAllColumns            = []string{"id", "uuid", "title", "cover_id", "audio_id", "author_id", "created_at", "start_point", "end_point"}
-	walkColumnsWithoutDefault = []string{"title", "cover_id", "audio_id", "author_id", "start_point", "end_point"}
+	walkAllColumns            = []string{"id", "uuid", "title", "cover_id", "audio_id", "author_id", "created_at", "start_point", "description"}
+	walkColumnsWithoutDefault = []string{"title", "cover_id", "audio_id", "author_id", "start_point", "description"}
 	walkColumnsWithDefault    = []string{"id", "uuid", "created_at"}
 	walkPrimaryKeyColumns     = []string{"id"}
 )

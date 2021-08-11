@@ -20,17 +20,16 @@ func JsonIn(r *http.Request, p interface{}) error {
 	return nil
 }
 
-func JsonOut(w http.ResponseWriter, load interface{}) error {
+func JsonOut(w http.ResponseWriter, load interface{}) {
 	response, err := json.Marshal(load)
 	if err != nil {
-		return nil
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 
 	_, err = w.Write(response)
 	if err != nil {
-		return err
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
-	return nil
 }
 
 func ServerError(msg string, a ...interface{}) *HttpError {

@@ -15,6 +15,7 @@ import (
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 	"github.com/volatiletech/sqlboiler/v4/types/pgeo"
 	"log"
+	"strings"
 )
 
 type Location struct {
@@ -22,73 +23,131 @@ type Location struct {
 	Lng float64 `json:"lng"`
 }
 
+type TourFile struct {
+	Url      string `json:"url"`
+	Path     string `json:"path"`
+	Checksum string `json:"checksum"`
+}
 type Tour struct {
-	Location    Location `json:"location"`
-	Description string   `json:"description"`
-	Title       string   `json:"title"`
-	Author      string   `json:"author"`
-	CoverUrl    string   `json:"cover_url"`
-	AudioUrl    string   `json:"audio_url"`
+	Location    Location   `json:"location"`
+	Description string     `json:"description"`
+	Title       string     `json:"title"`
+	Author      string     `json:"author"`
+	CoverUrl    string     `json:"cover_url"`
+	AudioUrl    string     `json:"audio_url"`
+	TourUrl     string     `json:"tour_url"`
+	Files       []TourFile `json:"files"`
 }
 
 func main() {
+	ctx := context.Background()
+
 	if err := godotenv.Load(".env.dev"); err != nil {
-		log.Panicf("could not load env: %v", err)
+		log.Panicf("could not load env: %+v", err)
 	}
 
 	components, err := common.InitComponents()
 	if err != nil {
-		panic(err)
+		log.Panicf("could not initiate components: %+v", err)
 	}
 
-	var jlFile bytes.Buffer
-	if err = components.Storage.Download("scraping/audiotours/mywowo-full-run-located.jl", &jlFile); err != nil {
-		panic(err)
+	var f bytes.Buffer
+	if err = components.Storage.Download("scraping/audiotours/mywowo-full-run-located.jl", &f); err != nil {
+		log.Panicf("could not download asset file: %+v", err)
 	}
 
-	scanner := bufio.NewScanner(&jlFile)
+	scanner := bufio.NewScanner(&f)
+	cnt := 0
 	for scanner.Scan() {
 		text := scanner.Text()
 		var tour Tour
 		if err = json.Unmarshal([]byte(text), &tour); err != nil {
-			panic(err)
+			log.Printf("-!- could not deserialize json line: %+v", err)
+			continue
 		}
 
 		var user models.User
 		handle := tour.Author
 		if handle == "" {
-			handle = randomdata.SillyName()
+			handle = fmt.Sprintf("%s %s %s", randomdata.SillyName(), randomdata.SillyName(), randomdata.LastName())
 			user = models.User{Email: randomdata.Email(), Handle: handle, Password: []byte(randomdata.RandStringRunes(10))}
-			if err = user.Insert(context.Background(), components.Db, boil.Infer()); err != nil {
-				panic(err)
+			if err = user.Insert(ctx, components.Db, boil.Infer()); err != nil {
+				log.Printf("-!- could not insert new user with handle '%s': %+v", handle, err)
+				continue
 			}
 		} else {
-			u, err := models.Users(qm.Where(fmt.Sprintf("%s = ?", models.UserColumns.Handle), handle)).One(context.Background(), components.Db)
+			exists, err := models.Users(qm.Where(fmt.Sprintf("%s = ?", models.UserColumns.Handle), handle)).Exists(ctx, components.Db)
 			if err != nil {
-				panic(err)
+				log.Printf("-!- could not look for user with handle '%s': %+v", handle, err)
+				continue
 			}
-			user = *u
+			if !exists {
+				user = models.User{Email: randomdata.Email(), Handle: handle, Password: []byte(randomdata.RandStringRunes(10))}
+				if err = user.Insert(ctx, components.Db, boil.Infer()); err != nil {
+					log.Printf("-!- could not insert new user with handle '%s': %+v", handle, err)
+					continue
+				}
+			} else {
+				u, err := models.Users(qm.Where(fmt.Sprintf("%s = ?", models.UserColumns.Handle), handle)).One(ctx, components.Db)
+				if err != nil {
+					log.Printf("-!- could not retrieve user '%s': %+v", handle, err)
+					continue
+				}
+				user = *u
+			}
 		}
 
-		// TODO: rethink asset schema
-		audio := models.Asset{MimeType: "audio/mp3", FileName: randomdata.Letters(10)}
-		if err = audio.Insert(context.Background(), components.Db, boil.Infer()); err != nil {
-			panic(err)
+		var audioFile, coverFile TourFile
+		for _, file := range tour.Files {
+			if strings.HasSuffix(file.Url, ".mp3") {
+				audioFile = file
+			} else {
+				coverFile = file
+			}
+		}
+
+		audio := models.Asset{
+			MimeType: "audio/mp3",
+			FileName: fmt.Sprintf("%s.mp3", audioFile.Checksum),
+			Bucket:   null.NewString("talkiewalkie-dev", true),
+			BlobName: null.NewString(fmt.Sprintf("scraping/audiotours/%s", audioFile.Path), true),
+		}
+		if err = audio.Insert(ctx, components.Db, boil.Infer()); err != nil {
+			log.Printf("-!- could not insert audio track as asset: %+v", err)
+			continue
+		}
+
+		cover := models.Asset{
+			MimeType: "image/jpg",
+			FileName: fmt.Sprintf("%s.mp3", audioFile.Checksum),
+			Bucket:   null.NewString("talkiewalkie-dev", true),
+			BlobName: null.NewString(fmt.Sprintf("scraping/audiotours/%s", coverFile.Path), true),
+		}
+		if err = cover.Insert(ctx, components.Db, boil.Infer()); err != nil {
+			log.Printf("-!- could not insert cover image as asset: %+v", err)
+			continue
 		}
 
 		walk := models.Walk{
-			Title:      tour.Title,
-			StartPoint: pgeo.Point{X: tour.Location.Lat, Y: tour.Location.Lng},
-			AuthorID:   user.ID,
-			AudioID:    null.NewInt(audio.ID, true),
+			Title:       tour.Title,
+			Description: null.NewString(tour.Description, true),
+			StartPoint:  pgeo.Point{X: tour.Location.Lat, Y: tour.Location.Lng},
+			AuthorID:    user.ID,
+			AudioID:     null.NewInt(audio.ID, true),
+			CoverID:     null.NewInt(cover.ID, true),
 		}
-		if err = walk.Insert(context.Background(), components.Db, boil.Infer()); err != nil {
-			panic(err)
+		if err = walk.Insert(ctx, components.Db, boil.Infer()); err != nil {
+			log.Printf("-!- could not insert walk: %+v", err)
+			continue
 		}
-		break
+
+		cnt += 1
+		if cnt%50 == 0 {
+			log.Printf("%d walks inserted", cnt)
+		}
 	}
 
-	walks, err := models.Walks().Count(context.Background(), components.Db)
+	walks, err := models.Walks().Count(ctx, components.Db)
 	if err != nil {
 		panic(err)
 	}
