@@ -78,10 +78,11 @@ type AuthorWalksItemOutput struct {
 }
 
 type WalksItemOutput struct {
-	Uuid     uuid.UUID             `json:"uuid"`
-	Title    string                `json:"title"`
-	Author   AuthorWalksItemOutput `json:"author"`
-	CoverUrl string                `json:"coverUrl"`
+	Uuid        uuid.UUID             `json:"uuid"`
+	Title       string                `json:"title"`
+	Description string                `json:"description"`
+	Author      AuthorWalksItemOutput `json:"author"`
+	CoverUrl    string                `json:"coverUrl"`
 }
 
 func Walks(w http.ResponseWriter, r *http.Request) {
@@ -109,10 +110,11 @@ func Walks(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 		responseWalks = append(responseWalks, WalksItemOutput{
-			Uuid:     walk.UUID,
-			Title:    walk.Title,
-			Author:   AuthorWalksItemOutput{walk.R.Author.UUID, walk.R.Author.Handle},
-			CoverUrl: coverUrl,
+			Uuid:        walk.UUID,
+			Title:       walk.Title,
+			Description: walk.Description.String,
+			Author:      AuthorWalksItemOutput{walk.R.Author.UUID, walk.R.Author.Handle},
+			CoverUrl:    coverUrl,
 		})
 	}
 	common.JsonOut(w, responseWalks)
@@ -121,11 +123,12 @@ func Walks(w http.ResponseWriter, r *http.Request) {
 // ------------
 
 type WalkByUuidOutput struct {
-	Uuid     uuid.UUID             `json:"uuid"`
-	Title    string                `json:"title"`
-	Author   AuthorWalksItemOutput `json:"author"`
-	CoverUrl string                `json:"coverUrl"`
-	AudioUrl string                `json:"audio_url"`
+	Uuid        uuid.UUID             `json:"uuid"`
+	Title       string                `json:"title"`
+	Description string                `json:"description"`
+	Author      AuthorWalksItemOutput `json:"author"`
+	CoverUrl    string                `json:"coverUrl"`
+	AudioUrl    string                `json:"audioUrl"`
 }
 
 func WalkByUuid(w http.ResponseWriter, r *http.Request) {
@@ -173,11 +176,12 @@ func WalkByUuid(w http.ResponseWriter, r *http.Request) {
 	}
 
 	out := WalkByUuidOutput{
-		Uuid:     walk.UUID,
-		Title:    walk.Title,
-		Author:   AuthorWalksItemOutput{Uuid: walk.R.Author.UUID, Handle: walk.R.Author.Handle},
-		CoverUrl: coverUrl,
-		AudioUrl: audioUrl,
+		Uuid:        walk.UUID,
+		Title:       walk.Title,
+		Description: walk.Description.String,
+		Author:      AuthorWalksItemOutput{Uuid: walk.R.Author.UUID, Handle: walk.R.Author.Handle},
+		CoverUrl:    coverUrl,
+		AudioUrl:    audioUrl,
 	}
 	common.JsonOut(w, out)
 }
