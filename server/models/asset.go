@@ -15,6 +15,7 @@ import (
 
 	"github.com/friendsofgo/errors"
 	"github.com/satori/go.uuid"
+	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
@@ -24,11 +25,13 @@ import (
 
 // Asset is an object representing the database table.
 type Asset struct {
-	ID         int       `db:"id" boil:"id" json:"id" toml:"id" yaml:"id"`
-	UUID       uuid.UUID `db:"uuid" boil:"uuid" json:"uuid" toml:"uuid" yaml:"uuid"`
-	FileName   string    `db:"file_name" boil:"file_name" json:"file_name" toml:"file_name" yaml:"file_name"`
-	MimeType   string    `db:"mime_type" boil:"mime_type" json:"mime_type" toml:"mime_type" yaml:"mime_type"`
-	UploadedAt time.Time `db:"uploaded_at" boil:"uploaded_at" json:"uploaded_at" toml:"uploaded_at" yaml:"uploaded_at"`
+	ID         int         `db:"id" boil:"id" json:"id" toml:"id" yaml:"id"`
+	UUID       uuid.UUID   `db:"uuid" boil:"uuid" json:"uuid" toml:"uuid" yaml:"uuid"`
+	FileName   string      `db:"file_name" boil:"file_name" json:"file_name" toml:"file_name" yaml:"file_name"`
+	MimeType   string      `db:"mime_type" boil:"mime_type" json:"mime_type" toml:"mime_type" yaml:"mime_type"`
+	UploadedAt time.Time   `db:"uploaded_at" boil:"uploaded_at" json:"uploaded_at" toml:"uploaded_at" yaml:"uploaded_at"`
+	Bucket     null.String `db:"bucket" boil:"bucket" json:"bucket,omitempty" toml:"bucket" yaml:"bucket,omitempty"`
+	BlobName   null.String `db:"blob_name" boil:"blob_name" json:"blob_name,omitempty" toml:"blob_name" yaml:"blob_name,omitempty"`
 
 	R *assetR `db:"-" boil:"-" json:"-" toml:"-" yaml:"-"`
 	L assetL  `db:"-" boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -40,12 +43,16 @@ var AssetColumns = struct {
 	FileName   string
 	MimeType   string
 	UploadedAt string
+	Bucket     string
+	BlobName   string
 }{
 	ID:         "id",
 	UUID:       "uuid",
 	FileName:   "file_name",
 	MimeType:   "mime_type",
 	UploadedAt: "uploaded_at",
+	Bucket:     "bucket",
+	BlobName:   "blob_name",
 }
 
 // Generated where
@@ -152,18 +159,45 @@ func (w whereHelpertime_Time) GTE(x time.Time) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.GTE, x)
 }
 
+type whereHelpernull_String struct{ field string }
+
+func (w whereHelpernull_String) EQ(x null.String) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, false, x)
+}
+func (w whereHelpernull_String) NEQ(x null.String) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, true, x)
+}
+func (w whereHelpernull_String) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
+func (w whereHelpernull_String) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
+func (w whereHelpernull_String) LT(x null.String) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelpernull_String) LTE(x null.String) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelpernull_String) GT(x null.String) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelpernull_String) GTE(x null.String) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
+
 var AssetWhere = struct {
 	ID         whereHelperint
 	UUID       whereHelperuuid_UUID
 	FileName   whereHelperstring
 	MimeType   whereHelperstring
 	UploadedAt whereHelpertime_Time
+	Bucket     whereHelpernull_String
+	BlobName   whereHelpernull_String
 }{
 	ID:         whereHelperint{field: "\"asset\".\"id\""},
 	UUID:       whereHelperuuid_UUID{field: "\"asset\".\"uuid\""},
 	FileName:   whereHelperstring{field: "\"asset\".\"file_name\""},
 	MimeType:   whereHelperstring{field: "\"asset\".\"mime_type\""},
 	UploadedAt: whereHelpertime_Time{field: "\"asset\".\"uploaded_at\""},
+	Bucket:     whereHelpernull_String{field: "\"asset\".\"bucket\""},
+	BlobName:   whereHelpernull_String{field: "\"asset\".\"blob_name\""},
 }
 
 // AssetRels is where relationship names are stored.
@@ -190,8 +224,8 @@ func (*assetR) NewStruct() *assetR {
 type assetL struct{}
 
 var (
-	assetAllColumns            = []string{"id", "uuid", "file_name", "mime_type", "uploaded_at"}
-	assetColumnsWithoutDefault = []string{"file_name", "mime_type"}
+	assetAllColumns            = []string{"id", "uuid", "file_name", "mime_type", "uploaded_at", "bucket", "blob_name"}
+	assetColumnsWithoutDefault = []string{"file_name", "mime_type", "bucket", "blob_name"}
 	assetColumnsWithDefault    = []string{"id", "uuid", "uploaded_at"}
 	assetPrimaryKeyColumns     = []string{"id"}
 )

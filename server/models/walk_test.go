@@ -1149,7 +1149,7 @@ func testWalksSelect(t *testing.T) {
 }
 
 var (
-	walkDBTypes = map[string]string{`ID`: `integer`, `UUID`: `uuid`, `Title`: `text`, `CoverID`: `integer`, `AudioID`: `integer`, `AuthorID`: `integer`, `CreatedAt`: `timestamp with time zone`, `StartPoint`: `point`, `EndPoint`: `point`}
+	walkDBTypes = map[string]string{`ID`: `integer`, `UUID`: `uuid`, `Title`: `text`, `CoverID`: `integer`, `AudioID`: `integer`, `AuthorID`: `integer`, `CreatedAt`: `timestamp with time zone`, `StartPoint`: `point`, `Description`: `text`}
 	_           = bytes.MinRead
 )
 

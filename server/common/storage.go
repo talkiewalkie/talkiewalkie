@@ -3,6 +3,7 @@ package common
 import (
 	"context"
 	"fmt"
+	"github.com/talkiewalkie/talkiewalkie/models"
 	"io"
 	"io/ioutil"
 	"log"
@@ -19,7 +20,10 @@ import (
 
 type StorageClient interface {
 	Upload(ctx context.Context, blob io.Reader) (*uuid.UUID, error)
-	Url(dest string) (string, error)
+	Download(blobName string, writer io.Writer) error
+	SignedUrl(bucket, blobName string) (string, error)
+	AssetUrl(asset *models.Asset) (string, error)
+	DefaultBucket() string
 }
 
 var _ StorageClient = GoogleStorage{}
@@ -28,6 +32,14 @@ type GoogleStorage struct {
 	*storage.Client
 	Cfg        *jwt.Config
 	BucketName string
+}
+
+func (g GoogleStorage) AssetUrl(asset *models.Asset) (string, error) {
+	if asset.Bucket.Valid {
+		return g.SignedUrl(asset.Bucket.String, asset.BlobName.String)
+	} else {
+		return g.SignedUrl(g.DefaultBucket(), asset.UUID.String())
+	}
 }
 
 func initStorageClient(ctx context.Context) (StorageClient, error) {
@@ -67,8 +79,8 @@ func (g GoogleStorage) Upload(c context.Context, blob io.Reader) (*uuid.UUID, er
 	return &uid, nil
 }
 
-func (g GoogleStorage) Url(dest string) (string, error) {
-	url, err := storage.SignedURL(g.BucketName, dest, &storage.SignedURLOptions{
+func (g GoogleStorage) SignedUrl(bucket, blobName string) (string, error) {
+	url, err := storage.SignedURL(bucket, blobName, &storage.SignedURLOptions{
 		GoogleAccessID: g.Cfg.Email,
 		// TODO: the only reason we keep loading explicit service account file is here, relevant issue:
 		// 	https://github.com/googleapis/google-cloud-go/issues/1130
@@ -77,4 +89,23 @@ func (g GoogleStorage) Url(dest string) (string, error) {
 		Expires:    time.Now().Add(3 * time.Hour),
 	})
 	return url, err
+}
+
+func (g GoogleStorage) Download(blobName string, writer io.Writer) error {
+	blob := g.Bucket(g.BucketName).Object(blobName)
+
+	reader, err := blob.NewReader(context.Background())
+	if err != nil {
+		return err
+	}
+
+	if _, err = io.Copy(writer, reader); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (g GoogleStorage) DefaultBucket() string {
+	return g.BucketName
 }

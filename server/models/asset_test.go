@@ -1224,7 +1224,7 @@ func testAssetsSelect(t *testing.T) {
 }
 
 var (
-	assetDBTypes = map[string]string{`ID`: `integer`, `UUID`: `uuid`, `FileName`: `text`, `MimeType`: `text`, `UploadedAt`: `timestamp with time zone`}
+	assetDBTypes = map[string]string{`ID`: `integer`, `UUID`: `uuid`, `FileName`: `text`, `MimeType`: `text`, `UploadedAt`: `timestamp with time zone`, `Bucket`: `text`, `BlobName`: `text`}
 	_            = bytes.MinRead
 )
 

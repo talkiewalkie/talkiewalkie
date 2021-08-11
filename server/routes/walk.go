@@ -102,7 +102,7 @@ func Walks(w http.ResponseWriter, r *http.Request) {
 	for _, walk := range walks {
 		var coverUrl string
 		if walk.R.Cover != nil {
-			coverUrl, err = ctx.Components.Storage.Url(walk.R.Cover.UUID.String())
+			coverUrl, err = ctx.Components.Storage.AssetUrl(walk.R.Cover)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
@@ -125,7 +125,7 @@ type WalkByUuidOutput struct {
 	Title    string                `json:"title"`
 	Author   AuthorWalksItemOutput `json:"author"`
 	CoverUrl string                `json:"coverUrl"`
-	// TODO: audio url lol
+	AudioUrl string                `json:"audio_url"`
 }
 
 func WalkByUuid(w http.ResponseWriter, r *http.Request) {
@@ -159,11 +159,17 @@ func WalkByUuid(w http.ResponseWriter, r *http.Request) {
 
 	var coverUrl string
 	if walk.R.Cover != nil {
-		coverUrl, err = ctx.Components.Storage.Url(walk.R.Cover.UUID.String())
+		coverUrl, err = ctx.Components.Storage.AssetUrl(walk.R.Cover)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
+	}
+
+	audioUrl, err := ctx.Components.Storage.AssetUrl(walk.R.Audio)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 	out := WalkByUuidOutput{
@@ -171,6 +177,7 @@ func WalkByUuid(w http.ResponseWriter, r *http.Request) {
 		Title:    walk.Title,
 		Author:   AuthorWalksItemOutput{Uuid: walk.R.Author.UUID, Handle: walk.R.Author.Handle},
 		CoverUrl: coverUrl,
+		AudioUrl: audioUrl,
 	}
 	common.JsonOut(w, out)
 }

@@ -8,9 +8,15 @@ install_golang_migrate_cli() {
   brew install golang-migrate
 }
 
+migrate_up() {
+    source .env.dev && \
+      migrate -path migrations -database postgres://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST:5432/talkiewalkie?sslmode=disable up
+    go generate
+}
+
 nukedb() {
   dropdb talkiewalkie && createdb talkiewalkie
-  migrate -path migrations -database postgres://theo:pinguy@localhost:5432/talkiewalkie?sslmode=disable up
+  migrate_up
 }
 
 new_migration() {

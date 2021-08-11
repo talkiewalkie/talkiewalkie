@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"github.com/talkiewalkie/talkiewalkie/models"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -17,6 +18,7 @@ import (
 func TestWalkRepository(t *testing.T) {
 	db := testutils.SetupDb()
 
+	testutils.TearDownDb(db)
 	t.Run("can create walk", createWalkTest(db))
 	testutils.TearDownDb(db)
 	//t.Run("can list walk", listWalkTest(repo))
@@ -48,6 +50,11 @@ func createWalkTest(db *sqlx.DB) func(t *testing.T) {
 
 		CreateWalk(w, r)
 		assert.Equal(t, http.StatusOK, w.Result().StatusCode)
+		cnt, err := models.Walks().Count(ctx, mctx.Components.Db)
+		assert.Equal(t, int64(1), cnt)
+		if err != nil {
+			t.Fatalf("could not count walks: %+v", err)
+		}
 
 		//w := &models.Walk{
 		//	Title:      "some title",
