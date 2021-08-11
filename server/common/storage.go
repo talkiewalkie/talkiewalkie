@@ -19,6 +19,7 @@ import (
 
 type StorageClient interface {
 	Upload(ctx context.Context, blob io.Reader) (*uuid.UUID, error)
+	Download(blobName string, writer io.Writer) error
 	Url(dest string) (string, error)
 }
 
@@ -77,4 +78,19 @@ func (g GoogleStorage) Url(dest string) (string, error) {
 		Expires:    time.Now().Add(3 * time.Hour),
 	})
 	return url, err
+}
+
+func (g GoogleStorage) Download(blobName string, writer io.Writer) error {
+	blob := g.Bucket(g.BucketName).Object(blobName)
+
+	reader, err := blob.NewReader(context.Background())
+	if err != nil {
+		return err
+	}
+
+	if _, err = io.Copy(writer, reader); err != nil {
+		return err
+	}
+
+	return nil
 }

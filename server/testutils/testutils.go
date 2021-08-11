@@ -43,6 +43,10 @@ func TearDownDb(db *sqlx.DB) {
 
 type FakeStorageClient struct{}
 
+func (f FakeStorageClient) Download(blobName string, writer io.Writer) error {
+	panic("implement me")
+}
+
 func (f FakeStorageClient) Upload(ctx context.Context, blob io.Reader) (*uuid.UUID, error) {
 	uid := uuid.NewV4()
 	return &uid, nil
