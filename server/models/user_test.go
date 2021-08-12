@@ -800,6 +800,165 @@ func testUserToManyAddOpAuthorWalks(t *testing.T) {
 		}
 	}
 }
+func testUserToOneAssetUsingProfilePictureAsset(t *testing.T) {
+	ctx := context.Background()
+	tx := MustTx(boil.BeginTx(ctx, nil))
+	defer func() { _ = tx.Rollback() }()
+
+	var local User
+	var foreign Asset
+
+	seed := randomize.NewSeed()
+	if err := randomize.Struct(seed, &local, userDBTypes, true, userColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize User struct: %s", err)
+	}
+	if err := randomize.Struct(seed, &foreign, assetDBTypes, false, assetColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Asset struct: %s", err)
+	}
+
+	if err := foreign.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	queries.Assign(&local.ProfilePicture, foreign.ID)
+	if err := local.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	check, err := local.ProfilePictureAsset().One(ctx, tx)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !queries.Equal(check.ID, foreign.ID) {
+		t.Errorf("want: %v, got %v", foreign.ID, check.ID)
+	}
+
+	slice := UserSlice{&local}
+	if err = local.L.LoadProfilePictureAsset(ctx, tx, false, (*[]*User)(&slice), nil); err != nil {
+		t.Fatal(err)
+	}
+	if local.R.ProfilePictureAsset == nil {
+		t.Error("struct should have been eager loaded")
+	}
+
+	local.R.ProfilePictureAsset = nil
+	if err = local.L.LoadProfilePictureAsset(ctx, tx, true, &local, nil); err != nil {
+		t.Fatal(err)
+	}
+	if local.R.ProfilePictureAsset == nil {
+		t.Error("struct should have been eager loaded")
+	}
+}
+
+func testUserToOneSetOpAssetUsingProfilePictureAsset(t *testing.T) {
+	var err error
+
+	ctx := context.Background()
+	tx := MustTx(boil.BeginTx(ctx, nil))
+	defer func() { _ = tx.Rollback() }()
+
+	var a User
+	var b, c Asset
+
+	seed := randomize.NewSeed()
+	if err = randomize.Struct(seed, &a, userDBTypes, false, strmangle.SetComplement(userPrimaryKeyColumns, userColumnsWithoutDefault)...); err != nil {
+		t.Fatal(err)
+	}
+	if err = randomize.Struct(seed, &b, assetDBTypes, false, strmangle.SetComplement(assetPrimaryKeyColumns, assetColumnsWithoutDefault)...); err != nil {
+		t.Fatal(err)
+	}
+	if err = randomize.Struct(seed, &c, assetDBTypes, false, strmangle.SetComplement(assetPrimaryKeyColumns, assetColumnsWithoutDefault)...); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := a.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	for i, x := range []*Asset{&b, &c} {
+		err = a.SetProfilePictureAsset(ctx, tx, i != 0, x)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if a.R.ProfilePictureAsset != x {
+			t.Error("relationship struct not set to correct value")
+		}
+
+		if x.R.ProfilePictureUsers[0] != &a {
+			t.Error("failed to append to foreign relationship struct")
+		}
+		if !queries.Equal(a.ProfilePicture, x.ID) {
+			t.Error("foreign key was wrong value", a.ProfilePicture)
+		}
+
+		zero := reflect.Zero(reflect.TypeOf(a.ProfilePicture))
+		reflect.Indirect(reflect.ValueOf(&a.ProfilePicture)).Set(zero)
+
+		if err = a.Reload(ctx, tx); err != nil {
+			t.Fatal("failed to reload", err)
+		}
+
+		if !queries.Equal(a.ProfilePicture, x.ID) {
+			t.Error("foreign key was wrong value", a.ProfilePicture, x.ID)
+		}
+	}
+}
+
+func testUserToOneRemoveOpAssetUsingProfilePictureAsset(t *testing.T) {
+	var err error
+
+	ctx := context.Background()
+	tx := MustTx(boil.BeginTx(ctx, nil))
+	defer func() { _ = tx.Rollback() }()
+
+	var a User
+	var b Asset
+
+	seed := randomize.NewSeed()
+	if err = randomize.Struct(seed, &a, userDBTypes, false, strmangle.SetComplement(userPrimaryKeyColumns, userColumnsWithoutDefault)...); err != nil {
+		t.Fatal(err)
+	}
+	if err = randomize.Struct(seed, &b, assetDBTypes, false, strmangle.SetComplement(assetPrimaryKeyColumns, assetColumnsWithoutDefault)...); err != nil {
+		t.Fatal(err)
+	}
+
+	if err = a.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	if err = a.SetProfilePictureAsset(ctx, tx, true, &b); err != nil {
+		t.Fatal(err)
+	}
+
+	if err = a.RemoveProfilePictureAsset(ctx, tx, &b); err != nil {
+		t.Error("failed to remove relationship")
+	}
+
+	count, err := a.ProfilePictureAsset().Count(ctx, tx)
+	if err != nil {
+		t.Error(err)
+	}
+	if count != 0 {
+		t.Error("want no relationships remaining")
+	}
+
+	if a.R.ProfilePictureAsset != nil {
+		t.Error("R struct entry should be nil")
+	}
+
+	if !queries.IsValuerNil(a.ProfilePicture) {
+		t.Error("foreign key value should be nil")
+	}
+
+	if len(b.R.ProfilePictureUsers) != 0 {
+		t.Error("failed to remove a from b's relationships")
+	}
+}
 
 func testUsersReload(t *testing.T) {
 	t.Parallel()
@@ -875,7 +1034,7 @@ func testUsersSelect(t *testing.T) {
 }
 
 var (
-	userDBTypes = map[string]string{`ID`: `integer`, `UUID`: `uuid`, `Handle`: `USER-DEFINED`, `Email`: `USER-DEFINED`, `Password`: `bytea`, `EmailToken`: `text`}
+	userDBTypes = map[string]string{`ID`: `integer`, `UUID`: `uuid`, `Handle`: `USER-DEFINED`, `FirebaseUID`: `character varying`, `ProfilePicture`: `integer`, `CreatedAt`: `timestamp with time zone`, `UpdatedAt`: `timestamp with time zone`}
 	_           = bytes.MinRead
 )
 

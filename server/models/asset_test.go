@@ -494,6 +494,83 @@ func testAssetsInsertWhitelist(t *testing.T) {
 	}
 }
 
+func testAssetToManyProfilePictureUsers(t *testing.T) {
+	var err error
+	ctx := context.Background()
+	tx := MustTx(boil.BeginTx(ctx, nil))
+	defer func() { _ = tx.Rollback() }()
+
+	var a Asset
+	var b, c User
+
+	seed := randomize.NewSeed()
+	if err = randomize.Struct(seed, &a, assetDBTypes, true, assetColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Asset struct: %s", err)
+	}
+
+	if err := a.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	if err = randomize.Struct(seed, &b, userDBTypes, false, userColumnsWithDefault...); err != nil {
+		t.Fatal(err)
+	}
+	if err = randomize.Struct(seed, &c, userDBTypes, false, userColumnsWithDefault...); err != nil {
+		t.Fatal(err)
+	}
+
+	queries.Assign(&b.ProfilePicture, a.ID)
+	queries.Assign(&c.ProfilePicture, a.ID)
+	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+	if err = c.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	check, err := a.ProfilePictureUsers().All(ctx, tx)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	bFound, cFound := false, false
+	for _, v := range check {
+		if queries.Equal(v.ProfilePicture, b.ProfilePicture) {
+			bFound = true
+		}
+		if queries.Equal(v.ProfilePicture, c.ProfilePicture) {
+			cFound = true
+		}
+	}
+
+	if !bFound {
+		t.Error("expected to find b")
+	}
+	if !cFound {
+		t.Error("expected to find c")
+	}
+
+	slice := AssetSlice{&a}
+	if err = a.L.LoadProfilePictureUsers(ctx, tx, false, (*[]*Asset)(&slice), nil); err != nil {
+		t.Fatal(err)
+	}
+	if got := len(a.R.ProfilePictureUsers); got != 2 {
+		t.Error("number of eager loaded records wrong, got:", got)
+	}
+
+	a.R.ProfilePictureUsers = nil
+	if err = a.L.LoadProfilePictureUsers(ctx, tx, true, &a, nil); err != nil {
+		t.Fatal(err)
+	}
+	if got := len(a.R.ProfilePictureUsers); got != 2 {
+		t.Error("number of eager loaded records wrong, got:", got)
+	}
+
+	if t.Failed() {
+		t.Logf("%#v", check)
+	}
+}
+
 func testAssetToManyAudioWalks(t *testing.T) {
 	var err error
 	ctx := context.Background()
@@ -645,6 +722,257 @@ func testAssetToManyCoverWalks(t *testing.T) {
 
 	if t.Failed() {
 		t.Logf("%#v", check)
+	}
+}
+
+func testAssetToManyAddOpProfilePictureUsers(t *testing.T) {
+	var err error
+
+	ctx := context.Background()
+	tx := MustTx(boil.BeginTx(ctx, nil))
+	defer func() { _ = tx.Rollback() }()
+
+	var a Asset
+	var b, c, d, e User
+
+	seed := randomize.NewSeed()
+	if err = randomize.Struct(seed, &a, assetDBTypes, false, strmangle.SetComplement(assetPrimaryKeyColumns, assetColumnsWithoutDefault)...); err != nil {
+		t.Fatal(err)
+	}
+	foreigners := []*User{&b, &c, &d, &e}
+	for _, x := range foreigners {
+		if err = randomize.Struct(seed, x, userDBTypes, false, strmangle.SetComplement(userPrimaryKeyColumns, userColumnsWithoutDefault)...); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	if err := a.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+	if err = c.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	foreignersSplitByInsertion := [][]*User{
+		{&b, &c},
+		{&d, &e},
+	}
+
+	for i, x := range foreignersSplitByInsertion {
+		err = a.AddProfilePictureUsers(ctx, tx, i != 0, x...)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		first := x[0]
+		second := x[1]
+
+		if !queries.Equal(a.ID, first.ProfilePicture) {
+			t.Error("foreign key was wrong value", a.ID, first.ProfilePicture)
+		}
+		if !queries.Equal(a.ID, second.ProfilePicture) {
+			t.Error("foreign key was wrong value", a.ID, second.ProfilePicture)
+		}
+
+		if first.R.ProfilePictureAsset != &a {
+			t.Error("relationship was not added properly to the foreign slice")
+		}
+		if second.R.ProfilePictureAsset != &a {
+			t.Error("relationship was not added properly to the foreign slice")
+		}
+
+		if a.R.ProfilePictureUsers[i*2] != first {
+			t.Error("relationship struct slice not set to correct value")
+		}
+		if a.R.ProfilePictureUsers[i*2+1] != second {
+			t.Error("relationship struct slice not set to correct value")
+		}
+
+		count, err := a.ProfilePictureUsers().Count(ctx, tx)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if want := int64((i + 1) * 2); count != want {
+			t.Error("want", want, "got", count)
+		}
+	}
+}
+
+func testAssetToManySetOpProfilePictureUsers(t *testing.T) {
+	var err error
+
+	ctx := context.Background()
+	tx := MustTx(boil.BeginTx(ctx, nil))
+	defer func() { _ = tx.Rollback() }()
+
+	var a Asset
+	var b, c, d, e User
+
+	seed := randomize.NewSeed()
+	if err = randomize.Struct(seed, &a, assetDBTypes, false, strmangle.SetComplement(assetPrimaryKeyColumns, assetColumnsWithoutDefault)...); err != nil {
+		t.Fatal(err)
+	}
+	foreigners := []*User{&b, &c, &d, &e}
+	for _, x := range foreigners {
+		if err = randomize.Struct(seed, x, userDBTypes, false, strmangle.SetComplement(userPrimaryKeyColumns, userColumnsWithoutDefault)...); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	if err = a.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+	if err = c.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	err = a.SetProfilePictureUsers(ctx, tx, false, &b, &c)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	count, err := a.ProfilePictureUsers().Count(ctx, tx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if count != 2 {
+		t.Error("count was wrong:", count)
+	}
+
+	err = a.SetProfilePictureUsers(ctx, tx, true, &d, &e)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	count, err = a.ProfilePictureUsers().Count(ctx, tx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if count != 2 {
+		t.Error("count was wrong:", count)
+	}
+
+	if !queries.IsValuerNil(b.ProfilePicture) {
+		t.Error("want b's foreign key value to be nil")
+	}
+	if !queries.IsValuerNil(c.ProfilePicture) {
+		t.Error("want c's foreign key value to be nil")
+	}
+	if !queries.Equal(a.ID, d.ProfilePicture) {
+		t.Error("foreign key was wrong value", a.ID, d.ProfilePicture)
+	}
+	if !queries.Equal(a.ID, e.ProfilePicture) {
+		t.Error("foreign key was wrong value", a.ID, e.ProfilePicture)
+	}
+
+	if b.R.ProfilePictureAsset != nil {
+		t.Error("relationship was not removed properly from the foreign struct")
+	}
+	if c.R.ProfilePictureAsset != nil {
+		t.Error("relationship was not removed properly from the foreign struct")
+	}
+	if d.R.ProfilePictureAsset != &a {
+		t.Error("relationship was not added properly to the foreign struct")
+	}
+	if e.R.ProfilePictureAsset != &a {
+		t.Error("relationship was not added properly to the foreign struct")
+	}
+
+	if a.R.ProfilePictureUsers[0] != &d {
+		t.Error("relationship struct slice not set to correct value")
+	}
+	if a.R.ProfilePictureUsers[1] != &e {
+		t.Error("relationship struct slice not set to correct value")
+	}
+}
+
+func testAssetToManyRemoveOpProfilePictureUsers(t *testing.T) {
+	var err error
+
+	ctx := context.Background()
+	tx := MustTx(boil.BeginTx(ctx, nil))
+	defer func() { _ = tx.Rollback() }()
+
+	var a Asset
+	var b, c, d, e User
+
+	seed := randomize.NewSeed()
+	if err = randomize.Struct(seed, &a, assetDBTypes, false, strmangle.SetComplement(assetPrimaryKeyColumns, assetColumnsWithoutDefault)...); err != nil {
+		t.Fatal(err)
+	}
+	foreigners := []*User{&b, &c, &d, &e}
+	for _, x := range foreigners {
+		if err = randomize.Struct(seed, x, userDBTypes, false, strmangle.SetComplement(userPrimaryKeyColumns, userColumnsWithoutDefault)...); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	if err := a.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	err = a.AddProfilePictureUsers(ctx, tx, true, foreigners...)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	count, err := a.ProfilePictureUsers().Count(ctx, tx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if count != 4 {
+		t.Error("count was wrong:", count)
+	}
+
+	err = a.RemoveProfilePictureUsers(ctx, tx, foreigners[:2]...)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	count, err = a.ProfilePictureUsers().Count(ctx, tx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if count != 2 {
+		t.Error("count was wrong:", count)
+	}
+
+	if !queries.IsValuerNil(b.ProfilePicture) {
+		t.Error("want b's foreign key value to be nil")
+	}
+	if !queries.IsValuerNil(c.ProfilePicture) {
+		t.Error("want c's foreign key value to be nil")
+	}
+
+	if b.R.ProfilePictureAsset != nil {
+		t.Error("relationship was not removed properly from the foreign struct")
+	}
+	if c.R.ProfilePictureAsset != nil {
+		t.Error("relationship was not removed properly from the foreign struct")
+	}
+	if d.R.ProfilePictureAsset != &a {
+		t.Error("relationship to a should have been preserved")
+	}
+	if e.R.ProfilePictureAsset != &a {
+		t.Error("relationship to a should have been preserved")
+	}
+
+	if len(a.R.ProfilePictureUsers) != 2 {
+		t.Error("should have preserved two relationships")
+	}
+
+	// Removal doesn't do a stable deletion for performance so we have to flip the order
+	if a.R.ProfilePictureUsers[1] != &d {
+		t.Error("relationship to d should have been preserved")
+	}
+	if a.R.ProfilePictureUsers[0] != &e {
+		t.Error("relationship to e should have been preserved")
 	}
 }
 

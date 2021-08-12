@@ -1,13 +1,6 @@
 // ./initAuth.js
 import { init } from "next-firebase-auth";
 
-const env = (key: string) => {
-  const value = process.env[key];
-  if (!value) throw new Error(`missing '${key}' in environment`);
-
-  return value;
-};
-
 const initAuth = () => {
   init({
     authPageURL: "/auth",
@@ -42,10 +35,11 @@ const initAuth = () => {
       path: "/",
       sameSite: "strict",
       secure: process.env.NODE_ENV !== "development", // set this to false in local (non-HTTPS) development
-      // Keys are required unless you set `signed` to `false`.
-      // The keys cannot be accessible on the client side.
-      signed: false,
-      // keys: [env("COOKIE_SECRET_CURRENT"), env("COOKIE_SECRET_PREVIOUS")],
+      signed: true,
+      keys: [
+        process.env.COOKIE_SECRET_CURRENT,
+        process.env.COOKIE_SECRET_PREVIOUS,
+      ],
     },
   });
 };

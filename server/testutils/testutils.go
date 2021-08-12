@@ -90,10 +90,7 @@ func AddMockUser(db common.DBLogger, t *testing.T) *models.User {
 	rnd := fmt.Sprintf("%f", rng.Float32())
 	rndId := rnd[len(rnd)-6:]
 	u := &models.User{
-		Handle:     fmt.Sprintf("test-user-%s", rndId),
-		Email:      fmt.Sprintf("test-user-%s@gmail.com", rndId),
-		Password:   []byte("abc123"),
-		EmailToken: null.String{},
+		Handle: fmt.Sprintf("test-user-%s", rndId),
 	}
 	if err := u.Insert(context.Background(), db, boil.Infer()); err != nil {
 		t.Log(err)
