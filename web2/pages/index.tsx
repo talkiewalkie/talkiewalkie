@@ -1,8 +1,13 @@
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { DotsHorizontalIcon } from "@heroicons/react/solid";
-import Layout from "../components/Layout";
+import Layout, { withLayout } from "../components/Layout";
 import useSWR from "swr";
+import {
+  useAuthUser,
+  withAuthUser,
+  withAuthUserTokenSSR,
+} from "next-firebase-auth";
 
 type Walk = {
   uuid: string;
@@ -67,13 +72,23 @@ const WalkCard = ({ walk }: { walk: Walk }) => {
   );
 };
 
-export default function Home() {
+const Home = () => {
   const { error, data: walks } = useSWR<Walk[]>("http://localhost:8080/walks");
-  const loading = !error && !walks;
+  const user = useAuthUser();
 
-  return loading ? (
-    <div className="h-full mx-auto">loading</div>
+  return error ? (
+    <div className="h-full mx-auto">{error}</div>
   ) : walks ? (
-    walks.map((w) => <WalkCard key={w.uuid} walk={w} />)
-  ) : null;
-}
+    <>
+      {walks.map((w) => (
+        <WalkCard key={w.uuid} walk={w} />
+      ))}
+    </>
+  ) : (
+    <div>loading</div>
+  );
+};
+
+export const getServerSideProps = withAuthUserTokenSSR()();
+
+export default withAuthUser()(withLayout(Home));

@@ -7,6 +7,9 @@ import {
 } from "@heroicons/react/solid";
 import Link from "next/link";
 import useSWR from "swr";
+import { withAuthUser, withAuthUserTokenSSR } from "next-firebase-auth";
+
+import { withLayout } from "../../components/Layout";
 
 type Walk = {
   uuid: string;
@@ -17,7 +20,7 @@ type Walk = {
   audioUrl: string;
 };
 
-export default function Walk() {
+const Walk = () => {
   const { query, isReady } = useRouter();
 
   const playerRef = useRef<HTMLAudioElement>(null);
@@ -85,4 +88,8 @@ export default function Walk() {
       </div>
     )
   );
-}
+};
+
+export const getServerSideProps = withAuthUserTokenSSR()();
+
+export default withAuthUser()(withLayout(Walk));
