@@ -1,11 +1,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import useSWR from "swr";
-import {
-  useAuthUser,
-  withAuthUser,
-  withAuthUserTokenSSR,
-} from "next-firebase-auth";
+import { withAuthUser, withAuthUserTokenSSR } from "next-firebase-auth";
 import { DotsHorizontalIcon } from "@heroicons/react/solid";
 
 import withLayout from "../components/Layout";
@@ -79,7 +75,6 @@ const WalkCard = ({ walk }: { walk: Walk }) => {
 
 const Home = () => {
   const { error, data: walks } = useSWR<Walk[]>("http://localhost:8080/walks");
-  const user = useAuthUser();
 
   return error ? (
     <div className="h-full mx-auto">{error}</div>

@@ -50,7 +50,8 @@ const AuthCard = ({
               firebase
                 .auth()
                 .signInWithEmailAndPassword(form.email, form.password)
-                .catch((e) => setAuthError(e));
+                .catch((e) => setAuthError(e))
+                .then(onSuccess);
             else
               firebase
                 .auth()
@@ -171,7 +172,7 @@ function Layout({ children }: { children: ReactNode }) {
           <div>{user.email}</div>
           <button
             className="mt-8 text-blue-400 font-medium hover:text-blue-300"
-            onClick={user.signOut}
+            onClick={() => user.signOut().then(() => setShowUserModal(false))}
           >
             Sign Out
           </button>
