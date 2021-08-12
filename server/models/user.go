@@ -32,6 +32,7 @@ type User struct {
 	ProfilePicture null.Int    `db:"profile_picture" boil:"profile_picture" json:"profile_picture,omitempty" toml:"profile_picture" yaml:"profile_picture,omitempty"`
 	CreatedAt      null.Time   `db:"created_at" boil:"created_at" json:"created_at,omitempty" toml:"created_at" yaml:"created_at,omitempty"`
 	UpdatedAt      null.Time   `db:"updated_at" boil:"updated_at" json:"updated_at,omitempty" toml:"updated_at" yaml:"updated_at,omitempty"`
+	Bio            null.String `db:"bio" boil:"bio" json:"bio,omitempty" toml:"bio" yaml:"bio,omitempty"`
 
 	R *userR `db:"-" boil:"-" json:"-" toml:"-" yaml:"-"`
 	L userL  `db:"-" boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -45,6 +46,7 @@ var UserColumns = struct {
 	ProfilePicture string
 	CreatedAt      string
 	UpdatedAt      string
+	Bio            string
 }{
 	ID:             "id",
 	UUID:           "uuid",
@@ -53,6 +55,7 @@ var UserColumns = struct {
 	ProfilePicture: "profile_picture",
 	CreatedAt:      "created_at",
 	UpdatedAt:      "updated_at",
+	Bio:            "bio",
 }
 
 // Generated where
@@ -111,6 +114,7 @@ var UserWhere = struct {
 	ProfilePicture whereHelpernull_Int
 	CreatedAt      whereHelpernull_Time
 	UpdatedAt      whereHelpernull_Time
+	Bio            whereHelpernull_String
 }{
 	ID:             whereHelperint{field: "\"user\".\"id\""},
 	UUID:           whereHelperuuid_UUID{field: "\"user\".\"uuid\""},
@@ -119,6 +123,7 @@ var UserWhere = struct {
 	ProfilePicture: whereHelpernull_Int{field: "\"user\".\"profile_picture\""},
 	CreatedAt:      whereHelpernull_Time{field: "\"user\".\"created_at\""},
 	UpdatedAt:      whereHelpernull_Time{field: "\"user\".\"updated_at\""},
+	Bio:            whereHelpernull_String{field: "\"user\".\"bio\""},
 }
 
 // UserRels is where relationship names are stored.
@@ -148,8 +153,8 @@ func (*userR) NewStruct() *userR {
 type userL struct{}
 
 var (
-	userAllColumns            = []string{"id", "uuid", "handle", "firebase_uid", "profile_picture", "created_at", "updated_at"}
-	userColumnsWithoutDefault = []string{"handle", "firebase_uid", "profile_picture"}
+	userAllColumns            = []string{"id", "uuid", "handle", "firebase_uid", "profile_picture", "created_at", "updated_at", "bio"}
+	userColumnsWithoutDefault = []string{"handle", "firebase_uid", "profile_picture", "bio"}
 	userColumnsWithDefault    = []string{"id", "uuid", "created_at", "updated_at"}
 	userPrimaryKeyColumns     = []string{"id"}
 )

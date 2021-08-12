@@ -55,7 +55,7 @@ func main() {
 		log.Panicf("could not download asset file: %+v", err)
 	}
 
-	mywowo := models.User{Handle: "mywowo"}
+	mywowo := models.User{Handle: "mywowo", Bio: null.NewString("My Wonderful World\nThe app already has hundreds of audio files in your own language that will tell you about the wonders of the following cities in a fun and simple way at an exceptional price!\nhttps://mywowo.net", true)}
 	if err = mywowo.Insert(ctx, components.Db, boil.Infer()); err != nil {
 		log.Panicf("-!- could not insert new user with handle '%s': %+v", "mywowo", err)
 	}
