@@ -123,7 +123,7 @@ func WithAuthedContext(r *http.Request) Context {
 	}
 
 	if services.User == nil {
-		panic(errors.New("auth"))
+		panic(errors.New("this is an authenticated route"))
 	}
 
 	return services

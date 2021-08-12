@@ -70,7 +70,11 @@ func main() {
 	router.HandleFunc("/walks", routes.Walks).Methods(http.MethodGet)
 	router.HandleFunc("/walk/{uuid}", routes.WalkByUuid).Methods(http.MethodGet)
 	router.HandleFunc("/walk", routes.CreateWalk).Methods(http.MethodPost)
+
+	router.HandleFunc("/user/{handle}", routes.UserByHandle).Methods(http.MethodGet)
+
 	router.HandleFunc("/asset", routes.UploadHandler).Methods(http.MethodPost)
+
 	router.HandleFunc("/ws", ws)
 
 	corsWrapper := handlers.CORS(
