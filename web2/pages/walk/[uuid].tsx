@@ -1,12 +1,12 @@
-import Layout from "../../components/Layout";
 import { useRouter } from "next/router";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import {
   DotsHorizontalIcon,
   PauseIcon,
   PlayIcon,
 } from "@heroicons/react/solid";
 import Link from "next/link";
+import useSWR from "swr";
 
 type Walk = {
   uuid: string;
@@ -22,19 +22,11 @@ export default function Walk() {
 
   const playerRef = useRef<HTMLAudioElement>(null);
 
-  const [loading, setLoading] = useState(true);
-  const [walk, setWalk] = useState<Walk>();
+  const { error, data: walk } = useSWR<Walk>(() =>
+    isReady ? `http://localhost:8080/walk/${query.uuid}` : null
+  );
+  const loading = !walk && !error;
   const [playing, setPlaying] = useState(false);
-
-  useEffect(() => {
-    isReady &&
-      fetch(`http://localhost:8080/walk/${query.uuid}`)
-        .then((r) => r.json())
-        .then((d: Walk) => {
-          setWalk(d);
-          setLoading(false);
-        });
-  }, [isReady]);
 
   return loading ? (
     <div>loading</div>

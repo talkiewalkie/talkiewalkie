@@ -2,6 +2,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { DotsHorizontalIcon } from "@heroicons/react/solid";
 import Layout from "../components/Layout";
+import useSWR from "swr";
 
 type Walk = {
   uuid: string;
@@ -67,22 +68,12 @@ const WalkCard = ({ walk }: { walk: Walk }) => {
 };
 
 export default function Home() {
-  const [loading, setLoading] = useState(false);
-  const [data, setData] = useState<Walk[]>();
-
-  useEffect(() => {
-    setLoading(true);
-    fetch("http://localhost:8080/walks")
-      .then((r) => r.json())
-      .then((d: Walk[]) => {
-        setData(d);
-        setLoading(false);
-      });
-  }, []);
+  const { error, data: walks } = useSWR<Walk[]>("http://localhost:8080/walks");
+  const loading = !error && !walks;
 
   return loading ? (
     <div className="h-full mx-auto">loading</div>
-  ) : data ? (
-    data.map((w) => <WalkCard key={w.uuid} walk={w} />)
+  ) : walks ? (
+    walks.map((w) => <WalkCard key={w.uuid} walk={w} />)
   ) : null;
 }
