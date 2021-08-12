@@ -1,13 +1,14 @@
+import { useState } from "react";
 import Link from "next/link";
-import { ReactNode, useEffect, useState } from "react";
-import { DotsHorizontalIcon } from "@heroicons/react/solid";
-import Layout, { withLayout } from "../components/Layout";
 import useSWR from "swr";
 import {
   useAuthUser,
   withAuthUser,
   withAuthUserTokenSSR,
 } from "next-firebase-auth";
+import { DotsHorizontalIcon } from "@heroicons/react/solid";
+
+import withLayout from "../components/Layout";
 
 type Walk = {
   uuid: string;
@@ -21,14 +22,18 @@ const WalkCard = ({ walk }: { walk: Walk }) => {
   const [showDetails, setShowDetails] = useState(false);
 
   return (
-    <Link as={`/walk/${walk.uuid}`} href="/walk/[uuid]">
+    <Link as={`/walk/${walk.uuid}`} href="/walk/[uuid]" passHref>
       <div
         key={walk.uuid}
         className="rounded-sm bg-white border py-4 hover:shadow-lg flex flex-col space-y-4"
       >
         <div className="px-4 flex items-center">
           <div className="h-8 w-8 bg-red-400 rounded-full mr-4" />
-          <Link as={`/user/${walk.author.uuid}`} href="/user/[uuid]">
+          <Link
+            as={`/user/${walk.author.handle}`}
+            href="/user/[handle]"
+            passHref
+          >
             <a className="hover:underline">{walk.author.handle}</a>
           </Link>
           <div className="ml-auto">

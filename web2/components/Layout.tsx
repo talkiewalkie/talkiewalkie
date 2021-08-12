@@ -5,7 +5,7 @@ import { useAuthUser } from "next-firebase-auth";
 import StyledFirebaseAuth from "react-firebaseui/StyledFirebaseAuth";
 import firebase from "firebase";
 
-export default function Layout({ children }: { children: ReactNode }) {
+function Layout({ children }: { children: ReactNode }) {
   const user = useAuthUser();
   const [showLogin, setShowLogin] = useState(false);
   const [userPopup, setUserPopup] = useState(false);
@@ -42,67 +42,41 @@ export default function Layout({ children }: { children: ReactNode }) {
             <Link href="/">
               <a className="font-bold transform rotate-12">TalkieWalkie</a>
             </Link>
-            <div className="ml-auto">
-              {user.id ? (
-                <>
-                  <button
-                    className="h-8 w-8 rounded-full bg-gray-300 border"
-                    onClick={() => setUserPopup(!userPopup)}
-                  />
-                  {userPopup && (
-                    <div className="fixed top-0 left-0 z-20 bg-green-200">
-                      <div>{user.email}</div>
-                      <button
-                        className="mt-8 text-blue-400 font-medium hover:text-blue-300"
-                        onClick={user.signOut}
-                      >
-                        Sign Out
-                      </button>
-                    </div>
-                  )}
-                </>
-              ) : (
-                <>
-                  <button
-                    className="rounded p-2 bg-blue-400 text-white font-medium hover:shadow hover:bg-blue-300"
-                    onClick={() => setShowLogin(true)}
-                  >
-                    Log In
-                  </button>
-                  <button className="p-2 text-blue-400 font-medium hover:text-blue-300">
-                    Sign Up
-                  </button>
-                </>
-              )}
-              {showLogin && renderAuth && (
-                // TODO: style our own
-                <StyledFirebaseAuth
-                  uiConfig={{
-                    signInFlow: "popup",
-                    // Auth providers
-                    // https://github.com/firebase/firebaseui-web#configure-oauth-providers
-                    signInOptions: [
-                      {
-                        provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
-                        requireDisplayName: true,
-                      },
-                    ],
-                    signInSuccessUrl: "/",
-                    credentialHelper: "none",
-                    callbacks: {
-                      // https://github.com/firebase/firebaseui-web#signinsuccesswithauthresultauthresult-redirecturl
-                      signInSuccessWithAuthResult: () => {
-                        // Don't automatically redirect. We handle redirecting based on
-                        // auth state in withAuthComponent.js.
-                        // setShowLogin(false);
-                        return false;
-                      },
-                    },
-                  }}
-                  firebaseAuth={firebase.auth()}
-                />
-              )}
-            </div>
+            {user.clientInitialized && (
+              <div className="ml-auto">
+                {user.id ? (
+                  <>
+                    <button
+                      className="h-8 w-8 rounded-full bg-gray-300 border"
+                      onClick={() => setUserPopup(!userPopup)}
+                    />
+                    {userPopup && (
+                      <div className="fixed top-0 left-0 z-20 bg-green-200">
+                        <div>{user.email}</div>
+                        <button
+                          className="mt-8 text-blue-400 font-medium hover:text-blue-300"
+                          onClick={user.signOut}
+                        >
+                          Sign Out
+                        </button>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <button
+                      className="rounded p-2 bg-blue-400 text-white font-medium hover:shadow hover:bg-blue-300"
+                      onClick={() => setShowLogin(true)}
+                    >
+                      Log In
+                    </button>
+                    <button className="p-2 text-blue-400 font-medium hover:text-blue-300">
+                      Sign Up
+                    </button>
+                  </>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
@@ -114,11 +88,42 @@ export default function Layout({ children }: { children: ReactNode }) {
             {children}
           </div>
         </div>
+
+        {showLogin && renderAuth && (
+          // TODO: style our own
+          <StyledFirebaseAuth
+            uiConfig={{
+              signInFlow: "popup",
+              // Auth providers
+              // https://github.com/firebase/firebaseui-web#configure-oauth-providers
+              signInOptions: [
+                {
+                  provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
+                  requireDisplayName: true,
+                },
+              ],
+              signInSuccessUrl: "/",
+              credentialHelper: "none",
+              callbacks: {
+                // https://github.com/firebase/firebaseui-web#signinsuccesswithauthresultauthresult-redirecturl
+                signInSuccessWithAuthResult: () => {
+                  // Don't automatically redirect. We handle redirecting based on
+                  // auth state in withAuthComponent.js.
+                  // setShowLogin(false);
+                  return false;
+                },
+              },
+            }}
+            firebaseAuth={firebase.auth()}
+          />
+        )}
       </main>
     </div>
   );
 }
 
-export const withLayout = (component: () => ReactNode) => () => (
-  <Layout>{component()}</Layout>
-);
+export default function withLayout(component: () => ReactNode) {
+  const Thing = () => <Layout>{component()}</Layout>;
+
+  return Thing;
+}

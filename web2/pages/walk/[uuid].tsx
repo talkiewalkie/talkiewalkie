@@ -9,7 +9,7 @@ import Link from "next/link";
 import useSWR from "swr";
 import { withAuthUser, withAuthUserTokenSSR } from "next-firebase-auth";
 
-import { withLayout } from "../../components/Layout";
+import withLayout from "../../components/Layout";
 
 type Walk = {
   uuid: string;
@@ -41,7 +41,7 @@ const Walk = () => {
         </audio>
         <div className="px-4 flex items-center">
           <div className="h-8 w-8 bg-red-400 rounded-full mr-4" />
-          <Link as={`/user/${walk.author.uuid}`} href="/user/[uuid]">
+          <Link as={`/user/${walk.author.handle}`} href="/user/[handle]">
             <a className="hover:underline">{walk.author.handle}</a>
           </Link>
           <div className="ml-auto">
