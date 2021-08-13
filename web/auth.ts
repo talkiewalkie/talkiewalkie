@@ -30,6 +30,7 @@ const initAuth = () => {
     cookies: {
       name: "TalkieWalkie", // required
       httpOnly: true,
+      domain: "talkiewalkie.app",
       maxAge: 12 * 60 * 60 * 24 * 1000, // twelve days
       overwrite: true,
       path: "/",
@@ -37,7 +38,9 @@ const initAuth = () => {
       secure: process.env.NODE_ENV !== "development", // set this to false in local (non-HTTPS) development
       signed: true,
       keys: [
+        // @ts-ignore
         process.env.COOKIE_SECRET_CURRENT,
+        // @ts-ignore
         process.env.COOKIE_SECRET_PREVIOUS,
       ],
     },
