@@ -43,10 +43,10 @@ spec:
                "--context=$BLOB_NAME",
                "--cache=true",
                "--destination=gcr.io/talkiewalkie-305117/talkiewalkie-front:$SHA",
-               '--build-arg=FIREBASE_PRIVATE_KEY=${FIREBASE_PRIVATE_KEY}',
-               '--build-arg=FIREBASE_CLIENT_EMAIL=${FIREBASE_CLIENT_EMAIL}',
-               '--build-arg=COOKIE_SECRET_CURRENT=${COOKIE_SECRET_CURRENT}',
-               '--build-arg=COOKIE_SECRET_PREVIOUS=${COOKIE_SECRET_PREVIOUS}']
+               '--build-arg=FIREBASE_PRIVATE_KEY=\${FIREBASE_PRIVATE_KEY}',
+               '--build-arg=FIREBASE_CLIENT_EMAIL=\${FIREBASE_CLIENT_EMAIL}',
+               '--build-arg=COOKIE_SECRET_CURRENT=\${COOKIE_SECRET_CURRENT}',
+               '--build-arg=COOKIE_SECRET_PREVIOUS=\${COOKIE_SECRET_PREVIOUS}']
         env:
           - name: FIREBASE_PRIVATE_KEY
             valueFrom:
