@@ -1,4 +1,4 @@
-import React, { ReactNode, useEffect, useState } from "react";
+import React, { ReactNode, useState } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import { useAuthUser } from "next-firebase-auth";
@@ -7,6 +7,8 @@ import "firebase/auth";
 import { MailIcon } from "@heroicons/react/solid";
 import { useForm } from "react-hook-form";
 import Modal from "./Modal";
+import useSWR from "swr";
+import { fetcher } from "../lib/fetcher";
 
 const AuthCard = ({
   type,
@@ -101,10 +103,19 @@ const AuthCard = ({
   );
 };
 
+type User = {
+  handle: string;
+};
+
 function Layout({ children }: { children: ReactNode }) {
   const user = useAuthUser();
   const [authCardType, setAuthCardType] = useState<"login" | "signup">();
   const [showUserModal, setShowUserModal] = useState(false);
+
+  const { data: me } = useSWR<User>(
+    () => (user.clientInitialized && !!user.id && showUserModal ? "/me" : null),
+    fetcher
+  );
 
   return (
     <div>
@@ -175,7 +186,8 @@ function Layout({ children }: { children: ReactNode }) {
         </Modal>
 
         <Modal open={showUserModal} onClose={() => setShowUserModal(false)}>
-          <div>{user.email}</div>
+          <div className="font-medium">{me && me.handle}</div>
+          <div className="text-sm text-gray-400">{user.email}</div>
           <button
             className="mt-8 text-blue-400 font-medium hover:text-blue-300"
             onClick={() => user.signOut().then(() => setShowUserModal(false))}

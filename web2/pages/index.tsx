@@ -5,6 +5,7 @@ import { withAuthUser, withAuthUserTokenSSR } from "next-firebase-auth";
 import { DotsHorizontalIcon } from "@heroicons/react/solid";
 
 import withLayout from "../components/Layout";
+import { fetcher } from "../lib/fetcher";
 
 type Walk = {
   uuid: string;
@@ -74,19 +75,7 @@ const WalkCard = ({ walk }: { walk: Walk }) => {
 };
 
 const Home = () => {
-  const { error, data: walks } = useSWR<Walk[]>(
-    "http://localhost:8080/walks",
-    async (url: string) => {
-      const res = await fetch(url, { credentials: "include" });
-      if (res.status > 299) {
-        const err = new Error(`Encountered error: ${res.status}`);
-        err.name = await res.text();
-        throw err;
-      }
-
-      return res.json();
-    }
-  );
+  const { error, data: walks } = useSWR<Walk[]>("/walks", fetcher);
 
   return error ? (
     <div className="h-full mx-auto">{JSON.stringify(error)}</div>

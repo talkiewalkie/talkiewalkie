@@ -72,3 +72,16 @@ func UserByHandle(w http.ResponseWriter, r *http.Request) {
 	}
 	common.JsonOut(w, out)
 }
+
+// --------
+
+type MeOutput struct {
+	Handle string `json:"handle"`
+}
+
+func Me(w http.ResponseWriter, r *http.Request) {
+	ctx := common.WithAuthedContext(r)
+
+	out := MeOutput{Handle: ctx.User.Handle}
+	common.JsonOut(w, out)
+}
