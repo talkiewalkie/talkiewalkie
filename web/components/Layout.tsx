@@ -237,7 +237,7 @@ function Layout({ children }: { children: ReactNode }) {
             {user.clientInitialized && (
               <div className="ml-auto flex items-center">
                 <button
-                  className="mr-4 text-red-400 hover:text-red-300"
+                  className="mr-4 text-red-400 hover:text-red-300 animate-pulse"
                   onClick={() => setPosPickerModal(true)}
                 >
                   <LocationMarkerIcon height={24} />
