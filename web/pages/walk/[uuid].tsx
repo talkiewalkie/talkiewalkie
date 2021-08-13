@@ -10,6 +10,7 @@ import useSWR from "swr";
 import { withAuthUser, withAuthUserTokenSSR } from "next-firebase-auth";
 
 import withLayout from "../../components/Layout";
+import { fetcher } from "../../lib/fetcher";
 
 type Walk = {
   uuid: string;
@@ -26,7 +27,7 @@ const Walk = () => {
   const playerRef = useRef<HTMLAudioElement>(null);
 
   const { error, data: walk } = useSWR<Walk>(() =>
-    isReady ? `/walk/${query.uuid}` : null
+    isReady ? `/walk/${query.uuid}` : null, fetcher,
   );
   const loading = !walk && !error;
   const [playing, setPlaying] = useState(false);
