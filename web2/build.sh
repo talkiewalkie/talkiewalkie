@@ -1,7 +1,7 @@
 #!/bin/bash
 
 clean() {
-	rm -f "kanikojob*.yaml"
+	rm -f "kanikojob-*"
 }
 
 trap clean EXIT ERR
@@ -9,7 +9,7 @@ trap clean EXIT ERR
 set -ex
 
 SHA="$(git rev-parse HEAD)"
-BUILD_NAME="web2-build-context-$SHA.tar.gz"
+BUILD_NAME="web-build-context-$SHA.tar.gz"
 BUILD_ARCHIVE="/tmp/$BUILD_NAME"
 BLOB_NAME="gs://talkiewalkie-dev/kaniko/$BUILD_NAME"
 JOB_FILE="kanikojob-$SHA.yaml"
@@ -28,7 +28,7 @@ cat <<EOF > $JOB_FILE
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: kaniko-web2-build-$SHA
+  name: web-build-$SHA
 spec:
   ttlSecondsAfterFinished: 120
   backoffLimit: 0
