@@ -2,7 +2,7 @@
 
 ## Getting started
 
-Needs `go1.15` installed, `postgresql` version 11.
+Needs `go1.15` installed, `postgresql` version 11 or above.
 
 ```bash
 createdb talkiewalkie
