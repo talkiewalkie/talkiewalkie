@@ -1,7 +1,7 @@
 #!/bin/bash
 
 clean() {
-	rm -f "kanikojob*.yaml"
+	rm -f kanikojob-*
 }
 
 trap clean EXIT ERR

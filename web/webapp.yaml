@@ -15,7 +15,7 @@ spec:
         app: webapp
     spec:
       containers:
-      - image: gcr.io/talkiewalkie-305117/talkiewalkie-front:66f7d63a15901349ffa1465f366ca699a23f50eb
+      - image: gcr.io/talkiewalkie-305117/talkiewalkie-front:aaca369d03c81039a6862b0aea2543ab1e688f45
         imagePullPolicy: Always
         name: webapp
         ports:
