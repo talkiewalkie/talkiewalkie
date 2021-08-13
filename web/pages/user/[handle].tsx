@@ -4,6 +4,7 @@ import Link from "next/link";
 
 import withLayout from "../../components/Layout";
 import useSWR from "swr";
+import { fetcher } from "../../lib/fetcher";
 
 type User = {
   handle: string;
@@ -17,7 +18,7 @@ const User = () => {
   const { query, isReady } = useRouter();
 
   const { error, data: user } = useSWR<User>(() =>
-    isReady ? `http://localhost:8080/user/${query.handle}` : null
+    isReady ? `/user/${query.handle}` : null, fetcher,
   );
 
   return (
