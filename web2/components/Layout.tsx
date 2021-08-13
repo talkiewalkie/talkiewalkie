@@ -57,7 +57,13 @@ const AuthCard = ({
                 .auth()
                 .createUserWithEmailAndPassword(form.email, form.password)
                 .catch((e) => setAuthError(e))
-                .then(onSuccess);
+                .then((creds) => {
+                  creds &&
+                    creds.user?.sendEmailVerification({
+                      url: "http://localhost:3000/",
+                    });
+                  onSuccess();
+                });
           })}
         >
           <div className="flex items-center space-x-2">
