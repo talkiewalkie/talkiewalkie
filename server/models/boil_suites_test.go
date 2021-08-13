@@ -102,6 +102,7 @@ func TestInsert(t *testing.T) {
 // TestToOne tests cannot be run in parallel
 // or deadlocks can occur.
 func TestToOne(t *testing.T) {
+	t.Run("UserToAssetUsingProfilePictureAsset", testUserToOneAssetUsingProfilePictureAsset)
 	t.Run("UserWalkToUserUsingUser", testUserWalkToOneUserUsingUser)
 	t.Run("UserWalkToWalkUsingWalk", testUserWalkToOneWalkUsingWalk)
 	t.Run("WalkToAssetUsingAudio", testWalkToOneAssetUsingAudio)
@@ -116,6 +117,7 @@ func TestOneToOne(t *testing.T) {}
 // TestToMany tests cannot be run in parallel
 // or deadlocks can occur.
 func TestToMany(t *testing.T) {
+	t.Run("AssetToProfilePictureUsers", testAssetToManyProfilePictureUsers)
 	t.Run("AssetToAudioWalks", testAssetToManyAudioWalks)
 	t.Run("AssetToCoverWalks", testAssetToManyCoverWalks)
 	t.Run("UserToUserWalks", testUserToManyUserWalks)
@@ -126,6 +128,7 @@ func TestToMany(t *testing.T) {
 // TestToOneSet tests cannot be run in parallel
 // or deadlocks can occur.
 func TestToOneSet(t *testing.T) {
+	t.Run("UserToAssetUsingProfilePictureUsers", testUserToOneSetOpAssetUsingProfilePictureAsset)
 	t.Run("UserWalkToUserUsingUserWalks", testUserWalkToOneSetOpUserUsingUser)
 	t.Run("UserWalkToWalkUsingUserWalks", testUserWalkToOneSetOpWalkUsingWalk)
 	t.Run("WalkToAssetUsingAudioWalks", testWalkToOneSetOpAssetUsingAudio)
@@ -136,6 +139,7 @@ func TestToOneSet(t *testing.T) {
 // TestToOneRemove tests cannot be run in parallel
 // or deadlocks can occur.
 func TestToOneRemove(t *testing.T) {
+	t.Run("UserToAssetUsingProfilePictureUsers", testUserToOneRemoveOpAssetUsingProfilePictureAsset)
 	t.Run("WalkToAssetUsingAudioWalks", testWalkToOneRemoveOpAssetUsingAudio)
 	t.Run("WalkToAssetUsingCoverWalks", testWalkToOneRemoveOpAssetUsingCover)
 }
@@ -151,6 +155,7 @@ func TestOneToOneRemove(t *testing.T) {}
 // TestToManyAdd tests cannot be run in parallel
 // or deadlocks can occur.
 func TestToManyAdd(t *testing.T) {
+	t.Run("AssetToProfilePictureUsers", testAssetToManyAddOpProfilePictureUsers)
 	t.Run("AssetToAudioWalks", testAssetToManyAddOpAudioWalks)
 	t.Run("AssetToCoverWalks", testAssetToManyAddOpCoverWalks)
 	t.Run("UserToUserWalks", testUserToManyAddOpUserWalks)
@@ -161,6 +166,7 @@ func TestToManyAdd(t *testing.T) {
 // TestToManySet tests cannot be run in parallel
 // or deadlocks can occur.
 func TestToManySet(t *testing.T) {
+	t.Run("AssetToProfilePictureUsers", testAssetToManySetOpProfilePictureUsers)
 	t.Run("AssetToAudioWalks", testAssetToManySetOpAudioWalks)
 	t.Run("AssetToCoverWalks", testAssetToManySetOpCoverWalks)
 }
@@ -168,6 +174,7 @@ func TestToManySet(t *testing.T) {
 // TestToManyRemove tests cannot be run in parallel
 // or deadlocks can occur.
 func TestToManyRemove(t *testing.T) {
+	t.Run("AssetToProfilePictureUsers", testAssetToManyRemoveOpProfilePictureUsers)
 	t.Run("AssetToAudioWalks", testAssetToManyRemoveOpAudioWalks)
 	t.Run("AssetToCoverWalks", testAssetToManyRemoveOpCoverWalks)
 }

@@ -2,6 +2,7 @@ package common
 
 import (
 	"context"
+	"firebase.google.com/go/v4/auth"
 	"fmt"
 	"log"
 	"math/rand"
@@ -9,6 +10,7 @@ import (
 	"os/exec"
 	"strconv"
 
+	"firebase.google.com/go/v4"
 	"github.com/go-chi/jwtauth"
 	"github.com/jmoiron/sqlx"
 
@@ -19,6 +21,7 @@ type Components struct {
 	Db          *sqlx.DB
 	EmailClient EmailClient
 	JwtAuth     *jwtauth.JWTAuth
+	FbAuth      *auth.Client
 	Storage     StorageClient
 	Audio       *pb.CompressionClient
 
@@ -28,6 +31,12 @@ type Components struct {
 func InitComponents() (*Components, error) {
 	tokenAuth := jwtauth.New("HS256", []byte(os.Getenv("JWT_SECRET")), nil)
 	emailClient := initEmailClient()
+
+	app, err := firebase.NewApp(context.Background(), nil)
+	if err != nil {
+		log.Panicf("could not init the firebase sdk: %+v", err)
+	}
+	fbAuth, err := app.Auth(context.Background())
 
 	storageClient, err := initStorageClient(context.Background())
 	if err != nil {
@@ -56,6 +65,7 @@ func InitComponents() (*Components, error) {
 		Db:          db,
 		EmailClient: emailClient,
 		JwtAuth:     tokenAuth,
+		FbAuth:      fbAuth,
 		Storage:     storageClient,
 		Audio:       &audioClient,
 		CompressImg: func(path string, width int) (string, error) {

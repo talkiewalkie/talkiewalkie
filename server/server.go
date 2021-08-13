@@ -32,7 +32,7 @@ func main() {
 	var host string
 	switch *env {
 	case "dev":
-		host = "http://localhost:19006"
+		host = "http://localhost:3000"
 		if err := godotenv.Load(fmt.Sprintf(".env.%s", *env)); err != nil {
 			log.Panicf("could not load env: %v", err)
 		}
@@ -67,9 +67,15 @@ func main() {
 		common.WithContextMiddleWare(components),
 		common.RecoverMiddleWare)
 
-	router.HandleFunc("/walk", routes.CreateWalk).Methods(http.MethodPost)
 	router.HandleFunc("/walks", routes.Walks).Methods(http.MethodGet)
+	router.HandleFunc("/walk/{uuid}", routes.WalkByUuid).Methods(http.MethodGet)
+	router.HandleFunc("/walk", routes.CreateWalk).Methods(http.MethodPost)
+
+	router.HandleFunc("/user/{handle}", routes.UserByHandle).Methods(http.MethodGet)
+	router.HandleFunc("/me", routes.Me).Methods(http.MethodGet)
+
 	router.HandleFunc("/asset", routes.UploadHandler).Methods(http.MethodPost)
+
 	router.HandleFunc("/ws", ws)
 
 	corsWrapper := handlers.CORS(

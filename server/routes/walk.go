@@ -1,7 +1,10 @@
 package routes
 
 import (
+	"fmt"
+	"math"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/gorilla/mux"
@@ -78,18 +81,60 @@ type AuthorWalksItemOutput struct {
 }
 
 type WalksItemOutput struct {
-	Uuid     uuid.UUID             `json:"uuid"`
-	Title    string                `json:"title"`
-	Author   AuthorWalksItemOutput `json:"author"`
-	CoverUrl string                `json:"coverUrl"`
+	Uuid              uuid.UUID             `json:"uuid"`
+	Title             string                `json:"title"`
+	Description       string                `json:"description"`
+	Author            AuthorWalksItemOutput `json:"author"`
+	CoverUrl          string                `json:"coverUrl"`
+	DistanceFromPoint float64               `json:"distanceFromPoint"`
 }
 
 func Walks(w http.ResponseWriter, r *http.Request) {
 	ctx := common.WithContext(r)
 
+	params := r.URL.Query()
+	lngs, foundLng := params["lng"]
+	lats, foundLat := params["lat"]
+	if foundLng != foundLat {
+		http.Error(w, "provide none or both coords params (lng,lat)", http.StatusBadRequest)
+		return
+	}
+	var lng, lat float64
+	if foundLat {
+		val, err := strconv.ParseFloat(lngs[0], 64)
+		if err != nil {
+			http.Error(w, "bad longitude", http.StatusBadRequest)
+			return
+		}
+		lng = val
+		val, err = strconv.ParseFloat(lats[0], 64)
+		if err != nil {
+			http.Error(w, "bad latitude", http.StatusBadRequest)
+			return
+		}
+		lat = val
+	}
+
+	var offset int
+	if vals, ok := params["offset"]; ok && len(vals) > 0 {
+		v, err := strconv.Atoi(vals[0])
+		if err != nil {
+			http.Error(w, "bad offset", http.StatusBadRequest)
+			return
+		}
+		offset = v
+	}
+
 	walks, err := models.Walks(
 		qm.Limit(20),
-		qm.Offset(0),
+		qm.Offset(offset),
+		qm.OrderBy(fmt.Sprintf(
+			"earth_distance(ll_to_earth(%s[0], %s[1]),  ll_to_earth(%f, %f))",
+			models.WalkColumns.StartPoint,
+			models.WalkColumns.StartPoint,
+			lat,
+			lng,
+		)),
 		qm.OrderBy(models.WalkColumns.CreatedAt),
 		qm.Load(models.WalkRels.Author),
 		qm.Load(models.WalkRels.Cover)).All(r.Context(), ctx.Components.Db)
@@ -109,10 +154,13 @@ func Walks(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 		responseWalks = append(responseWalks, WalksItemOutput{
-			Uuid:     walk.UUID,
-			Title:    walk.Title,
-			Author:   AuthorWalksItemOutput{walk.R.Author.UUID, walk.R.Author.Handle},
-			CoverUrl: coverUrl,
+			Uuid:        walk.UUID,
+			Title:       walk.Title,
+			Description: walk.Description.String,
+			Author:      AuthorWalksItemOutput{walk.R.Author.UUID, walk.R.Author.Handle},
+			CoverUrl:    coverUrl,
+			// XXX: it's a shame to recompute what postgres has done for the sorting, but it's simpler atm
+			DistanceFromPoint: Distance(lat, lng, walk.StartPoint.X, walk.StartPoint.Y),
 		})
 	}
 	common.JsonOut(w, responseWalks)
@@ -121,11 +169,12 @@ func Walks(w http.ResponseWriter, r *http.Request) {
 // ------------
 
 type WalkByUuidOutput struct {
-	Uuid     uuid.UUID             `json:"uuid"`
-	Title    string                `json:"title"`
-	Author   AuthorWalksItemOutput `json:"author"`
-	CoverUrl string                `json:"coverUrl"`
-	AudioUrl string                `json:"audio_url"`
+	Uuid        uuid.UUID             `json:"uuid"`
+	Title       string                `json:"title"`
+	Description string                `json:"description"`
+	Author      AuthorWalksItemOutput `json:"author"`
+	CoverUrl    string                `json:"coverUrl"`
+	AudioUrl    string                `json:"audioUrl"`
 }
 
 func WalkByUuid(w http.ResponseWriter, r *http.Request) {
@@ -173,11 +222,46 @@ func WalkByUuid(w http.ResponseWriter, r *http.Request) {
 	}
 
 	out := WalkByUuidOutput{
-		Uuid:     walk.UUID,
-		Title:    walk.Title,
-		Author:   AuthorWalksItemOutput{Uuid: walk.R.Author.UUID, Handle: walk.R.Author.Handle},
-		CoverUrl: coverUrl,
-		AudioUrl: audioUrl,
+		Uuid:        walk.UUID,
+		Title:       walk.Title,
+		Description: walk.Description.String,
+		Author:      AuthorWalksItemOutput{Uuid: walk.R.Author.UUID, Handle: walk.R.Author.Handle},
+		CoverUrl:    coverUrl,
+		AudioUrl:    audioUrl,
 	}
 	common.JsonOut(w, out)
+}
+
+// HELPERS
+
+// https://gist.github.com/cdipaolo/d3f8db3848278b49db68
+// haversin(θ) function
+func hsin(theta float64) float64 {
+	return math.Pow(math.Sin(theta/2), 2)
+}
+
+// Distance function returns the distance (in meters) between two points of
+//     a given longitude and latitude relatively accurately (using a spherical
+//     approximation of the Earth) through the Haversin Distance Formula for
+//     great arc distance on a sphere with accuracy for small distances
+//
+// point coordinates are supplied in degrees and converted into rad. in the func
+//
+// distance returned is METERS!!!!!!
+// http://en.wikipedia.org/wiki/Haversine_formula
+func Distance(lat1, lon1, lat2, lon2 float64) float64 {
+	// convert to radians
+	// must cast radius as float to multiply later
+	var la1, lo1, la2, lo2, r float64
+	la1 = lat1 * math.Pi / 180
+	lo1 = lon1 * math.Pi / 180
+	la2 = lat2 * math.Pi / 180
+	lo2 = lon2 * math.Pi / 180
+
+	r = 6378100 // Earth radius in METERS
+
+	// calculate
+	h := hsin(la2-la1) + math.Cos(la1)*math.Cos(la2)*hsin(lo2-lo1)
+
+	return 2 * r * math.Asin(math.Sqrt(h))
 }

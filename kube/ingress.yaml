@@ -1,0 +1,37 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: "gce"
+    networking.gke.io/managed-certificates: talkiewalkie
+    kubernetes.io/ingress.global-static-ip-name: tw-ip
+  labels:
+    app: talkiewalkie
+  name: ingress
+spec:
+  rules:
+  - host: api.talkiewalkie.app
+    http:
+      paths:
+      - backend:
+          serviceName: back
+          servicePort: 8080
+  - host: web.talkiewalkie.app
+    http:
+      paths:
+      - backend:
+          serviceName: webapp
+          servicePort: 80
+  - host: tunnel.talkiewalkie.app
+    http:
+      paths:
+      - backend:
+          serviceName: chisel
+          servicePort: 8080
+  - host: dev.talkiewalkie.app
+    http:
+      paths:
+      - backend:
+          serviceName: chisel
+          servicePort: 8081
+

@@ -202,17 +202,20 @@ var AssetWhere = struct {
 
 // AssetRels is where relationship names are stored.
 var AssetRels = struct {
-	AudioWalks string
-	CoverWalks string
+	ProfilePictureUsers string
+	AudioWalks          string
+	CoverWalks          string
 }{
-	AudioWalks: "AudioWalks",
-	CoverWalks: "CoverWalks",
+	ProfilePictureUsers: "ProfilePictureUsers",
+	AudioWalks:          "AudioWalks",
+	CoverWalks:          "CoverWalks",
 }
 
 // assetR is where relationships are stored.
 type assetR struct {
-	AudioWalks WalkSlice `db:"AudioWalks" boil:"AudioWalks" json:"AudioWalks" toml:"AudioWalks" yaml:"AudioWalks"`
-	CoverWalks WalkSlice `db:"CoverWalks" boil:"CoverWalks" json:"CoverWalks" toml:"CoverWalks" yaml:"CoverWalks"`
+	ProfilePictureUsers UserSlice `db:"ProfilePictureUsers" boil:"ProfilePictureUsers" json:"ProfilePictureUsers" toml:"ProfilePictureUsers" yaml:"ProfilePictureUsers"`
+	AudioWalks          WalkSlice `db:"AudioWalks" boil:"AudioWalks" json:"AudioWalks" toml:"AudioWalks" yaml:"AudioWalks"`
+	CoverWalks          WalkSlice `db:"CoverWalks" boil:"CoverWalks" json:"CoverWalks" toml:"CoverWalks" yaml:"CoverWalks"`
 }
 
 // NewStruct creates a new relationship struct
@@ -505,6 +508,27 @@ func (q assetQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (bool
 	return count > 0, nil
 }
 
+// ProfilePictureUsers retrieves all the user's Users with an executor via profile_picture column.
+func (o *Asset) ProfilePictureUsers(mods ...qm.QueryMod) userQuery {
+	var queryMods []qm.QueryMod
+	if len(mods) != 0 {
+		queryMods = append(queryMods, mods...)
+	}
+
+	queryMods = append(queryMods,
+		qm.Where("\"user\".\"profile_picture\"=?", o.ID),
+	)
+
+	query := Users(queryMods...)
+	queries.SetFrom(query.Query, "\"user\"")
+
+	if len(queries.GetSelect(query.Query)) == 0 {
+		queries.SetSelect(query.Query, []string{"\"user\".*"})
+	}
+
+	return query
+}
+
 // AudioWalks retrieves all the walk's Walks with an executor via audio_id column.
 func (o *Asset) AudioWalks(mods ...qm.QueryMod) walkQuery {
 	var queryMods []qm.QueryMod
@@ -545,6 +569,104 @@ func (o *Asset) CoverWalks(mods ...qm.QueryMod) walkQuery {
 	}
 
 	return query
+}
+
+// LoadProfilePictureUsers allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for a 1-M or N-M relationship.
+func (assetL) LoadProfilePictureUsers(ctx context.Context, e boil.ContextExecutor, singular bool, maybeAsset interface{}, mods queries.Applicator) error {
+	var slice []*Asset
+	var object *Asset
+
+	if singular {
+		object = maybeAsset.(*Asset)
+	} else {
+		slice = *maybeAsset.(*[]*Asset)
+	}
+
+	args := make([]interface{}, 0, 1)
+	if singular {
+		if object.R == nil {
+			object.R = &assetR{}
+		}
+		args = append(args, object.ID)
+	} else {
+	Outer:
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &assetR{}
+			}
+
+			for _, a := range args {
+				if queries.Equal(a, obj.ID) {
+					continue Outer
+				}
+			}
+
+			args = append(args, obj.ID)
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	query := NewQuery(
+		qm.From(`user`),
+		qm.WhereIn(`user.profile_picture in ?`, args...),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load user")
+	}
+
+	var resultSlice []*User
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice user")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results in eager load on user")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for user")
+	}
+
+	if len(userAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+	if singular {
+		object.R.ProfilePictureUsers = resultSlice
+		for _, foreign := range resultSlice {
+			if foreign.R == nil {
+				foreign.R = &userR{}
+			}
+			foreign.R.ProfilePictureAsset = object
+		}
+		return nil
+	}
+
+	for _, foreign := range resultSlice {
+		for _, local := range slice {
+			if queries.Equal(local.ID, foreign.ProfilePicture) {
+				local.R.ProfilePictureUsers = append(local.R.ProfilePictureUsers, foreign)
+				if foreign.R == nil {
+					foreign.R = &userR{}
+				}
+				foreign.R.ProfilePictureAsset = local
+				break
+			}
+		}
+	}
+
+	return nil
 }
 
 // LoadAudioWalks allows an eager lookup of values, cached into the
@@ -737,6 +859,129 @@ func (assetL) LoadCoverWalks(ctx context.Context, e boil.ContextExecutor, singul
 				foreign.R.Cover = local
 				break
 			}
+		}
+	}
+
+	return nil
+}
+
+// AddProfilePictureUsers adds the given related objects to the existing relationships
+// of the asset, optionally inserting them as new records.
+// Appends related to o.R.ProfilePictureUsers.
+// Sets related.R.ProfilePictureAsset appropriately.
+func (o *Asset) AddProfilePictureUsers(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*User) error {
+	var err error
+	for _, rel := range related {
+		if insert {
+			queries.Assign(&rel.ProfilePicture, o.ID)
+			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
+				return errors.Wrap(err, "failed to insert into foreign table")
+			}
+		} else {
+			updateQuery := fmt.Sprintf(
+				"UPDATE \"user\" SET %s WHERE %s",
+				strmangle.SetParamNames("\"", "\"", 1, []string{"profile_picture"}),
+				strmangle.WhereClause("\"", "\"", 2, userPrimaryKeyColumns),
+			)
+			values := []interface{}{o.ID, rel.ID}
+
+			if boil.IsDebug(ctx) {
+				writer := boil.DebugWriterFrom(ctx)
+				fmt.Fprintln(writer, updateQuery)
+				fmt.Fprintln(writer, values)
+			}
+			if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+				return errors.Wrap(err, "failed to update foreign table")
+			}
+
+			queries.Assign(&rel.ProfilePicture, o.ID)
+		}
+	}
+
+	if o.R == nil {
+		o.R = &assetR{
+			ProfilePictureUsers: related,
+		}
+	} else {
+		o.R.ProfilePictureUsers = append(o.R.ProfilePictureUsers, related...)
+	}
+
+	for _, rel := range related {
+		if rel.R == nil {
+			rel.R = &userR{
+				ProfilePictureAsset: o,
+			}
+		} else {
+			rel.R.ProfilePictureAsset = o
+		}
+	}
+	return nil
+}
+
+// SetProfilePictureUsers removes all previously related items of the
+// asset replacing them completely with the passed
+// in related items, optionally inserting them as new records.
+// Sets o.R.ProfilePictureAsset's ProfilePictureUsers accordingly.
+// Replaces o.R.ProfilePictureUsers with related.
+// Sets related.R.ProfilePictureAsset's ProfilePictureUsers accordingly.
+func (o *Asset) SetProfilePictureUsers(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*User) error {
+	query := "update \"user\" set \"profile_picture\" = null where \"profile_picture\" = $1"
+	values := []interface{}{o.ID}
+	if boil.IsDebug(ctx) {
+		writer := boil.DebugWriterFrom(ctx)
+		fmt.Fprintln(writer, query)
+		fmt.Fprintln(writer, values)
+	}
+	_, err := exec.ExecContext(ctx, query, values...)
+	if err != nil {
+		return errors.Wrap(err, "failed to remove relationships before set")
+	}
+
+	if o.R != nil {
+		for _, rel := range o.R.ProfilePictureUsers {
+			queries.SetScanner(&rel.ProfilePicture, nil)
+			if rel.R == nil {
+				continue
+			}
+
+			rel.R.ProfilePictureAsset = nil
+		}
+
+		o.R.ProfilePictureUsers = nil
+	}
+	return o.AddProfilePictureUsers(ctx, exec, insert, related...)
+}
+
+// RemoveProfilePictureUsers relationships from objects passed in.
+// Removes related items from R.ProfilePictureUsers (uses pointer comparison, removal does not keep order)
+// Sets related.R.ProfilePictureAsset.
+func (o *Asset) RemoveProfilePictureUsers(ctx context.Context, exec boil.ContextExecutor, related ...*User) error {
+	var err error
+	for _, rel := range related {
+		queries.SetScanner(&rel.ProfilePicture, nil)
+		if rel.R != nil {
+			rel.R.ProfilePictureAsset = nil
+		}
+		if _, err = rel.Update(ctx, exec, boil.Whitelist("profile_picture")); err != nil {
+			return err
+		}
+	}
+	if o.R == nil {
+		return nil
+	}
+
+	for _, rel := range related {
+		for i, ri := range o.R.ProfilePictureUsers {
+			if rel != ri {
+				continue
+			}
+
+			ln := len(o.R.ProfilePictureUsers)
+			if ln > 1 && i < ln-1 {
+				o.R.ProfilePictureUsers[i] = o.R.ProfilePictureUsers[ln-1]
+			}
+			o.R.ProfilePictureUsers = o.R.ProfilePictureUsers[:ln-1]
+			break
 		}
 	}
 

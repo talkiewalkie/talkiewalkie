@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: chisel
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: chisel
+  template:
+    metadata:
+      labels:
+        app: chisel
+    spec:
+      containers:
+      - name: chisel
+        image: jpillora/chisel
+        # TODO: secure the server with --authfile
+        # https://github.com/jpillora/chisel#authentication
+        args: ["server", "-v", "-p", "8080", "--reverse"]
+        ports:
+        - containerPort: 8080
+          name: http
+        - containerPort: 8081
+          name: forwarded
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: http
+          initialDelaySeconds: 3
+          periodSeconds: 3
+          successThreshold: 1
+        resources:
+          limits:
+            cpu: 500m
+            memory: 500Mi
+          requests:
+            cpu: 50m
+            memory: 200Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: chisel
+spec:
+  selector:
+    app: chisel
+  ports:
+  - protocol: TCP
+    targetPort: http
+    port: 8080
+    name: tunnel
+  - protocol: TCP
+    targetPort: forwarded
+    port: 8081
+    name: forwarded
+  type: NodePort

@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: back
+  name: back
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: back
+  template:
+    metadata:
+      labels:
+        app: back
+    spec:
+
+      volumes:
+        - name: google-cloud-key
+          secret:
+            secretName: backend-service-account
+
+      containers:
+      - image: gcr.io/talkiewalkie-305117/talkiewalkie-back:c02ba3139f903a5012b7008999c39812c9b508c1
+        imagePullPolicy: Always
+        name: back
+        ports:
+          - containerPort: 8080
+        volumeMounts:
+          - name: google-cloud-key
+            mountPath: /var/secrets/google
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 2
+          periodSeconds: 3
+          successThreshold: 1
+        env:
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                key: pg_password
+                name: mysecrets
+          - name: POSTGRES_HOST
+            value: "pgsql"
+          - name: GOOGLE_APPLICATION_CREDENTIALS
+            value: "/var/secrets/google/key.json"
+          - name: POSTGRES_USER
+            value: "postgres"
+          - name: JWT_SECRET
+            valueFrom:
+              secretKeyRef:
+                key: jwt_secret
+                name: mysecrets
+          - name: BUCKET_NAME
+            valueFrom:
+              secretKeyRef:
+                key: bucket_name
+                name: mysecrets
+
+      restartPolicy: Always
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: back
+spec:
+  type: ClusterIP
+  selector:
+    app: back
+  ports:
+    - port: 8080
+

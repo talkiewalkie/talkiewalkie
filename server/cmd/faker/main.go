@@ -6,7 +6,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/Pallinder/go-randomdata"
 	"github.com/joho/godotenv"
 	"github.com/talkiewalkie/talkiewalkie/common"
 	"github.com/talkiewalkie/talkiewalkie/models"
@@ -56,6 +55,11 @@ func main() {
 		log.Panicf("could not download asset file: %+v", err)
 	}
 
+	mywowo := models.User{Handle: "mywowo", Bio: null.NewString("My Wonderful World\nThe app already has hundreds of audio files in your own language that will tell you about the wonders of the following cities in a fun and simple way at an exceptional price!\nhttps://mywowo.net", true)}
+	if err = mywowo.Insert(ctx, components.Db, boil.Infer()); err != nil {
+		log.Panicf("-!- could not insert new user with handle '%s': %+v", "mywowo", err)
+	}
+
 	scanner := bufio.NewScanner(&f)
 	cnt := 0
 	for scanner.Scan() {
@@ -69,12 +73,8 @@ func main() {
 		var user models.User
 		handle := tour.Author
 		if handle == "" {
-			handle = fmt.Sprintf("%s %s %s", randomdata.SillyName(), randomdata.SillyName(), randomdata.LastName())
-			user = models.User{Email: randomdata.Email(), Handle: handle, Password: []byte(randomdata.RandStringRunes(10))}
-			if err = user.Insert(ctx, components.Db, boil.Infer()); err != nil {
-				log.Printf("-!- could not insert new user with handle '%s': %+v", handle, err)
-				continue
-			}
+			handle = mywowo.Handle
+			user = mywowo
 		} else {
 			exists, err := models.Users(qm.Where(fmt.Sprintf("%s = ?", models.UserColumns.Handle), handle)).Exists(ctx, components.Db)
 			if err != nil {
@@ -82,7 +82,7 @@ func main() {
 				continue
 			}
 			if !exists {
-				user = models.User{Email: randomdata.Email(), Handle: handle, Password: []byte(randomdata.RandStringRunes(10))}
+				user = models.User{Handle: handle}
 				if err = user.Insert(ctx, components.Db, boil.Infer()); err != nil {
 					log.Printf("-!- could not insert new user with handle '%s': %+v", handle, err)
 					continue

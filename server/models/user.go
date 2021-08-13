@@ -25,73 +25,123 @@ import (
 
 // User is an object representing the database table.
 type User struct {
-	ID         int         `db:"id" boil:"id" json:"id" toml:"id" yaml:"id"`
-	UUID       uuid.UUID   `db:"uuid" boil:"uuid" json:"uuid" toml:"uuid" yaml:"uuid"`
-	Handle     string      `db:"handle" boil:"handle" json:"handle" toml:"handle" yaml:"handle"`
-	Email      string      `db:"email" boil:"email" json:"email" toml:"email" yaml:"email"`
-	Password   []byte      `db:"password" boil:"password" json:"password" toml:"password" yaml:"password"`
-	EmailToken null.String `db:"email_token" boil:"email_token" json:"email_token,omitempty" toml:"email_token" yaml:"email_token,omitempty"`
+	ID             int         `db:"id" boil:"id" json:"id" toml:"id" yaml:"id"`
+	UUID           uuid.UUID   `db:"uuid" boil:"uuid" json:"uuid" toml:"uuid" yaml:"uuid"`
+	Handle         string      `db:"handle" boil:"handle" json:"handle" toml:"handle" yaml:"handle"`
+	FirebaseUID    null.String `db:"firebase_uid" boil:"firebase_uid" json:"firebase_uid,omitempty" toml:"firebase_uid" yaml:"firebase_uid,omitempty"`
+	ProfilePicture null.Int    `db:"profile_picture" boil:"profile_picture" json:"profile_picture,omitempty" toml:"profile_picture" yaml:"profile_picture,omitempty"`
+	CreatedAt      null.Time   `db:"created_at" boil:"created_at" json:"created_at,omitempty" toml:"created_at" yaml:"created_at,omitempty"`
+	UpdatedAt      null.Time   `db:"updated_at" boil:"updated_at" json:"updated_at,omitempty" toml:"updated_at" yaml:"updated_at,omitempty"`
+	Bio            null.String `db:"bio" boil:"bio" json:"bio,omitempty" toml:"bio" yaml:"bio,omitempty"`
 
 	R *userR `db:"-" boil:"-" json:"-" toml:"-" yaml:"-"`
 	L userL  `db:"-" boil:"-" json:"-" toml:"-" yaml:"-"`
 }
 
 var UserColumns = struct {
-	ID         string
-	UUID       string
-	Handle     string
-	Email      string
-	Password   string
-	EmailToken string
+	ID             string
+	UUID           string
+	Handle         string
+	FirebaseUID    string
+	ProfilePicture string
+	CreatedAt      string
+	UpdatedAt      string
+	Bio            string
 }{
-	ID:         "id",
-	UUID:       "uuid",
-	Handle:     "handle",
-	Email:      "email",
-	Password:   "password",
-	EmailToken: "email_token",
+	ID:             "id",
+	UUID:           "uuid",
+	Handle:         "handle",
+	FirebaseUID:    "firebase_uid",
+	ProfilePicture: "profile_picture",
+	CreatedAt:      "created_at",
+	UpdatedAt:      "updated_at",
+	Bio:            "bio",
 }
 
 // Generated where
 
-type whereHelper__byte struct{ field string }
+type whereHelpernull_Int struct{ field string }
 
-func (w whereHelper__byte) EQ(x []byte) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
-func (w whereHelper__byte) NEQ(x []byte) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
-func (w whereHelper__byte) LT(x []byte) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
-func (w whereHelper__byte) LTE(x []byte) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
-func (w whereHelper__byte) GT(x []byte) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
-func (w whereHelper__byte) GTE(x []byte) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
+func (w whereHelpernull_Int) EQ(x null.Int) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, false, x)
+}
+func (w whereHelpernull_Int) NEQ(x null.Int) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, true, x)
+}
+func (w whereHelpernull_Int) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
+func (w whereHelpernull_Int) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
+func (w whereHelpernull_Int) LT(x null.Int) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelpernull_Int) LTE(x null.Int) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelpernull_Int) GT(x null.Int) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelpernull_Int) GTE(x null.Int) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
+
+type whereHelpernull_Time struct{ field string }
+
+func (w whereHelpernull_Time) EQ(x null.Time) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, false, x)
+}
+func (w whereHelpernull_Time) NEQ(x null.Time) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, true, x)
+}
+func (w whereHelpernull_Time) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
+func (w whereHelpernull_Time) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
+func (w whereHelpernull_Time) LT(x null.Time) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelpernull_Time) LTE(x null.Time) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelpernull_Time) GT(x null.Time) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelpernull_Time) GTE(x null.Time) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
 
 var UserWhere = struct {
-	ID         whereHelperint
-	UUID       whereHelperuuid_UUID
-	Handle     whereHelperstring
-	Email      whereHelperstring
-	Password   whereHelper__byte
-	EmailToken whereHelpernull_String
+	ID             whereHelperint
+	UUID           whereHelperuuid_UUID
+	Handle         whereHelperstring
+	FirebaseUID    whereHelpernull_String
+	ProfilePicture whereHelpernull_Int
+	CreatedAt      whereHelpernull_Time
+	UpdatedAt      whereHelpernull_Time
+	Bio            whereHelpernull_String
 }{
-	ID:         whereHelperint{field: "\"user\".\"id\""},
-	UUID:       whereHelperuuid_UUID{field: "\"user\".\"uuid\""},
-	Handle:     whereHelperstring{field: "\"user\".\"handle\""},
-	Email:      whereHelperstring{field: "\"user\".\"email\""},
-	Password:   whereHelper__byte{field: "\"user\".\"password\""},
-	EmailToken: whereHelpernull_String{field: "\"user\".\"email_token\""},
+	ID:             whereHelperint{field: "\"user\".\"id\""},
+	UUID:           whereHelperuuid_UUID{field: "\"user\".\"uuid\""},
+	Handle:         whereHelperstring{field: "\"user\".\"handle\""},
+	FirebaseUID:    whereHelpernull_String{field: "\"user\".\"firebase_uid\""},
+	ProfilePicture: whereHelpernull_Int{field: "\"user\".\"profile_picture\""},
+	CreatedAt:      whereHelpernull_Time{field: "\"user\".\"created_at\""},
+	UpdatedAt:      whereHelpernull_Time{field: "\"user\".\"updated_at\""},
+	Bio:            whereHelpernull_String{field: "\"user\".\"bio\""},
 }
 
 // UserRels is where relationship names are stored.
 var UserRels = struct {
-	UserWalks   string
-	AuthorWalks string
+	ProfilePictureAsset string
+	UserWalks           string
+	AuthorWalks         string
 }{
-	UserWalks:   "UserWalks",
-	AuthorWalks: "AuthorWalks",
+	ProfilePictureAsset: "ProfilePictureAsset",
+	UserWalks:           "UserWalks",
+	AuthorWalks:         "AuthorWalks",
 }
 
 // userR is where relationships are stored.
 type userR struct {
-	UserWalks   UserWalkSlice `db:"UserWalks" boil:"UserWalks" json:"UserWalks" toml:"UserWalks" yaml:"UserWalks"`
-	AuthorWalks WalkSlice     `db:"AuthorWalks" boil:"AuthorWalks" json:"AuthorWalks" toml:"AuthorWalks" yaml:"AuthorWalks"`
+	ProfilePictureAsset *Asset        `db:"ProfilePictureAsset" boil:"ProfilePictureAsset" json:"ProfilePictureAsset" toml:"ProfilePictureAsset" yaml:"ProfilePictureAsset"`
+	UserWalks           UserWalkSlice `db:"UserWalks" boil:"UserWalks" json:"UserWalks" toml:"UserWalks" yaml:"UserWalks"`
+	AuthorWalks         WalkSlice     `db:"AuthorWalks" boil:"AuthorWalks" json:"AuthorWalks" toml:"AuthorWalks" yaml:"AuthorWalks"`
 }
 
 // NewStruct creates a new relationship struct
@@ -103,9 +153,9 @@ func (*userR) NewStruct() *userR {
 type userL struct{}
 
 var (
-	userAllColumns            = []string{"id", "uuid", "handle", "email", "password", "email_token"}
-	userColumnsWithoutDefault = []string{"handle", "email", "password", "email_token"}
-	userColumnsWithDefault    = []string{"id", "uuid"}
+	userAllColumns            = []string{"id", "uuid", "handle", "firebase_uid", "profile_picture", "created_at", "updated_at", "bio"}
+	userColumnsWithoutDefault = []string{"handle", "firebase_uid", "profile_picture", "bio"}
+	userColumnsWithDefault    = []string{"id", "uuid", "created_at", "updated_at"}
 	userPrimaryKeyColumns     = []string{"id"}
 )
 
@@ -384,6 +434,20 @@ func (q userQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (bool,
 	return count > 0, nil
 }
 
+// ProfilePictureAsset pointed to by the foreign key.
+func (o *User) ProfilePictureAsset(mods ...qm.QueryMod) assetQuery {
+	queryMods := []qm.QueryMod{
+		qm.Where("\"id\" = ?", o.ProfilePicture),
+	}
+
+	queryMods = append(queryMods, mods...)
+
+	query := Assets(queryMods...)
+	queries.SetFrom(query.Query, "\"asset\"")
+
+	return query
+}
+
 // UserWalks retrieves all the user_walk's UserWalks with an executor.
 func (o *User) UserWalks(mods ...qm.QueryMod) userWalkQuery {
 	var queryMods []qm.QueryMod
@@ -424,6 +488,114 @@ func (o *User) AuthorWalks(mods ...qm.QueryMod) walkQuery {
 	}
 
 	return query
+}
+
+// LoadProfilePictureAsset allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for an N-1 relationship.
+func (userL) LoadProfilePictureAsset(ctx context.Context, e boil.ContextExecutor, singular bool, maybeUser interface{}, mods queries.Applicator) error {
+	var slice []*User
+	var object *User
+
+	if singular {
+		object = maybeUser.(*User)
+	} else {
+		slice = *maybeUser.(*[]*User)
+	}
+
+	args := make([]interface{}, 0, 1)
+	if singular {
+		if object.R == nil {
+			object.R = &userR{}
+		}
+		if !queries.IsNil(object.ProfilePicture) {
+			args = append(args, object.ProfilePicture)
+		}
+
+	} else {
+	Outer:
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &userR{}
+			}
+
+			for _, a := range args {
+				if queries.Equal(a, obj.ProfilePicture) {
+					continue Outer
+				}
+			}
+
+			if !queries.IsNil(obj.ProfilePicture) {
+				args = append(args, obj.ProfilePicture)
+			}
+
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	query := NewQuery(
+		qm.From(`asset`),
+		qm.WhereIn(`asset.id in ?`, args...),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load Asset")
+	}
+
+	var resultSlice []*Asset
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice Asset")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results of eager load for asset")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for asset")
+	}
+
+	if len(userAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+
+	if len(resultSlice) == 0 {
+		return nil
+	}
+
+	if singular {
+		foreign := resultSlice[0]
+		object.R.ProfilePictureAsset = foreign
+		if foreign.R == nil {
+			foreign.R = &assetR{}
+		}
+		foreign.R.ProfilePictureUsers = append(foreign.R.ProfilePictureUsers, object)
+		return nil
+	}
+
+	for _, local := range slice {
+		for _, foreign := range resultSlice {
+			if queries.Equal(local.ProfilePicture, foreign.ID) {
+				local.R.ProfilePictureAsset = foreign
+				if foreign.R == nil {
+					foreign.R = &assetR{}
+				}
+				foreign.R.ProfilePictureUsers = append(foreign.R.ProfilePictureUsers, local)
+				break
+			}
+		}
+	}
+
+	return nil
 }
 
 // LoadUserWalks allows an eager lookup of values, cached into the
@@ -622,6 +794,86 @@ func (userL) LoadAuthorWalks(ctx context.Context, e boil.ContextExecutor, singul
 	return nil
 }
 
+// SetProfilePictureAsset of the user to the related item.
+// Sets o.R.ProfilePictureAsset to related.
+// Adds o to related.R.ProfilePictureUsers.
+func (o *User) SetProfilePictureAsset(ctx context.Context, exec boil.ContextExecutor, insert bool, related *Asset) error {
+	var err error
+	if insert {
+		if err = related.Insert(ctx, exec, boil.Infer()); err != nil {
+			return errors.Wrap(err, "failed to insert into foreign table")
+		}
+	}
+
+	updateQuery := fmt.Sprintf(
+		"UPDATE \"user\" SET %s WHERE %s",
+		strmangle.SetParamNames("\"", "\"", 1, []string{"profile_picture"}),
+		strmangle.WhereClause("\"", "\"", 2, userPrimaryKeyColumns),
+	)
+	values := []interface{}{related.ID, o.ID}
+
+	if boil.IsDebug(ctx) {
+		writer := boil.DebugWriterFrom(ctx)
+		fmt.Fprintln(writer, updateQuery)
+		fmt.Fprintln(writer, values)
+	}
+	if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+		return errors.Wrap(err, "failed to update local table")
+	}
+
+	queries.Assign(&o.ProfilePicture, related.ID)
+	if o.R == nil {
+		o.R = &userR{
+			ProfilePictureAsset: related,
+		}
+	} else {
+		o.R.ProfilePictureAsset = related
+	}
+
+	if related.R == nil {
+		related.R = &assetR{
+			ProfilePictureUsers: UserSlice{o},
+		}
+	} else {
+		related.R.ProfilePictureUsers = append(related.R.ProfilePictureUsers, o)
+	}
+
+	return nil
+}
+
+// RemoveProfilePictureAsset relationship.
+// Sets o.R.ProfilePictureAsset to nil.
+// Removes o from all passed in related items' relationships struct (Optional).
+func (o *User) RemoveProfilePictureAsset(ctx context.Context, exec boil.ContextExecutor, related *Asset) error {
+	var err error
+
+	queries.SetScanner(&o.ProfilePicture, nil)
+	if _, err = o.Update(ctx, exec, boil.Whitelist("profile_picture")); err != nil {
+		return errors.Wrap(err, "failed to update local table")
+	}
+
+	if o.R != nil {
+		o.R.ProfilePictureAsset = nil
+	}
+	if related == nil || related.R == nil {
+		return nil
+	}
+
+	for i, ri := range related.R.ProfilePictureUsers {
+		if queries.Equal(o.ProfilePicture, ri.ProfilePicture) {
+			continue
+		}
+
+		ln := len(related.R.ProfilePictureUsers)
+		if ln > 1 && i < ln-1 {
+			related.R.ProfilePictureUsers[i] = related.R.ProfilePictureUsers[ln-1]
+		}
+		related.R.ProfilePictureUsers = related.R.ProfilePictureUsers[:ln-1]
+		break
+	}
+	return nil
+}
+
 // AddUserWalks adds the given related objects to the existing relationships
 // of the user, optionally inserting them as new records.
 // Appends related to o.R.UserWalks.
@@ -768,6 +1020,16 @@ func (o *User) Insert(ctx context.Context, exec boil.ContextExecutor, columns bo
 	}
 
 	var err error
+	if !boil.TimestampsAreSkipped(ctx) {
+		currTime := time.Now().In(boil.GetLocation())
+
+		if queries.MustTime(o.CreatedAt).IsZero() {
+			queries.SetScanner(&o.CreatedAt, currTime)
+		}
+		if queries.MustTime(o.UpdatedAt).IsZero() {
+			queries.SetScanner(&o.UpdatedAt, currTime)
+		}
+	}
 
 	if err := o.doBeforeInsertHooks(ctx, exec); err != nil {
 		return err
@@ -843,6 +1105,12 @@ func (o *User) Insert(ctx context.Context, exec boil.ContextExecutor, columns bo
 // See boil.Columns.UpdateColumnSet documentation to understand column list inference for updates.
 // Update does not automatically update the record in case of default values. Use .Reload() to refresh the records.
 func (o *User) Update(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) (int64, error) {
+	if !boil.TimestampsAreSkipped(ctx) {
+		currTime := time.Now().In(boil.GetLocation())
+
+		queries.SetScanner(&o.UpdatedAt, currTime)
+	}
+
 	var err error
 	if err = o.doBeforeUpdateHooks(ctx, exec); err != nil {
 		return 0, err
@@ -972,6 +1240,14 @@ func (o UserSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, col
 func (o *User) Upsert(ctx context.Context, exec boil.ContextExecutor, updateOnConflict bool, conflictColumns []string, updateColumns, insertColumns boil.Columns) error {
 	if o == nil {
 		return errors.New("models: no user provided for upsert")
+	}
+	if !boil.TimestampsAreSkipped(ctx) {
+		currTime := time.Now().In(boil.GetLocation())
+
+		if queries.MustTime(o.CreatedAt).IsZero() {
+			queries.SetScanner(&o.CreatedAt, currTime)
+		}
+		queries.SetScanner(&o.UpdatedAt, currTime)
 	}
 
 	if err := o.doBeforeUpsertHooks(ctx, exec); err != nil {
