@@ -17,8 +17,9 @@ type User = {
 const User = () => {
   const { query, isReady } = useRouter();
 
-  const { error, data: user } = useSWR<User>(() =>
-    isReady ? `/user/${query.handle}` : null, fetcher,
+  const { error, data: user } = useSWR<User>(
+    () => (isReady ? `/user/${query.handle}` : null),
+    fetcher
   );
 
   return (

@@ -4,8 +4,9 @@ import useSWR from "swr";
 import { withAuthUser, withAuthUserTokenSSR } from "next-firebase-auth";
 import { DotsHorizontalIcon } from "@heroicons/react/solid";
 
-import withLayout from "../components/Layout";
+import withLayout, { LocationContext } from "../components/Layout";
 import { fetcher } from "../lib/fetcher";
+import { useContextOrThrow } from "../lib/useContext";
 
 type Walk = {
   uuid: string;
@@ -52,7 +53,8 @@ const WalkCard = ({ walk }: { walk: Walk }) => {
           {showDetails && (
             <>
               <div className="absolute top-0 left-0 h-full w-full bg-black opacity-20" />
-              <div className="absolute top-0 left-0 h-full w-full text-white font-medium flex items-center justify-center">
+              <div
+                className="absolute top-0 left-0 h-full w-full text-white font-medium flex items-center justify-center">
                 <div>Length: {Math.floor(Math.random() ** 2 * 30)}min</div>
               </div>
             </>
@@ -75,18 +77,23 @@ const WalkCard = ({ walk }: { walk: Walk }) => {
 };
 
 const Home = () => {
-  const { error, data: walks } = useSWR<Walk[]>("/walks", fetcher);
+  const { position } = useContextOrThrow(LocationContext);
+  const { error, data: walks } = useSWR<Walk[]>(["/walks", position], fetcher);
 
-  return error ? (
-    <div className="h-full mx-auto">{JSON.stringify(error)}</div>
-  ) : walks ? (
+  return (
     <>
-      {walks.map((w) => (
-        <WalkCard key={w.uuid} walk={w} />
-      ))}
+      {error ? (
+        <div className="h-full mx-auto">{JSON.stringify(error)}</div>
+      ) : walks ? (
+        <>
+          {walks.map((w) => (
+            <WalkCard key={w.uuid} walk={w} />
+          ))}
+        </>
+      ) : (
+        <div>loading</div>
+      )}
     </>
-  ) : (
-    <div>loading</div>
   );
 };
 

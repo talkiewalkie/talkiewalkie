@@ -1,7 +1,9 @@
 package routes
 
 import (
+	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/gorilla/mux"
@@ -88,9 +90,49 @@ type WalksItemOutput struct {
 func Walks(w http.ResponseWriter, r *http.Request) {
 	ctx := common.WithContext(r)
 
+	params := r.URL.Query()
+	lngs, foundLng := params["lng"]
+	lats, foundLat := params["lat"]
+	if foundLng != foundLat {
+		http.Error(w, "provide none or both coords params (lng,lat)", http.StatusBadRequest)
+		return
+	}
+	var lng, lat float64
+	if foundLat {
+		val, err := strconv.ParseFloat(lngs[0], 64)
+		if err != nil {
+			http.Error(w, "bad longitude", http.StatusBadRequest)
+			return
+		}
+		lng = val
+		val, err = strconv.ParseFloat(lats[0], 64)
+		if err != nil {
+			http.Error(w, "bad latitude", http.StatusBadRequest)
+			return
+		}
+		lat = val
+	}
+
+	var offset int
+	if vals, ok := params["offset"]; ok && len(vals) > 0 {
+		v, err := strconv.Atoi(vals[0])
+		if err != nil {
+			http.Error(w, "bad offset", http.StatusBadRequest)
+			return
+		}
+		offset = v
+	}
+
 	walks, err := models.Walks(
 		qm.Limit(20),
-		qm.Offset(0),
+		qm.Offset(offset),
+		qm.OrderBy(fmt.Sprintf(
+			"earth_distance(ll_to_earth(%s[0], %s[1]),  ll_to_earth(%f, %f))",
+			models.WalkColumns.StartPoint,
+			models.WalkColumns.StartPoint,
+			lat,
+			lng,
+		)),
 		qm.OrderBy(models.WalkColumns.CreatedAt),
 		qm.Load(models.WalkRels.Author),
 		qm.Load(models.WalkRels.Cover)).All(r.Context(), ctx.Components.Db)

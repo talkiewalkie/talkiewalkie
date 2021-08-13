@@ -1,15 +1,107 @@
-import React, { ReactNode, useState } from "react";
+import React, { createContext, ReactNode, useContext, useState } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import { useAuthUser } from "next-firebase-auth";
 import firebase from "firebase/app";
 import "firebase/auth";
-import { MailIcon } from "@heroicons/react/solid";
+import { MailIcon, XCircleIcon } from "@heroicons/react/solid";
 import { useForm } from "react-hook-form";
-import Modal from "./Modal";
+import ReactMapGL, { Marker } from "react-map-gl";
 import useSWR from "swr";
-import { fetcher } from "../lib/fetcher";
+import { LocationMarkerIcon } from "@heroicons/react/outline";
 
+import Modal from "./Modal";
+import { fetcher } from "../lib/fetcher";
+import { useContextOrThrow } from "../lib/useContext";
+
+type Coords = {
+  lng: number;
+  lat: number;
+};
+
+export const LocationContext = createContext<{
+  position: Coords;
+  setPosition: (p: Coords) => void;
+} | null>(null);
+
+export const LocationContextProvider = ({
+  children,
+}: {
+  children: ReactNode;
+}) => {
+  const [position, setPosition] = useState<Coords>({
+    // Notre-Dame coordinates :P
+    lat: 48.853,
+    lng: 2.3499,
+  });
+
+  return (
+    <LocationContext.Provider value={{ position, setPosition }}>
+      {children}
+    </LocationContext.Provider>
+  );
+};
+
+const LocationCard = () => {
+  const [showMap, setShowMap] = useState(false);
+  const [viewport, setViewport] = useState({
+    latitude: 48.853,
+    longitude: 2.3499,
+    zoom: 10,
+  });
+  const { position, setPosition } = useContextOrThrow(LocationContext);
+  const user = useAuthUser();
+
+  return showMap ? (
+    <ReactMapGL
+      mapboxApiAccessToken="pk.eyJ1IjoidGhlby1tLXR3IiwiYSI6ImNrc2FzaTJ5ZzAwMDYycG81bHNvNnU5dmkifQ.VcoUFDpOkF8vJ5TlnpMnJQ"
+      {...viewport}
+      className="relative"
+      width="100%"
+      height="300px"
+      onViewportChange={(viewport: any) => setViewport(viewport)}
+      onClick={(p) => setPosition({ lng: p.lngLat[0], lat: p.lngLat[1] })}
+    >
+      {position && (
+        <Marker longitude={position.lng} latitude={position.lat}>
+          <LocationMarkerIcon className="text-blue-400" height={32} />
+        </Marker>
+      )}
+      <button
+        className="absolute top-4 right-4 text-gray-500 hover:text-gray-300"
+        onClick={() => setShowMap(false)}
+      >
+        <XCircleIcon height={24} />
+      </button>
+    </ReactMapGL>
+  ) : (
+    <div className="flex items-start">
+      <button
+        className="w-1/2 p-4 font-medium text-white bg-blue-400 hover:bg-blue-300 hover:bg-shadow"
+        onClick={() =>
+          navigator.geolocation.getCurrentPosition(
+            (p) =>
+              setPosition({
+                lng: p.coords.longitude,
+                lat: p.coords.latitude,
+              }),
+            (e) => setShowMap(true),
+            { enableHighAccuracy: true }
+          )
+        }
+      >
+        Geoloc
+      </button>
+      <button
+        className="w-1/2 p-4 font-medium text-blue-400 hover:text-blue-300"
+        onClick={() => setShowMap(true)}
+        disabled={!user.id}
+      >
+        Set Pin{!user.id && ` (sign in)`}
+      </button>
+    </div>
+  );
+};
 const AuthCard = ({
   type,
   onSuccess,
@@ -111,6 +203,7 @@ function Layout({ children }: { children: ReactNode }) {
   const user = useAuthUser();
   const [authCardType, setAuthCardType] = useState<"login" | "signup">();
   const [showUserModal, setShowUserModal] = useState(false);
+  const [posPickerModal, setPosPickerModal] = useState(false);
 
   const { data: me } = useSWR<User>(
     () => (user.clientInitialized && !!user.id && showUserModal ? "/me" : null),
@@ -142,7 +235,13 @@ function Layout({ children }: { children: ReactNode }) {
               </a>
             </Link>
             {user.clientInitialized && (
-              <div className="ml-auto">
+              <div className="ml-auto flex items-center">
+                <button
+                  className="mr-4 text-red-400 hover:text-red-300"
+                  onClick={() => setPosPickerModal(true)}
+                >
+                  <LocationMarkerIcon height={24} />
+                </button>
                 {user.id ? (
                   <button
                     className="h-8 w-8 rounded-full bg-gray-300 border"
@@ -194,6 +293,10 @@ function Layout({ children }: { children: ReactNode }) {
           >
             Sign Out
           </button>
+        </Modal>
+
+        <Modal open={posPickerModal} onClose={() => setPosPickerModal(false)}>
+          <LocationCard />
         </Modal>
       </main>
     </div>

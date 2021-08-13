@@ -26,8 +26,9 @@ const Walk = () => {
 
   const playerRef = useRef<HTMLAudioElement>(null);
 
-  const { error, data: walk } = useSWR<Walk>(() =>
-    isReady ? `/walk/${query.uuid}` : null, fetcher,
+  const { error, data: walk } = useSWR<Walk>(
+    () => (isReady ? `/walk/${query.uuid}` : null),
+    fetcher
   );
   const loading = !walk && !error;
   const [playing, setPlaying] = useState(false);
