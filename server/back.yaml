@@ -21,7 +21,7 @@ spec:
             secretName: backend-service-account
 
       containers:
-      - image: gcr.io/talkiewalkie-305117/talkiewalkie-back:2f8badb7393cd8d5ea0d8f9404ed7817a7542477
+      - image: gcr.io/talkiewalkie-305117/talkiewalkie-back:c02ba3139f903a5012b7008999c39812c9b508c1
         imagePullPolicy: Always
         name: back
         ports:

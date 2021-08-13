@@ -14,7 +14,17 @@ type Walk = {
   description: string;
   author: { uuid: string; handle: string };
   coverUrl: string;
+  distanceFromPoint: number;
 };
+
+const displayDistance = (d: number) =>
+  d > 10_000
+    ? ">10km"
+    : d > 950
+    ? `>${Math.round(d / 1_000)}km`
+    : d > 100
+    ? `>${Math.round(d / 100)}00m`
+    : "<100m";
 
 const WalkCard = ({ walk }: { walk: Walk }) => {
   const [showDetails, setShowDetails] = useState(false);
@@ -53,8 +63,7 @@ const WalkCard = ({ walk }: { walk: Walk }) => {
           {showDetails && (
             <>
               <div className="absolute top-0 left-0 h-full w-full bg-black opacity-20" />
-              <div
-                className="absolute top-0 left-0 h-full w-full text-white font-medium flex items-center justify-center">
+              <div className="absolute top-0 left-0 h-full w-full text-white font-medium flex items-center justify-center">
                 <div>Length: {Math.floor(Math.random() ** 2 * 30)}min</div>
               </div>
             </>
@@ -63,8 +72,8 @@ const WalkCard = ({ walk }: { walk: Walk }) => {
 
         <div className="px-4 flex items-center">
           <span>{walk.title}</span>
-          <span className="ml-auto text-gray-300">
-            {Math.floor(Math.random() ** 2 * 30)}min away
+          <span className="ml-auto text-gray-300 text-sm">
+            {displayDistance(walk.distanceFromPoint)} away
           </span>
         </div>
 

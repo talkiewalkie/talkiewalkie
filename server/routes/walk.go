@@ -2,6 +2,7 @@ package routes
 
 import (
 	"fmt"
+	"math"
 	"net/http"
 	"strconv"
 	"strings"
@@ -80,11 +81,12 @@ type AuthorWalksItemOutput struct {
 }
 
 type WalksItemOutput struct {
-	Uuid        uuid.UUID             `json:"uuid"`
-	Title       string                `json:"title"`
-	Description string                `json:"description"`
-	Author      AuthorWalksItemOutput `json:"author"`
-	CoverUrl    string                `json:"coverUrl"`
+	Uuid              uuid.UUID             `json:"uuid"`
+	Title             string                `json:"title"`
+	Description       string                `json:"description"`
+	Author            AuthorWalksItemOutput `json:"author"`
+	CoverUrl          string                `json:"coverUrl"`
+	DistanceFromPoint float64               `json:"distanceFromPoint"`
 }
 
 func Walks(w http.ResponseWriter, r *http.Request) {
@@ -157,6 +159,8 @@ func Walks(w http.ResponseWriter, r *http.Request) {
 			Description: walk.Description.String,
 			Author:      AuthorWalksItemOutput{walk.R.Author.UUID, walk.R.Author.Handle},
 			CoverUrl:    coverUrl,
+			// XXX: it's a shame to recompute what postgres has done for the sorting, but it's simpler atm
+			DistanceFromPoint: Distance(lat, lng, walk.StartPoint.X, walk.StartPoint.Y),
 		})
 	}
 	common.JsonOut(w, responseWalks)
@@ -226,4 +230,38 @@ func WalkByUuid(w http.ResponseWriter, r *http.Request) {
 		AudioUrl:    audioUrl,
 	}
 	common.JsonOut(w, out)
+}
+
+// HELPERS
+
+// https://gist.github.com/cdipaolo/d3f8db3848278b49db68
+// haversin(θ) function
+func hsin(theta float64) float64 {
+	return math.Pow(math.Sin(theta/2), 2)
+}
+
+// Distance function returns the distance (in meters) between two points of
+//     a given longitude and latitude relatively accurately (using a spherical
+//     approximation of the Earth) through the Haversin Distance Formula for
+//     great arc distance on a sphere with accuracy for small distances
+//
+// point coordinates are supplied in degrees and converted into rad. in the func
+//
+// distance returned is METERS!!!!!!
+// http://en.wikipedia.org/wiki/Haversine_formula
+func Distance(lat1, lon1, lat2, lon2 float64) float64 {
+	// convert to radians
+	// must cast radius as float to multiply later
+	var la1, lo1, la2, lo2, r float64
+	la1 = lat1 * math.Pi / 180
+	lo1 = lon1 * math.Pi / 180
+	la2 = lat2 * math.Pi / 180
+	lo2 = lon2 * math.Pi / 180
+
+	r = 6378100 // Earth radius in METERS
+
+	// calculate
+	h := hsin(la2-la1) + math.Cos(la1)*math.Cos(la2)*hsin(lo2-lo1)
+
+	return 2 * r * math.Asin(math.Sqrt(h))
 }
