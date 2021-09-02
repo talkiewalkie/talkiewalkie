@@ -89,6 +89,8 @@ const Home = () => {
   const { position } = useContextOrThrow(LocationContext);
   const { error, data: walks } = useSWR<Walk[]>(["/walks", position], fetcher);
 
+  // TODO: infinite scrolling
+  // https://dev.to/hunterjsbit/react-infinite-scroll-in-few-lines-588f
   return (
     <>
       {error ? (

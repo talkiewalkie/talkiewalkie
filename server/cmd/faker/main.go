@@ -6,6 +6,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/gosimple/slug"
 	"github.com/joho/godotenv"
 	"github.com/talkiewalkie/talkiewalkie/common"
 	"github.com/talkiewalkie/talkiewalkie/models"
@@ -82,7 +83,7 @@ func main() {
 				continue
 			}
 			if !exists {
-				user = models.User{Handle: handle}
+				user = models.User{Handle: slug.Make(handle)}
 				if err = user.Insert(ctx, components.Db, boil.Infer()); err != nil {
 					log.Printf("-!- could not insert new user with handle '%s': %+v", handle, err)
 					continue

@@ -4,6 +4,9 @@ import (
 	"context"
 	"firebase.google.com/go/v4/auth"
 	"fmt"
+	"github.com/gosimple/slug"
+	"github.com/talkiewalkie/talkiewalkie/models"
+	"github.com/volatiletech/sqlboiler/v4/boil"
 	"log"
 	"math/rand"
 	"os"
@@ -56,10 +59,22 @@ func InitComponents() (*Components, error) {
 		os.Getenv("POSTGRES_HOST"),
 	)
 	db, err := sqlx.Connect("postgres", dsName)
-
 	if err != nil {
 		return nil, err
 	}
+
+	models.AddUserHook(boil.BeforeInsertHook, func(ctx context.Context, db boil.ContextExecutor, u *models.User) error {
+		u.Handle = slug.Make(u.Handle)
+		return nil
+	})
+	models.AddUserHook(boil.BeforeUpdateHook, func(ctx context.Context, db boil.ContextExecutor, u *models.User) error {
+		u.Handle = slug.Make(u.Handle)
+		return nil
+	})
+	models.AddUserHook(boil.BeforeUpsertHook, func(ctx context.Context, db boil.ContextExecutor, u *models.User) error {
+		u.Handle = slug.Make(u.Handle)
+		return nil
+	})
 
 	return &Components{
 		Db:          db,

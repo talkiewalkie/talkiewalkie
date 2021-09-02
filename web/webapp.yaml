@@ -5,7 +5,7 @@ metadata:
     app: webapp
   name: webapp
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: webapp
@@ -15,11 +15,11 @@ spec:
         app: webapp
     spec:
       containers:
-      - image: gcr.io/talkiewalkie-305117/talkiewalkie-front:d3d8ec3db6cfc05c297d7285461bc7fc26ff64ea
-        imagePullPolicy: Always
-        name: webapp
-        ports:
-          - containerPort: 80
+        - image: gcr.io/talkiewalkie-305117/talkiewalkie-front:86d82d9f61bead709fed7e54db26d8bae73c2700
+          imagePullPolicy: Always
+          name: webapp
+          ports:
+            - containerPort: 80
       restartPolicy: Always
 ---
 apiVersion: v1
