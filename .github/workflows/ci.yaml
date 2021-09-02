@@ -73,5 +73,5 @@ jobs:
           gcloud container clusters get-credentials $GKE_CLUSTER --zone $GKE_ZONE --project $GKE_PROJECT
           pushd server && ./build.sh && popd
           pushd web && ./build.sh && popd
-          kubectl wait --for=condition=complete back-build-${{ github.sha }} && kubectl set image deployment/back webapp=gcr.io/${{ secrets.GKE_PROJECT }}/talkiewalkie-back:${{ github.sha }}
-          kubectl wait --for=condition=complete web-build-${{ github.sha }} && kubectl set image deployment/webapp webapp=gcr.io/${{ secrets.GKE_PROJECT }}/talkiewalkie-front:${{ github.sha }}
+          kubectl wait --for=condition=complete job.batch/back-build-${{ github.sha }} && kubectl set image deployment/back webapp=gcr.io/${{ secrets.GKE_PROJECT }}/talkiewalkie-back:${{ github.sha }}
+          kubectl wait --for=condition=complete job.batch/web-build-${{ github.sha }} && kubectl set image deployment/webapp webapp=gcr.io/${{ secrets.GKE_PROJECT }}/talkiewalkie-front:${{ github.sha }}
