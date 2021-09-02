@@ -234,6 +234,14 @@ function Layout({ children }: { children: ReactNode }) {
                 TalkieWalkie
               </a>
             </Link>
+            <button
+              type="button"
+              onClick={() => {
+                throw new Error("Sentry Frontend Error");
+              }}
+            >
+              Throw error
+            </button>
             {user.clientInitialized && (
               <div className="ml-auto flex items-center">
                 <button
