@@ -73,5 +73,7 @@ jobs:
           gcloud container clusters get-credentials $GKE_CLUSTER --zone $GKE_ZONE --project $GKE_PROJECT
           pushd server && ./build.sh && popd
           pushd web && ./build.sh && popd
+          # Delay waiting commands for jobs to be created
+          sleep 10
           kubectl wait --for=condition=complete --timeout=15m job/back-build-${{ github.sha }} && kubectl set image deployment/back webapp=gcr.io/${{ secrets.GKE_PROJECT }}/talkiewalkie-back:${{ github.sha }}
           kubectl wait --for=condition=complete --timeout=15m job/web-build-${{ github.sha }} && kubectl set image deployment/webapp webapp=gcr.io/${{ secrets.GKE_PROJECT }}/talkiewalkie-front:${{ github.sha }}
