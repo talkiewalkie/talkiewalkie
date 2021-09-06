@@ -10,7 +10,10 @@ export const fetcher = async (url: string, params?: Record<string, any>) => {
       fullUrl.searchParams.append(key, params[key])
     );
 
-  const res = await fetch(fullUrl.toString(), { credentials: "include" });
+  const res = await fetch(fullUrl.toString(), {
+    credentials: "include",
+    mode: "cors",
+  });
   if (res.status > 299) {
     const err = new Error(`Encountered error: ${res.status}`);
     err.name = await res.text();
@@ -18,4 +21,21 @@ export const fetcher = async (url: string, params?: Record<string, any>) => {
   }
 
   return res.json();
+};
+
+export const poster = async (url: string, data: Object) => {
+  const res = await fetch(`${api}${url}`, {
+    method: "POST",
+    credentials: "include",
+    mode: "cors",
+    body: JSON.stringify(data),
+  });
+
+  if (res.status > 299) {
+    const err = new Error(`Encountered error: ${res.status}`);
+    err.name = await res.text();
+    throw err;
+  }
+
+  return res;
 };

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useAuthUser } from "next-firebase-auth";
 import firebase from "firebase/app";
 import "firebase/auth";
-import { MailIcon, XCircleIcon } from "@heroicons/react/solid";
+import { MailIcon, PlusIcon, XCircleIcon } from "@heroicons/react/solid";
 import { useForm } from "react-hook-form";
 import ReactMapGL, { Marker } from "react-map-gl";
 import useSWR from "swr";
@@ -14,7 +14,7 @@ import Modal from "./Modal";
 import { fetcher } from "../lib/fetcher";
 import { useContextOrThrow } from "../lib/useContext";
 
-type Coords = {
+export type Coords = {
   lng: number;
   lat: number;
 };
@@ -102,6 +102,7 @@ const LocationCard = () => {
     </div>
   );
 };
+
 const AuthCard = ({
   type,
   onSuccess,
@@ -236,6 +237,11 @@ function Layout({ children }: { children: ReactNode }) {
             </Link>
             {user.clientInitialized && (
               <div className="ml-auto flex items-center">
+                <Link href="/walk/new">
+                  <a className="mr-4 border border-4 rounded text-gray-500 hover:text-gray-300">
+                    <PlusIcon height={24} />
+                  </a>
+                </Link>
                 <button
                   className="mr-4 text-red-400 hover:text-red-300 animate-pulse"
                   onClick={() => setPosPickerModal(true)}
