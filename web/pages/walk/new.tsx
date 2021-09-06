@@ -74,46 +74,27 @@ const CoverAndWalkPicker = ({
   name: string;
   label: string;
 }) => {
-  // Marrying react-hook-form and dropzone according to
-  // https://github.com/react-hook-form/react-hook-form/discussions/2146#discussioncomment-579355
-  const { register, unregister, setValue, watch } = useFormContext();
-  const file = watch("cover");
-  const onDrop = useCallback(
-    (files) => setValue("cover", files, { shouldValidate: true }),
-    [setValue]
-  );
-  const { acceptedFiles, getRootProps, getInputProps, fileRejections } =
-    useDropzone({
-      accept: "image/*",
-      multiple: false,
-      onDrop,
-    });
-  useEffect(() => {
-    register("cover");
-    return () => unregister("cover");
-  }, [register, unregister]);
+  const { register, watch } = useFormContext();
+  const files = watch("cover");
 
   return (
-    <div
-      {...getRootProps({
-        className: "dropzone max-h-48 cursor-pointer relative",
-      })}
-    >
+    <div className="dropzone max-h-48 cursor-pointer relative">
       <label className="hidden" htmlFor="picture">
         Picture
       </label>
-      <input {...getInputProps({ name })} />
-      {fileRejections[0] ? (
+      <input type="file" className="hidden" {...register("cover")} />
+      {false ? (
         <div className="bg-gray-300 hover:bg-gray-200 h-48 flex justify-center items-center">
           <p className="text-sm text-red-500 font-medium">
-            {fileRejections[0].errors.map((e) => e.message).join("\n")}
+            {/*{fileRejections[0].errors.map((e) => e.message).join("\n")}*/}
+            error
           </p>
         </div>
-      ) : acceptedFiles[0] ? (
+      ) : files && files[0] ? (
         <div className="relative">
           <img
             className="w-full max-h-48 object-cover"
-            src={URL.createObjectURL(acceptedFiles[0])}
+            src={URL.createObjectURL(files[0])}
             alt="selected cover picture"
           />
           <div className="absolute top-0 left-0 h-full w-full bg-black opacity-20 hover:opacity-40" />
