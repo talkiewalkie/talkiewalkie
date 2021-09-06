@@ -9,9 +9,12 @@ createdb talkiewalkie
 go run .
 ```
 
+For development one can use [`air`](https://github.com/cosmtrek/air) (`go get -u github.com/cosmtrek/air`) to reload the server on file changes.
+
 ### Getting data
 
 Running the following will insert 500+ walks and a few users to the db.
+
 ```bash
 go run cmd/faker/main.go
 ```
