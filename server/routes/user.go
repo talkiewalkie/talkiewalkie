@@ -9,16 +9,18 @@ import (
 	"github.com/talkiewalkie/talkiewalkie/models"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 	"net/http"
+	"strconv"
 )
 
 // ------------
 
 type UserByHandleOutput struct {
-	Handle  string                   `json:"handle"`
-	Bio     string                   `json:"bio"`
-	Profile string                   `json:"profile"`
-	Walks   []UserByHandleWalkOutput `json:"walks"`
-	Likes   int                      `json:"likes"`
+	Handle     string                   `json:"handle"`
+	Bio        string                   `json:"bio"`
+	Profile    string                   `json:"profile"`
+	TotalWalks int64                    `json:"totalWalks"`
+	Walks      []UserByHandleWalkOutput `json:"walks"`
+	Likes      int                      `json:"likes"`
 }
 
 type UserByHandleWalkOutput struct {
@@ -28,6 +30,17 @@ type UserByHandleWalkOutput struct {
 
 func UserByHandle(w http.ResponseWriter, r *http.Request) {
 	ctx := common.WithContext(r)
+
+	var offset int
+	params := r.URL.Query()
+	if vals, ok := params["offset"]; ok && len(vals) > 0 {
+		value, err := strconv.Atoi(vals[0])
+		if err != nil {
+			http.Error(w, "bad offset", http.StatusBadRequest)
+			return
+		}
+		offset = value
+	}
 
 	vars := mux.Vars(r)
 	handle, ok := vars["handle"]
@@ -39,7 +52,7 @@ func UserByHandle(w http.ResponseWriter, r *http.Request) {
 	u, err := models.Users(
 		models.UserWhere.Handle.EQ(handle),
 		qm.Load(models.UserRels.ProfilePictureAsset),
-		qm.Load(models.UserRels.AuthorWalks),
+		qm.Load(models.UserRels.AuthorWalks, qm.Limit(20), qm.Offset(offset)),
 		qm.Load(qm.Rels(models.UserRels.UserWalks, models.UserWalkRels.Walk))).One(r.Context(), ctx.Components.Db)
 	if errors.Cause(err) == sql.ErrNoRows {
 		http.Error(w, fmt.Sprintf("no user for '%s'", handle), http.StatusNotFound)
@@ -63,12 +76,19 @@ func UserByHandle(w http.ResponseWriter, r *http.Request) {
 		walks = append(walks, UserByHandleWalkOutput{Uuid: userWalk.UUID.String(), Title: userWalk.Title})
 	}
 
+	count, err := models.Walks(models.WalkWhere.AuthorID.EQ(u.ID)).Count(r.Context(), ctx.Components.Db)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("could not count the total number of walks: %+v", err), http.StatusInternalServerError)
+		return
+	}
+
 	out := UserByHandleOutput{
-		Handle:  u.Handle,
-		Bio:     u.Bio.String,
-		Profile: profile,
-		Walks:   walks,
-		Likes:   len(u.R.UserWalks),
+		Handle:     u.Handle,
+		Bio:        u.Bio.String,
+		Profile:    profile,
+		Walks:      walks,
+		TotalWalks: count,
+		Likes:      len(u.R.UserWalks),
 	}
 	common.JsonOut(w, out)
 }

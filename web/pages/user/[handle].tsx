@@ -5,17 +5,38 @@ import Link from "next/link";
 import withLayout from "../../components/Layout";
 import useSWR from "swr";
 import { fetcher } from "../../lib/api";
+import { useState } from "react";
 
 type User = {
   handle: string;
   bio: string;
   profile: string;
+  totalWalks: number;
   walks: { uuid: string; title: string }[];
   likes: number;
 };
 
+const UserWalks = ({ offset }: { offset: number }) => {
+  const { query, isReady } = useRouter();
+  const { data: user } = useSWR<User>(
+    () => (isReady ? `/user/${query.handle}?offset=${offset}` : null),
+    fetcher
+  );
+
+  return (
+    <>
+      {user?.walks?.map((w) => (
+        <Link key={w.uuid} as={`/walk/${w.uuid}`} href="/walk/[uuid]" passHref>
+          <a className="truncate">{w.title}</a>
+        </Link>
+      ))}
+    </>
+  );
+};
+
 const User = () => {
   const { query, isReady } = useRouter();
+  const [pages, setPages] = useState<number[]>([0]);
 
   const { error, data: user } = useSWR<User>(
     () => (isReady ? `/user/${query.handle}` : null),
@@ -32,7 +53,7 @@ const User = () => {
             <div className="font-medium">{user.handle}</div>
             <div className="ml-auto flex items-center space-x-4">
               <div className="flex flex-col text-center">
-                <div className="font-medium">{user.walks.length}</div>
+                <div className="font-medium">{user.totalWalks}</div>
                 <div className="text-gray-400 text-sm">walks</div>
               </div>
               <div className="flex flex-col text-center">
@@ -45,16 +66,15 @@ const User = () => {
             {user.bio}
           </div>
           <div className="mt-4 flex flex-col space-y-2">
-            {user.walks?.map((w) => (
-              <Link
-                key={w.uuid}
-                as={`/walk/${w.uuid}`}
-                href="/walk/[uuid]"
-                passHref
-              >
-                <a className="truncate">{w.title}</a>
-              </Link>
+            {pages.map((offset) => (
+              <UserWalks key={offset} offset={offset} />
             ))}
+            <button
+              className="border px-8 py-1 hover:bg-gray-200"
+              onClick={() => setPages([...pages, (pages.length + 1) * 20])}
+            >
+              more
+            </button>
           </div>
         </div>
       ) : (
