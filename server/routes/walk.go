@@ -24,11 +24,9 @@ type Coords struct {
 }
 
 type CreateWalkInput struct {
-	Title        string    `json:"title"`
-	Description  string    `json:"description"`
-	StartPoint   Coords    `json:"startPoint"`
-	CoverArtUuid uuid.UUID `json:"coverArtUuid"`
-	AudioUuid    uuid.UUID `json:"audioUuid"`
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	StartPoint  Coords `json:"startPoint"`
 }
 
 type CreateWalkOutput struct {
@@ -41,13 +39,15 @@ func CreateWalk(w http.ResponseWriter, r *http.Request) {
 
 	var p CreateWalkInput
 	if err := json.Unmarshal([]byte(r.FormValue("payload")), &p); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		t := r.FormValue("payload")
+		println(t)
+		http.Error(w, fmt.Sprintf("bad payload: %+v", err), http.StatusBadRequest)
 		return
 	}
 
 	cover, coverHeaders, err := r.FormFile("cover")
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, fmt.Sprintf("bad cover: %+v", err), http.StatusBadRequest)
 		return
 	}
 

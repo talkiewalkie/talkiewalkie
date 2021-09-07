@@ -3,6 +3,7 @@ package routes
 import (
 	"bytes"
 	"fmt"
+	"github.com/stretchr/testify/require"
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
@@ -10,7 +11,6 @@ import (
 	"testing"
 
 	"github.com/jmoiron/sqlx"
-	"github.com/stretchr/testify/assert"
 	"github.com/talkiewalkie/talkiewalkie/models"
 	"github.com/talkiewalkie/talkiewalkie/testutils"
 )
@@ -47,10 +47,10 @@ func createImageAssetUploadTest(db *sqlx.DB) func(t *testing.T) {
 
 		UploadHandler(w, req)
 
-		assert.Equal(t, http.StatusOK, w.Result().StatusCode)
+		require.Equal(t, http.StatusOK, w.Result().StatusCode)
 
 		assets, _ := models.Assets().All(req.Context(), db)
-		assert.NotEmptyf(t, assets, "no asset in db")
+		require.NotEmptyf(t, assets, "no asset in db")
 	}
 }
 
@@ -73,9 +73,9 @@ func createAudioAssetUploadTest(db *sqlx.DB) func(t *testing.T) {
 
 		UploadHandler(w, req)
 
-		assert.Equal(t, http.StatusOK, w.Result().StatusCode)
+		require.Equal(t, http.StatusOK, w.Result().StatusCode)
 
 		assets, _ := models.Assets().All(req.Context(), db)
-		assert.NotEmptyf(t, assets, "no asset in db")
+		require.NotEmptyf(t, assets, "no asset in db")
 	}
 }

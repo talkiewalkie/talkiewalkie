@@ -4,13 +4,14 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"github.com/stretchr/testify/require"
 	"github.com/talkiewalkie/talkiewalkie/models"
+	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
 	"github.com/jmoiron/sqlx"
-	"github.com/stretchr/testify/assert"
 	"github.com/talkiewalkie/talkiewalkie/common"
 	"github.com/talkiewalkie/talkiewalkie/testutils"
 )
@@ -30,28 +31,35 @@ func TestWalkRepository(t *testing.T) {
 func createWalkTest(db *sqlx.DB) func(t *testing.T) {
 	return func(t *testing.T) {
 		u := testutils.AddMockUser(db, t)
-		coverArt := testutils.AddMockAsset("image/png", db, t)
-		audio := testutils.AddMockAsset("video/ogg", db, t)
 
 		w := &httptest.ResponseRecorder{}
 		bb, _ := json.Marshal(CreateWalkInput{
-			Title:        "test walk",
-			Description:  "",
-			CoverArtUuid: coverArt.UUID,
-			AudioUuid:    audio.UUID,
+			Title:       "test walk",
+			Description: "test walk for testing purposes",
+			StartPoint:  Coords{Lat: testutils.IPPUDO.X, Lng: testutils.IPPUDO.Y},
 		})
-		r := httptest.NewRequest(http.MethodGet, "/walk", bytes.NewReader(bb))
+		var formData bytes.Buffer
+		formWriter := multipart.NewWriter(&formData)
+		_ = formWriter.WriteField("payload", string(bb))
+		cf, _ := formWriter.CreateFormFile("cover", "cover.test.png")
+		cf.Write([]byte("fake file"))
+		af, _ := formWriter.CreateFormFile("walk", "audio.test.mp3")
+		af.Write([]byte("fake file"))
+		_ = formWriter.Close()
+
+		r := httptest.NewRequest(http.MethodGet, "/walk", &formData)
+		r.Header.Set("Content-Type", formWriter.FormDataContentType())
 		mctx := common.Context{
-			Components: &common.Components{Db: db},
+			Components: &common.Components{Db: db, Storage: testutils.FakeStorageClient{}},
 			User:       u,
 		}
 		ctx := context.WithValue(r.Context(), "context", mctx)
 		r = r.WithContext(ctx)
 
 		CreateWalk(w, r)
-		assert.Equal(t, http.StatusOK, w.Result().StatusCode)
+		require.Equal(t, http.StatusOK, w.Code, "hello", w.Body.String())
 		cnt, err := models.Walks().Count(ctx, mctx.Components.Db)
-		assert.Equal(t, int64(1), cnt)
+		require.Equal(t, int64(1), cnt)
 		if err != nil {
 			t.Fatalf("could not count walks: %+v", err)
 		}
