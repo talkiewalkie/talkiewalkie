@@ -9,7 +9,8 @@ createdb talkiewalkie
 go run .
 ```
 
-For development one can use [`air`](https://github.com/cosmtrek/air) (`go get -u github.com/cosmtrek/air`) to reload the server on file changes.
+For development one can use [`air`](https://github.com/cosmtrek/air) to reload the
+server on file changes. Once installed just run `air`.
 
 ### Getting data
 
