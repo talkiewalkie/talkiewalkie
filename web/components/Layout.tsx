@@ -238,8 +238,8 @@ function Layout({ children }: { children: ReactNode }) {
             {user.clientInitialized && (
               <div className="ml-auto flex items-center">
                 <Link href="/walk/new">
-                  <a className="mr-4 border border-4 rounded text-gray-500 hover:text-gray-300">
-                    <PlusIcon height={24} />
+                  <a className="mr-4 p-1 border-2 rounded text-gray-500 hover:text-white hover:bg-gray-200 hover:shadow">
+                    <PlusIcon height={18} />
                   </a>
                 </Link>
                 <button
@@ -250,7 +250,7 @@ function Layout({ children }: { children: ReactNode }) {
                 </button>
                 {user.id ? (
                   <button
-                    className="h-8 w-8 rounded-full bg-gray-300 border"
+                    className="h-8 w-8 rounded-full bg-gray-300 border hover:shadow"
                     onClick={() => setShowUserModal(!showUserModal)}
                   />
                 ) : (
