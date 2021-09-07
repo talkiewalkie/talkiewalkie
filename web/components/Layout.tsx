@@ -4,17 +4,17 @@ import Link from "next/link";
 import { useAuthUser } from "next-firebase-auth";
 import firebase from "firebase/app";
 import "firebase/auth";
-import { MailIcon, XCircleIcon } from "@heroicons/react/solid";
+import { MailIcon, PlusIcon, XCircleIcon } from "@heroicons/react/solid";
 import { useForm } from "react-hook-form";
 import ReactMapGL, { Marker } from "react-map-gl";
 import useSWR from "swr";
 import { LocationMarkerIcon } from "@heroicons/react/outline";
 
 import Modal from "./Modal";
-import { fetcher } from "../lib/fetcher";
+import { fetcher } from "../lib/api";
 import { useContextOrThrow } from "../lib/useContext";
 
-type Coords = {
+export type Coords = {
   lng: number;
   lat: number;
 };
@@ -102,6 +102,7 @@ const LocationCard = () => {
     </div>
   );
 };
+
 const AuthCard = ({
   type,
   onSuccess,
@@ -236,6 +237,11 @@ function Layout({ children }: { children: ReactNode }) {
             </Link>
             {user.clientInitialized && (
               <div className="ml-auto flex items-center">
+                <Link href="/walk/new">
+                  <a className="mr-4 p-1 border-2 rounded text-gray-500 hover:text-white hover:bg-gray-200 hover:shadow">
+                    <PlusIcon height={18} />
+                  </a>
+                </Link>
                 <button
                   className="mr-4 text-red-400 hover:text-red-300 animate-pulse"
                   onClick={() => setPosPickerModal(true)}
@@ -244,7 +250,7 @@ function Layout({ children }: { children: ReactNode }) {
                 </button>
                 {user.id ? (
                   <button
-                    className="h-8 w-8 rounded-full bg-gray-300 border"
+                    className="h-8 w-8 rounded-full bg-gray-300 border hover:shadow"
                     onClick={() => setShowUserModal(!showUserModal)}
                   />
                 ) : (

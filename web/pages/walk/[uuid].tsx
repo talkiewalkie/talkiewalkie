@@ -10,7 +10,7 @@ import useSWR from "swr";
 import { withAuthUser, withAuthUserTokenSSR } from "next-firebase-auth";
 
 import withLayout from "../../components/Layout";
-import { fetcher } from "../../lib/fetcher";
+import { fetcher } from "../../lib/api";
 
 type Walk = {
   uuid: string;
