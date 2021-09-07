@@ -23,12 +23,12 @@ export const fetcher = async (url: string, params?: Record<string, any>) => {
   return res.json();
 };
 
-export const poster = async (url: string, data: Object) => {
+export const poster = async (url: string, data: FormData) => {
   const res = await fetch(`${api}${url}`, {
     method: "POST",
     credentials: "include",
     mode: "cors",
-    body: JSON.stringify(data),
+    body: data,
   });
 
   if (res.status > 299) {
