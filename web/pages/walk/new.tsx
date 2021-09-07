@@ -20,6 +20,7 @@ import React, {
 import { useContextOrThrow } from "../../lib/useContext";
 import Modal from "../../components/Modal";
 import { FormFileInput } from "../../components/FormFileInput";
+import { useRouter } from "next/router";
 
 const CoverAndWalkPicker = () => {
   const [length, setLength] = useState<string>();
@@ -88,6 +89,7 @@ const CoverAndWalkPicker = () => {
 const NewWalk = () => {
   const { position: userPosition } = useContextOrThrow(LocationContext);
   const authUser = useAuthUser();
+  const { push } = useRouter();
 
   const [viewport, setViewport] = useState({
     latitude: 48.853,
@@ -116,7 +118,11 @@ const NewWalk = () => {
               "payload",
               JSON.stringify({ title, description, startPoint: position })
             );
-            poster("/walk", fd);
+            poster("/walk", fd)
+              .then((res) => res.json())
+              .then((data) =>
+                push({ pathname: "/walk/[uuid]", query: { uuid: data.uuid } })
+              );
           })}
         >
           <div className="px-4 flex items-center">
