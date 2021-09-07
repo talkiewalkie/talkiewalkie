@@ -1,12 +1,8 @@
 package routes
 
 import (
+	"encoding/json"
 	"fmt"
-	"math"
-	"net/http"
-	"strconv"
-	"strings"
-
 	"github.com/gorilla/mux"
 	uuid "github.com/satori/go.uuid"
 	"github.com/talkiewalkie/talkiewalkie/common"
@@ -14,13 +10,22 @@ import (
 	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
+	"math"
+	"net/http"
+	"strconv"
 )
 
 // ------------
 
+type Coords struct {
+	Lat float32 `json:"lat"`
+	Lng float32 `json:"lng"`
+}
+
 type CreateWalkInput struct {
 	Title        string    `json:"title"`
 	Description  string    `json:"description"`
+	StartPoint   Coords    `json:"startPoint"`
 	CoverArtUuid uuid.UUID `json:"coverArtUuid"`
 	AudioUuid    uuid.UUID `json:"audioUuid"`
 }
@@ -34,35 +39,61 @@ func CreateWalk(w http.ResponseWriter, r *http.Request) {
 	ctx := common.WithAuthedContext(r)
 
 	var p CreateWalkInput
-	if err := common.JsonIn(r, &p); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	if err := json.Unmarshal([]byte(r.FormValue("payload")), &p); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	assets, err := models.Assets(
-		models.AssetWhere.UUID.IN([]uuid.UUID{p.AudioUuid, p.CoverArtUuid}),
-	).All(r.Context(), ctx.Components.Db)
+	cover, coverHeaders, err := r.FormFile("cover")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	coverUuid, err := ctx.Components.Storage.Upload(r.Context(), cover)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	var audio, cover *models.Asset
-	if strings.HasPrefix(assets[0].MimeType, "image") && strings.HasPrefix(assets[1].MimeType, "video") {
-		cover = assets[0]
-		audio = assets[1]
-	} else if strings.HasPrefix(assets[1].MimeType, "image") && strings.HasPrefix(assets[0].MimeType, "video") {
-		cover = assets[1]
-		audio = assets[0]
-	} else {
-		http.Error(w, "bad asset references", http.StatusInternalServerError)
+	coverDb := models.Asset{
+		FileName: coverHeaders.Filename,
+		MimeType: coverHeaders.Header.Get("mimeType"),
+		Bucket:   null.NewString("", false),
+		UUID:     *coverUuid,
+	}
+	if err = coverDb.Insert(r.Context(), ctx.Components.Db, boil.Infer()); err != nil {
+		http.Error(w, fmt.Sprintf("failed to insert cover: %+v", err), http.StatusInternalServerError)
+		return
+	}
+
+	audio, audioHeaders, err := r.FormFile("walk")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	audioUuid, err := ctx.Components.Storage.Upload(r.Context(), audio)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	audioDb := models.Asset{
+		FileName: audioHeaders.Filename,
+		MimeType: audioHeaders.Header.Get("mimeType"),
+		Bucket:   null.NewString("", false),
+		UUID:     *audioUuid,
+	}
+	if err = audioDb.Insert(r.Context(), ctx.Components.Db, boil.Infer()); err != nil {
+		http.Error(w, fmt.Sprintf("failed to insert audio: %+v", err), http.StatusInternalServerError)
 		return
 	}
 
 	walk := &models.Walk{
 		Title:    p.Title,
-		CoverID:  null.NewInt(cover.ID, true),
-		AudioID:  null.NewInt(audio.ID, true),
+		CoverID:  null.NewInt(coverDb.ID, true),
+		AudioID:  null.NewInt(audioDb.ID, true),
 		AuthorID: ctx.User.ID,
 	}
 	if err := walk.Insert(r.Context(), ctx.Components.Db, boil.Infer()); err != nil {
