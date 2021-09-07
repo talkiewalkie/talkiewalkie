@@ -1,10 +1,10 @@
-const api =
+const baseUrl =
   process.env.NODE_ENV === "development"
     ? "http://localhost:8080"
     : "https://api.talkiewalkie.app";
 
-export const fetcher = async (url: string, params?: Record<string, any>) => {
-  const fullUrl = new URL(`${api}${url}`);
+export const fetcher = async (path: string, params?: Record<string, any>) => {
+  const fullUrl = new URL(`${baseUrl}${path}`);
   params &&
     Object.keys(params).forEach((key) =>
       fullUrl.searchParams.append(key, params[key])
@@ -12,7 +12,6 @@ export const fetcher = async (url: string, params?: Record<string, any>) => {
 
   const res = await fetch(fullUrl.toString(), {
     credentials: "include",
-    mode: "cors",
   });
   if (res.status > 299) {
     const err = new Error(`Encountered error: ${res.status}`);
@@ -23,11 +22,10 @@ export const fetcher = async (url: string, params?: Record<string, any>) => {
   return res.json();
 };
 
-export const poster = async (url: string, data: FormData) => {
-  const res = await fetch(`${api}${url}`, {
+export const poster = async (path: string, data: FormData) => {
+  const res = await fetch(`${baseUrl}${path}`, {
     method: "POST",
     credentials: "include",
-    mode: "cors",
     body: data,
   });
 

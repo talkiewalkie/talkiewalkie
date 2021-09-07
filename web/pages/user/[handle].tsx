@@ -4,7 +4,7 @@ import Link from "next/link";
 
 import withLayout from "../../components/Layout";
 import useSWR from "swr";
-import { fetcher } from "../../lib/fetcher";
+import { fetcher } from "../../lib/api";
 
 type User = {
   handle: string;

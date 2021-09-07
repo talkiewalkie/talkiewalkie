@@ -5,7 +5,7 @@ import {
 } from "next-firebase-auth";
 import withLayout, { Coords, LocationContext } from "../../components/Layout";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
-import { poster } from "../../lib/fetcher";
+import { poster } from "../../lib/api";
 import ReactMapGL, { Marker } from "react-map-gl";
 import { LocationMarkerIcon } from "@heroicons/react/outline";
 import { CheckCircleIcon, DotsHorizontalIcon } from "@heroicons/react/solid";

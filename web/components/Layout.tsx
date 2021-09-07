@@ -11,7 +11,7 @@ import useSWR from "swr";
 import { LocationMarkerIcon } from "@heroicons/react/outline";
 
 import Modal from "./Modal";
-import { fetcher } from "../lib/fetcher";
+import { fetcher } from "../lib/api";
 import { useContextOrThrow } from "../lib/useContext";
 
 export type Coords = {

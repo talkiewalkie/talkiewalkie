@@ -5,7 +5,7 @@ import { withAuthUser, withAuthUserTokenSSR } from "next-firebase-auth";
 import { DotsHorizontalIcon } from "@heroicons/react/solid";
 
 import withLayout, { LocationContext } from "../components/Layout";
-import { fetcher } from "../lib/fetcher";
+import { fetcher } from "../lib/api";
 import { useContextOrThrow } from "../lib/useContext";
 
 type Walk = {
