@@ -128,9 +128,6 @@ const NewWalk = () => {
           <div className="px-4 flex items-center">
             <div className="h-8 w-8 bg-red-400 rounded-full mr-4" />
             <span className="hover:underline">{authUser.displayName}</span>
-            <div className="ml-auto">
-              <DotsHorizontalIcon height={16} />
-            </div>
           </div>
 
           <CoverAndWalkPicker />

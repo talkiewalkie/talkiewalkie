@@ -1,4 +1,4 @@
-import React, { createContext, ReactNode, useContext, useState } from "react";
+import React, { createContext, ReactNode, useState } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import { useAuthUser } from "next-firebase-auth";
@@ -43,13 +43,14 @@ export const LocationContextProvider = ({
 };
 
 const LocationCard = () => {
+  const { position, setPosition } = useContextOrThrow(LocationContext);
+
   const [showMap, setShowMap] = useState(false);
   const [viewport, setViewport] = useState({
-    latitude: 48.853,
-    longitude: 2.3499,
+    latitude: position.lat,
+    longitude: position.lng,
     zoom: 10,
   });
-  const { position, setPosition } = useContextOrThrow(LocationContext);
   const user = useAuthUser();
 
   return showMap ? (
