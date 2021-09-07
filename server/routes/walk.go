@@ -10,6 +10,7 @@ import (
 	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
+	"github.com/volatiletech/sqlboiler/v4/types/pgeo"
 	"math"
 	"net/http"
 	"strconv"
@@ -18,8 +19,8 @@ import (
 // ------------
 
 type Coords struct {
-	Lat float32 `json:"lat"`
-	Lng float32 `json:"lng"`
+	Lat float64 `json:"lat"`
+	Lng float64 `json:"lng"`
 }
 
 type CreateWalkInput struct {
@@ -91,10 +92,12 @@ func CreateWalk(w http.ResponseWriter, r *http.Request) {
 	}
 
 	walk := &models.Walk{
-		Title:    p.Title,
-		CoverID:  null.NewInt(coverDb.ID, true),
-		AudioID:  null.NewInt(audioDb.ID, true),
-		AuthorID: ctx.User.ID,
+		Title:       p.Title,
+		Description: null.StringFrom(p.Description),
+		CoverID:     null.NewInt(coverDb.ID, true),
+		AudioID:     null.NewInt(audioDb.ID, true),
+		AuthorID:    ctx.User.ID,
+		StartPoint:  pgeo.Point{X: p.StartPoint.Lat, Y: p.StartPoint.Lng},
 	}
 	if err := walk.Insert(r.Context(), ctx.Components.Db, boil.Infer()); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
