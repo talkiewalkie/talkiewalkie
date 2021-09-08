@@ -13,9 +13,6 @@ env:
   GITHUB_SHA: ${{ github.sha }}
   GKE_ZONE: europe-west1-b
   GKE_CLUSTER: talkiewalkie-main
-  IMAGE: talkiewalkie-back
-  REGISTRY_HOSTNAME: gcr.io
-  DEPLOYMENT_NAME: talkiewalkie-back
 
 jobs:
   setup-build-publish-deploy:
@@ -111,5 +108,5 @@ jobs:
             --build-arg COOKIE_SECRET_PREVIOUS=$(kubectl get secrets -n prod mysecrets --template={{.data.cookie_secret_previous}} | base64 -D) \
             --tag gcr.io/$GKE_PROJECT/talkiewalkie-front:$GITHUB_SHA \
             .
-          docker push
+          docker push gcr.io/$GKE_PROJECT/talkiewalkie-front:$GITHUB_SHA
           kubectl set image deployment/webapp webapp=gcr.io/${{ secrets.GKE_PROJECT }}/talkiewalkie-front:${{ github.sha }} -n prod
