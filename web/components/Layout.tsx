@@ -64,7 +64,12 @@ const LocationCard = () => {
       onClick={(p) => setPosition({ lng: p.lngLat[0], lat: p.lngLat[1] })}
     >
       {position && (
-        <Marker longitude={position.lng} latitude={position.lat}>
+        <Marker
+          longitude={position.lng}
+          latitude={position.lat}
+          offsetLeft={-16}
+          offsetTop={-32}
+        >
           <LocationMarkerIcon className="text-blue-400" height={32} />
         </Marker>
       )}

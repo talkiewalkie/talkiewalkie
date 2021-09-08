@@ -30,7 +30,7 @@ export const FormFileInput = ({
     register(name);
 
     return () => unregister(name);
-  }, [register, unregister]);
+  }, [register, unregister, name]);
 
   return (
     <button
