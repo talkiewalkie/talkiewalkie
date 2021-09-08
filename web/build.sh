@@ -30,7 +30,7 @@ kind: Job
 metadata:
   name: web-build-$SHA
 spec:
-  ttlSecondsAfterFinished: 120
+  ttlSecondsAfterFinished: 10
   backoffLimit: 0
   template:
     spec:
