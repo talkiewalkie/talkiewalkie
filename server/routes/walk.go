@@ -133,7 +133,9 @@ func Walks(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "provide none or both coords params (lng,lat)", http.StatusBadRequest)
 		return
 	}
-	var lng, lat float64
+
+	lat := 48.8645814
+	lng := 2.3425034
 	if foundLat {
 		val, err := strconv.ParseFloat(lngs[0], 64)
 		if err != nil {

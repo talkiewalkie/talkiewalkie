@@ -1,22 +1,16 @@
 import {
+  AuthAction,
   useAuthUser,
   withAuthUser,
   withAuthUserTokenSSR,
 } from "next-firebase-auth";
 import withLayout, { Coords, LocationContext } from "../../components/Layout";
-import { FormProvider, useForm, useFormContext } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
 import { poster } from "../../lib/api";
 import ReactMapGL, { Marker } from "react-map-gl";
 import { LocationMarkerIcon } from "@heroicons/react/outline";
-import { CheckCircleIcon, DotsHorizontalIcon } from "@heroicons/react/solid";
-import React, {
-  ChangeEvent,
-  HTMLProps,
-  ReactNode,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { CheckCircleIcon } from "@heroicons/react/solid";
+import React, { useState } from "react";
 import { useContextOrThrow } from "../../lib/useContext";
 import Modal from "../../components/Modal";
 import { FormFileInput } from "../../components/FormFileInput";
@@ -201,6 +195,8 @@ const NewWalk = () => {
   );
 };
 
-export const getServerSideProps = withAuthUserTokenSSR()();
+export const getServerSideProps = withAuthUserTokenSSR({
+  whenUnauthed: AuthAction.REDIRECT_TO_LOGIN,
+})();
 
 export default withAuthUser()(withLayout(NewWalk));
