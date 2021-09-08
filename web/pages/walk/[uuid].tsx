@@ -1,16 +1,20 @@
 import { useRouter } from "next/router";
-import { useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import {
   DotsHorizontalIcon,
   PauseIcon,
   PlayIcon,
 } from "@heroicons/react/solid";
+import { LightningBoltIcon } from "@heroicons/react/outline";
 import Link from "next/link";
 import useSWR from "swr";
 import { withAuthUser, withAuthUserTokenSSR } from "next-firebase-auth";
 
-import withLayout from "../../components/Layout";
+import withLayout, { LocationContext } from "../../components/Layout";
 import { fetcher } from "../../lib/api";
+import ReactMapGL, { Marker, WebMercatorViewport } from "react-map-gl";
+import { LocationMarkerIcon } from "@heroicons/react/outline";
+import { useContextOrThrow } from "../../lib/useContext";
 
 type Walk = {
   uuid: string;
@@ -19,6 +23,53 @@ type Walk = {
   author: { handle: string; uuid: string };
   coverUrl: string;
   audioUrl: string;
+  startPoint: { lat: number; lng: number };
+};
+
+const WalkMap = ({ walk }: { walk: Walk }) => {
+  const { position, setPosition } = useContextOrThrow(LocationContext);
+  const { latitude, longitude, zoom } = new WebMercatorViewport({
+    width: 800,
+    height: 600,
+  }).fitBounds(
+    [
+      [
+        Math.min(position.lng, walk.startPoint.lng),
+        Math.min(position.lat, walk.startPoint.lat),
+      ],
+      [
+        Math.max(position.lng, walk.startPoint.lng),
+        Math.max(position.lat, walk.startPoint.lat),
+      ],
+    ],
+    { padding: 200 }
+  );
+  const [viewport, setViewport] = useState({
+    latitude,
+    longitude,
+    zoom: Math.min(16, zoom),
+  });
+
+  return (
+    <ReactMapGL
+      mapboxApiAccessToken="pk.eyJ1IjoidGhlby1tLXR3IiwiYSI6ImNrc2FzaTJ5ZzAwMDYycG81bHNvNnU5dmkifQ.VcoUFDpOkF8vJ5TlnpMnJQ"
+      {...viewport}
+      className="px-4"
+      width="100%"
+      height="300px"
+      onViewportChange={(viewport: any) => setViewport(viewport)}
+      onClick={(p) => setPosition({ lng: p.lngLat[0], lat: p.lngLat[1] })}
+    >
+      {position && (
+        <Marker longitude={position.lng} latitude={position.lat}>
+          <LocationMarkerIcon className="text-blue-400" height={32} />
+        </Marker>
+      )}
+      <Marker longitude={walk.startPoint.lng} latitude={walk.startPoint.lat}>
+        <LightningBoltIcon className="text-yellow-600" height={32} />
+      </Marker>
+    </ReactMapGL>
+  );
 };
 
 const Walk = () => {
@@ -87,6 +138,7 @@ const Walk = () => {
           </p>
           <p className="text-xs uppercase text-gray-200 my-4">2min ago</p>
         </div>
+        <WalkMap walk={walk} />
       </div>
     )
   );

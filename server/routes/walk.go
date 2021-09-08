@@ -209,6 +209,7 @@ type WalkByUuidOutput struct {
 	Author      AuthorWalksItemOutput `json:"author"`
 	CoverUrl    string                `json:"coverUrl"`
 	AudioUrl    string                `json:"audioUrl"`
+	StartPoint  Coords                `json:"startPoint"`
 }
 
 func WalkByUuid(w http.ResponseWriter, r *http.Request) {
@@ -262,6 +263,7 @@ func WalkByUuid(w http.ResponseWriter, r *http.Request) {
 		Author:      AuthorWalksItemOutput{Uuid: walk.R.Author.UUID, Handle: walk.R.Author.Handle},
 		CoverUrl:    coverUrl,
 		AudioUrl:    audioUrl,
+		StartPoint:  Coords{Lat: walk.StartPoint.X, Lng: walk.StartPoint.Y},
 	}
 	common.JsonOut(w, out)
 }
