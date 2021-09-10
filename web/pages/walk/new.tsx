@@ -199,4 +199,6 @@ export const getServerSideProps = withAuthUserTokenSSR({
   whenUnauthed: AuthAction.REDIRECT_TO_LOGIN,
 })();
 
-export default withAuthUser()(withLayout(NewWalk));
+export default withAuthUser({ authPageURL: "/auth/login" })(
+  withLayout(NewWalk)
+);
