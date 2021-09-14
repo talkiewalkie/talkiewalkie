@@ -9,11 +9,11 @@ import SwiftUI
 
 @main
 struct talkiewalkieApp: App {
-    var home = HomeViewModel()
-    
+    var home = FeedViewModel()
+
     var body: some Scene {
         WindowGroup {
-            ContentView(home: home)
+            FeedView(model: home)
         }
     }
 }

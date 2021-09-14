@@ -3,21 +3,28 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E47F0D0026EF59E800995D8B /* AudioKit in Frameworks */ = {isa = PBXBuildFile; productRef = E47F0CFF26EF59E800995D8B /* AudioKit */; };
+		E47F0D0226EF5A3D00995D8B /* ThingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E47F0D0126EF5A3D00995D8B /* ThingView.swift */; };
+		E47F0D0526EF5AB000995D8B /* AudioKitUI in Frameworks */ = {isa = PBXBuildFile; productRef = E47F0D0426EF5AB000995D8B /* AudioKitUI */; };
+		E4953B1626EF5F8A00244908 /* SoundpipeAudioKit in Frameworks */ = {isa = PBXBuildFile; productRef = E4953B1526EF5F8A00244908 /* SoundpipeAudioKit */; };
+		E4953B1926EF643400244908 /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E4953B1826EF643400244908 /* MapKit.framework */; };
 		E4B9D70E26E8997E0007C62D /* talkiewalkieApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4B9D70D26E8997E0007C62D /* talkiewalkieApp.swift */; };
-		E4B9D71026E8997E0007C62D /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4B9D70F26E8997E0007C62D /* ContentView.swift */; };
+		E4B9D71026E8997E0007C62D /* FeedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4B9D70F26E8997E0007C62D /* FeedView.swift */; };
 		E4B9D71226E8997F0007C62D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E4B9D71126E8997F0007C62D /* Assets.xcassets */; };
 		E4B9D71526E8997F0007C62D /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E4B9D71426E8997F0007C62D /* Preview Assets.xcassets */; };
 		E4B9D72026E8997F0007C62D /* talkiewalkieTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4B9D71F26E8997F0007C62D /* talkiewalkieTests.swift */; };
 		E4B9D72B26E8997F0007C62D /* talkiewalkieUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4B9D72A26E8997F0007C62D /* talkiewalkieUITests.swift */; };
-		E4B9D73D26E8B0A60007C62D /* HomeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4B9D73C26E8B0A60007C62D /* HomeViewModel.swift */; };
+		E4B9D73D26E8B0A60007C62D /* FeedViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4B9D73C26E8B0A60007C62D /* FeedViewModel.swift */; };
 		E4B9D73F26E8E4C30007C62D /* Api.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4B9D73E26E8E4C30007C62D /* Api.swift */; };
 		E4B9D74126E8F75E0007C62D /* RemoteImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4B9D74026E8F75E0007C62D /* RemoteImage.swift */; };
 		E4B9D74326E90FDF0007C62D /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4B9D74226E90FDF0007C62D /* LocationManager.swift */; };
 		E4B9D74526E9171A0007C62D /* Format.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4B9D74426E9171A0007C62D /* Format.swift */; };
+		E4B9D74726EF18C80007C62D /* WalkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4B9D74626EF18C80007C62D /* WalkView.swift */; };
+		E4B9D74926EF1CD90007C62D /* WalkViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4B9D74826EF1CD90007C62D /* WalkViewModel.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -38,9 +45,11 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		E47F0D0126EF5A3D00995D8B /* ThingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThingView.swift; sourceTree = "<group>"; };
+		E4953B1826EF643400244908 /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = System/Library/Frameworks/MapKit.framework; sourceTree = SDKROOT; };
 		E4B9D70A26E8997E0007C62D /* talkiewalkie.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = talkiewalkie.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E4B9D70D26E8997E0007C62D /* talkiewalkieApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = talkiewalkieApp.swift; sourceTree = "<group>"; };
-		E4B9D70F26E8997E0007C62D /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		E4B9D70F26E8997E0007C62D /* FeedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedView.swift; sourceTree = "<group>"; };
 		E4B9D71126E8997F0007C62D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		E4B9D71426E8997F0007C62D /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		E4B9D71626E8997F0007C62D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -50,11 +59,13 @@
 		E4B9D72626E8997F0007C62D /* talkiewalkieUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = talkiewalkieUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		E4B9D72A26E8997F0007C62D /* talkiewalkieUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = talkiewalkieUITests.swift; sourceTree = "<group>"; };
 		E4B9D72C26E8997F0007C62D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		E4B9D73C26E8B0A60007C62D /* HomeViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeViewModel.swift; sourceTree = "<group>"; };
+		E4B9D73C26E8B0A60007C62D /* FeedViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedViewModel.swift; sourceTree = "<group>"; };
 		E4B9D73E26E8E4C30007C62D /* Api.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Api.swift; sourceTree = "<group>"; };
 		E4B9D74026E8F75E0007C62D /* RemoteImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteImage.swift; sourceTree = "<group>"; };
 		E4B9D74226E90FDF0007C62D /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
 		E4B9D74426E9171A0007C62D /* Format.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Format.swift; sourceTree = "<group>"; };
+		E4B9D74626EF18C80007C62D /* WalkView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WalkView.swift; sourceTree = "<group>"; };
+		E4B9D74826EF1CD90007C62D /* WalkViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WalkViewModel.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -62,6 +73,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E47F0D0526EF5AB000995D8B /* AudioKitUI in Frameworks */,
+				E47F0D0026EF59E800995D8B /* AudioKit in Frameworks */,
+				E4953B1926EF643400244908 /* MapKit.framework in Frameworks */,
+				E4953B1626EF5F8A00244908 /* SoundpipeAudioKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -82,6 +97,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		E4953B1726EF643400244908 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				E4953B1826EF643400244908 /* MapKit.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		E4B9D70126E8997E0007C62D = {
 			isa = PBXGroup;
 			children = (
@@ -89,6 +112,7 @@
 				E4B9D71E26E8997F0007C62D /* talkiewalkieTests */,
 				E4B9D72926E8997F0007C62D /* talkiewalkieUITests */,
 				E4B9D70B26E8997E0007C62D /* Products */,
+				E4953B1726EF643400244908 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -106,8 +130,11 @@
 			isa = PBXGroup;
 			children = (
 				E4B9D70D26E8997E0007C62D /* talkiewalkieApp.swift */,
-				E4B9D73C26E8B0A60007C62D /* HomeViewModel.swift */,
-				E4B9D70F26E8997E0007C62D /* ContentView.swift */,
+				E4B9D73C26E8B0A60007C62D /* FeedViewModel.swift */,
+				E4B9D70F26E8997E0007C62D /* FeedView.swift */,
+				E4B9D74626EF18C80007C62D /* WalkView.swift */,
+				E47F0D0126EF5A3D00995D8B /* ThingView.swift */,
+				E4B9D74826EF1CD90007C62D /* WalkViewModel.swift */,
 				E4B9D74426E9171A0007C62D /* Format.swift */,
 				E4B9D74026E8F75E0007C62D /* RemoteImage.swift */,
 				E4B9D71126E8997F0007C62D /* Assets.xcassets */,
@@ -161,6 +188,11 @@
 			dependencies = (
 			);
 			name = talkiewalkie;
+			packageProductDependencies = (
+				E47F0CFF26EF59E800995D8B /* AudioKit */,
+				E47F0D0426EF5AB000995D8B /* AudioKitUI */,
+				E4953B1526EF5F8A00244908 /* SoundpipeAudioKit */,
+			);
 			productName = talkiewalkie;
 			productReference = E4B9D70A26E8997E0007C62D /* talkiewalkie.app */;
 			productType = "com.apple.product-type.application";
@@ -232,6 +264,11 @@
 				Base,
 			);
 			mainGroup = E4B9D70126E8997E0007C62D;
+			packageReferences = (
+				E47F0CFE26EF59E800995D8B /* XCRemoteSwiftPackageReference "AudioKit" */,
+				E47F0D0326EF5AB000995D8B /* XCRemoteSwiftPackageReference "AudioKitUI" */,
+				E4953B1426EF5F8A00244908 /* XCRemoteSwiftPackageReference "SoundpipeAudioKit" */,
+			);
 			productRefGroup = E4B9D70B26E8997E0007C62D /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -274,13 +311,16 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E4B9D71026E8997E0007C62D /* ContentView.swift in Sources */,
+				E4B9D71026E8997E0007C62D /* FeedView.swift in Sources */,
+				E4B9D74926EF1CD90007C62D /* WalkViewModel.swift in Sources */,
 				E4B9D70E26E8997E0007C62D /* talkiewalkieApp.swift in Sources */,
+				E47F0D0226EF5A3D00995D8B /* ThingView.swift in Sources */,
 				E4B9D74326E90FDF0007C62D /* LocationManager.swift in Sources */,
+				E4B9D74726EF18C80007C62D /* WalkView.swift in Sources */,
 				E4B9D74526E9171A0007C62D /* Format.swift in Sources */,
 				E4B9D73F26E8E4C30007C62D /* Api.swift in Sources */,
 				E4B9D74126E8F75E0007C62D /* RemoteImage.swift in Sources */,
-				E4B9D73D26E8B0A60007C62D /* HomeViewModel.swift in Sources */,
+				E4B9D73D26E8B0A60007C62D /* FeedViewModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -450,7 +490,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = talkiewalkie.talkiewalkie;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -472,7 +512,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = talkiewalkie.talkiewalkie;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};
@@ -600,6 +640,51 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		E47F0CFE26EF59E800995D8B /* XCRemoteSwiftPackageReference "AudioKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/AudioKit/AudioKit/";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.2.1;
+			};
+		};
+		E47F0D0326EF5AB000995D8B /* XCRemoteSwiftPackageReference "AudioKitUI" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/AudioKit/AudioKitUI";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
+		E4953B1426EF5F8A00244908 /* XCRemoteSwiftPackageReference "SoundpipeAudioKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/AudioKit/SoundpipeAudioKit";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		E47F0CFF26EF59E800995D8B /* AudioKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E47F0CFE26EF59E800995D8B /* XCRemoteSwiftPackageReference "AudioKit" */;
+			productName = AudioKit;
+		};
+		E47F0D0426EF5AB000995D8B /* AudioKitUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E47F0D0326EF5AB000995D8B /* XCRemoteSwiftPackageReference "AudioKitUI" */;
+			productName = AudioKitUI;
+		};
+		E4953B1526EF5F8A00244908 /* SoundpipeAudioKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E4953B1426EF5F8A00244908 /* XCRemoteSwiftPackageReference "SoundpipeAudioKit" */;
+			productName = SoundpipeAudioKit;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = E4B9D70226E8997E0007C62D /* Project object */;
 }

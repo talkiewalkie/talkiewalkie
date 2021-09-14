@@ -22,7 +22,7 @@ struct RemoteImage: View {
                 fatalError("Invalid URL: \(url)")
             }
 
-            URLSession.shared.dataTask(with: parsedURL) { data, response, error in
+            URLSession.shared.dataTask(with: parsedURL) { data, _, _ in
                 if let data = data, data.count > 0 {
                     self.data = data
                     self.state = .success
