@@ -22,8 +22,6 @@
 	<true/>
 	<key>MKDirectionsApplicationSupportedModes</key>
 	<array/>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>blablabla</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

@@ -19,13 +19,13 @@ struct WalkView: View {
             Image(systemName: "loading")
         } else if player != nil {
             Image(systemName: "play")
-            .opacity(0.9)
-            .frame(width: 200, height: 200, alignment: .center)
+                .opacity(0.9)
+                .frame(width: 200, height: 200, alignment: .center)
         } else {
-             EmptyView()
+            EmptyView()
         }
     }
-    
+
     var body: some View {
         if let w = model.walk {
             ScrollView {

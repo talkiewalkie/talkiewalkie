@@ -20,8 +20,8 @@ class WalkViewModel: ObservableObject {
 
         // TODO: would be nice to have an instant page show when coming from the feed
         switch input {
-        case .FeedWalk(let fw):
-            self.walk = Api.Walk(title: fw.title, description: fw.description, uuid: fw.uuid, coverUrl: fw.coverUrl, audioUrl: "fakeurl", author: fw.author)
+        case let .FeedWalk(fw):
+            walk = Api.Walk(title: fw.title, description: fw.description, uuid: fw.uuid, coverUrl: fw.coverUrl, audioUrl: "fakeurl", author: fw.author)
         default:
             break
         }
@@ -36,9 +36,9 @@ class WalkViewModel: ObservableObject {
         var uuid: String
 
         switch input {
-        case .FeedWalk(let fw):
+        case let .FeedWalk(fw):
             uuid = fw.uuid
-        case .Uuid(let uuid_):
+        case let .Uuid(uuid_):
             uuid = uuid_
         }
 

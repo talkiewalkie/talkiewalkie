@@ -8,10 +8,11 @@
 
 /* Begin PBXBuildFile section */
 		E47F0D0026EF59E800995D8B /* AudioKit in Frameworks */ = {isa = PBXBuildFile; productRef = E47F0CFF26EF59E800995D8B /* AudioKit */; };
-		E47F0D0226EF5A3D00995D8B /* ThingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E47F0D0126EF5A3D00995D8B /* ThingView.swift */; };
 		E47F0D0526EF5AB000995D8B /* AudioKitUI in Frameworks */ = {isa = PBXBuildFile; productRef = E47F0D0426EF5AB000995D8B /* AudioKitUI */; };
 		E4953B1626EF5F8A00244908 /* SoundpipeAudioKit in Frameworks */ = {isa = PBXBuildFile; productRef = E4953B1526EF5F8A00244908 /* SoundpipeAudioKit */; };
 		E4953B1926EF643400244908 /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E4953B1826EF643400244908 /* MapKit.framework */; };
+		E4953B1C26F23B3200244908 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = E4953B1B26F23B3200244908 /* FirebaseAuth */; };
+		E4953B1E26F24FD800244908 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = E4953B1D26F24FD800244908 /* GoogleService-Info.plist */; };
 		E4B9D70E26E8997E0007C62D /* talkiewalkieApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4B9D70D26E8997E0007C62D /* talkiewalkieApp.swift */; };
 		E4B9D71026E8997E0007C62D /* FeedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4B9D70F26E8997E0007C62D /* FeedView.swift */; };
 		E4B9D71226E8997F0007C62D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E4B9D71126E8997F0007C62D /* Assets.xcassets */; };
@@ -25,6 +26,10 @@
 		E4B9D74526E9171A0007C62D /* Format.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4B9D74426E9171A0007C62D /* Format.swift */; };
 		E4B9D74726EF18C80007C62D /* WalkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4B9D74626EF18C80007C62D /* WalkView.swift */; };
 		E4B9D74926EF1CD90007C62D /* WalkViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4B9D74826EF1CD90007C62D /* WalkViewModel.swift */; };
+		E4EEA55326F2531400BFE75C /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = E4EEA55226F2531400BFE75C /* GoogleSignIn */; };
+		E4EEA55526F32F3600BFE75C /* AuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4EEA55426F32F3600BFE75C /* AuthView.swift */; };
+		E4EEA55726F38C8C00BFE75C /* AuthViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4EEA55626F38C8C00BFE75C /* AuthViewModel.swift */; };
+		E4EEA55926F46A9500BFE75C /* ThingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4EEA55826F46A9500BFE75C /* ThingView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -45,8 +50,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		E47F0D0126EF5A3D00995D8B /* ThingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThingView.swift; sourceTree = "<group>"; };
 		E4953B1826EF643400244908 /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = System/Library/Frameworks/MapKit.framework; sourceTree = SDKROOT; };
+		E4953B1D26F24FD800244908 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		E4B9D70A26E8997E0007C62D /* talkiewalkie.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = talkiewalkie.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E4B9D70D26E8997E0007C62D /* talkiewalkieApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = talkiewalkieApp.swift; sourceTree = "<group>"; };
 		E4B9D70F26E8997E0007C62D /* FeedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedView.swift; sourceTree = "<group>"; };
@@ -66,6 +71,9 @@
 		E4B9D74426E9171A0007C62D /* Format.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Format.swift; sourceTree = "<group>"; };
 		E4B9D74626EF18C80007C62D /* WalkView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WalkView.swift; sourceTree = "<group>"; };
 		E4B9D74826EF1CD90007C62D /* WalkViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WalkViewModel.swift; sourceTree = "<group>"; };
+		E4EEA55426F32F3600BFE75C /* AuthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthView.swift; sourceTree = "<group>"; };
+		E4EEA55626F38C8C00BFE75C /* AuthViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthViewModel.swift; sourceTree = "<group>"; };
+		E4EEA55826F46A9500BFE75C /* ThingView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ThingView.swift; path = ../../../../../.Trash/ThingView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -74,9 +82,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				E47F0D0526EF5AB000995D8B /* AudioKitUI in Frameworks */,
+				E4953B1C26F23B3200244908 /* FirebaseAuth in Frameworks */,
 				E47F0D0026EF59E800995D8B /* AudioKit in Frameworks */,
 				E4953B1926EF643400244908 /* MapKit.framework in Frameworks */,
 				E4953B1626EF5F8A00244908 /* SoundpipeAudioKit in Frameworks */,
+				E4EEA55326F2531400BFE75C /* GoogleSignIn in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -132,8 +142,10 @@
 				E4B9D70D26E8997E0007C62D /* talkiewalkieApp.swift */,
 				E4B9D73C26E8B0A60007C62D /* FeedViewModel.swift */,
 				E4B9D70F26E8997E0007C62D /* FeedView.swift */,
+				E4EEA55426F32F3600BFE75C /* AuthView.swift */,
+				E4EEA55626F38C8C00BFE75C /* AuthViewModel.swift */,
 				E4B9D74626EF18C80007C62D /* WalkView.swift */,
-				E47F0D0126EF5A3D00995D8B /* ThingView.swift */,
+				E4EEA55826F46A9500BFE75C /* ThingView.swift */,
 				E4B9D74826EF1CD90007C62D /* WalkViewModel.swift */,
 				E4B9D74426E9171A0007C62D /* Format.swift */,
 				E4B9D74026E8F75E0007C62D /* RemoteImage.swift */,
@@ -142,6 +154,7 @@
 				E4B9D71326E8997F0007C62D /* Preview Content */,
 				E4B9D73E26E8E4C30007C62D /* Api.swift */,
 				E4B9D74226E90FDF0007C62D /* LocationManager.swift */,
+				E4953B1D26F24FD800244908 /* GoogleService-Info.plist */,
 			);
 			path = talkiewalkie;
 			sourceTree = "<group>";
@@ -192,6 +205,8 @@
 				E47F0CFF26EF59E800995D8B /* AudioKit */,
 				E47F0D0426EF5AB000995D8B /* AudioKitUI */,
 				E4953B1526EF5F8A00244908 /* SoundpipeAudioKit */,
+				E4953B1B26F23B3200244908 /* FirebaseAuth */,
+				E4EEA55226F2531400BFE75C /* GoogleSignIn */,
 			);
 			productName = talkiewalkie;
 			productReference = E4B9D70A26E8997E0007C62D /* talkiewalkie.app */;
@@ -268,6 +283,8 @@
 				E47F0CFE26EF59E800995D8B /* XCRemoteSwiftPackageReference "AudioKit" */,
 				E47F0D0326EF5AB000995D8B /* XCRemoteSwiftPackageReference "AudioKitUI" */,
 				E4953B1426EF5F8A00244908 /* XCRemoteSwiftPackageReference "SoundpipeAudioKit" */,
+				E4953B1A26F23B3200244908 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				E4EEA55126F2531400BFE75C /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
 			);
 			productRefGroup = E4B9D70B26E8997E0007C62D /* Products */;
 			projectDirPath = "";
@@ -287,6 +304,7 @@
 			files = (
 				E4B9D71526E8997F0007C62D /* Preview Assets.xcassets in Resources */,
 				E4B9D71226E8997F0007C62D /* Assets.xcassets in Resources */,
+				E4953B1E26F24FD800244908 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -314,12 +332,14 @@
 				E4B9D71026E8997E0007C62D /* FeedView.swift in Sources */,
 				E4B9D74926EF1CD90007C62D /* WalkViewModel.swift in Sources */,
 				E4B9D70E26E8997E0007C62D /* talkiewalkieApp.swift in Sources */,
-				E47F0D0226EF5A3D00995D8B /* ThingView.swift in Sources */,
+				E4EEA55926F46A9500BFE75C /* ThingView.swift in Sources */,
 				E4B9D74326E90FDF0007C62D /* LocationManager.swift in Sources */,
 				E4B9D74726EF18C80007C62D /* WalkView.swift in Sources */,
 				E4B9D74526E9171A0007C62D /* Format.swift in Sources */,
 				E4B9D73F26E8E4C30007C62D /* Api.swift in Sources */,
+				E4EEA55726F38C8C00BFE75C /* AuthViewModel.swift in Sources */,
 				E4B9D74126E8F75E0007C62D /* RemoteImage.swift in Sources */,
+				E4EEA55526F32F3600BFE75C /* AuthView.swift in Sources */,
 				E4B9D73D26E8B0A60007C62D /* FeedViewModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -666,6 +686,22 @@
 				kind = branch;
 			};
 		};
+		E4953B1A26F23B3200244908 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 8.7.0;
+			};
+		};
+		E4EEA55126F2531400BFE75C /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/google/GoogleSignIn-iOS";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 6.0.2;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -683,6 +719,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = E4953B1426EF5F8A00244908 /* XCRemoteSwiftPackageReference "SoundpipeAudioKit" */;
 			productName = SoundpipeAudioKit;
+		};
+		E4953B1B26F23B3200244908 /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E4953B1A26F23B3200244908 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		E4EEA55226F2531400BFE75C /* GoogleSignIn */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E4EEA55126F2531400BFE75C /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignIn;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

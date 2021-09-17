@@ -5,15 +5,23 @@
 //  Created by Théo Matussière on 08/09/2021.
 //
 
+import Firebase
 import SwiftUI
 
 @main
 struct talkiewalkieApp: App {
-    var home = FeedViewModel()
+    init() {
+        FirebaseApp.configure()
+    }
 
     var body: some Scene {
         WindowGroup {
-            FeedView(model: home)
+            let auth = AuthViewModel()
+            let home = FeedViewModel()
+
+            AuthView<FeedView>(vm: auth) {
+                FeedView(model: home)
+            }
         }
     }
 }

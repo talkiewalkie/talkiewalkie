@@ -50,35 +50,31 @@ struct WalkCard: View {
 
 struct FeedView: View {
     @ObservedObject var model: FeedViewModel
-//    @StateObject var locManager = LocationManager()
+    @State private var showingSheet = false
+    @EnvironmentObject var auth: UserViewModel
 
     var body: some View {
-        NavigationView {
-            ScrollView {
-                if model.loading {
-                    // TODO: Spacers not working, the loading text is not centered vertically
-                    Spacer()
-                    Text("loading").foregroundColor(.gray)
-                    Spacer()
-                } else {
-                    LazyVStack(alignment: .center, spacing: 20.0) {
-                        ForEach(model.walks, id: \.uuid) { w in
-                            WalkCard(walk: w)
-                                .padding(.top, model.walks.first?.uuid == w.uuid ? 20 : 0)
-                                .onAppear {
-                                    model.loadMoreIfNeeded(w)
-                                }
-                        }
-                        .frame(width: UIScreen.main.bounds.size.width, alignment: /*@START_MENU_TOKEN@*/ .center/*@END_MENU_TOKEN@*/)
+        ScrollView {
+            if model.loading {
+                // TODO: Spacers not working, the loading text is not centered vertically
+                Spacer()
+                Text("loading").foregroundColor(.gray)
+                Spacer()
+            } else {
+                LazyVStack(alignment: .center, spacing: 20.0) {
+                    ForEach(model.walks, id: \.uuid) { w in
+                        WalkCard(walk: w)
+                            .padding(.top, model.walks.first?.uuid == w.uuid ? 20 : 0)
+                            .onAppear {
+                                model.loadMoreIfNeeded(w)
+                            }
                     }
+                    .frame(width: UIScreen.main.bounds.size.width, alignment: /*@START_MENU_TOKEN@*/ .center/*@END_MENU_TOKEN@*/)
                 }
             }
-            .onAppear {
-//                model.position = locManager.lastLocation?.coordinate
-                model.getPage(0)
-            }
-            .navigationBarTitle("TalkieWalkie")
-            .navigationBarItems(leading: Text(""), trailing: NavigationLink("Account", destination: VocalTractView()))
+        }
+        .onAppear {
+            model.getPage(0)
         }
     }
 }
@@ -88,7 +84,7 @@ struct ContentView_Previews: PreviewProvider {
         let home = FeedViewModel()
         home.addWalk(Api.WalksItem(title: "Tour of the thing", description: "I did a thing that's really great yeah i was there a few times in November last year blablabla.", uuid: "uuid", coverUrl: "https://picsum.photos/200", author: Api.WalkAuthor(uuid: "uuid1", handle: "theo"), distanceFromPoint: 300))
         home.addWalk(Api.WalksItem(title: "Moving to montreal", description: "I did a thing that's really great yeah i was there a few times blablabla.", uuid: "uu2id", coverUrl: "https://picsum.photos/200", author: Api.WalkAuthor(uuid: "uui21", handle: "georg"), distanceFromPoint: 10000))
-        
+
         return FeedView(model: home)
     }
 }

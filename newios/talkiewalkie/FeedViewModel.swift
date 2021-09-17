@@ -5,19 +5,17 @@
 //  Created by Théo Matussière on 08/09/2021.
 //
 
-import CoreLocation
 import Foundation
 
 class FeedViewModel: ObservableObject {
     @Published private(set) var walks: [Api.WalksItem] = []
     @Published private(set) var loading = false // true
-    @Published var position: CLLocationCoordinate2D?
 
     // MARK: - Intent(s)
 
     func getPage(_ page: Int = 0) {
         loading = true
-        Api.walks(offset: page, position: position) { val, _ in
+        Api.walks(offset: page, position: nil) { val, _ in
             self.loading = false
             if let walks = val {
                 print("fetched \(walks.count) new walks, adding to existing \(self.walks.count)")

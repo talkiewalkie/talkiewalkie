@@ -52,7 +52,6 @@ struct Api {
 
     // MARK: - WALK
 
-
     struct Walk: Codable {
         let title: String
         let description: String
@@ -61,7 +60,7 @@ struct Api {
         let audioUrl: String
         let author: WalkAuthor
     }
-    
+
     static func walk(_ uuid: String, completion: @escaping (Api.Walk?, Error?) -> Void) {
         let url = URLComponents(string: "\(Api.url)/walk/\(uuid)")!
         Api.get(url.url!, completion: completion)
