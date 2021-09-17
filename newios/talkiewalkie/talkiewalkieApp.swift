@@ -17,11 +17,8 @@ struct talkiewalkieApp: App {
     var body: some Scene {
         WindowGroup {
             let auth = AuthViewModel()
-            let home = FeedViewModel()
-
-            AuthView<FeedView>(vm: auth) {
-                FeedView(model: home)
-            }
+            
+            AuthView(vm: auth)
         }
     }
 }

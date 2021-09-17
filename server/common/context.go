@@ -14,6 +14,7 @@ import (
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 type Context struct {
@@ -38,6 +39,9 @@ func WithContextMiddleWare(comps *Components) mux.MiddlewareFunc {
 
 			var u *models.User
 
+			// TODO: we should uniformize auth methods, we currently maintain two: the cookie based one just below,
+			//   which we maintain for the webapp which uses a library to manage auth that I don't really like, and the
+			// 	 much more standard header based one I used for iOS. We should only keep the latter.
 			tokenb64, err := r.Cookie("TalkieWalkie.AuthUserTokens")
 			if err == nil {
 				quotedStr, err := base64.StdEncoding.DecodeString(tokenb64.Value)
@@ -61,6 +65,39 @@ func WithContextMiddleWare(comps *Components) mux.MiddlewareFunc {
 				tok, err := comps.FbAuth.VerifyIDTokenAndCheckRevoked(r.Context(), fbToken.IdToken)
 				if err != nil {
 					http.Error(w, fmt.Sprintf("auth cookie provided but couldn't be verified: %+v", err), http.StatusBadRequest)
+					return
+				}
+				u, err = models.Users(models.UserWhere.FirebaseUID.EQ(null.NewString(tok.UID, true))).One(r.Context(), comps.Db)
+				if errors.Cause(err) == sql.ErrNoRows {
+					var handle, picture string
+					if name, ok := tok.Claims["name"]; ok {
+						handle = slug.Make(name.(string))
+					}
+					if email, ok := tok.Claims["email"]; ok && handle == "" {
+						handle = slug.Make(email.(string))
+					}
+					if url, ok := tok.Claims["picture"]; ok {
+						picture = url.(string)
+					}
+
+					fmt.Printf("%s %s", handle, picture)
+					u = &models.User{
+						Handle:         handle,
+						FirebaseUID:    null.NewString(tok.UID, true),
+						ProfilePicture: null.NewInt(0, false), // TODO reupload picture
+					}
+					if err = u.Insert(r.Context(), comps.Db, boil.Infer()); err != nil {
+						http.Error(w, fmt.Sprintf("could not create matching db user for new firebase user: %+v", err), http.StatusInternalServerError)
+						return
+					}
+				} else if err != nil {
+					http.Error(w, fmt.Sprintf("failed to query for user uid: %+v", err), http.StatusInternalServerError)
+					return
+				}
+			} else if tokb64 := r.Header.Get("X-TalkieWalkie-Auth"); tokb64 != "" {
+				tok, err := comps.FbAuth.VerifyIDTokenAndCheckRevoked(r.Context(), strings.Replace(tokb64, "Bearer ", "", 1))
+				if err != nil {
+					http.Error(w, fmt.Sprintf("auth header provided couldn't be verified: %+v", err), http.StatusBadRequest)
 					return
 				}
 				u, err = models.Users(models.UserWhere.FirebaseUID.EQ(null.NewString(tok.UID, true))).One(r.Context(), comps.Db)

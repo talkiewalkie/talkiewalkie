@@ -10,18 +10,24 @@ import Foundation
 class FeedViewModel: ObservableObject {
     @Published private(set) var walks: [Api.WalksItem] = []
     @Published private(set) var loading = false // true
+    
+    let api: Api
+    
+    init(api: Api) {
+        self.api = api
+    }
 
     // MARK: - Intent(s)
 
     func getPage(_ page: Int = 0) {
         loading = true
-        Api.walks(offset: page, position: nil) { val, _ in
+        self.api.walks(offset: page, position: nil) { val, err in
             self.loading = false
             if let walks = val {
                 print("fetched \(walks.count) new walks, adding to existing \(self.walks.count)")
                 self.walks.append(contentsOf: walks)
-            } else {
-                print("no walks")
+            } else if let err = err {
+                print(err)
                 return
             }
         }
@@ -36,5 +42,10 @@ class FeedViewModel: ObservableObject {
         if w.uuid == walks.last?.uuid {
             getPage(walks.count)
         }
+    }
+    
+    func refresh() {
+        walks = []
+        getPage()
     }
 }

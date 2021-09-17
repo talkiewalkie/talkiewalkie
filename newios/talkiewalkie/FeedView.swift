@@ -8,10 +8,11 @@
 import SwiftUI
 
 struct WalkCard: View {
+    @EnvironmentObject var auth: UserViewModel
     let walk: Api.WalksItem
-
+    
     var body: some View {
-        NavigationLink(destination: WalkView(model: WalkViewModel(input: WalkViewModel.Input.FeedWalk(walk)))) {
+        NavigationLink(destination: WalkView(model: WalkViewModel(input: WalkViewModel.Input.FeedWalk(walk), api: auth.api))) {
             VStack(alignment: .leading, spacing: 10) {
                 HStack(alignment: .center, spacing: nil) {
                     Text("p")
@@ -52,14 +53,20 @@ struct FeedView: View {
     @ObservedObject var model: FeedViewModel
     @State private var showingSheet = false
     @EnvironmentObject var auth: UserViewModel
-
+    
     var body: some View {
-        ScrollView {
+        RefreshableScrollView(action: { model.refresh() }) {
             if model.loading {
                 // TODO: Spacers not working, the loading text is not centered vertically
-                Spacer()
-                Text("loading").foregroundColor(.gray)
-                Spacer()
+                VStack(alignment: .center, spacing: 20.0) {
+                    Spacer()
+                    ProgressView("Loading")
+                    Spacer()
+                }.frame(
+                    width: UIScreen.main.bounds.size.width,
+                    height: UIScreen.main.bounds.size.height,
+                    alignment: .topLeading
+                  )
             } else {
                 LazyVStack(alignment: .center, spacing: 20.0) {
                     ForEach(model.walks, id: \.uuid) { w in
@@ -81,10 +88,10 @@ struct FeedView: View {
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        let home = FeedViewModel()
+        let home = FeedViewModel(api: Api(token: "xxx"))
         home.addWalk(Api.WalksItem(title: "Tour of the thing", description: "I did a thing that's really great yeah i was there a few times in November last year blablabla.", uuid: "uuid", coverUrl: "https://picsum.photos/200", author: Api.WalkAuthor(uuid: "uuid1", handle: "theo"), distanceFromPoint: 300))
         home.addWalk(Api.WalksItem(title: "Moving to montreal", description: "I did a thing that's really great yeah i was there a few times blablabla.", uuid: "uu2id", coverUrl: "https://picsum.photos/200", author: Api.WalkAuthor(uuid: "uui21", handle: "georg"), distanceFromPoint: 10000))
-
+        
         return FeedView(model: home)
     }
 }

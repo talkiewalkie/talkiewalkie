@@ -8,9 +8,8 @@
 import FirebaseAuth
 import SwiftUI
 
-struct AuthView<Label>: View where Label: View {
+struct AuthView: View {
     @ObservedObject var vm: AuthViewModel
-    let signedInView: () -> Label
     @State private var showingSheet = false
     @State private var signInFlow = false
 
@@ -18,10 +17,10 @@ struct AuthView<Label>: View where Label: View {
     @State var password: String = ""
 
     var body: some View {
-        if let u = vm.user {
+        if let u = vm.user, let api = vm.api {
             NavigationView {
-                signedInView()
-                    .environmentObject(UserViewModel(user: u))
+                FeedView(model: FeedViewModel(api: api))
+                    .environmentObject(UserViewModel(user: u, api: api))
                     .sheet(isPresented: $showingSheet) {
                         VStack {
                             Text(u.email ?? "no email")
@@ -98,6 +97,6 @@ struct AuthView_Previews: PreviewProvider {
     static var previews: some View {
         let vm = AuthViewModel()
 
-        return AuthView(vm: vm) { EmptyView() }
+        return AuthView(vm: vm)
     }
 }

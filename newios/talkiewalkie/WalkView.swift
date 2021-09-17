@@ -83,8 +83,8 @@ struct WalkView: View {
 struct WalkView_Previews: PreviewProvider {
     static var previews: some View {
         let walk = Api.WalksItem(title: "Tour of the thing", description: "I did a thing that's really great yeah i was there a few times in November last year blablabla.", uuid: "uuid", coverUrl: "https://picsum.photos/200", author: Api.WalkAuthor(uuid: "uuid1", handle: "theo"), distanceFromPoint: 300)
-        let vm = WalkViewModel(input: WalkViewModel.Input.FeedWalk(walk))
-        let vm2 = WalkViewModel(input: WalkViewModel.Input.Uuid("ieijie"))
+        let vm = WalkViewModel(input: WalkViewModel.Input.FeedWalk(walk), api: Api(token: "xxx"))
+        let vm2 = WalkViewModel(input: WalkViewModel.Input.Uuid("ieijie"), api: Api(token: "xxx"))
 
         return Group {
             WalkView(model: vm)

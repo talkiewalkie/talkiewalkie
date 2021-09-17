@@ -12,10 +12,11 @@ class WalkViewModel: ObservableObject {
         case FeedWalk(Api.WalksItem)
         case Uuid(String)
     }
-
+    
     let input: WalkViewModel.Input
+    let api :Api
 
-    init(input: WalkViewModel.Input) {
+    init(input: WalkViewModel.Input, api: Api) {
         self.input = input
 
         // TODO: would be nice to have an instant page show when coming from the feed
@@ -25,6 +26,8 @@ class WalkViewModel: ObservableObject {
         default:
             break
         }
+        
+        self.api = api
     }
 
     @Published private(set) var walk: Api.Walk?
@@ -44,7 +47,7 @@ class WalkViewModel: ObservableObject {
 
         loading = true
 
-        Api.walk(uuid) { val, err in
+        api.walk(uuid) { val, err in
             self.loading = false
             print("finished getting walk")
             if let w = val {

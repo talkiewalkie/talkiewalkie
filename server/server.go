@@ -82,7 +82,7 @@ func main() {
 		handlers.AllowCredentials(),
 		// TODO: The sentry-trace header is sent by the web client on initial calls for some reason. It's a bit strange
 		//    and should be investigated - but I wasted enough time on strange CORS errors for the day.
-		handlers.AllowedHeaders([]string{"Authorization", "Content-Type", "sentry-trace"}),
+		handlers.AllowedHeaders([]string{"Authorization", "Content-Type", "sentry-trace", "X-TalkieWalkie-Auth"}),
 		handlers.AllowedOrigins([]string{host}),
 		handlers.AllowedMethods([]string{http.MethodPost, http.MethodGet, http.MethodOptions, http.MethodHead}))
 
