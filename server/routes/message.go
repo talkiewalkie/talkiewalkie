@@ -54,6 +54,8 @@ func Message(w http.ResponseWriter, r *http.Request) {
 		ids = append(ids, recipient.ID)
 	}
 
+	// TODO: this could be severely optimised as we iterate multiple times over the same groups to retrieve an already
+	//    existing one.
 	ugs, err := models.UserGroups(
 		models.UserGroupWhere.UserID.IN(ids),
 		qm.Load(qm.Rels(models.UserGroupRels.Group, models.GroupRels.UserGroups)),

@@ -129,3 +129,19 @@ func AddMockAsset(mimeType string, db common.DBLogger, t *testing.T) *models.Ass
 	}
 	return a
 }
+
+func AddMockGroup(db common.DBLogger, t *testing.T, users ...*models.User) *models.Group {
+	g := &models.Group{}
+	if err := g.Insert(context.Background(), db, boil.Infer()); err != nil {
+		t.Log(err)
+		t.Fail()
+	}
+	for _, user := range users {
+		ug := models.UserGroup{GroupID: g.ID, UserID: user.ID}
+		if err := ug.Insert(context.Background(), db, boil.Infer()); err != nil {
+			t.Log(err)
+			t.Fail()
+		}
+	}
+	return g
+}
