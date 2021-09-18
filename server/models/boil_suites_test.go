@@ -13,77 +13,110 @@ import "testing"
 // Separating the tests thusly grants avoidance of Postgres deadlocks.
 func TestParent(t *testing.T) {
 	t.Run("Assets", testAssets)
+	t.Run("Groups", testGroups)
+	t.Run("Messages", testMessages)
 	t.Run("Users", testUsers)
+	t.Run("UserGroups", testUserGroups)
 	t.Run("UserWalks", testUserWalks)
 	t.Run("Walks", testWalks)
 }
 
 func TestDelete(t *testing.T) {
 	t.Run("Assets", testAssetsDelete)
+	t.Run("Groups", testGroupsDelete)
+	t.Run("Messages", testMessagesDelete)
 	t.Run("Users", testUsersDelete)
+	t.Run("UserGroups", testUserGroupsDelete)
 	t.Run("UserWalks", testUserWalksDelete)
 	t.Run("Walks", testWalksDelete)
 }
 
 func TestQueryDeleteAll(t *testing.T) {
 	t.Run("Assets", testAssetsQueryDeleteAll)
+	t.Run("Groups", testGroupsQueryDeleteAll)
+	t.Run("Messages", testMessagesQueryDeleteAll)
 	t.Run("Users", testUsersQueryDeleteAll)
+	t.Run("UserGroups", testUserGroupsQueryDeleteAll)
 	t.Run("UserWalks", testUserWalksQueryDeleteAll)
 	t.Run("Walks", testWalksQueryDeleteAll)
 }
 
 func TestSliceDeleteAll(t *testing.T) {
 	t.Run("Assets", testAssetsSliceDeleteAll)
+	t.Run("Groups", testGroupsSliceDeleteAll)
+	t.Run("Messages", testMessagesSliceDeleteAll)
 	t.Run("Users", testUsersSliceDeleteAll)
+	t.Run("UserGroups", testUserGroupsSliceDeleteAll)
 	t.Run("UserWalks", testUserWalksSliceDeleteAll)
 	t.Run("Walks", testWalksSliceDeleteAll)
 }
 
 func TestExists(t *testing.T) {
 	t.Run("Assets", testAssetsExists)
+	t.Run("Groups", testGroupsExists)
+	t.Run("Messages", testMessagesExists)
 	t.Run("Users", testUsersExists)
+	t.Run("UserGroups", testUserGroupsExists)
 	t.Run("UserWalks", testUserWalksExists)
 	t.Run("Walks", testWalksExists)
 }
 
 func TestFind(t *testing.T) {
 	t.Run("Assets", testAssetsFind)
+	t.Run("Groups", testGroupsFind)
+	t.Run("Messages", testMessagesFind)
 	t.Run("Users", testUsersFind)
+	t.Run("UserGroups", testUserGroupsFind)
 	t.Run("UserWalks", testUserWalksFind)
 	t.Run("Walks", testWalksFind)
 }
 
 func TestBind(t *testing.T) {
 	t.Run("Assets", testAssetsBind)
+	t.Run("Groups", testGroupsBind)
+	t.Run("Messages", testMessagesBind)
 	t.Run("Users", testUsersBind)
+	t.Run("UserGroups", testUserGroupsBind)
 	t.Run("UserWalks", testUserWalksBind)
 	t.Run("Walks", testWalksBind)
 }
 
 func TestOne(t *testing.T) {
 	t.Run("Assets", testAssetsOne)
+	t.Run("Groups", testGroupsOne)
+	t.Run("Messages", testMessagesOne)
 	t.Run("Users", testUsersOne)
+	t.Run("UserGroups", testUserGroupsOne)
 	t.Run("UserWalks", testUserWalksOne)
 	t.Run("Walks", testWalksOne)
 }
 
 func TestAll(t *testing.T) {
 	t.Run("Assets", testAssetsAll)
+	t.Run("Groups", testGroupsAll)
+	t.Run("Messages", testMessagesAll)
 	t.Run("Users", testUsersAll)
+	t.Run("UserGroups", testUserGroupsAll)
 	t.Run("UserWalks", testUserWalksAll)
 	t.Run("Walks", testWalksAll)
 }
 
 func TestCount(t *testing.T) {
 	t.Run("Assets", testAssetsCount)
+	t.Run("Groups", testGroupsCount)
+	t.Run("Messages", testMessagesCount)
 	t.Run("Users", testUsersCount)
+	t.Run("UserGroups", testUserGroupsCount)
 	t.Run("UserWalks", testUserWalksCount)
 	t.Run("Walks", testWalksCount)
 }
 
 func TestHooks(t *testing.T) {
 	t.Run("Assets", testAssetsHooks)
+	t.Run("Groups", testGroupsHooks)
+	t.Run("Messages", testMessagesHooks)
 	t.Run("Users", testUsersHooks)
+	t.Run("UserGroups", testUserGroupsHooks)
 	t.Run("UserWalks", testUserWalksHooks)
 	t.Run("Walks", testWalksHooks)
 }
@@ -91,8 +124,14 @@ func TestHooks(t *testing.T) {
 func TestInsert(t *testing.T) {
 	t.Run("Assets", testAssetsInsert)
 	t.Run("Assets", testAssetsInsertWhitelist)
+	t.Run("Groups", testGroupsInsert)
+	t.Run("Groups", testGroupsInsertWhitelist)
+	t.Run("Messages", testMessagesInsert)
+	t.Run("Messages", testMessagesInsertWhitelist)
 	t.Run("Users", testUsersInsert)
 	t.Run("Users", testUsersInsertWhitelist)
+	t.Run("UserGroups", testUserGroupsInsert)
+	t.Run("UserGroups", testUserGroupsInsertWhitelist)
 	t.Run("UserWalks", testUserWalksInsert)
 	t.Run("UserWalks", testUserWalksInsertWhitelist)
 	t.Run("Walks", testWalksInsert)
@@ -102,7 +141,11 @@ func TestInsert(t *testing.T) {
 // TestToOne tests cannot be run in parallel
 // or deadlocks can occur.
 func TestToOne(t *testing.T) {
+	t.Run("MessageToUserUsingAuthor", testMessageToOneUserUsingAuthor)
+	t.Run("MessageToGroupUsingGroup", testMessageToOneGroupUsingGroup)
 	t.Run("UserToAssetUsingProfilePictureAsset", testUserToOneAssetUsingProfilePictureAsset)
+	t.Run("UserGroupToGroupUsingGroup", testUserGroupToOneGroupUsingGroup)
+	t.Run("UserGroupToUserUsingUser", testUserGroupToOneUserUsingUser)
 	t.Run("UserWalkToUserUsingUser", testUserWalkToOneUserUsingUser)
 	t.Run("UserWalkToWalkUsingWalk", testUserWalkToOneWalkUsingWalk)
 	t.Run("WalkToAssetUsingAudio", testWalkToOneAssetUsingAudio)
@@ -120,6 +163,10 @@ func TestToMany(t *testing.T) {
 	t.Run("AssetToProfilePictureUsers", testAssetToManyProfilePictureUsers)
 	t.Run("AssetToAudioWalks", testAssetToManyAudioWalks)
 	t.Run("AssetToCoverWalks", testAssetToManyCoverWalks)
+	t.Run("GroupToMessages", testGroupToManyMessages)
+	t.Run("GroupToUserGroups", testGroupToManyUserGroups)
+	t.Run("UserToAuthorMessages", testUserToManyAuthorMessages)
+	t.Run("UserToUserGroups", testUserToManyUserGroups)
 	t.Run("UserToUserWalks", testUserToManyUserWalks)
 	t.Run("UserToAuthorWalks", testUserToManyAuthorWalks)
 	t.Run("WalkToUserWalks", testWalkToManyUserWalks)
@@ -128,7 +175,11 @@ func TestToMany(t *testing.T) {
 // TestToOneSet tests cannot be run in parallel
 // or deadlocks can occur.
 func TestToOneSet(t *testing.T) {
+	t.Run("MessageToUserUsingAuthorMessages", testMessageToOneSetOpUserUsingAuthor)
+	t.Run("MessageToGroupUsingMessages", testMessageToOneSetOpGroupUsingGroup)
 	t.Run("UserToAssetUsingProfilePictureUsers", testUserToOneSetOpAssetUsingProfilePictureAsset)
+	t.Run("UserGroupToGroupUsingUserGroups", testUserGroupToOneSetOpGroupUsingGroup)
+	t.Run("UserGroupToUserUsingUserGroups", testUserGroupToOneSetOpUserUsingUser)
 	t.Run("UserWalkToUserUsingUserWalks", testUserWalkToOneSetOpUserUsingUser)
 	t.Run("UserWalkToWalkUsingUserWalks", testUserWalkToOneSetOpWalkUsingWalk)
 	t.Run("WalkToAssetUsingAudioWalks", testWalkToOneSetOpAssetUsingAudio)
@@ -139,6 +190,8 @@ func TestToOneSet(t *testing.T) {
 // TestToOneRemove tests cannot be run in parallel
 // or deadlocks can occur.
 func TestToOneRemove(t *testing.T) {
+	t.Run("MessageToUserUsingAuthorMessages", testMessageToOneRemoveOpUserUsingAuthor)
+	t.Run("MessageToGroupUsingMessages", testMessageToOneRemoveOpGroupUsingGroup)
 	t.Run("UserToAssetUsingProfilePictureUsers", testUserToOneRemoveOpAssetUsingProfilePictureAsset)
 	t.Run("WalkToAssetUsingAudioWalks", testWalkToOneRemoveOpAssetUsingAudio)
 	t.Run("WalkToAssetUsingCoverWalks", testWalkToOneRemoveOpAssetUsingCover)
@@ -158,6 +211,10 @@ func TestToManyAdd(t *testing.T) {
 	t.Run("AssetToProfilePictureUsers", testAssetToManyAddOpProfilePictureUsers)
 	t.Run("AssetToAudioWalks", testAssetToManyAddOpAudioWalks)
 	t.Run("AssetToCoverWalks", testAssetToManyAddOpCoverWalks)
+	t.Run("GroupToMessages", testGroupToManyAddOpMessages)
+	t.Run("GroupToUserGroups", testGroupToManyAddOpUserGroups)
+	t.Run("UserToAuthorMessages", testUserToManyAddOpAuthorMessages)
+	t.Run("UserToUserGroups", testUserToManyAddOpUserGroups)
 	t.Run("UserToUserWalks", testUserToManyAddOpUserWalks)
 	t.Run("UserToAuthorWalks", testUserToManyAddOpAuthorWalks)
 	t.Run("WalkToUserWalks", testWalkToManyAddOpUserWalks)
@@ -169,6 +226,8 @@ func TestToManySet(t *testing.T) {
 	t.Run("AssetToProfilePictureUsers", testAssetToManySetOpProfilePictureUsers)
 	t.Run("AssetToAudioWalks", testAssetToManySetOpAudioWalks)
 	t.Run("AssetToCoverWalks", testAssetToManySetOpCoverWalks)
+	t.Run("GroupToMessages", testGroupToManySetOpMessages)
+	t.Run("UserToAuthorMessages", testUserToManySetOpAuthorMessages)
 }
 
 // TestToManyRemove tests cannot be run in parallel
@@ -177,39 +236,56 @@ func TestToManyRemove(t *testing.T) {
 	t.Run("AssetToProfilePictureUsers", testAssetToManyRemoveOpProfilePictureUsers)
 	t.Run("AssetToAudioWalks", testAssetToManyRemoveOpAudioWalks)
 	t.Run("AssetToCoverWalks", testAssetToManyRemoveOpCoverWalks)
+	t.Run("GroupToMessages", testGroupToManyRemoveOpMessages)
+	t.Run("UserToAuthorMessages", testUserToManyRemoveOpAuthorMessages)
 }
 
 func TestReload(t *testing.T) {
 	t.Run("Assets", testAssetsReload)
+	t.Run("Groups", testGroupsReload)
+	t.Run("Messages", testMessagesReload)
 	t.Run("Users", testUsersReload)
+	t.Run("UserGroups", testUserGroupsReload)
 	t.Run("UserWalks", testUserWalksReload)
 	t.Run("Walks", testWalksReload)
 }
 
 func TestReloadAll(t *testing.T) {
 	t.Run("Assets", testAssetsReloadAll)
+	t.Run("Groups", testGroupsReloadAll)
+	t.Run("Messages", testMessagesReloadAll)
 	t.Run("Users", testUsersReloadAll)
+	t.Run("UserGroups", testUserGroupsReloadAll)
 	t.Run("UserWalks", testUserWalksReloadAll)
 	t.Run("Walks", testWalksReloadAll)
 }
 
 func TestSelect(t *testing.T) {
 	t.Run("Assets", testAssetsSelect)
+	t.Run("Groups", testGroupsSelect)
+	t.Run("Messages", testMessagesSelect)
 	t.Run("Users", testUsersSelect)
+	t.Run("UserGroups", testUserGroupsSelect)
 	t.Run("UserWalks", testUserWalksSelect)
 	t.Run("Walks", testWalksSelect)
 }
 
 func TestUpdate(t *testing.T) {
 	t.Run("Assets", testAssetsUpdate)
+	t.Run("Groups", testGroupsUpdate)
+	t.Run("Messages", testMessagesUpdate)
 	t.Run("Users", testUsersUpdate)
+	t.Run("UserGroups", testUserGroupsUpdate)
 	t.Run("UserWalks", testUserWalksUpdate)
 	t.Run("Walks", testWalksUpdate)
 }
 
 func TestSliceUpdateAll(t *testing.T) {
 	t.Run("Assets", testAssetsSliceUpdateAll)
+	t.Run("Groups", testGroupsSliceUpdateAll)
+	t.Run("Messages", testMessagesSliceUpdateAll)
 	t.Run("Users", testUsersSliceUpdateAll)
+	t.Run("UserGroups", testUserGroupsSliceUpdateAll)
 	t.Run("UserWalks", testUserWalksSliceUpdateAll)
 	t.Run("Walks", testWalksSliceUpdateAll)
 }

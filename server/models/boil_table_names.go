@@ -4,13 +4,19 @@
 package models
 
 var TableNames = struct {
-	Asset    string
-	User     string
-	UserWalk string
-	Walk     string
+	Asset     string
+	Group     string
+	Message   string
+	User      string
+	UserGroup string
+	UserWalk  string
+	Walk      string
 }{
-	Asset:    "asset",
-	User:     "user",
-	UserWalk: "user_walk",
-	Walk:     "walk",
+	Asset:     "asset",
+	Group:     "group",
+	Message:   "message",
+	User:      "user",
+	UserGroup: "user_group",
+	UserWalk:  "user_walk",
+	Walk:      "walk",
 }

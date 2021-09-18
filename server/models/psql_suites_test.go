@@ -8,7 +8,13 @@ import "testing"
 func TestUpsert(t *testing.T) {
 	t.Run("Assets", testAssetsUpsert)
 
+	t.Run("Groups", testGroupsUpsert)
+
+	t.Run("Messages", testMessagesUpsert)
+
 	t.Run("Users", testUsersUpsert)
+
+	t.Run("UserGroups", testUserGroupsUpsert)
 
 	t.Run("UserWalks", testUserWalksUpsert)
 

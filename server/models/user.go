@@ -60,29 +60,6 @@ var UserColumns = struct {
 
 // Generated where
 
-type whereHelpernull_Int struct{ field string }
-
-func (w whereHelpernull_Int) EQ(x null.Int) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, false, x)
-}
-func (w whereHelpernull_Int) NEQ(x null.Int) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, true, x)
-}
-func (w whereHelpernull_Int) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
-func (w whereHelpernull_Int) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
-func (w whereHelpernull_Int) LT(x null.Int) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LT, x)
-}
-func (w whereHelpernull_Int) LTE(x null.Int) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LTE, x)
-}
-func (w whereHelpernull_Int) GT(x null.Int) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GT, x)
-}
-func (w whereHelpernull_Int) GTE(x null.Int) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GTE, x)
-}
-
 type whereHelpernull_Time struct{ field string }
 
 func (w whereHelpernull_Time) EQ(x null.Time) qm.QueryMod {
@@ -129,19 +106,25 @@ var UserWhere = struct {
 // UserRels is where relationship names are stored.
 var UserRels = struct {
 	ProfilePictureAsset string
+	AuthorMessages      string
+	UserGroups          string
 	UserWalks           string
 	AuthorWalks         string
 }{
 	ProfilePictureAsset: "ProfilePictureAsset",
+	AuthorMessages:      "AuthorMessages",
+	UserGroups:          "UserGroups",
 	UserWalks:           "UserWalks",
 	AuthorWalks:         "AuthorWalks",
 }
 
 // userR is where relationships are stored.
 type userR struct {
-	ProfilePictureAsset *Asset        `db:"ProfilePictureAsset" boil:"ProfilePictureAsset" json:"ProfilePictureAsset" toml:"ProfilePictureAsset" yaml:"ProfilePictureAsset"`
-	UserWalks           UserWalkSlice `db:"UserWalks" boil:"UserWalks" json:"UserWalks" toml:"UserWalks" yaml:"UserWalks"`
-	AuthorWalks         WalkSlice     `db:"AuthorWalks" boil:"AuthorWalks" json:"AuthorWalks" toml:"AuthorWalks" yaml:"AuthorWalks"`
+	ProfilePictureAsset *Asset         `db:"ProfilePictureAsset" boil:"ProfilePictureAsset" json:"ProfilePictureAsset" toml:"ProfilePictureAsset" yaml:"ProfilePictureAsset"`
+	AuthorMessages      MessageSlice   `db:"AuthorMessages" boil:"AuthorMessages" json:"AuthorMessages" toml:"AuthorMessages" yaml:"AuthorMessages"`
+	UserGroups          UserGroupSlice `db:"UserGroups" boil:"UserGroups" json:"UserGroups" toml:"UserGroups" yaml:"UserGroups"`
+	UserWalks           UserWalkSlice  `db:"UserWalks" boil:"UserWalks" json:"UserWalks" toml:"UserWalks" yaml:"UserWalks"`
+	AuthorWalks         WalkSlice      `db:"AuthorWalks" boil:"AuthorWalks" json:"AuthorWalks" toml:"AuthorWalks" yaml:"AuthorWalks"`
 }
 
 // NewStruct creates a new relationship struct
@@ -448,6 +431,48 @@ func (o *User) ProfilePictureAsset(mods ...qm.QueryMod) assetQuery {
 	return query
 }
 
+// AuthorMessages retrieves all the message's Messages with an executor via author_id column.
+func (o *User) AuthorMessages(mods ...qm.QueryMod) messageQuery {
+	var queryMods []qm.QueryMod
+	if len(mods) != 0 {
+		queryMods = append(queryMods, mods...)
+	}
+
+	queryMods = append(queryMods,
+		qm.Where("\"message\".\"author_id\"=?", o.ID),
+	)
+
+	query := Messages(queryMods...)
+	queries.SetFrom(query.Query, "\"message\"")
+
+	if len(queries.GetSelect(query.Query)) == 0 {
+		queries.SetSelect(query.Query, []string{"\"message\".*"})
+	}
+
+	return query
+}
+
+// UserGroups retrieves all the user_group's UserGroups with an executor.
+func (o *User) UserGroups(mods ...qm.QueryMod) userGroupQuery {
+	var queryMods []qm.QueryMod
+	if len(mods) != 0 {
+		queryMods = append(queryMods, mods...)
+	}
+
+	queryMods = append(queryMods,
+		qm.Where("\"user_group\".\"user_id\"=?", o.ID),
+	)
+
+	query := UserGroups(queryMods...)
+	queries.SetFrom(query.Query, "\"user_group\"")
+
+	if len(queries.GetSelect(query.Query)) == 0 {
+		queries.SetSelect(query.Query, []string{"\"user_group\".*"})
+	}
+
+	return query
+}
+
 // UserWalks retrieves all the user_walk's UserWalks with an executor.
 func (o *User) UserWalks(mods ...qm.QueryMod) userWalkQuery {
 	var queryMods []qm.QueryMod
@@ -590,6 +615,202 @@ func (userL) LoadProfilePictureAsset(ctx context.Context, e boil.ContextExecutor
 					foreign.R = &assetR{}
 				}
 				foreign.R.ProfilePictureUsers = append(foreign.R.ProfilePictureUsers, local)
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
+// LoadAuthorMessages allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for a 1-M or N-M relationship.
+func (userL) LoadAuthorMessages(ctx context.Context, e boil.ContextExecutor, singular bool, maybeUser interface{}, mods queries.Applicator) error {
+	var slice []*User
+	var object *User
+
+	if singular {
+		object = maybeUser.(*User)
+	} else {
+		slice = *maybeUser.(*[]*User)
+	}
+
+	args := make([]interface{}, 0, 1)
+	if singular {
+		if object.R == nil {
+			object.R = &userR{}
+		}
+		args = append(args, object.ID)
+	} else {
+	Outer:
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &userR{}
+			}
+
+			for _, a := range args {
+				if queries.Equal(a, obj.ID) {
+					continue Outer
+				}
+			}
+
+			args = append(args, obj.ID)
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	query := NewQuery(
+		qm.From(`message`),
+		qm.WhereIn(`message.author_id in ?`, args...),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load message")
+	}
+
+	var resultSlice []*Message
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice message")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results in eager load on message")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for message")
+	}
+
+	if len(messageAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+	if singular {
+		object.R.AuthorMessages = resultSlice
+		for _, foreign := range resultSlice {
+			if foreign.R == nil {
+				foreign.R = &messageR{}
+			}
+			foreign.R.Author = object
+		}
+		return nil
+	}
+
+	for _, foreign := range resultSlice {
+		for _, local := range slice {
+			if queries.Equal(local.ID, foreign.AuthorID) {
+				local.R.AuthorMessages = append(local.R.AuthorMessages, foreign)
+				if foreign.R == nil {
+					foreign.R = &messageR{}
+				}
+				foreign.R.Author = local
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
+// LoadUserGroups allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for a 1-M or N-M relationship.
+func (userL) LoadUserGroups(ctx context.Context, e boil.ContextExecutor, singular bool, maybeUser interface{}, mods queries.Applicator) error {
+	var slice []*User
+	var object *User
+
+	if singular {
+		object = maybeUser.(*User)
+	} else {
+		slice = *maybeUser.(*[]*User)
+	}
+
+	args := make([]interface{}, 0, 1)
+	if singular {
+		if object.R == nil {
+			object.R = &userR{}
+		}
+		args = append(args, object.ID)
+	} else {
+	Outer:
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &userR{}
+			}
+
+			for _, a := range args {
+				if a == obj.ID {
+					continue Outer
+				}
+			}
+
+			args = append(args, obj.ID)
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	query := NewQuery(
+		qm.From(`user_group`),
+		qm.WhereIn(`user_group.user_id in ?`, args...),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load user_group")
+	}
+
+	var resultSlice []*UserGroup
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice user_group")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results in eager load on user_group")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for user_group")
+	}
+
+	if len(userGroupAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+	if singular {
+		object.R.UserGroups = resultSlice
+		for _, foreign := range resultSlice {
+			if foreign.R == nil {
+				foreign.R = &userGroupR{}
+			}
+			foreign.R.User = object
+		}
+		return nil
+	}
+
+	for _, foreign := range resultSlice {
+		for _, local := range slice {
+			if local.ID == foreign.UserID {
+				local.R.UserGroups = append(local.R.UserGroups, foreign)
+				if foreign.R == nil {
+					foreign.R = &userGroupR{}
+				}
+				foreign.R.User = local
 				break
 			}
 		}
@@ -870,6 +1091,182 @@ func (o *User) RemoveProfilePictureAsset(ctx context.Context, exec boil.ContextE
 		}
 		related.R.ProfilePictureUsers = related.R.ProfilePictureUsers[:ln-1]
 		break
+	}
+	return nil
+}
+
+// AddAuthorMessages adds the given related objects to the existing relationships
+// of the user, optionally inserting them as new records.
+// Appends related to o.R.AuthorMessages.
+// Sets related.R.Author appropriately.
+func (o *User) AddAuthorMessages(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Message) error {
+	var err error
+	for _, rel := range related {
+		if insert {
+			queries.Assign(&rel.AuthorID, o.ID)
+			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
+				return errors.Wrap(err, "failed to insert into foreign table")
+			}
+		} else {
+			updateQuery := fmt.Sprintf(
+				"UPDATE \"message\" SET %s WHERE %s",
+				strmangle.SetParamNames("\"", "\"", 1, []string{"author_id"}),
+				strmangle.WhereClause("\"", "\"", 2, messagePrimaryKeyColumns),
+			)
+			values := []interface{}{o.ID, rel.ID}
+
+			if boil.IsDebug(ctx) {
+				writer := boil.DebugWriterFrom(ctx)
+				fmt.Fprintln(writer, updateQuery)
+				fmt.Fprintln(writer, values)
+			}
+			if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+				return errors.Wrap(err, "failed to update foreign table")
+			}
+
+			queries.Assign(&rel.AuthorID, o.ID)
+		}
+	}
+
+	if o.R == nil {
+		o.R = &userR{
+			AuthorMessages: related,
+		}
+	} else {
+		o.R.AuthorMessages = append(o.R.AuthorMessages, related...)
+	}
+
+	for _, rel := range related {
+		if rel.R == nil {
+			rel.R = &messageR{
+				Author: o,
+			}
+		} else {
+			rel.R.Author = o
+		}
+	}
+	return nil
+}
+
+// SetAuthorMessages removes all previously related items of the
+// user replacing them completely with the passed
+// in related items, optionally inserting them as new records.
+// Sets o.R.Author's AuthorMessages accordingly.
+// Replaces o.R.AuthorMessages with related.
+// Sets related.R.Author's AuthorMessages accordingly.
+func (o *User) SetAuthorMessages(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Message) error {
+	query := "update \"message\" set \"author_id\" = null where \"author_id\" = $1"
+	values := []interface{}{o.ID}
+	if boil.IsDebug(ctx) {
+		writer := boil.DebugWriterFrom(ctx)
+		fmt.Fprintln(writer, query)
+		fmt.Fprintln(writer, values)
+	}
+	_, err := exec.ExecContext(ctx, query, values...)
+	if err != nil {
+		return errors.Wrap(err, "failed to remove relationships before set")
+	}
+
+	if o.R != nil {
+		for _, rel := range o.R.AuthorMessages {
+			queries.SetScanner(&rel.AuthorID, nil)
+			if rel.R == nil {
+				continue
+			}
+
+			rel.R.Author = nil
+		}
+
+		o.R.AuthorMessages = nil
+	}
+	return o.AddAuthorMessages(ctx, exec, insert, related...)
+}
+
+// RemoveAuthorMessages relationships from objects passed in.
+// Removes related items from R.AuthorMessages (uses pointer comparison, removal does not keep order)
+// Sets related.R.Author.
+func (o *User) RemoveAuthorMessages(ctx context.Context, exec boil.ContextExecutor, related ...*Message) error {
+	var err error
+	for _, rel := range related {
+		queries.SetScanner(&rel.AuthorID, nil)
+		if rel.R != nil {
+			rel.R.Author = nil
+		}
+		if _, err = rel.Update(ctx, exec, boil.Whitelist("author_id")); err != nil {
+			return err
+		}
+	}
+	if o.R == nil {
+		return nil
+	}
+
+	for _, rel := range related {
+		for i, ri := range o.R.AuthorMessages {
+			if rel != ri {
+				continue
+			}
+
+			ln := len(o.R.AuthorMessages)
+			if ln > 1 && i < ln-1 {
+				o.R.AuthorMessages[i] = o.R.AuthorMessages[ln-1]
+			}
+			o.R.AuthorMessages = o.R.AuthorMessages[:ln-1]
+			break
+		}
+	}
+
+	return nil
+}
+
+// AddUserGroups adds the given related objects to the existing relationships
+// of the user, optionally inserting them as new records.
+// Appends related to o.R.UserGroups.
+// Sets related.R.User appropriately.
+func (o *User) AddUserGroups(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*UserGroup) error {
+	var err error
+	for _, rel := range related {
+		if insert {
+			rel.UserID = o.ID
+			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
+				return errors.Wrap(err, "failed to insert into foreign table")
+			}
+		} else {
+			updateQuery := fmt.Sprintf(
+				"UPDATE \"user_group\" SET %s WHERE %s",
+				strmangle.SetParamNames("\"", "\"", 1, []string{"user_id"}),
+				strmangle.WhereClause("\"", "\"", 2, userGroupPrimaryKeyColumns),
+			)
+			values := []interface{}{o.ID, rel.ID}
+
+			if boil.IsDebug(ctx) {
+				writer := boil.DebugWriterFrom(ctx)
+				fmt.Fprintln(writer, updateQuery)
+				fmt.Fprintln(writer, values)
+			}
+			if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+				return errors.Wrap(err, "failed to update foreign table")
+			}
+
+			rel.UserID = o.ID
+		}
+	}
+
+	if o.R == nil {
+		o.R = &userR{
+			UserGroups: related,
+		}
+	} else {
+		o.R.UserGroups = append(o.R.UserGroups, related...)
+	}
+
+	for _, rel := range related {
+		if rel.R == nil {
+			rel.R = &userGroupR{
+				User: o,
+			}
+		} else {
+			rel.R.User = o
+		}
 	}
 	return nil
 }

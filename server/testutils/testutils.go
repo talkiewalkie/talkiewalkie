@@ -32,10 +32,13 @@ func SetupDb() *sqlx.DB {
 
 func TearDownDb(db *sqlx.DB) {
 	tx := db.MustBegin()
-	tx.MustExec(`DELETE FROM "user";`)
+	tx.MustExec(`DELETE FROM "message";`)
+	tx.MustExec(`DELETE FROM "user_group";`)
+	tx.MustExec(`DELETE FROM "group";`)
 	tx.MustExec(`DELETE FROM "walk";`)
 	tx.MustExec(`DELETE FROM "user_walk";`)
 	tx.MustExec(`DELETE FROM "asset";`)
+	tx.MustExec(`DELETE FROM "user";`)
 	if err := tx.Commit(); err != nil {
 		log.Panicf("could not reset db state: %+v", err)
 	}

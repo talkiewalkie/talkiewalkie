@@ -105,3 +105,44 @@ func Me(w http.ResponseWriter, r *http.Request) {
 	out := MeOutput{Handle: ctx.User.Handle}
 	common.JsonOut(w, out)
 }
+
+// --------
+
+type FriendsOutput struct {
+	Handles []string `json:"handles"`
+}
+
+func Friends(w http.ResponseWriter, r *http.Request) {
+	ctx := common.WithAuthedContext(r)
+
+	pageSz := 20
+
+	var offset int
+	offsetVal := r.URL.Query().Get("offset")
+	offset, err := strconv.Atoi(offsetVal)
+	if offsetVal != "" && err != nil {
+		http.Error(w, "offset param is not an integer", http.StatusBadRequest)
+		return
+	}
+
+	groups, err := models.UserGroups(
+		models.UserGroupWhere.UserID.EQ(ctx.User.ID),
+		qm.Load(models.UserGroupRels.User),
+		qm.OrderBy(fmt.Sprintf("%s DESC", models.UserGroupColumns.CreatedAt)),
+		qm.Offset(offset), qm.Limit(pageSz),
+	).All(r.Context(), ctx.Components.Db)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("could not fetch user's groups: %+v", err), http.StatusInternalServerError)
+		return
+	}
+
+	handles := []string{}
+	for _, group := range groups {
+		if group.R.User.Handle != ctx.User.Handle {
+			handles = append(handles, group.R.User.Handle)
+		}
+	}
+
+	out := FriendsOutput{Handles: handles}
+	common.JsonOut(w, out)
+}

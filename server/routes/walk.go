@@ -195,7 +195,8 @@ func Walks(w http.ResponseWriter, r *http.Request) {
 			Description: walk.Description.String,
 			Author:      AuthorWalksItemOutput{walk.R.Author.UUID, walk.R.Author.Handle},
 			CoverUrl:    coverUrl,
-			// XXX: it's a shame to recompute what postgres has done for the sorting, but it's simpler atm
+			// TODO: it's a shame to recompute what postgres has done for the sorting, but it's simpler atm
+			//   when we some free cycles we can do this with https://github.com/volatiletech/sqlboiler#binding
 			DistanceFromPoint: Distance(lat, lng, walk.StartPoint.X, walk.StartPoint.Y),
 		})
 	}
