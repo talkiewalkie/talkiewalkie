@@ -29,6 +29,11 @@ func Message(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if len(msg.Handles) == 0 {
+		http.Error(w, "message needs a recipient", http.StatusBadRequest)
+		return
+	}
+
 	handles := make(map[string]int)
 	for _, handle := range msg.Handles {
 		handles[handle] += 1
