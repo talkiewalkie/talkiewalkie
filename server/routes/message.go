@@ -54,7 +54,7 @@ func Message(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ids := []int{}
+	ids := []int{ctx.User.ID}
 	for _, recipient := range recipients {
 		ids = append(ids, recipient.ID)
 	}
@@ -73,7 +73,17 @@ func Message(w http.ResponseWriter, r *http.Request) {
 	for _, ug := range ugs {
 		groupIds := []int{}
 		for _, ug := range ug.R.Group.R.UserGroups {
-			groupIds = append(groupIds, ug.UserID)
+			// TODO: somehow traversing the dependencies brings redundant rows, e.g. the list we're iterating on can
+			// 		yield [115, 115, 116] as user ids.
+			redundant := false
+			for _, id := range groupIds {
+				if ug.UserID == id {
+					redundant = true
+				}
+			}
+			if !redundant {
+				groupIds = append(groupIds, ug.UserID)
+			}
 		}
 		sort.Ints(groupIds)
 		if reflect.DeepEqual(groupIds, ids) {
