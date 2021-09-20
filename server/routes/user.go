@@ -10,6 +10,7 @@ import (
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 // ------------
@@ -109,6 +110,12 @@ func Me(w http.ResponseWriter, r *http.Request) {
 // --------
 
 type FriendsOutput struct {
+	Friends []FriendsOutputGroup `json:"handles"`
+}
+
+type FriendsOutputGroup struct {
+	Uuid    string   `json:"uuid"`
+	Display string   `json:"display"`
 	Handles []string `json:"handles"`
 }
 
@@ -125,9 +132,8 @@ func Friends(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	groups, err := models.UserGroups(
+	myGroups, err := models.UserGroups(
 		models.UserGroupWhere.UserID.EQ(ctx.User.ID),
-		qm.Load(models.UserGroupRels.User),
 		qm.OrderBy(fmt.Sprintf("%s DESC", models.UserGroupColumns.CreatedAt)),
 		qm.Offset(offset), qm.Limit(pageSz),
 	).All(r.Context(), ctx.Components.Db)
@@ -136,13 +142,43 @@ func Friends(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	handles := []string{}
-	for _, group := range groups {
-		if group.R.User.Handle != ctx.User.Handle {
-			handles = append(handles, group.R.User.Handle)
-		}
+	groupIds := []int{}
+	for _, ugs := range myGroups {
+		groupIds = append(groupIds, ugs.GroupID)
+	}
+	groups, err := models.Groups(models.GroupWhere.ID.IN(groupIds), qm.Load(qm.Rels(models.GroupRels.UserGroups, models.UserGroupRels.User))).All(r.Context(), ctx.Components.Db)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("could not fetch user's groups: %+v", err), http.StatusInternalServerError)
+		return
 	}
 
-	out := FriendsOutput{Handles: handles}
+	groupOutput := []FriendsOutputGroup{}
+	for _, g := range groups {
+		handles := []string{}
+		for _, ug := range g.R.UserGroups {
+			redundant := false
+			for _, h := range handles {
+				if h == ug.R.User.Handle {
+					redundant = true
+				}
+			}
+			if !redundant {
+				handles = append(handles, ug.R.User.Handle)
+			}
+		}
+
+		display := g.Name.String
+		if !g.Name.Valid {
+			display = strings.Join(handles, ", ")
+		}
+
+		groupOutput = append(groupOutput, FriendsOutputGroup{
+			Uuid:    g.UUID.String(),
+			Display: display,
+			Handles: handles,
+		})
+	}
+
+	out := FriendsOutput{Friends: groupOutput}
 	common.JsonOut(w, out)
 }

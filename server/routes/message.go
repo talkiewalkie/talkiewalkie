@@ -2,6 +2,7 @@ package routes
 
 import (
 	"fmt"
+	uuid2 "github.com/satori/go.uuid"
 	"github.com/talkiewalkie/talkiewalkie/common"
 	"github.com/talkiewalkie/talkiewalkie/models"
 	"github.com/volatiletech/null/v8"
@@ -16,8 +17,11 @@ import (
 // ---------------
 
 type MessageInput struct {
-	Handles []string `json:"handles"`
-	Text    string   `json:"text"`
+	// Clients should only specify one the options below - if groupUuid is set it will prevail over the list of handles
+	GroupUuid string   `json:"groupUuid"`
+	Handles   []string `json:"handles"`
+
+	Text string `json:"text"`
 }
 
 func Message(w http.ResponseWriter, r *http.Request) {
@@ -31,6 +35,30 @@ func Message(w http.ResponseWriter, r *http.Request) {
 
 	if len(msg.Handles) == 0 {
 		http.Error(w, "message needs a recipient", http.StatusBadRequest)
+		return
+	}
+
+	if msg.GroupUuid != "" {
+		uuid, err := uuid2.FromString(msg.GroupUuid)
+		if err != nil {
+			http.Error(w, fmt.Sprintf("could not parse uuid: %+v", err), http.StatusInternalServerError)
+			return
+		}
+		group, err := models.Groups(models.GroupWhere.UUID.EQ(uuid)).One(r.Context(), ctx.Components.Db)
+		if err != nil {
+			http.Error(w, fmt.Sprintf("could not find group: %+v", err), http.StatusInternalServerError)
+			return
+		}
+		message := models.Message{
+			Text:     msg.Text,
+			AuthorID: null.IntFrom(ctx.User.ID),
+			GroupID:  null.IntFrom(group.ID),
+		}
+
+		if err = message.Insert(r.Context(), ctx.Components.Db, boil.Infer()); err != nil {
+			http.Error(w, fmt.Sprintf("could not insert message: %+v", err), http.StatusInternalServerError)
+			return
+		}
 		return
 	}
 

@@ -27,6 +27,7 @@ struct Api {
                 if httpResponse.statusCode > 299 {
                     let body = data != nil ? String(data: data!, encoding: .utf8) : "empty body"
                     print("statusCode: \(httpResponse.statusCode), \(body)")
+                    
                     return
                 }
             }
