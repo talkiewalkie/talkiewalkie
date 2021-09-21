@@ -58,7 +58,7 @@ func main() {
 
 	mywowo := models.User{Handle: "mywowo", Bio: null.NewString("My Wonderful World\nThe app already has hundreds of audio files in your own language that will tell you about the wonders of the following cities in a fun and simple way at an exceptional price!\nhttps://mywowo.net", true)}
 	if err = mywowo.Insert(ctx, components.Db, boil.Infer()); err != nil {
-		log.Panicf("-!- could not insert new user with handle '%s': %+v", "mywowo", err)
+		log.Printf("-!- could not insert new user with handle '%s': %+v", "mywowo", err)
 	}
 
 	scanner := bufio.NewScanner(&f)
@@ -72,12 +72,12 @@ func main() {
 		}
 
 		var user models.User
-		handle := tour.Author
+		handle := slug.Make(tour.Author)
 		if handle == "" {
 			handle = mywowo.Handle
 			user = mywowo
 		} else {
-			exists, err := models.Users(qm.Where(fmt.Sprintf("%s = ?", models.UserColumns.Handle), handle)).Exists(ctx, components.Db)
+			exists, err := models.Users(qm.Where(fmt.Sprintf("%s = ?", models.UserColumns.Handle), slug.Make(handle))).Exists(ctx, components.Db)
 			if err != nil {
 				log.Printf("-!- could not look for user with handle '%s': %+v", handle, err)
 				continue
