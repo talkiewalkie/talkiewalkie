@@ -6,6 +6,7 @@ import (
 	"github.com/friendsofgo/errors"
 	"github.com/gorilla/mux"
 	"github.com/talkiewalkie/talkiewalkie/common"
+	"github.com/talkiewalkie/talkiewalkie/entities"
 	"github.com/talkiewalkie/talkiewalkie/models"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 	"net/http"
@@ -110,7 +111,8 @@ func Me(w http.ResponseWriter, r *http.Request) {
 // --------
 
 type FriendsOutput struct {
-	Friends []FriendsOutputGroup `json:"handles"`
+	Friends []FriendsOutputGroup `json:"friends"`
+	Randoms []string             `json:"randoms"`
 }
 
 type FriendsOutputGroup struct {
@@ -132,21 +134,7 @@ func Friends(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	myGroups, err := models.UserGroups(
-		models.UserGroupWhere.UserID.EQ(ctx.User.ID),
-		qm.OrderBy(fmt.Sprintf("%s DESC", models.UserGroupColumns.CreatedAt)),
-		qm.Offset(offset), qm.Limit(pageSz),
-	).All(r.Context(), ctx.Components.Db)
-	if err != nil {
-		http.Error(w, fmt.Sprintf("could not fetch user's groups: %+v", err), http.StatusInternalServerError)
-		return
-	}
-
-	groupIds := []int{}
-	for _, ugs := range myGroups {
-		groupIds = append(groupIds, ugs.GroupID)
-	}
-	groups, err := models.Groups(models.GroupWhere.ID.IN(groupIds), qm.Load(qm.Rels(models.GroupRels.UserGroups, models.UserGroupRels.User))).All(r.Context(), ctx.Components.Db)
+	groups, err := entities.UserConversations(ctx, offset, pageSz)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("could not fetch user's groups: %+v", err), http.StatusInternalServerError)
 		return
@@ -179,6 +167,17 @@ func Friends(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 
-	out := FriendsOutput{Friends: groupOutput}
+	// TODO: not really random, fine for now, for postgres randomness see https://stackoverflow.com/a/34990197
+	randomUsers, err := models.Users(qm.Limit(10)).All(r.Context(), ctx.Components.Db)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("could not fetch set of random users: %+v", err), http.StatusInternalServerError)
+		return
+	}
+	randoms := []string{}
+	for _, user := range randomUsers {
+		randoms = append(randoms, user.Handle)
+	}
+
+	out := FriendsOutput{Friends: groupOutput, Randoms: randoms}
 	common.JsonOut(w, out)
 }

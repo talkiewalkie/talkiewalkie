@@ -18,6 +18,7 @@ import (
 )
 
 type Context struct {
+	Context    context.Context
 	Components *Components
 	User       *models.User
 }
@@ -132,6 +133,7 @@ func WithContextMiddleWare(comps *Components) mux.MiddlewareFunc {
 			myCtx := Context{
 				Components: comps,
 				User:       u,
+				Context:    r.Context(),
 			}
 			ctx := context.WithValue(r.Context(), "context", myCtx)
 			newR := r.WithContext(ctx)

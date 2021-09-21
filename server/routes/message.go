@@ -33,11 +33,6 @@ func Message(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if len(msg.Handles) == 0 {
-		http.Error(w, "message needs a recipient", http.StatusBadRequest)
-		return
-	}
-
 	if msg.GroupUuid != "" {
 		uuid, err := uuid2.FromString(msg.GroupUuid)
 		if err != nil {
@@ -59,6 +54,11 @@ func Message(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, fmt.Sprintf("could not insert message: %+v", err), http.StatusInternalServerError)
 			return
 		}
+		return
+	}
+
+	if len(msg.Handles) == 0 {
+		http.Error(w, "message needs a recipient", http.StatusBadRequest)
 		return
 	}
 
@@ -151,6 +151,7 @@ func Message(w http.ResponseWriter, r *http.Request) {
 				wg.Done()
 			}()
 		}
+		wg.Wait()
 		close(errs)
 		for err := range errs {
 			tx.Rollback()
