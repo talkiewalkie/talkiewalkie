@@ -75,7 +75,7 @@ struct WalkView: View {
                 }
             })
         } else {
-            Text("Error / Loading")
+            ProgressView("Walk")
         }
     }
 }

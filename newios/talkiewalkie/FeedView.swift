@@ -56,6 +56,7 @@ struct FeedView: View {
     
     var body: some View {
         RefreshableScrollView(action: { model.refresh() }) {
+            NavigationLink("Go to messages", destination: ConversationView(model: ConversationModelView(api: auth.api)).environmentObject(auth))
             if model.loading {
                 // TODO: Spacers not working, the loading text is not centered vertically
                 VStack(alignment: .center, spacing: 20.0) {
