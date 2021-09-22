@@ -2,9 +2,12 @@ package common
 
 import (
 	"context"
+	"firebase.google.com/go/v4"
 	"firebase.google.com/go/v4/auth"
 	"fmt"
+	"github.com/go-chi/jwtauth"
 	"github.com/gosimple/slug"
+	"github.com/jmoiron/sqlx"
 	"github.com/talkiewalkie/talkiewalkie/models"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"log"
@@ -13,15 +16,12 @@ import (
 	"os/exec"
 	"strconv"
 
-	"firebase.google.com/go/v4"
-	"github.com/go-chi/jwtauth"
-	"github.com/jmoiron/sqlx"
-
 	"github.com/talkiewalkie/talkiewalkie/pb"
 )
 
 type Components struct {
 	Db          *sqlx.DB
+	PgPubSub    *PgPubSub
 	EmailClient EmailClient
 	JwtAuth     *jwtauth.JWTAuth
 	FbAuth      *auth.Client
@@ -63,6 +63,8 @@ func InitComponents() (*Components, error) {
 		return nil, err
 	}
 
+	pgPubSub := NewPgPubSub(db, dsName)
+
 	models.AddUserHook(boil.BeforeInsertHook, func(ctx context.Context, db boil.ContextExecutor, u *models.User) error {
 		u.Handle = slug.Make(u.Handle)
 		return nil
@@ -78,6 +80,7 @@ func InitComponents() (*Components, error) {
 
 	return &Components{
 		Db:          db,
+		PgPubSub:    &pgPubSub,
 		EmailClient: emailClient,
 		JwtAuth:     tokenAuth,
 		FbAuth:      fbAuth,

@@ -5,6 +5,7 @@ import (
 	"github.com/talkiewalkie/talkiewalkie/common"
 	"github.com/talkiewalkie/talkiewalkie/models"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
+	"strings"
 )
 
 func UserConversations(ctx common.Context, offset, pageSz int) (models.GroupSlice, error) {
@@ -30,4 +31,8 @@ func UserConversations(ctx common.Context, offset, pageSz int) (models.GroupSlic
 	}
 
 	return groups, nil
+}
+
+func UserPubSubTopic(u *models.User) string {
+	return strings.Replace(fmt.Sprintf("user-conn-%s", u.UUID), "-", "_", -1)
 }

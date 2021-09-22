@@ -27,7 +27,7 @@ type Message struct {
 	ID        int       `db:"id" boil:"id" json:"id" toml:"id" yaml:"id"`
 	Text      string    `db:"text" boil:"text" json:"text" toml:"text" yaml:"text"`
 	AuthorID  null.Int  `db:"author_id" boil:"author_id" json:"author_id,omitempty" toml:"author_id" yaml:"author_id,omitempty"`
-	GroupID   null.Int  `db:"group_id" boil:"group_id" json:"group_id,omitempty" toml:"group_id" yaml:"group_id,omitempty"`
+	GroupID   int       `db:"group_id" boil:"group_id" json:"group_id" toml:"group_id" yaml:"group_id"`
 	CreatedAt time.Time `db:"created_at" boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
 
 	R *messageR `db:"-" boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -77,13 +77,13 @@ var MessageWhere = struct {
 	ID        whereHelperint
 	Text      whereHelperstring
 	AuthorID  whereHelpernull_Int
-	GroupID   whereHelpernull_Int
+	GroupID   whereHelperint
 	CreatedAt whereHelpertime_Time
 }{
 	ID:        whereHelperint{field: "\"message\".\"id\""},
 	Text:      whereHelperstring{field: "\"message\".\"text\""},
 	AuthorID:  whereHelpernull_Int{field: "\"message\".\"author_id\""},
-	GroupID:   whereHelpernull_Int{field: "\"message\".\"group_id\""},
+	GroupID:   whereHelperint{field: "\"message\".\"group_id\""},
 	CreatedAt: whereHelpertime_Time{field: "\"message\".\"created_at\""},
 }
 
@@ -545,9 +545,7 @@ func (messageL) LoadGroup(ctx context.Context, e boil.ContextExecutor, singular 
 		if object.R == nil {
 			object.R = &messageR{}
 		}
-		if !queries.IsNil(object.GroupID) {
-			args = append(args, object.GroupID)
-		}
+		args = append(args, object.GroupID)
 
 	} else {
 	Outer:
@@ -557,14 +555,12 @@ func (messageL) LoadGroup(ctx context.Context, e boil.ContextExecutor, singular 
 			}
 
 			for _, a := range args {
-				if queries.Equal(a, obj.GroupID) {
+				if a == obj.GroupID {
 					continue Outer
 				}
 			}
 
-			if !queries.IsNil(obj.GroupID) {
-				args = append(args, obj.GroupID)
-			}
+			args = append(args, obj.GroupID)
 
 		}
 	}
@@ -622,7 +618,7 @@ func (messageL) LoadGroup(ctx context.Context, e boil.ContextExecutor, singular 
 
 	for _, local := range slice {
 		for _, foreign := range resultSlice {
-			if queries.Equal(local.GroupID, foreign.ID) {
+			if local.GroupID == foreign.ID {
 				local.R.Group = foreign
 				if foreign.R == nil {
 					foreign.R = &groupR{}
@@ -743,7 +739,7 @@ func (o *Message) SetGroup(ctx context.Context, exec boil.ContextExecutor, inser
 		return errors.Wrap(err, "failed to update local table")
 	}
 
-	queries.Assign(&o.GroupID, related.ID)
+	o.GroupID = related.ID
 	if o.R == nil {
 		o.R = &messageR{
 			Group: related,
@@ -760,39 +756,6 @@ func (o *Message) SetGroup(ctx context.Context, exec boil.ContextExecutor, inser
 		related.R.Messages = append(related.R.Messages, o)
 	}
 
-	return nil
-}
-
-// RemoveGroup relationship.
-// Sets o.R.Group to nil.
-// Removes o from all passed in related items' relationships struct (Optional).
-func (o *Message) RemoveGroup(ctx context.Context, exec boil.ContextExecutor, related *Group) error {
-	var err error
-
-	queries.SetScanner(&o.GroupID, nil)
-	if _, err = o.Update(ctx, exec, boil.Whitelist("group_id")); err != nil {
-		return errors.Wrap(err, "failed to update local table")
-	}
-
-	if o.R != nil {
-		o.R.Group = nil
-	}
-	if related == nil || related.R == nil {
-		return nil
-	}
-
-	for i, ri := range related.R.Messages {
-		if queries.Equal(o.GroupID, ri.GroupID) {
-			continue
-		}
-
-		ln := len(related.R.Messages)
-		if ln > 1 && i < ln-1 {
-			related.R.Messages[i] = related.R.Messages[ln-1]
-		}
-		related.R.Messages = related.R.Messages[:ln-1]
-		break
-	}
 	return nil
 }
 

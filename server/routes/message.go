@@ -4,14 +4,17 @@ import (
 	"fmt"
 	uuid2 "github.com/satori/go.uuid"
 	"github.com/talkiewalkie/talkiewalkie/common"
+	"github.com/talkiewalkie/talkiewalkie/entities"
 	"github.com/talkiewalkie/talkiewalkie/models"
 	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
+	"log"
 	"net/http"
 	"reflect"
 	"sort"
 	"sync"
+	"time"
 )
 
 // ---------------
@@ -47,7 +50,7 @@ func Message(w http.ResponseWriter, r *http.Request) {
 		message := models.Message{
 			Text:     msg.Text,
 			AuthorID: null.IntFrom(ctx.User.ID),
-			GroupID:  null.IntFrom(group.ID),
+			GroupID:  group.ID,
 		}
 
 		if err = message.Insert(r.Context(), ctx.Components.Db, boil.Infer()); err != nil {
@@ -67,9 +70,11 @@ func Message(w http.ResponseWriter, r *http.Request) {
 		handles[handle] += 1
 	}
 
-	uniqueHandles := []string{}
+	uniqueHandles := []string{ctx.User.Handle}
 	for handle, _ := range handles {
-		uniqueHandles = append(uniqueHandles, handle)
+		if handle != ctx.User.Handle {
+			uniqueHandles = append(uniqueHandles, handle)
+		}
 	}
 
 	recipients, err := models.Users(models.UserWhere.Handle.IN(uniqueHandles)).All(r.Context(), ctx.Components.Db)
@@ -84,7 +89,9 @@ func Message(w http.ResponseWriter, r *http.Request) {
 
 	ids := []int{ctx.User.ID}
 	for _, recipient := range recipients {
-		ids = append(ids, recipient.ID)
+		if recipient.ID != ctx.User.ID {
+			ids = append(ids, recipient.ID)
+		}
 	}
 
 	ugs, err := models.UserGroups(
@@ -96,7 +103,7 @@ func Message(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	groupId := null.NewInt(0, false)
+	var group *models.Group
 	sort.Ints(ids)
 	for _, ug := range ugs {
 		groupIds := []int{}
@@ -115,7 +122,7 @@ func Message(w http.ResponseWriter, r *http.Request) {
 		}
 		sort.Ints(groupIds)
 		if reflect.DeepEqual(groupIds, ids) {
-			groupId = null.IntFrom(ug.GroupID)
+			group = ug.R.Group
 			break
 		}
 	}
@@ -127,7 +134,7 @@ func Message(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprintf("could not start transaction: %+v", err), http.StatusInternalServerError)
 		return
 	}
-	if !groupId.Valid {
+	if group == nil {
 		newGroup := models.Group{}
 		if err = newGroup.Insert(r.Context(), tx, boil.Infer()); err != nil {
 			tx.Rollback()
@@ -158,13 +165,13 @@ func Message(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, fmt.Sprintf("could not add recipient to new group: %+v", err), http.StatusInternalServerError)
 			return
 		}
-		groupId = null.IntFrom(newGroup.ID)
+		group = &newGroup
 	}
 
 	message := models.Message{
 		Text:     msg.Text,
 		AuthorID: null.IntFrom(ctx.User.ID),
-		GroupID:  groupId,
+		GroupID:  group.ID,
 	}
 	if err = message.Insert(r.Context(), tx, boil.Infer()); err != nil {
 		tx.Rollback()
@@ -175,5 +182,19 @@ func Message(w http.ResponseWriter, r *http.Request) {
 	if err = tx.Commit(); err != nil {
 		http.Error(w, fmt.Sprintf("could not commit transaction: %+v", err), http.StatusInternalServerError)
 		return
+	}
+
+	for _, rec := range recipients {
+		if rec.ID == ctx.User.ID {
+			continue
+		}
+
+		if err = ctx.Components.PgPubSub.Publish(entities.UserPubSubTopic(rec), common.NewMessageEvent{
+			PubSubEvent:  common.PubSubEvent{Type: "newmessage", Timestamp: time.Now()},
+			Message:      msg.Text,
+			AuthorHandle: ctx.User.Handle,
+		}); err != nil {
+			log.Printf("failed to notify recipients of message: %+v", err)
+		}
 	}
 }

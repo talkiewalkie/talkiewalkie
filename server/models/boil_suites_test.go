@@ -191,7 +191,6 @@ func TestToOneSet(t *testing.T) {
 // or deadlocks can occur.
 func TestToOneRemove(t *testing.T) {
 	t.Run("MessageToUserUsingAuthorMessages", testMessageToOneRemoveOpUserUsingAuthor)
-	t.Run("MessageToGroupUsingMessages", testMessageToOneRemoveOpGroupUsingGroup)
 	t.Run("UserToAssetUsingProfilePictureUsers", testUserToOneRemoveOpAssetUsingProfilePictureAsset)
 	t.Run("WalkToAssetUsingAudioWalks", testWalkToOneRemoveOpAssetUsingAudio)
 	t.Run("WalkToAssetUsingCoverWalks", testWalkToOneRemoveOpAssetUsingCover)
@@ -226,7 +225,6 @@ func TestToManySet(t *testing.T) {
 	t.Run("AssetToProfilePictureUsers", testAssetToManySetOpProfilePictureUsers)
 	t.Run("AssetToAudioWalks", testAssetToManySetOpAudioWalks)
 	t.Run("AssetToCoverWalks", testAssetToManySetOpCoverWalks)
-	t.Run("GroupToMessages", testGroupToManySetOpMessages)
 	t.Run("UserToAuthorMessages", testUserToManySetOpAuthorMessages)
 }
 
@@ -236,7 +234,6 @@ func TestToManyRemove(t *testing.T) {
 	t.Run("AssetToProfilePictureUsers", testAssetToManyRemoveOpProfilePictureUsers)
 	t.Run("AssetToAudioWalks", testAssetToManyRemoveOpAudioWalks)
 	t.Run("AssetToCoverWalks", testAssetToManyRemoveOpCoverWalks)
-	t.Run("GroupToMessages", testGroupToManyRemoveOpMessages)
 	t.Run("UserToAuthorMessages", testUserToManyRemoveOpAuthorMessages)
 }
 

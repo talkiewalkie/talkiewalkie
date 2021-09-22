@@ -554,7 +554,7 @@ func testMessageToOneGroupUsingGroup(t *testing.T) {
 	var foreign Group
 
 	seed := randomize.NewSeed()
-	if err := randomize.Struct(seed, &local, messageDBTypes, true, messageColumnsWithDefault...); err != nil {
+	if err := randomize.Struct(seed, &local, messageDBTypes, false, messageColumnsWithDefault...); err != nil {
 		t.Errorf("Unable to randomize Message struct: %s", err)
 	}
 	if err := randomize.Struct(seed, &foreign, groupDBTypes, false, groupColumnsWithDefault...); err != nil {
@@ -565,7 +565,7 @@ func testMessageToOneGroupUsingGroup(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	queries.Assign(&local.GroupID, foreign.ID)
+	local.GroupID = foreign.ID
 	if err := local.Insert(ctx, tx, boil.Infer()); err != nil {
 		t.Fatal(err)
 	}
@@ -575,7 +575,7 @@ func testMessageToOneGroupUsingGroup(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if !queries.Equal(check.ID, foreign.ID) {
+	if check.ID != foreign.ID {
 		t.Errorf("want: %v, got %v", foreign.ID, check.ID)
 	}
 
@@ -746,7 +746,7 @@ func testMessageToOneSetOpGroupUsingGroup(t *testing.T) {
 		if x.R.Messages[0] != &a {
 			t.Error("failed to append to foreign relationship struct")
 		}
-		if !queries.Equal(a.GroupID, x.ID) {
+		if a.GroupID != x.ID {
 			t.Error("foreign key was wrong value", a.GroupID)
 		}
 
@@ -757,60 +757,9 @@ func testMessageToOneSetOpGroupUsingGroup(t *testing.T) {
 			t.Fatal("failed to reload", err)
 		}
 
-		if !queries.Equal(a.GroupID, x.ID) {
+		if a.GroupID != x.ID {
 			t.Error("foreign key was wrong value", a.GroupID, x.ID)
 		}
-	}
-}
-
-func testMessageToOneRemoveOpGroupUsingGroup(t *testing.T) {
-	var err error
-
-	ctx := context.Background()
-	tx := MustTx(boil.BeginTx(ctx, nil))
-	defer func() { _ = tx.Rollback() }()
-
-	var a Message
-	var b Group
-
-	seed := randomize.NewSeed()
-	if err = randomize.Struct(seed, &a, messageDBTypes, false, strmangle.SetComplement(messagePrimaryKeyColumns, messageColumnsWithoutDefault)...); err != nil {
-		t.Fatal(err)
-	}
-	if err = randomize.Struct(seed, &b, groupDBTypes, false, strmangle.SetComplement(groupPrimaryKeyColumns, groupColumnsWithoutDefault)...); err != nil {
-		t.Fatal(err)
-	}
-
-	if err = a.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-
-	if err = a.SetGroup(ctx, tx, true, &b); err != nil {
-		t.Fatal(err)
-	}
-
-	if err = a.RemoveGroup(ctx, tx, &b); err != nil {
-		t.Error("failed to remove relationship")
-	}
-
-	count, err := a.Group().Count(ctx, tx)
-	if err != nil {
-		t.Error(err)
-	}
-	if count != 0 {
-		t.Error("want no relationships remaining")
-	}
-
-	if a.R.Group != nil {
-		t.Error("R struct entry should be nil")
-	}
-
-	if !queries.IsValuerNil(a.GroupID) {
-		t.Error("foreign key value should be nil")
-	}
-
-	if len(b.R.Messages) != 0 {
-		t.Error("failed to remove a from b's relationships")
 	}
 }
 

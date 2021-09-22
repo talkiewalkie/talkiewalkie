@@ -519,8 +519,9 @@ func testGroupToManyMessages(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	queries.Assign(&b.GroupID, a.ID)
-	queries.Assign(&c.GroupID, a.ID)
+	b.GroupID = a.ID
+	c.GroupID = a.ID
+
 	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
 		t.Fatal(err)
 	}
@@ -535,10 +536,10 @@ func testGroupToManyMessages(t *testing.T) {
 
 	bFound, cFound := false, false
 	for _, v := range check {
-		if queries.Equal(v.GroupID, b.GroupID) {
+		if v.GroupID == b.GroupID {
 			bFound = true
 		}
-		if queries.Equal(v.GroupID, c.GroupID) {
+		if v.GroupID == c.GroupID {
 			cFound = true
 		}
 	}
@@ -694,10 +695,10 @@ func testGroupToManyAddOpMessages(t *testing.T) {
 		first := x[0]
 		second := x[1]
 
-		if !queries.Equal(a.ID, first.GroupID) {
+		if a.ID != first.GroupID {
 			t.Error("foreign key was wrong value", a.ID, first.GroupID)
 		}
-		if !queries.Equal(a.ID, second.GroupID) {
+		if a.ID != second.GroupID {
 			t.Error("foreign key was wrong value", a.ID, second.GroupID)
 		}
 
@@ -724,182 +725,6 @@ func testGroupToManyAddOpMessages(t *testing.T) {
 		}
 	}
 }
-
-func testGroupToManySetOpMessages(t *testing.T) {
-	var err error
-
-	ctx := context.Background()
-	tx := MustTx(boil.BeginTx(ctx, nil))
-	defer func() { _ = tx.Rollback() }()
-
-	var a Group
-	var b, c, d, e Message
-
-	seed := randomize.NewSeed()
-	if err = randomize.Struct(seed, &a, groupDBTypes, false, strmangle.SetComplement(groupPrimaryKeyColumns, groupColumnsWithoutDefault)...); err != nil {
-		t.Fatal(err)
-	}
-	foreigners := []*Message{&b, &c, &d, &e}
-	for _, x := range foreigners {
-		if err = randomize.Struct(seed, x, messageDBTypes, false, strmangle.SetComplement(messagePrimaryKeyColumns, messageColumnsWithoutDefault)...); err != nil {
-			t.Fatal(err)
-		}
-	}
-
-	if err = a.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-	if err = c.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-
-	err = a.SetMessages(ctx, tx, false, &b, &c)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	count, err := a.Messages().Count(ctx, tx)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if count != 2 {
-		t.Error("count was wrong:", count)
-	}
-
-	err = a.SetMessages(ctx, tx, true, &d, &e)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	count, err = a.Messages().Count(ctx, tx)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if count != 2 {
-		t.Error("count was wrong:", count)
-	}
-
-	if !queries.IsValuerNil(b.GroupID) {
-		t.Error("want b's foreign key value to be nil")
-	}
-	if !queries.IsValuerNil(c.GroupID) {
-		t.Error("want c's foreign key value to be nil")
-	}
-	if !queries.Equal(a.ID, d.GroupID) {
-		t.Error("foreign key was wrong value", a.ID, d.GroupID)
-	}
-	if !queries.Equal(a.ID, e.GroupID) {
-		t.Error("foreign key was wrong value", a.ID, e.GroupID)
-	}
-
-	if b.R.Group != nil {
-		t.Error("relationship was not removed properly from the foreign struct")
-	}
-	if c.R.Group != nil {
-		t.Error("relationship was not removed properly from the foreign struct")
-	}
-	if d.R.Group != &a {
-		t.Error("relationship was not added properly to the foreign struct")
-	}
-	if e.R.Group != &a {
-		t.Error("relationship was not added properly to the foreign struct")
-	}
-
-	if a.R.Messages[0] != &d {
-		t.Error("relationship struct slice not set to correct value")
-	}
-	if a.R.Messages[1] != &e {
-		t.Error("relationship struct slice not set to correct value")
-	}
-}
-
-func testGroupToManyRemoveOpMessages(t *testing.T) {
-	var err error
-
-	ctx := context.Background()
-	tx := MustTx(boil.BeginTx(ctx, nil))
-	defer func() { _ = tx.Rollback() }()
-
-	var a Group
-	var b, c, d, e Message
-
-	seed := randomize.NewSeed()
-	if err = randomize.Struct(seed, &a, groupDBTypes, false, strmangle.SetComplement(groupPrimaryKeyColumns, groupColumnsWithoutDefault)...); err != nil {
-		t.Fatal(err)
-	}
-	foreigners := []*Message{&b, &c, &d, &e}
-	for _, x := range foreigners {
-		if err = randomize.Struct(seed, x, messageDBTypes, false, strmangle.SetComplement(messagePrimaryKeyColumns, messageColumnsWithoutDefault)...); err != nil {
-			t.Fatal(err)
-		}
-	}
-
-	if err := a.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-
-	err = a.AddMessages(ctx, tx, true, foreigners...)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	count, err := a.Messages().Count(ctx, tx)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if count != 4 {
-		t.Error("count was wrong:", count)
-	}
-
-	err = a.RemoveMessages(ctx, tx, foreigners[:2]...)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	count, err = a.Messages().Count(ctx, tx)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if count != 2 {
-		t.Error("count was wrong:", count)
-	}
-
-	if !queries.IsValuerNil(b.GroupID) {
-		t.Error("want b's foreign key value to be nil")
-	}
-	if !queries.IsValuerNil(c.GroupID) {
-		t.Error("want c's foreign key value to be nil")
-	}
-
-	if b.R.Group != nil {
-		t.Error("relationship was not removed properly from the foreign struct")
-	}
-	if c.R.Group != nil {
-		t.Error("relationship was not removed properly from the foreign struct")
-	}
-	if d.R.Group != &a {
-		t.Error("relationship to a should have been preserved")
-	}
-	if e.R.Group != &a {
-		t.Error("relationship to a should have been preserved")
-	}
-
-	if len(a.R.Messages) != 2 {
-		t.Error("should have preserved two relationships")
-	}
-
-	// Removal doesn't do a stable deletion for performance so we have to flip the order
-	if a.R.Messages[1] != &d {
-		t.Error("relationship to d should have been preserved")
-	}
-	if a.R.Messages[0] != &e {
-		t.Error("relationship to e should have been preserved")
-	}
-}
-
 func testGroupToManyAddOpUserGroups(t *testing.T) {
 	var err error
 

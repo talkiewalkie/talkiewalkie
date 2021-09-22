@@ -433,7 +433,7 @@ func (groupL) LoadMessages(ctx context.Context, e boil.ContextExecutor, singular
 			}
 
 			for _, a := range args {
-				if queries.Equal(a, obj.ID) {
+				if a == obj.ID {
 					continue Outer
 				}
 			}
@@ -491,7 +491,7 @@ func (groupL) LoadMessages(ctx context.Context, e boil.ContextExecutor, singular
 
 	for _, foreign := range resultSlice {
 		for _, local := range slice {
-			if queries.Equal(local.ID, foreign.GroupID) {
+			if local.ID == foreign.GroupID {
 				local.R.Messages = append(local.R.Messages, foreign)
 				if foreign.R == nil {
 					foreign.R = &messageR{}
@@ -611,7 +611,7 @@ func (o *Group) AddMessages(ctx context.Context, exec boil.ContextExecutor, inse
 	var err error
 	for _, rel := range related {
 		if insert {
-			queries.Assign(&rel.GroupID, o.ID)
+			rel.GroupID = o.ID
 			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
 				return errors.Wrap(err, "failed to insert into foreign table")
 			}
@@ -632,7 +632,7 @@ func (o *Group) AddMessages(ctx context.Context, exec boil.ContextExecutor, inse
 				return errors.Wrap(err, "failed to update foreign table")
 			}
 
-			queries.Assign(&rel.GroupID, o.ID)
+			rel.GroupID = o.ID
 		}
 	}
 
@@ -653,76 +653,6 @@ func (o *Group) AddMessages(ctx context.Context, exec boil.ContextExecutor, inse
 			rel.R.Group = o
 		}
 	}
-	return nil
-}
-
-// SetMessages removes all previously related items of the
-// group replacing them completely with the passed
-// in related items, optionally inserting them as new records.
-// Sets o.R.Group's Messages accordingly.
-// Replaces o.R.Messages with related.
-// Sets related.R.Group's Messages accordingly.
-func (o *Group) SetMessages(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Message) error {
-	query := "update \"message\" set \"group_id\" = null where \"group_id\" = $1"
-	values := []interface{}{o.ID}
-	if boil.IsDebug(ctx) {
-		writer := boil.DebugWriterFrom(ctx)
-		fmt.Fprintln(writer, query)
-		fmt.Fprintln(writer, values)
-	}
-	_, err := exec.ExecContext(ctx, query, values...)
-	if err != nil {
-		return errors.Wrap(err, "failed to remove relationships before set")
-	}
-
-	if o.R != nil {
-		for _, rel := range o.R.Messages {
-			queries.SetScanner(&rel.GroupID, nil)
-			if rel.R == nil {
-				continue
-			}
-
-			rel.R.Group = nil
-		}
-
-		o.R.Messages = nil
-	}
-	return o.AddMessages(ctx, exec, insert, related...)
-}
-
-// RemoveMessages relationships from objects passed in.
-// Removes related items from R.Messages (uses pointer comparison, removal does not keep order)
-// Sets related.R.Group.
-func (o *Group) RemoveMessages(ctx context.Context, exec boil.ContextExecutor, related ...*Message) error {
-	var err error
-	for _, rel := range related {
-		queries.SetScanner(&rel.GroupID, nil)
-		if rel.R != nil {
-			rel.R.Group = nil
-		}
-		if _, err = rel.Update(ctx, exec, boil.Whitelist("group_id")); err != nil {
-			return err
-		}
-	}
-	if o.R == nil {
-		return nil
-	}
-
-	for _, rel := range related {
-		for i, ri := range o.R.Messages {
-			if rel != ri {
-				continue
-			}
-
-			ln := len(o.R.Messages)
-			if ln > 1 && i < ln-1 {
-				o.R.Messages[i] = o.R.Messages[ln-1]
-			}
-			o.R.Messages = o.R.Messages[:ln-1]
-			break
-		}
-	}
-
 	return nil
 }
 

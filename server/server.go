@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/talkiewalkie/talkiewalkie/websockets"
 	"log"
 	"net/http"
 	"os"
@@ -61,8 +62,15 @@ func main() {
 		w.WriteHeader(http.StatusOK)
 	})
 	router.Use(
+		// No logging for root
 		func(next http.Handler) http.Handler {
-			return handlers.CombinedLoggingHandler(os.Stdout, next)
+			return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if r.URL.String() == "/" {
+					next.ServeHTTP(w, r)
+				} else {
+					handlers.CombinedLoggingHandler(os.Stdout, next).ServeHTTP(w, r)
+				}
+			})
 		},
 		common.WithContextMiddleWare(components),
 		common.RecoverMiddleWare)
@@ -81,7 +89,7 @@ func main() {
 
 	router.HandleFunc("/asset", routes.UploadHandler).Methods(http.MethodPost)
 
-	router.HandleFunc("/ws", ws)
+	router.HandleFunc("/ws/groups", websockets.GroupWebsocketHandler)
 
 	corsWrapper := handlers.CORS(
 		handlers.AllowCredentials(),
