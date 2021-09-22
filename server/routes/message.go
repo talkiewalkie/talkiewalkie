@@ -82,7 +82,7 @@ func Message(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprintf("could not find recipients: %+v", err), http.StatusBadRequest)
 		return
 	}
-	if len(recipients) != len(msg.Handles) {
+	if len(recipients) != len(uniqueHandles) {
 		http.Error(w, "some users where not found", http.StatusBadRequest)
 		return
 	}
