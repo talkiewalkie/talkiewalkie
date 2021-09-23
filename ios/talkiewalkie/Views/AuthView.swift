@@ -19,7 +19,7 @@ struct AuthView: View {
     var body: some View {
         if let u = vm.user, let api = vm.api {
             NavigationView {
-                FeedView(model: FeedViewModel(api: api))
+                ConversationView(model: ConversationModelView(api: api))
                     .environmentObject(UserViewModel(user: u, api: api))
                     .sheet(isPresented: $showingSheet) {
                         VStack {
