@@ -15,6 +15,13 @@ struct Api {
     static let url = "https://api.talkiewalkie.app"
     #endif
     
+    #if DEBUG
+    static let wsUrl = "wss://dev.talkiewalkie.app/ws"
+//    static let wsUrl = "ws://localhost:8080/ws"
+    #else
+    static let wsUrl = "wss://api.talkiewalkie.app/ws"
+    #endif
+    
     var token: String
     
     private func get<T>(_ url: URL, completion: @escaping (T?, Error?) -> Void) where T: Codable {
@@ -88,6 +95,27 @@ struct Api {
                 }
             }
         }.resume()
+    }
+    
+    private func ws(_ url: URL, onReceive: @escaping (Result<URLSessionWebSocketTask.Message, Error>) -> Void) -> MyWsDelegate {
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.addValue("Bearer \(token)", forHTTPHeaderField: "X-TalkieWalkie-Auth")
+        
+        let ws2 = MyWsDelegate(with: request, onReceive: onReceive)
+        ws2.connect()
+        return ws2
+    }
+    
+    // MARK: - GROUP WS
+    
+    struct GroupWsMessage: Codable {
+        let message: String
+        let authorHandle: String
+    }
+    
+    func groupWs(onReceive: @escaping (Result<URLSessionWebSocketTask.Message, Error>) -> Void) -> MyWsDelegate {
+        return ws(URL(string: "\(Api.wsUrl)/groups")!, onReceive: onReceive)
     }
     
     // MARK: - WALKS
@@ -210,5 +238,99 @@ struct Api {
         url.queryItems = [URLQueryItem(name: "offset", value: String(offset))]
         
         get(url.url!, completion: completion)
+    }
+}
+
+class MyWsDelegate: NSObject {
+    let KEEP_ALIVE_INTERVAL_SECONDS: Double = 5
+    
+    var session: URLSession?
+    var task: URLSessionWebSocketTask?
+    var connected: Bool = false
+    var shouldTryToReconnect = true
+    var onReceive: ((Result<URLSessionWebSocketTask.Message, Error>) -> Void)?
+    
+    var url: String {
+        return task?.currentRequest?.url?.absoluteString ?? "[null task - no url]"
+    }
+    
+    init(with urlRequest: URLRequest, onReceive: @escaping (Result<URLSessionWebSocketTask.Message, Error>) -> Void) {
+        super.init()
+        self.session = URLSession(configuration: .default, delegate: self, delegateQueue: OperationQueue())
+        self.task = session?.webSocketTask(with: urlRequest)
+        self.onReceive = onReceive
+    }
+    
+    func reinit() {
+        print("\(Date()) reconnecting...")
+        disconnect()
+        self.session = URLSession(configuration: .default, delegate: self, delegateQueue: OperationQueue())
+        self.task = session?.webSocketTask(with: task!.currentRequest!)
+        connect()
+    }
+    
+    func keepAlive() {
+        task?.sendPing { error in
+            if let error = error {
+                let nsError = error as NSError
+                print("\(Date()) Error when sending PING to '\(self.url)':\(error)")
+                if nsError.domain == NSURLErrorDomain && nsError.code == 57 {
+                    self.connected = false
+                }
+            } else {
+                print("\(Date()) WebSocket connection '\(self.url)' alive")
+                DispatchQueue.global().asyncAfter(deadline: .now() + self.KEEP_ALIVE_INTERVAL_SECONDS) {
+                    if self.connected {
+                        self.keepAlive()
+                    }
+                }
+            }
+        }
+    }
+    
+    public func connect() {
+        print("\(Date()) WEBSOCKET '\(url)'")
+        shouldTryToReconnect = true
+        task?.resume()
+    }
+
+    public func disconnect() {
+        task?.cancel(with: .goingAway, reason: nil)
+        connected = false
+        shouldTryToReconnect = false
+    }
+    
+    public func receive() {
+        task?.receive { result in
+            self.onReceive?(result)
+            if self.connected {
+                self.receive()
+            }
+        }
+    }
+}
+
+extension MyWsDelegate: URLSessionWebSocketDelegate {
+    func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didOpenWithProtocol protocol: String?) {
+        connected = true
+        print("\(Date()) Connected to '\(url)'!")
+        
+        receive()
+        keepAlive()
+    }
+
+    func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didCloseWith closeCode: URLSessionWebSocketTask.CloseCode, reason: Data?) {
+        connected = false
+        print("\(Date()) Disconnected from '\(url)' with close code: \(closeCode) - reason \(reason)!")
+        if shouldTryToReconnect {
+            print("\(Date()) Reconnecting...")
+            connect()
+        }
+    }
+    
+    func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError: Error?) {
+        if let err = didCompleteWithError {
+            print("\(Date()) failed to connect to '\(url)': \(err)")
+        }
     }
 }

@@ -16,6 +16,14 @@ struct ConversationView: View {
 
     var body: some View {
         VStack(spacing: 20) {
+            if self.model.webSocketTask?.connected ?? false {
+                Text("Connecting...").padding()
+            }
+            if let msg = self.model.newMessage {
+                HStack {
+                    Text(msg.message).padding()
+                }
+            }
             if let groups = model.groups {
                 ForEach(groups, id: \.uuid) { g in
                     NavigationLink(destination: ChatView(model: ChatViewModel(api: model.api, uuid: g.uuid)).environmentObject(auth)) {
@@ -74,15 +82,19 @@ struct ConversationView: View {
                 }
             }
         }.onAppear {
+            model.connect()
             model.loadFriends()
             model.loadGroups()
+        }
+        .onDisappear {
+            model.disconnect()
         }
     }
 }
 
 struct ConversationView_Previews: PreviewProvider {
     static var previews: some View {
-        var model = ConversationModelView(api: Api(token: "XX"))
+        let model = ConversationModelView(api: Api(token: "XX"))
         ConversationView(model: model)
     }
 }
