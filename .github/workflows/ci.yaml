@@ -51,7 +51,7 @@ jobs:
 
       - name: Test
         run: |
-          pushd server && go test ./routes/... ./common/... ./cmd/... ./testutils/... && popd
+          pushd server && go test ./routes/... ./websockets/... ./common/... ./cmd/... ./testutils/... && popd
 
 
       # Setup gcloud CLI
