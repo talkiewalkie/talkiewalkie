@@ -12,6 +12,7 @@ import (
 	"github.com/talkiewalkie/talkiewalkie/models"
 	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -81,7 +82,7 @@ func WithContextMiddleWare(comps *Components) mux.MiddlewareFunc {
 						picture = url.(string)
 					}
 
-					fmt.Printf("%s %s", handle, picture)
+					log.Printf("%s, %s", handle, picture)
 					u = &models.User{
 						Handle:         handle,
 						FirebaseUID:    null.NewString(tok.UID, true),

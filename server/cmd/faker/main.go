@@ -153,5 +153,5 @@ func main() {
 		panic(err)
 	}
 
-	fmt.Printf("%d walks in db", walks)
+	log.Printf("%d walks in db", walks)
 }

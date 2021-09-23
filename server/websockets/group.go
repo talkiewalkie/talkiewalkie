@@ -24,6 +24,8 @@ func websocketSync(c *websocket.Conn, closing chan bool) {
 			log.Printf("%s failed to close websocket: %+v", time.Now(), err)
 		}
 	}()
+	clientPingInterval := 5 * time.Second
+	c.SetPongHandler(func(string) error { c.SetReadDeadline(time.Now().Add(clientPingInterval)); return nil })
 
 	for {
 		_, msg, err := c.ReadMessage()
@@ -77,14 +79,20 @@ func GroupWebsocketHandler(w http.ResponseWriter, r *http.Request) {
 	conn := websocket.Upgrader{HandshakeTimeout: time.Second}
 	c, err := conn.Upgrade(w, r, nil)
 	if err != nil {
+		log.Printf("could not initiate websocket: %+v", err)
 		http.Error(w, fmt.Sprintf("could not initiate websocket: %+v", err), http.StatusInternalServerError)
+		c.Close()
 		return
 	}
 
 	topic := entities.UserPubSubTopic(ctx.User)
+	log.Printf("established websocket connection [%s]", topic)
+
 	listener, unlisten, err := ctx.Components.PgPubSub.Subscribe(topic)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("could not subscribe to pubsub topic: %+v", err), http.StatusBadRequest)
+		c.Close()
+		unlisten()
 		return
 	}
 
