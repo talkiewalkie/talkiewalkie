@@ -120,6 +120,9 @@ TIMEOUT:
 		case m := <-msgs:
 			if checker(m) {
 				cnt += 1
+				if cnt == n {
+					return
+				}
 			} else {
 				log.Printf("DEBUG:did not pass checker function: '%s'", string(m))
 			}
