@@ -98,13 +98,14 @@ func UserByHandle(w http.ResponseWriter, r *http.Request) {
 // --------
 
 type MeOutput struct {
+	Uuid   string `json:"uuid"`
 	Handle string `json:"handle"`
 }
 
 func Me(w http.ResponseWriter, r *http.Request) {
 	ctx := common.WithAuthedContext(r)
 
-	out := MeOutput{Handle: ctx.User.Handle}
+	out := MeOutput{Uuid: ctx.User.UUID.String(), Handle: ctx.User.Handle}
 	common.JsonOut(w, out)
 }
 

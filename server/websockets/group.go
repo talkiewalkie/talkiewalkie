@@ -92,7 +92,9 @@ func GroupWebsocketHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, fmt.Sprintf("could not subscribe to pubsub topic: %+v", err), http.StatusBadRequest)
 		c.Close()
-		unlisten()
+		if err := unlisten(); err != nil {
+			log.Printf("could not stop listening to topic '%s': %+v", topic, err)
+		}
 		return
 	}
 

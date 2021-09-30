@@ -121,6 +121,7 @@ func GroupByUuid(w http.ResponseWriter, r *http.Request) {
 
 	group, err := models.Groups(
 		models.GroupWhere.UUID.EQ(uuid),
+		qm.Load(qm.Rels(models.GroupRels.UserGroups, models.UserGroupRels.User)),
 		qm.Load(
 			qm.Rels(models.GroupRels.Messages, models.MessageRels.Author),
 			qm.Limit(pageSz), qm.Offset(offset), qm.OrderBy(fmt.Sprintf("%s DESC", models.MessageColumns.CreatedAt))),
@@ -142,10 +143,28 @@ func GroupByUuid(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 
+	handles := []string{}
+	for _, userGroup := range group.R.UserGroups {
+		redundant := false
+		for _, h := range handles {
+			if h == userGroup.R.User.Handle {
+				redundant = true
+			}
+		}
+		if !redundant {
+			handles = append(handles, userGroup.R.User.Handle)
+		}
+	}
+
+	display := group.Name.String
+	if !group.Name.Valid {
+		display = strings.Join(handles, ", ")
+	}
+
 	out := GroupByUuidOutput{
 		Uuid:     group.UUID.String(),
-		Display:  "",
-		Handles:  []string{},
+		Display:  display,
+		Handles:  handles,
 		Messages: messages,
 	}
 	common.JsonOut(w, out)

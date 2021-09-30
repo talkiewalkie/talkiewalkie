@@ -64,6 +64,9 @@ func (ps PgPubSub) Subscribe(topic string) (*pq.Listener, func() error, error) {
 
 	return listener, func() error {
 		_, err := ps.db.Exec(fmt.Sprintf("UNLISTEN %s", topic))
+		if err2 := listener.Close(); err == nil {
+			return err2
+		}
 		return err
 	}, nil
 }
