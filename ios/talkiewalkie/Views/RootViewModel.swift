@@ -8,21 +8,34 @@
 import FirebaseAuth
 import Foundation
 
-class AuthViewModel: ObservableObject {
+class RootViewModel: ObservableObject {
     private var auth = Auth.auth()
     
-    @Published var user: User?
+    @Published var user: FirebaseAuth.User?
+    @Published var me: Api.MeOutput?
     @Published var api: Api?
     
     init() {
-        auth.addStateDidChangeListener() { auth, user in
+        self.user = auth.currentUser
+        auth.addStateDidChangeListener { _, user in
+            self.user = user
+            
             if let user = user {
-                self.user = user
-                user.getIDTokenResult() { result, error in
-                    if let result = result { self.api = Api(token: result.token) }
+                user.getIDTokenResult { result, _ in
+                    if let result = result {
+                        self.api = Api(token: result.token)
+                        self.api?.me { res, _ in
+                            if let data = res { self.me = data }
+                        }
+                    }
                 }
             }
         }
+    }
+    
+    func authenticatedModel() -> AuthenticatedState? {
+        guard let u = user, let a = api, let m = me else { return nil }
+        return AuthenticatedState(user: u, me: m, api: a)
     }
     
     var isSignedIn: Bool { user != nil }
@@ -33,10 +46,8 @@ class AuthViewModel: ObservableObject {
                 print(err)
             } else {
                 self.user = auth.currentUser
-                
             }
         }
-        
     }
     
     func createUser(_ email: String, _ password: String) {
@@ -55,22 +66,18 @@ class AuthViewModel: ObservableObject {
     }
 }
 
-extension User {
-    func token() {
-        // get jwt
-    }
-}
-
 enum AuthError: Error {
     case badBody
 }
 
-class UserViewModel: ObservableObject {
-    var user: User
+class AuthenticatedState: ObservableObject {
+    var user: FirebaseAuth.User
+    var me: Api.MeOutput
     var api: Api
     
-    init(user: User, api: Api) {
+    init(user: FirebaseAuth.User, me: Api.MeOutput, api: Api) {
         self.user = user
+        self.me = me
         self.api = api
     }
 }

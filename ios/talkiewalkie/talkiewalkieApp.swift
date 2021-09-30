@@ -16,9 +16,9 @@ struct talkiewalkieApp: App {
 
     var body: some Scene {
         WindowGroup {
-            let auth = AuthViewModel()
+            let auth = RootViewModel()
             
-            AuthView(vm: auth)
+            RootView(vm: auth)
         }
     }
 }

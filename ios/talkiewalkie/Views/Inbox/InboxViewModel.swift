@@ -7,23 +7,17 @@
 
 import Foundation
 
-class ConversationModelView: ObservableObject {
+class InboxViewModel: ObservableObject {
     let api: Api
 
     init(api: Api) {
         self.api = api
     }
 
-    @Published private(set) var loading = true
-    @Published private(set) var friends: Api.Friends?
-    @Published private(set) var groups: [Api.GroupsOutputGroup] = []
+    // MARK: - INBOX
 
-    func loadFriends() {
-        api.friends { friends, _ in
-            self.loading = false
-            self.friends = friends
-        }
-    }
+    @Published private(set) var loading = true
+    @Published private(set) var groups: [Api.GroupsOutputGroup] = []
 
     func message(text: String, handles: [String]) {
         api.message(text, handles) { _, _ in }
@@ -37,10 +31,22 @@ class ConversationModelView: ObservableObject {
         }
     }
 
+    // MARK: - QUICK SEND
+
+    @Published private(set) var loadingFriends: Bool = true
+    @Published private(set) var friends: Api.Friends?
+
+    func loadFriends() {
+        loadingFriends = true
+        api.friends { friends, _ in
+            self.loadingFriends = false
+            self.friends = friends
+        }
+    }
+
     // MARK: - Connection
 
-    @Published var webSocketTask: MyWsDelegate?
-    @Published var newMessage: Api.GroupWsMessage?
+    @Published var webSocketTask: WebSocketManager?
 
     private func onReceive(result: Result<URLSessionWebSocketTask.Message, Error>) {
         switch result {
@@ -48,7 +54,8 @@ class ConversationModelView: ObservableObject {
             switch m {
             case .string(let content):
                 DispatchQueue.main.async {
-                    self.newMessage = try! JSONDecoder().decode(Api.GroupWsMessage.self, from: content.data(using: .utf8)!)
+                    let newMessage = try! JSONDecoder().decode(Api.GroupWsMessage.self, from: content.data(using: .utf8)!)
+                    print("\(Date()) received new message!: [\(newMessage.message)]")
                 }
             default:
                 print("\(Date()) ws connection only handles text messages, message ignored")
@@ -73,7 +80,7 @@ class ConversationModelView: ObservableObject {
         webSocketTask?.disconnect()
     }
 
-    deinit { // 9
+    deinit {
         disconnect()
     }
 }

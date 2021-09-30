@@ -8,8 +8,8 @@
 import FirebaseAuth
 import SwiftUI
 
-struct AuthView: View {
-    @ObservedObject var vm: AuthViewModel
+struct RootView: View {
+    @ObservedObject var vm: RootViewModel
     @State private var showingSheet = false
     @State private var signInFlow = false
 
@@ -17,22 +17,26 @@ struct AuthView: View {
     @State var password: String = ""
 
     var body: some View {
-        if let u = vm.user, let api = vm.api {
-            NavigationView {
-                ConversationView(model: ConversationModelView(api: api))
-                    .environmentObject(UserViewModel(user: u, api: api))
-                    .sheet(isPresented: $showingSheet) {
-                        VStack {
-                            Text(u.email ?? "no email")
-                            Button("sign out") {
-                                vm.signOut()
-                                showingSheet = false
-                            }.padding()
-                            Button("go back") { print("sign out") }
-                        }
+        if let u = vm.user {
+            if let authedObj = vm.authenticatedModel() {
+                NavigationView {
+                    InboxView(model: InboxViewModel(api: authedObj.api))
+                        .navigationBarTitle("TalkieWalkie")
+                        .navigationBarItems(leading: Text(""), trailing: Button("account") { showingSheet = true })
+                }
+                .environmentObject(authedObj)
+                .sheet(isPresented: $showingSheet) {
+                    VStack {
+                        Text(u.email ?? "no email")
+                        Button("sign out") {
+                            vm.signOut()
+                            showingSheet = false
+                        }.padding()
                     }
-                    .navigationBarTitle("TalkieWalkie")
-                    .navigationBarItems(leading: Text(""), trailing: Button("account") { showingSheet = true })
+                }
+            } else {
+                // Case where app has user info stored locally but we don't have a fresh token and our api's initial response
+                ProgressView()
             }
         } else {
             VStack(alignment: .leading) {
@@ -95,8 +99,8 @@ struct AuthView: View {
 
 struct AuthView_Previews: PreviewProvider {
     static var previews: some View {
-        let vm = AuthViewModel()
+        let vm = RootViewModel()
 
-        return AuthView(vm: vm)
+        return RootView(vm: vm)
     }
 }
