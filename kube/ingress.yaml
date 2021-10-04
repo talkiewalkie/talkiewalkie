@@ -10,28 +10,34 @@ metadata:
   name: ingress
 spec:
   rules:
-  - host: api.talkiewalkie.app
-    http:
-      paths:
-      - backend:
-          serviceName: back
-          servicePort: 8080
-  - host: web.talkiewalkie.app
-    http:
-      paths:
-      - backend:
-          serviceName: webapp
-          servicePort: 80
-  - host: tunnel.talkiewalkie.app
-    http:
-      paths:
-      - backend:
-          serviceName: chisel
-          servicePort: 8080
-  - host: dev.talkiewalkie.app
-    http:
-      paths:
-      - backend:
-          serviceName: chisel
-          servicePort: 8081
+    - host: api.talkiewalkie.app
+      http:
+        paths:
+          - backend:
+              serviceName: back
+              servicePort: 8080
+    - host: web.talkiewalkie.app
+      http:
+        paths:
+          - backend:
+              serviceName: webapp
+              servicePort: 80
+    - host: tunnel.talkiewalkie.app
+      http:
+        paths:
+          - backend:
+              serviceName: chisel
+              servicePort: 8080
+    - host: theo.dev.talkiewalkie.app
+      http:
+        paths:
+          - backend:
+              serviceName: chisel
+              servicePort: 8081
+    - host: alex.dev.talkiewalkie.app
+      http:
+        paths:
+          - backend:
+              serviceName: chisel
+              servicePort: 8082
 

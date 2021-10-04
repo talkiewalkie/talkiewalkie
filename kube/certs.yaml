@@ -4,8 +4,10 @@ metadata:
   name: talkiewalkie
 spec:
   domains:
-    - api.talkiewalkie.app
-    - web.talkiewalkie.app 
-    - dev.talkiewalkie.app
-    - tunnel.talkiewalkie.app
+    - "api.talkiewalkie.app"
+    - "web.talkiewalkie.app"
+    - "dev.talkiewalkie.app"
+    - "theo.dev.talkiewalkie.app"
+    - "alex.dev.talkiewalkie.app"
+    - "tunnel.talkiewalkie.app"
 
