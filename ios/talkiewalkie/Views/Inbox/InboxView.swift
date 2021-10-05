@@ -13,34 +13,36 @@ struct InboxView: View {
 
     @StateObject var model: InboxViewModel
     @EnvironmentObject var auth: AuthenticatedState
+
+    @FetchRequest(
+        entity: Conversation.entity(),
+        sortDescriptors: [NSSortDescriptor(key: "lastActivityAt", ascending: false)]
+    ) var conversations: FetchedResults<Conversation>
+
     @Environment(\.colorScheme) private var cs: ColorScheme
 
     var body: some View {
-        let _ = print("connect status: \(model.webSocketTask?.connected)")
         ZStack(alignment: .bottomLeading) {
             VStack(spacing: 20) {
-                if let ws = self.model.webSocketTask {
-                    if ws.connected { Text("Connected").padding() }
-                    if !ws.connected { Text("Disconnected").padding() }
-                }
+                if self.model.connected { Text("Connected").padding() }
+                else { Text("Disconnected").padding() }
 
-                if let groups = model.groups {
-                    ScrollView {
-                        ForEach(groups, id: \.uuid) { g in
-                            NavigationLink(destination: ChatView(model: ChatViewModel(api: model.api, uuid: g.uuid)).environmentObject(auth)) {
-                                HStack(spacing: 10) {
-                                    Circle().frame(width: 30, height: 30)
-                                    Text(g.display)
-                                        .lineLimit(1)
-                                        .foregroundColor(.black)
-                                    Spacer()
-                                    Text("(\(g.handles.count))")
-                                        .foregroundColor(.gray)
-                                }
-                                .padding(.horizontal, 10)
+                ScrollView {
+                    ForEach(conversations, id: \.uuid?.uuidString) { conv in
+                        let cm = ChatViewModel(authed: auth, uuid: conv.uuid!.uuidString)
+                        NavigationLink(destination: ChatView(model: cm).environmentObject(auth)) {
+                            HStack(spacing: 10) {
+                                Circle().frame(width: 30, height: 30)
+                                Text(conv.display ?? "no title")
+                                    .lineLimit(1)
+                                    .foregroundColor(.black)
+                                Spacer()
+                                Text("(\(conv.users?.count ?? 0))")
+                                    .foregroundColor(.gray)
                             }
-                            Divider().frame(width: UIScreen.main.bounds.width - 40, height: 2, alignment: .center).foregroundColor(.black)
+                            .padding(.horizontal, 10)
                         }
+                        Divider().frame(width: UIScreen.main.bounds.width - 40, height: 2, alignment: .center).foregroundColor(.black)
                     }
                 }
 
@@ -58,12 +60,9 @@ struct InboxView: View {
             }
         }
         .onAppear {
-            model.connect()
-            model.loadFriends()
-            model.loadGroups()
-        }
-        .onDisappear {
-            model.disconnect()
+//            model.connect()
+//            model.loadFriends()
+            model.syncConversations()
         }
         .sheet(isPresented: $showQuickSendSheet) {
             if let friends = self.model.friends, !self.model.loading {
@@ -120,9 +119,9 @@ struct InboxView: View {
     }
 }
 
-struct ConversationView_Previews: PreviewProvider {
-    static var previews: some View {
-        let model = InboxViewModel(api: Api(token: "XX"))
-        InboxView(model: model)
-    }
-}
+// struct ConversationView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        let model = InboxViewModel(api: Api(token: "XX"))
+//        InboxView(model: model)
+//    }
+// }

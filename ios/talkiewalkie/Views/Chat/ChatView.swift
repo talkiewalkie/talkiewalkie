@@ -32,13 +32,13 @@ struct ChatView: View {
         .onAppear {
             model.loadMessages(page: 0)
         }
-        .navigationTitle(Text(model.group?.display ?? "Loading group..."))
+        .navigationTitle(Text(model.conversation?.display ?? "Loading conversation..."))
     }
 }
 
-struct ChatView_Previews: PreviewProvider {
-    static var previews: some View {
-        let model = ChatViewModel(api: Api(token: ""), uuid: "")
-        ChatView(model: model)
-    }
-}
+// struct ChatView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        let model = ChatViewModel(api: Api(token: ""), uuid: "")
+//        ChatView(model: model)
+//    }
+// }

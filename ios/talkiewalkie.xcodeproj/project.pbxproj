@@ -7,9 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		E43D833E2702076C00612C7B /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = E43D833D2702076C00612C7B /* User.swift */; };
+		E411D68D270B4DD4001EBAF3 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = E411D68C270B4DD4001EBAF3 /* User.swift */; };
+		E411D693270B5DBD001EBAF3 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = E411D692270B5DBD001EBAF3 /* Extensions.swift */; };
+		E411D695270B6A83001EBAF3 /* Conversation.swift in Sources */ = {isa = PBXBuildFile; fileRef = E411D694270B6A83001EBAF3 /* Conversation.swift */; };
+		E411D697270C481E001EBAF3 /* ModelExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = E411D696270C481E001EBAF3 /* ModelExtensions.swift */; };
 		E43D8342270360DE00612C7B /* MessageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E43D8341270360DE00612C7B /* MessageView.swift */; };
-		E43D834427037E6D00612C7B /* WebSocket.swift in Sources */ = {isa = PBXBuildFile; fileRef = E43D834327037E6D00612C7B /* WebSocket.swift */; };
+		E43D834B2707554500612C7B /* WebSocketConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = E43D834A2707554500612C7B /* WebSocketConnection.swift */; };
+		E43D834E270AE78D00612C7B /* User.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = E43D834C270AE78D00612C7B /* User.xcdatamodeld */; };
 		E47F0D0026EF59E800995D8B /* AudioKit in Frameworks */ = {isa = PBXBuildFile; productRef = E47F0CFF26EF59E800995D8B /* AudioKit */; };
 		E47F0D0526EF5AB000995D8B /* AudioKitUI in Frameworks */ = {isa = PBXBuildFile; productRef = E47F0D0426EF5AB000995D8B /* AudioKitUI */; };
 		E483918826FD340C00BBA902 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E483918526FD32C200BBA902 /* RootView.swift */; };
@@ -52,9 +56,13 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		E43D833D2702076C00612C7B /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
+		E411D68C270B4DD4001EBAF3 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
+		E411D692270B5DBD001EBAF3 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
+		E411D694270B6A83001EBAF3 /* Conversation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Conversation.swift; sourceTree = "<group>"; };
+		E411D696270C481E001EBAF3 /* ModelExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelExtensions.swift; sourceTree = "<group>"; };
 		E43D8341270360DE00612C7B /* MessageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageView.swift; sourceTree = "<group>"; };
-		E43D834327037E6D00612C7B /* WebSocket.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebSocket.swift; sourceTree = "<group>"; };
+		E43D834A2707554500612C7B /* WebSocketConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebSocketConnection.swift; sourceTree = "<group>"; };
+		E43D834D270AE78D00612C7B /* User.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = User.xcdatamodel; sourceTree = "<group>"; };
 		E483917F26FD32C200BBA902 /* InboxView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InboxView.swift; sourceTree = "<group>"; };
 		E483918026FD32C200BBA902 /* InboxViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InboxViewModel.swift; sourceTree = "<group>"; };
 		E483918226FD32C200BBA902 /* ChatViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatViewModel.swift; sourceTree = "<group>"; };
@@ -111,10 +119,12 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		E43D833C2702075F00612C7B /* Models */ = {
+		E411D68B270B4DC9001EBAF3 /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				E43D833D2702076C00612C7B /* User.swift */,
+				E411D68C270B4DD4001EBAF3 /* User.swift */,
+				E411D694270B6A83001EBAF3 /* Conversation.swift */,
+				E411D696270C481E001EBAF3 /* ModelExtensions.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -165,7 +175,8 @@
 			children = (
 				E483919726FD352B00BBA902 /* Api.swift */,
 				E483919626FD352B00BBA902 /* Format.swift */,
-				E43D834327037E6D00612C7B /* WebSocket.swift */,
+				E43D834A2707554500612C7B /* WebSocketConnection.swift */,
+				E411D692270B5DBD001EBAF3 /* Extensions.swift */,
 			);
 			path = Lib;
 			sourceTree = "<group>";
@@ -202,7 +213,8 @@
 		E4B9D70C26E8997E0007C62D /* talkiewalkie */ = {
 			isa = PBXGroup;
 			children = (
-				E43D833C2702075F00612C7B /* Models */,
+				E43D834C270AE78D00612C7B /* User.xcdatamodeld */,
+				E411D68B270B4DC9001EBAF3 /* Models */,
 				E483919526FD352100BBA902 /* Lib */,
 				E483919026FD350700BBA902 /* Components */,
 				E483918A26FD344D00BBA902 /* Views */,
@@ -385,19 +397,23 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E43D834427037E6D00612C7B /* WebSocket.swift in Sources */,
-				E43D833E2702076C00612C7B /* User.swift in Sources */,
+				E411D693270B5DBD001EBAF3 /* Extensions.swift in Sources */,
 				E483918F26FD34FA00BBA902 /* InboxViewModel.swift in Sources */,
 				E483919826FD352B00BBA902 /* Format.swift in Sources */,
 				E483919B26FD361C00BBA902 /* Refreshable.swift in Sources */,
+				E43D834E270AE78D00612C7B /* User.xcdatamodeld in Sources */,
 				E483918C26FD34C300BBA902 /* ChatView.swift in Sources */,
+				E411D697270C481E001EBAF3 /* ModelExtensions.swift in Sources */,
+				E411D68D270B4DD4001EBAF3 /* User.swift in Sources */,
 				E483918826FD340C00BBA902 /* RootView.swift in Sources */,
+				E411D695270B6A83001EBAF3 /* Conversation.swift in Sources */,
 				E483919926FD352B00BBA902 /* Api.swift in Sources */,
 				E43D8342270360DE00612C7B /* MessageView.swift in Sources */,
 				E4B9D70E26E8997E0007C62D /* talkiewalkieApp.swift in Sources */,
 				E483918D26FD34CB00BBA902 /* ChatViewModel.swift in Sources */,
 				E483918926FD342B00BBA902 /* RootViewModel.swift in Sources */,
 				E483918E26FD34F700BBA902 /* InboxView.swift in Sources */,
+				E43D834B2707554500612C7B /* WebSocketConnection.swift in Sources */,
 				E483919326FD351800BBA902 /* RemoteImage.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -776,6 +792,19 @@
 			productName = FirebaseAuth;
 		};
 /* End XCSwiftPackageProductDependency section */
+
+/* Begin XCVersionGroup section */
+		E43D834C270AE78D00612C7B /* User.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				E43D834D270AE78D00612C7B /* User.xcdatamodel */,
+			);
+			currentVersion = E43D834D270AE78D00612C7B /* User.xcdatamodel */;
+			path = User.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+/* End XCVersionGroup section */
 	};
 	rootObject = E4B9D70226E8997E0007C62D /* Project object */;
 }

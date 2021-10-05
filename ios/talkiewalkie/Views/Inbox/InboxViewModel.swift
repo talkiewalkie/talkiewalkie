@@ -8,26 +8,36 @@
 import Foundation
 
 class InboxViewModel: ObservableObject {
-    let api: Api
+    let authed: AuthenticatedState
 
-    init(api: Api) {
-        self.api = api
+    private var socketTask: WebSocketTaskConnection
+    private let decoder = JSONDecoder()
+    private let encoder = JSONEncoder()
+    @Published var connected = false
+
+    init(authed: AuthenticatedState) {
+        self.authed = authed
+
+        socketTask = authed.api.ws(path: "conversations")
+        socketTask.delegate = self
+        socketTask.connect()
     }
 
     // MARK: - INBOX
 
     @Published private(set) var loading = true
-    @Published private(set) var groups: [Api.GroupsOutputGroup] = []
 
     func message(text: String, handles: [String]) {
-        api.message(text, handles) { _, _ in }
+        authed.api.message(text, handles) { _, _ in }
     }
 
-    func loadGroups() {
+    func syncConversations() {
         loading = true
-        api.groups { groups, _ in
+        authed.api.conversations { conversations, _ in
             self.loading = false
-            self.groups = groups?.groups ?? []
+            if let convs = conversations {
+                Conversation.dumpFromRemote(convs, context: self.authed.context)
+            }
         }
     }
 
@@ -38,49 +48,55 @@ class InboxViewModel: ObservableObject {
 
     func loadFriends() {
         loadingFriends = true
-        api.friends { friends, _ in
+        authed.api.friends { friends, _ in
             self.loadingFriends = false
             self.friends = friends
         }
     }
 
-    // MARK: - Connection
+    deinit {
+        socketTask.disconnect()
+    }
+}
 
-    @Published var webSocketTask: WebSocketManager?
-
-    private func onReceive(result: Result<URLSessionWebSocketTask.Message, Error>) {
-        switch result {
-        case .success(let m):
-            switch m {
-            case .string(let content):
-                DispatchQueue.main.async {
-                    let newMessage = try! JSONDecoder().decode(Api.GroupWsMessage.self, from: content.data(using: .utf8)!)
-                    print("\(Date()) received new message!: [\(newMessage.message)]")
-                }
-            default:
-                print("\(Date()) ws connection only handles text messages, message ignored")
-            }
-        case .failure(let err):
-            let nsErr = err as NSError
-            if nsErr.domain == NSPOSIXErrorDomain, nsErr.code == 57 {
-                print("\(Date()) unwanted disconnection from ws '\(webSocketTask?.url)'")
-                webSocketTask?.reinit()
-            } else {
-                print("\(Date()) ws reception error: \(nsErr)")
-                webSocketTask?.connected = false
-            }
+extension InboxViewModel: WebSocketConnectionDelegate {
+    func onConnected(connection _: WebSocketConnection) {
+        print("\(Date()) ws connected")
+        DispatchQueue.main.async {
+            self.connected = true
         }
     }
 
-    func connect() {
-        webSocketTask = api.groupWs(onReceive: onReceive)
+    func onDisconnected(connection _: WebSocketConnection, error _: Error?) {
+        print("\(Date()) ws disconnected")
+        DispatchQueue.main.async {
+            self.connected = false
+        }
     }
 
-    func disconnect() {
-        webSocketTask?.disconnect()
+    func onError(connection _: WebSocketConnection, error: Error) {
+        print("\(Date()) ws connection err: \(error)")
+        socketTask.disconnect()
+        socketTask.numReconnects += 1
+        socketTask.connect()
     }
 
-    deinit {
-        disconnect()
+    func onMessage(connection _: WebSocketConnection, text: String) {
+        do {
+            let newMsg = try decoder.decode(Api.ConversationWsMessage.self, from: text.data(using: .utf8)!)
+//            let convs = me.conversations?.array as! [Conversation]
+//            let conv = convs.first { $0.uuid?.uuidString == newMsg.conversationUuid }
+//            guard var conv = conv else {
+//                // TODO: load the new conversation data, if the call errs then we err in the client side too.
+//                return
+//            }
+
+//            conv.messages.append(Message(createdAt: Date(), text: newMsg.message))
+            print("\(Date()) ws msg: \(text)")
+        } catch { print(error) }
+    }
+
+    func onMessage(connection _: WebSocketConnection, data _: Data) {
+        print("\(Date()) received byte message from ws connection, unhandled")
     }
 }

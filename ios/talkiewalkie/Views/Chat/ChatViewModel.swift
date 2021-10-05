@@ -8,27 +8,25 @@
 import Foundation
 
 class ChatViewModel: ObservableObject {
-    let api: Api
+    let authed: AuthenticatedState
     let uuid: String
-    init(api: Api, uuid: String) {
-        self.api = api
+    init(authed: AuthenticatedState, uuid: String) {
+        self.authed = authed
         self.uuid = uuid
     }
-    
+
     @Published var loading = false
-    @Published var group: Api.GroupOutput?
-    @Published var messages: [Api.GroupOutputMessage] = []
-    
+    @Published var conversation: Api.ConversationOutput?
+    @Published var messages: [Api.ConversationOutputMessage] = []
+
     func loadMessages(page: Int) {
-        self.api.group(uuid, offset: page) { g, _ in
-            self.group = g
+        authed.api.conversation(uuid, offset: page) { g, _ in
+            self.conversation = g
             self.messages.append(contentsOf: g?.messages ?? [])
         }
     }
-    
-    
+
     func message(text: String) {
-        self.api.message(text, groupUuid: uuid) { data, _ in }
+        authed.api.message(text, conversationUuid: uuid) { _, _ in }
     }
-    
 }

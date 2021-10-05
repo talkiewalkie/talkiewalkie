@@ -18,9 +18,9 @@ struct RootView: View {
 
     var body: some View {
         if let u = vm.user {
-            if let authedObj = vm.authenticatedModel() {
+            if let authedObj = vm.authed {
                 NavigationView {
-                    InboxView(model: InboxViewModel(api: authedObj.api))
+                    InboxView(model: InboxViewModel(authed: authedObj))
                         .navigationBarTitle("TalkieWalkie")
                         .navigationBarItems(leading: Text(""), trailing: Button("account") { showingSheet = true })
                 }
@@ -97,10 +97,10 @@ struct RootView: View {
     }
 }
 
-struct AuthView_Previews: PreviewProvider {
-    static var previews: some View {
-        let vm = RootViewModel()
-
-        return RootView(vm: vm)
-    }
-}
+// struct AuthView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        let vm = RootViewModel()
+//
+//        return RootView(vm: vm)
+//    }
+// }

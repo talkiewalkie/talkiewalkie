@@ -5,10 +5,11 @@
 //  Created by Théo Matussière on 28/09/2021.
 //
 
+import OSLog
 import SwiftUI
 
 struct MessageView: View {
-    let message: Api.GroupOutputMessage
+    let message: Api.ConversationOutputMessage
     @EnvironmentObject var authState: AuthenticatedState
 
     var isSentByMe: Bool {
@@ -21,17 +22,16 @@ struct MessageView: View {
             Text(message.text)
                 .padding(10)
                 .foregroundColor(isSentByMe ? Color.white : Color.black)
-                .background(isSentByMe ? Color.blue : Color(UIColor(red: 240/255, green: 240/255, blue: 240/255, alpha: 1.0)))
+                .background(isSentByMe ? Color.blue : Color(UIColor(red: 240 / 255, green: 240 / 255, blue: 240 / 255, alpha: 1.0)))
                 .cornerRadius(10)
         }
         .padding(10)
-        .frame(width: .infinity)
     }
 }
 
 struct MessageView_Previews: PreviewProvider {
     static var previews: some View {
-        let msg = Api.GroupOutputMessage(text: "hello", createdAt: ISO8601DateFormatter().string(from: Date()), authorHandle: "toto")
+        let msg = Api.ConversationOutputMessage(text: "hello", createdAt: ISO8601DateFormatter().string(from: Date()), authorHandle: "toto")
         MessageView(message: msg)
     }
 }

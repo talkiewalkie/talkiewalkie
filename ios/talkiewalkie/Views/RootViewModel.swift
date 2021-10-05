@@ -5,41 +5,37 @@
 //  Created by Théo Matussière on 16/09/2021.
 //
 
-import FirebaseAuth
 import Foundation
+import SwiftUI
+
+import CoreData
+import FirebaseAuth
+import OSLog
 
 class RootViewModel: ObservableObject {
+    private var coredataCtx: NSManagedObjectContext
     private var auth = Auth.auth()
-    
+
     @Published var user: FirebaseAuth.User?
-    @Published var me: Api.MeOutput?
-    @Published var api: Api?
-    
-    init() {
-        self.user = auth.currentUser
+    @Published var authed: AuthenticatedState?
+
+    init(_ ctx: NSManagedObjectContext) {
+        coredataCtx = ctx
+        user = auth.currentUser
+
         auth.addStateDidChangeListener { _, user in
             self.user = user
-            
+
             if let user = user {
-                user.getIDTokenResult { result, _ in
-                    if let result = result {
-                        self.api = Api(token: result.token)
-                        self.api?.me { res, _ in
-                            if let data = res { self.me = data }
-                        }
-                    }
+                AuthenticatedState.build(fbU: user, context: self.coredataCtx) { s in
+                    self.authed = s
                 }
             }
         }
     }
-    
-    func authenticatedModel() -> AuthenticatedState? {
-        guard let u = user, let a = api, let m = me else { return nil }
-        return AuthenticatedState(user: u, me: m, api: a)
-    }
-    
+
     var isSignedIn: Bool { user != nil }
-    
+
     func signIn(_ email: String, _ password: String) {
         auth.signIn(withEmail: email, password: password) { [self] _, error in
             if let err = error {
@@ -49,7 +45,7 @@ class RootViewModel: ObservableObject {
             }
         }
     }
-    
+
     func createUser(_ email: String, _ password: String) {
         auth.createUser(withEmail: email, password: password) { [self] _, error in
             if let err = error {
@@ -59,7 +55,7 @@ class RootViewModel: ObservableObject {
             }
         }
     }
-    
+
     func signOut() {
         try! auth.signOut()
         user = nil
@@ -72,12 +68,42 @@ enum AuthError: Error {
 
 class AuthenticatedState: ObservableObject {
     var user: FirebaseAuth.User
-    var me: Api.MeOutput
     var api: Api
-    
-    init(user: FirebaseAuth.User, me: Api.MeOutput, api: Api) {
+    var context: NSManagedObjectContext
+
+    var me: Me { Me.fromCache(context: context)! }
+
+    static func build(fbU: FirebaseAuth.User, context: NSManagedObjectContext, completion: @escaping (AuthenticatedState) -> Void) {
+        fbU.getIDTokenResult { res, _ in
+            if let token = res {
+                let api = Api(token: token.token)
+
+                if let me = Me.fromCache(context: context) {
+                    os_log("loaded user info from cache: \(me)")
+                    completion(AuthenticatedState(user: fbU, api: api, context: context))
+                } else {
+                    api.me { res, _ in
+                        if let u = res {
+                            let me = Me(context: context)
+                            me.firebaseUid = fbU.uid
+                            me.someOptions = true
+                            me.handle = u.handle
+                            me.uuid = u.uuid
+
+                            me.objectWillChange.send()
+                            context.saveOrLogError()
+
+                            completion(AuthenticatedState(user: fbU, api: api, context: context))
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private init(user: FirebaseAuth.User, api: Api, context: NSManagedObjectContext) {
         self.user = user
-        self.me = me
         self.api = api
+        self.context = context
     }
 }
