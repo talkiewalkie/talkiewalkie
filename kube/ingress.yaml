@@ -28,6 +28,12 @@ spec:
           - backend:
               serviceName: chisel
               servicePort: 8080
+    - host: dev.talkiewalkie.app
+      http:
+        paths:
+          - backend:
+              serviceName: chisel
+              servicePort: 8081
     - host: theo.dev.talkiewalkie.app
       http:
         paths:
