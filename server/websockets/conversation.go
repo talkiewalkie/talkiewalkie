@@ -13,18 +13,13 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-type WsMessageOut struct {
-	Text         string `json:"text"`
-	AuthorHandle string `json:"authorHandle"`
-}
-
 func websocketSync(c *websocket.Conn, closing chan bool) {
 	defer func() {
 		if err := c.Close(); err != nil {
 			log.Printf("%s failed to close websocket: %+v", time.Now(), err)
 		}
 	}()
-	clientPingInterval := 5 * time.Second
+	clientPingInterval := 10 * time.Second
 	c.SetPongHandler(func(string) error { c.SetReadDeadline(time.Now().Add(clientPingInterval)); return nil })
 
 	for {
@@ -73,10 +68,10 @@ func pubsubSync(c *websocket.Conn, topic string, listener *pq.Listener, unlisten
 	}
 }
 
-func GroupWebsocketHandler(w http.ResponseWriter, r *http.Request) {
+func ConversationWebsocketHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := common.WithAuthedContext(r)
 
-	conn := websocket.Upgrader{HandshakeTimeout: time.Second}
+	conn := websocket.Upgrader{HandshakeTimeout: 10 * time.Second}
 	c, err := conn.Upgrade(w, r, nil)
 	if err != nil {
 		log.Printf("could not initiate websocket: %+v", err)

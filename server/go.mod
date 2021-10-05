@@ -5,6 +5,7 @@ go 1.15
 require (
 	cloud.google.com/go/storage v1.10.0
 	firebase.google.com/go/v4 v4.6.0
+	github.com/bxcodec/faker/v3 v3.6.0
 	github.com/friendsofgo/errors v0.9.2
 	github.com/go-chi/jwtauth v1.2.0
 	github.com/go-sql-driver/mysql v1.6.0 // indirect

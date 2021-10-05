@@ -8,29 +8,29 @@ import (
 	"strings"
 )
 
-func UserConversations(ctx common.Context, offset, pageSz int) (models.GroupSlice, error) {
-	myGroups, err := models.UserGroups(
-		models.UserGroupWhere.UserID.EQ(ctx.User.ID),
-		qm.OrderBy(fmt.Sprintf("%s DESC", models.UserGroupColumns.CreatedAt)),
+func UserConversations(ctx common.Context, offset, pageSz int) (models.ConversationSlice, error) {
+	myConversations, err := models.UserConversations(
+		models.UserConversationWhere.UserID.EQ(ctx.User.ID),
+		qm.OrderBy(fmt.Sprintf("%s DESC", models.UserConversationColumns.CreatedAt)),
 		qm.Offset(offset), qm.Limit(pageSz),
 	).All(ctx.Context, ctx.Components.Db)
 	if err != nil {
 		return nil, err
 	}
 
-	groupIds := []int{}
-	for _, ugs := range myGroups {
-		groupIds = append(groupIds, ugs.GroupID)
+	conversationIds := []int{}
+	for _, ugs := range myConversations {
+		conversationIds = append(conversationIds, ugs.ConversationID)
 	}
-	groups, err := models.Groups(
-		models.GroupWhere.ID.IN(groupIds),
-		qm.Load(qm.Rels(models.GroupRels.UserGroups, models.UserGroupRels.User)),
+	conversations, err := models.Conversations(
+		models.ConversationWhere.ID.IN(conversationIds),
+		qm.Load(qm.Rels(models.ConversationRels.UserConversations, models.UserConversationRels.User)),
 	).All(ctx.Context, ctx.Components.Db)
 	if err != nil {
 		return nil, err
 	}
 
-	return groups, nil
+	return conversations, nil
 }
 
 func UserPubSubTopic(u *models.User) string {

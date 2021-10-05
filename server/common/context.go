@@ -102,8 +102,8 @@ func WithContextMiddleWare(comps *Components) mux.MiddlewareFunc {
 					http.Error(w, fmt.Sprintf("auth header provided couldn't be verified: %+v", err), http.StatusBadRequest)
 					return
 				}
-				u, err = models.Users(models.UserWhere.FirebaseUID.EQ(null.NewString(tok.UID, true))).One(r.Context(), comps.Db)
-				if errors.Cause(err) == sql.ErrNoRows {
+				u, err = models.Users(models.UserWhere.FirebaseUID.EQ(null.StringFrom(tok.UID))).One(r.Context(), comps.Db)
+				if err != nil && errors.Cause(err) == sql.ErrNoRows {
 					var handle, picture string
 					if name, ok := tok.Claims["name"]; ok {
 						handle = slug.Make(name.(string))

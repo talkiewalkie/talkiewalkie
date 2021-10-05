@@ -18,17 +18,17 @@ import (
 
 // ---------------
 
-type GroupsOutput struct {
-	Groups []GroupOutput `json:"groups"`
+type ConversationsOutput struct {
+	Conversations []ConversationOutput `json:"conversations"`
 }
 
-type GroupOutput struct {
+type ConversationOutput struct {
 	Uuid    string   `json:"uuid"`
 	Display string   `json:"display"`
 	Handles []string `json:"handles"`
 }
 
-func Groups(w http.ResponseWriter, r *http.Request) {
+func Conversations(w http.ResponseWriter, r *http.Request) {
 	ctx := common.WithAuthedContext(r)
 
 	pageSz := 20
@@ -41,16 +41,16 @@ func Groups(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	groups, err := entities.UserConversations(ctx, offset, pageSz)
+	conversations, err := entities.UserConversations(ctx, offset, pageSz)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("could not fetch user's groups: %+v", err), http.StatusInternalServerError)
+		http.Error(w, fmt.Sprintf("could not fetch user's conversations: %+v", err), http.StatusInternalServerError)
 		return
 	}
 
-	groupOutput := []GroupOutput{}
-	for _, g := range groups {
+	conversationOutput := []ConversationOutput{}
+	for _, g := range conversations {
 		handles := []string{}
-		for _, ug := range g.R.UserGroups {
+		for _, ug := range g.R.UserConversations {
 			redundant := false
 			for _, h := range handles {
 				if h == ug.R.User.Handle {
@@ -67,39 +67,39 @@ func Groups(w http.ResponseWriter, r *http.Request) {
 			display = strings.Join(handles, ", ")
 		}
 
-		groupOutput = append(groupOutput, GroupOutput{
+		conversationOutput = append(conversationOutput, ConversationOutput{
 			Uuid:    g.UUID.String(),
 			Display: display,
 			Handles: handles,
 		})
 	}
 
-	out := GroupsOutput{Groups: groupOutput}
+	out := ConversationsOutput{Conversations: conversationOutput}
 	common.JsonOut(w, out)
 }
 
 // -------------
 
-type GroupByUuidOutput struct {
-	Uuid     string         `json:"uuid"`
-	Display  string         `json:"display"`
-	Handles  []string       `json:"handles"`
-	Messages []GroupMessage `json:"messages"`
+type ConversationByUuidOutput struct {
+	Uuid     string                `json:"uuid"`
+	Display  string                `json:"display"`
+	Handles  []string              `json:"handles"`
+	Messages []ConversationMessage `json:"messages"`
 }
 
-type GroupMessage struct {
+type ConversationMessage struct {
 	AuthorHandle string `json:"authorHandle"`
 	Text         string `json:"text"`
 	CreatedAt    string `json:"createdAt"`
 }
 
-func GroupByUuid(w http.ResponseWriter, r *http.Request) {
+func ConversationByUuid(w http.ResponseWriter, r *http.Request) {
 	ctx := common.WithAuthedContext(r)
 
 	vars := mux.Vars(r)
 	uuidraw, ok := vars["uuid"]
 	if !ok {
-		http.Error(w, "expect a group uuid", http.StatusBadRequest)
+		http.Error(w, "expect a conversation uuid", http.StatusBadRequest)
 		return
 	}
 
@@ -119,24 +119,33 @@ func GroupByUuid(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	group, err := models.Groups(
-		models.GroupWhere.UUID.EQ(uuid),
-		qm.Load(qm.Rels(models.GroupRels.UserGroups, models.UserGroupRels.User)),
+	conversation, err := models.Conversations(
+		models.ConversationWhere.UUID.EQ(uuid),
+		qm.Load(qm.Rels(models.ConversationRels.UserConversations, models.UserConversationRels.User)),
 		qm.Load(
-			qm.Rels(models.GroupRels.Messages, models.MessageRels.Author),
+			qm.Rels(models.ConversationRels.Messages, models.MessageRels.Author),
 			qm.Limit(pageSz), qm.Offset(offset), qm.OrderBy(fmt.Sprintf("%s DESC", models.MessageColumns.CreatedAt))),
 	).One(ctx.Context, ctx.Components.Db)
 	if errors.Cause(err) == sql.ErrNoRows {
-		http.Error(w, fmt.Sprintf("no group for '%s'", uuid.String()), http.StatusNotFound)
+		http.Error(w, fmt.Sprintf("no conversation for '%s'", uuid.String()), http.StatusNotFound)
 		return
 	} else if err != nil {
-		http.Error(w, fmt.Sprintf("could not find group: %+v", err), http.StatusInternalServerError)
+		http.Error(w, fmt.Sprintf("could not find conversation: %+v", err), http.StatusInternalServerError)
+		return
+	}
+	ok, err = entities.CanAccessConversation(conversation, ctx.User)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if !ok {
+		http.Error(w, "can't access this conversation, not listed in its participants", http.StatusForbidden)
 		return
 	}
 
-	messages := []GroupMessage{}
-	for _, msg := range group.R.Messages {
-		messages = append(messages, GroupMessage{
+	messages := []ConversationMessage{}
+	for _, msg := range conversation.R.Messages {
+		messages = append(messages, ConversationMessage{
 			AuthorHandle: msg.R.Author.Handle,
 			Text:         msg.Text,
 			CreatedAt:    msg.CreatedAt.Format(time.RFC3339),
@@ -144,25 +153,25 @@ func GroupByUuid(w http.ResponseWriter, r *http.Request) {
 	}
 
 	handles := []string{}
-	for _, userGroup := range group.R.UserGroups {
+	for _, userConversation := range conversation.R.UserConversations {
 		redundant := false
 		for _, h := range handles {
-			if h == userGroup.R.User.Handle {
+			if h == userConversation.R.User.Handle {
 				redundant = true
 			}
 		}
 		if !redundant {
-			handles = append(handles, userGroup.R.User.Handle)
+			handles = append(handles, userConversation.R.User.Handle)
 		}
 	}
 
-	display := group.Name.String
-	if !group.Name.Valid {
+	display := conversation.Name.String
+	if !conversation.Name.Valid {
 		display = strings.Join(handles, ", ")
 	}
 
-	out := GroupByUuidOutput{
-		Uuid:     group.UUID.String(),
+	out := ConversationByUuidOutput{
+		Uuid:     conversation.UUID.String(),
 		Display:  display,
 		Handles:  handles,
 		Messages: messages,

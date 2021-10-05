@@ -1,46 +1,34 @@
 package main
 
 import (
-	"bufio"
-	"bytes"
 	"context"
-	"encoding/json"
+	"database/sql"
+	"flag"
 	"fmt"
+	"github.com/bxcodec/faker/v3"
+	"github.com/friendsofgo/errors"
 	"github.com/gosimple/slug"
 	"github.com/joho/godotenv"
 	"github.com/talkiewalkie/talkiewalkie/common"
 	"github.com/talkiewalkie/talkiewalkie/models"
 	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
-	"github.com/volatiletech/sqlboiler/v4/queries/qm"
-	"github.com/volatiletech/sqlboiler/v4/types/pgeo"
 	"log"
-	"strings"
+	"math/rand"
 )
 
-type Location struct {
-	Lat float64 `json:"lat"`
-	Lng float64 `json:"lng"`
-}
-
-type TourFile struct {
-	Url      string `json:"url"`
-	Path     string `json:"path"`
-	Checksum string `json:"checksum"`
-}
-type Tour struct {
-	Location    Location   `json:"location"`
-	Description string     `json:"description"`
-	Title       string     `json:"title"`
-	Author      string     `json:"author"`
-	CoverUrl    string     `json:"cover_url"`
-	AudioUrl    string     `json:"audio_url"`
-	TourUrl     string     `json:"tour_url"`
-	Files       []TourFile `json:"files"`
-}
+var (
+	email = flag.String("email", "", "an email address you'll login with")
+)
 
 func main() {
+	flag.Parse()
 	ctx := context.Background()
+
+	if *email == "" {
+		fmt.Println("you need to provide your email address")
+		return
+	}
 
 	if err := godotenv.Load(".env.dev"); err != nil {
 		log.Panicf("could not load env: %+v", err)
@@ -51,107 +39,58 @@ func main() {
 		log.Panicf("could not initiate components: %+v", err)
 	}
 
-	var f bytes.Buffer
-	if err = components.Storage.Download("scraping/audiotours/mywowo-full-run-located.jl", &f); err != nil {
-		log.Panicf("could not download asset file: %+v", err)
-	}
-
-	mywowo := models.User{Handle: "mywowo", Bio: null.NewString("My Wonderful World\nThe app already has hundreds of audio files in your own language that will tell you about the wonders of the following cities in a fun and simple way at an exceptional price!\nhttps://mywowo.net", true)}
-	if err = mywowo.Insert(ctx, components.Db, boil.Infer()); err != nil {
-		log.Printf("-!- could not insert new user with handle '%s': %+v", "mywowo", err)
-	}
-
-	scanner := bufio.NewScanner(&f)
-	cnt := 0
-	for scanner.Scan() {
-		text := scanner.Text()
-		var tour Tour
-		if err = json.Unmarshal([]byte(text), &tour); err != nil {
-			log.Printf("-!- could not deserialize json line: %+v", err)
-			continue
-		}
-
-		var user models.User
-		handle := slug.Make(tour.Author)
-		if handle == "" {
-			handle = mywowo.Handle
-			user = mywowo
-		} else {
-			exists, err := models.Users(qm.Where(fmt.Sprintf("%s = ?", models.UserColumns.Handle), slug.Make(handle))).Exists(ctx, components.Db)
-			if err != nil {
-				log.Printf("-!- could not look for user with handle '%s': %+v", handle, err)
-				continue
-			}
-			if !exists {
-				user = models.User{Handle: slug.Make(handle)}
-				if err = user.Insert(ctx, components.Db, boil.Infer()); err != nil {
-					log.Printf("-!- could not insert new user with handle '%s': %+v", handle, err)
-					continue
-				}
-			} else {
-				u, err := models.Users(qm.Where(fmt.Sprintf("%s = ?", models.UserColumns.Handle), handle)).One(ctx, components.Db)
-				if err != nil {
-					log.Printf("-!- could not retrieve user '%s': %+v", handle, err)
-					continue
-				}
-				user = *u
-			}
-		}
-
-		var audioFile, coverFile TourFile
-		for _, file := range tour.Files {
-			if strings.HasSuffix(file.Url, ".mp3") {
-				audioFile = file
-			} else {
-				coverFile = file
-			}
-		}
-
-		audio := models.Asset{
-			MimeType: "audio/mp3",
-			FileName: fmt.Sprintf("%s.mp3", audioFile.Checksum),
-			Bucket:   null.NewString("talkiewalkie-dev", true),
-			BlobName: null.NewString(fmt.Sprintf("scraping/audiotours/%s", audioFile.Path), true),
-		}
-		if err = audio.Insert(ctx, components.Db, boil.Infer()); err != nil {
-			log.Printf("-!- could not insert audio track as asset: %+v", err)
-			continue
-		}
-
-		cover := models.Asset{
-			MimeType: "image/jpg",
-			FileName: fmt.Sprintf("%s.mp3", audioFile.Checksum),
-			Bucket:   null.NewString("talkiewalkie-dev", true),
-			BlobName: null.NewString(fmt.Sprintf("scraping/audiotours/%s", coverFile.Path), true),
-		}
-		if err = cover.Insert(ctx, components.Db, boil.Infer()); err != nil {
-			log.Printf("-!- could not insert cover image as asset: %+v", err)
-			continue
-		}
-
-		walk := models.Walk{
-			Title:       tour.Title,
-			Description: null.NewString(tour.Description, true),
-			StartPoint:  pgeo.Point{X: tour.Location.Lat, Y: tour.Location.Lng},
-			AuthorID:    user.ID,
-			AudioID:     null.NewInt(audio.ID, true),
-			CoverID:     null.NewInt(cover.ID, true),
-		}
-		if err = walk.Insert(ctx, components.Db, boil.Infer()); err != nil {
-			log.Printf("-!- could not insert walk: %+v", err)
-			continue
-		}
-
-		cnt += 1
-		if cnt%50 == 0 {
-			log.Printf("%d walks inserted", cnt)
-		}
-	}
-
-	walks, err := models.Walks().Count(ctx, components.Db)
+	fbu, err := components.FbAuth.GetUserByEmail(ctx, *email)
 	if err != nil {
-		panic(err)
+		log.Panicf("could not fetch firebase user: %+v", err)
 	}
 
-	log.Printf("%d walks in db", walks)
+	u, err := models.Users(models.UserWhere.FirebaseUID.EQ(null.StringFrom(fbu.UID))).One(ctx, components.Db)
+	if err != nil {
+		if errors.Cause(err) == sql.ErrNoRows {
+			u = &models.User{Handle: slug.Make(*email), FirebaseUID: null.StringFrom(fbu.UID)}
+			if err = u.Insert(ctx, components.Db, boil.Infer()); err != nil {
+				log.Panicf("could create user for email: %+v", err)
+			}
+		} else {
+			log.Panicf("could not find user for email: %+v", err)
+		}
+	}
+
+	for i := 0; i < 10; i += 1 {
+		friends := []*models.User{u}
+		for j := 0; j < rand.Intn(6)+1; j += 1 {
+			friend := &models.User{Handle: faker.Username(), FirebaseUID: null.String{}}
+			if err = friend.Insert(ctx, components.Db, boil.Infer()); err != nil {
+				log.Panicf("could not insert new friend: %+v", err)
+			}
+			friends = append(friends, friend)
+		}
+
+		conv := models.Conversation{Name: null.String{}}
+		if err = conv.Insert(ctx, components.Db, boil.Infer()); err != nil {
+			log.Panicf("could not insert new conv: %+v", err)
+		}
+
+		for _, f := range friends {
+			uc := models.UserConversation{UserID: f.ID, ConversationID: conv.ID}
+			if err = uc.Insert(ctx, components.Db, boil.Infer()); err != nil {
+				log.Panicf("could not link user to conv: %+v", err)
+			}
+		}
+
+		for j := 0; j < rand.Intn(150)+1; j += 1 {
+			text := faker.Paragraph()
+			if rand.Int31()%2 == 0 {
+				text = faker.Sentence()
+			}
+
+			frid := rand.Intn(len(friends))
+			authorId := friends[frid].ID
+
+			msg := models.Message{Text: text, AuthorID: null.IntFrom(authorId), ConversationID: conv.ID}
+			if err = msg.Insert(ctx, components.Db, boil.Infer()); err != nil {
+				log.Panicf("could not insert new message: %+v", err)
+			}
+		}
+	}
 }

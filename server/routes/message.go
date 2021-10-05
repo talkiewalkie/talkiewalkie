@@ -20,9 +20,9 @@ import (
 // ---------------
 
 type MessageInput struct {
-	// Clients should only specify one the options below - if groupUuid is set it will prevail over the list of handles
-	GroupUuid string   `json:"groupUuid"`
-	Handles   []string `json:"handles"`
+	// Clients should only specify one the options below - if conversationUuid is set it will prevail over the list of handles
+	ConversationUuid string   `json:"conversationUuid"`
+	Handles          []string `json:"handles"`
 
 	Text string `json:"text"`
 }
@@ -36,21 +36,21 @@ func Message(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if msg.GroupUuid != "" {
-		uuid, err := uuid2.FromString(msg.GroupUuid)
+	if msg.ConversationUuid != "" {
+		uuid, err := uuid2.FromString(msg.ConversationUuid)
 		if err != nil {
 			http.Error(w, fmt.Sprintf("could not parse uuid: %+v", err), http.StatusInternalServerError)
 			return
 		}
-		group, err := models.Groups(models.GroupWhere.UUID.EQ(uuid)).One(r.Context(), ctx.Components.Db)
+		conversation, err := models.Conversations(models.ConversationWhere.UUID.EQ(uuid)).One(r.Context(), ctx.Components.Db)
 		if err != nil {
-			http.Error(w, fmt.Sprintf("could not find group: %+v", err), http.StatusInternalServerError)
+			http.Error(w, fmt.Sprintf("could not find conversation: %+v", err), http.StatusInternalServerError)
 			return
 		}
 		message := models.Message{
-			Text:     msg.Text,
-			AuthorID: null.IntFrom(ctx.User.ID),
-			GroupID:  group.ID,
+			Text:           msg.Text,
+			AuthorID:       null.IntFrom(ctx.User.ID),
+			ConversationID: conversation.ID,
 		}
 
 		if err = message.Insert(r.Context(), ctx.Components.Db, boil.Infer()); err != nil {
@@ -94,35 +94,35 @@ func Message(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	ugs, err := models.UserGroups(
-		models.UserGroupWhere.UserID.EQ(ctx.User.ID),
-		qm.Load(qm.Rels(models.UserGroupRels.Group, models.GroupRels.UserGroups)),
+	ugs, err := models.UserConversations(
+		models.UserConversationWhere.UserID.EQ(ctx.User.ID),
+		qm.Load(qm.Rels(models.UserConversationRels.Conversation, models.ConversationRels.UserConversations)),
 	).All(r.Context(), ctx.Components.Db)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("could not find recipients groups: %+v", err), http.StatusInternalServerError)
+		http.Error(w, fmt.Sprintf("could not find recipients conversations: %+v", err), http.StatusInternalServerError)
 		return
 	}
 
-	var group *models.Group
+	var conversation *models.Conversation
 	sort.Ints(ids)
 	for _, ug := range ugs {
-		groupIds := []int{}
-		for _, ug := range ug.R.Group.R.UserGroups {
+		conversationIds := []int{}
+		for _, ug := range ug.R.Conversation.R.UserConversations {
 			// TODO: somehow traversing the dependencies brings redundant rows, e.g. the list we're iterating on can
 			// 		yield [115, 115, 116] as user ids.
 			redundant := false
-			for _, id := range groupIds {
+			for _, id := range conversationIds {
 				if ug.UserID == id {
 					redundant = true
 				}
 			}
 			if !redundant {
-				groupIds = append(groupIds, ug.UserID)
+				conversationIds = append(conversationIds, ug.UserID)
 			}
 		}
-		sort.Ints(groupIds)
-		if reflect.DeepEqual(groupIds, ids) {
-			group = ug.R.Group
+		sort.Ints(conversationIds)
+		if reflect.DeepEqual(conversationIds, ids) {
+			conversation = ug.R.Conversation
 			break
 		}
 	}
@@ -134,11 +134,11 @@ func Message(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprintf("could not start transaction: %+v", err), http.StatusInternalServerError)
 		return
 	}
-	if group == nil {
-		newGroup := models.Group{}
-		if err = newGroup.Insert(r.Context(), tx, boil.Infer()); err != nil {
+	if conversation == nil {
+		newConversation := models.Conversation{}
+		if err = newConversation.Insert(r.Context(), tx, boil.Infer()); err != nil {
 			tx.Rollback()
-			http.Error(w, fmt.Sprintf("could not create new group: %+v", err), http.StatusInternalServerError)
+			http.Error(w, fmt.Sprintf("could not create new conversation: %+v", err), http.StatusInternalServerError)
 			return
 		}
 
@@ -148,9 +148,9 @@ func Message(w http.ResponseWriter, r *http.Request) {
 			wg.Add(1)
 			uid := id
 			go func() {
-				ug := models.UserGroup{
-					UserID:  uid,
-					GroupID: newGroup.ID,
+				ug := models.UserConversation{
+					UserID:         uid,
+					ConversationID: newConversation.ID,
 				}
 				if err := ug.Insert(r.Context(), tx, boil.Infer()); err != nil {
 					errs <- err
@@ -162,16 +162,16 @@ func Message(w http.ResponseWriter, r *http.Request) {
 		close(errs)
 		for err := range errs {
 			tx.Rollback()
-			http.Error(w, fmt.Sprintf("could not add recipient to new group: %+v", err), http.StatusInternalServerError)
+			http.Error(w, fmt.Sprintf("could not add recipient to new conversation: %+v", err), http.StatusInternalServerError)
 			return
 		}
-		group = &newGroup
+		conversation = &newConversation
 	}
 
 	message := models.Message{
-		Text:     msg.Text,
-		AuthorID: null.IntFrom(ctx.User.ID),
-		GroupID:  group.ID,
+		Text:           msg.Text,
+		AuthorID:       null.IntFrom(ctx.User.ID),
+		ConversationID: conversation.ID,
 	}
 	if err = message.Insert(r.Context(), tx, boil.Infer()); err != nil {
 		tx.Rollback()
@@ -190,9 +190,10 @@ func Message(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if err = ctx.Components.PgPubSub.Publish(entities.UserPubSubTopic(rec), common.NewMessageEvent{
-			PubSubEvent:  common.PubSubEvent{Type: "newmessage", Timestamp: time.Now()},
-			Message:      msg.Text,
-			AuthorHandle: ctx.User.Handle,
+			PubSubEvent:      common.PubSubEvent{Type: "newmessage", Timestamp: time.Now()},
+			Text:             msg.Text,
+			AuthorHandle:     ctx.User.Handle,
+			ConversationUuid: msg.ConversationUuid,
 		}); err != nil {
 			log.Printf("failed to notify recipients of message: %+v", err)
 		}

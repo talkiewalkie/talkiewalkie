@@ -53,17 +53,17 @@ func setupWs(t *testing.T, u *models.User, db *sqlx.DB, handlerFunc http.Handler
 func websocketCanSendAndReceive(db *sqlx.DB) func(t *testing.T) {
 	return func(t *testing.T) {
 		userA := testutils.AddMockUser(db, t)
-		sA, wsA := setupWs(t, userA, db, GroupWebsocketHandler)
+		sA, wsA := setupWs(t, userA, db, ConversationWebsocketHandler)
 		defer sA.Close()
 		defer wsA.Close()
 
 		userB := testutils.AddMockUser(db, t)
-		sB, wsB := setupWs(t, userB, db, GroupWebsocketHandler)
+		sB, wsB := setupWs(t, userB, db, ConversationWebsocketHandler)
 		defer sB.Close()
 		defer wsB.Close()
 
 		userC := testutils.AddMockUser(db, t)
-		sC, wsC := setupWs(t, userC, db, GroupWebsocketHandler)
+		sC, wsC := setupWs(t, userC, db, ConversationWebsocketHandler)
 		defer sC.Close()
 		defer wsC.Close()
 
@@ -83,7 +83,7 @@ func websocketCanSendAndReceive(db *sqlx.DB) func(t *testing.T) {
 			if err != nil {
 				return false
 			}
-			return inp.Message == "hey its me userb"
+			return inp.Text == "hey its me userb"
 		}
 		testutils.RequireReceive(t, wsB, time.Second, 0, msgChecker)
 		testutils.RequireReceive(t, wsA, time.Second, 1, msgChecker)

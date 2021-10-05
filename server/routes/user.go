@@ -112,11 +112,11 @@ func Me(w http.ResponseWriter, r *http.Request) {
 // --------
 
 type FriendsOutput struct {
-	Friends []FriendsOutputGroup `json:"friends"`
-	Randoms []string             `json:"randoms"`
+	Friends []FriendsOutputConversation `json:"friends"`
+	Randoms []string                    `json:"randoms"`
 }
 
-type FriendsOutputGroup struct {
+type FriendsOutputConversation struct {
 	Uuid    string   `json:"uuid"`
 	Display string   `json:"display"`
 	Handles []string `json:"handles"`
@@ -135,16 +135,16 @@ func Friends(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	groups, err := entities.UserConversations(ctx, offset, pageSz)
+	conversations, err := entities.UserConversations(ctx, offset, pageSz)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("could not fetch user's groups: %+v", err), http.StatusInternalServerError)
+		http.Error(w, fmt.Sprintf("could not fetch user's conversations: %+v", err), http.StatusInternalServerError)
 		return
 	}
 
-	groupOutput := []FriendsOutputGroup{}
-	for _, g := range groups {
+	conversationOutput := []FriendsOutputConversation{}
+	for _, g := range conversations {
 		handles := []string{}
-		for _, ug := range g.R.UserGroups {
+		for _, ug := range g.R.UserConversations {
 			redundant := false
 			for _, h := range handles {
 				if h == ug.R.User.Handle {
@@ -161,7 +161,7 @@ func Friends(w http.ResponseWriter, r *http.Request) {
 			display = strings.Join(handles, ", ")
 		}
 
-		groupOutput = append(groupOutput, FriendsOutputGroup{
+		conversationOutput = append(conversationOutput, FriendsOutputConversation{
 			Uuid:    g.UUID.String(),
 			Display: display,
 			Handles: handles,
@@ -179,6 +179,6 @@ func Friends(w http.ResponseWriter, r *http.Request) {
 		randoms = append(randoms, user.Handle)
 	}
 
-	out := FriendsOutput{Friends: groupOutput, Randoms: randoms}
+	out := FriendsOutput{Friends: conversationOutput, Randoms: randoms}
 	common.JsonOut(w, out)
 }

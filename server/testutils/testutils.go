@@ -38,8 +38,8 @@ func SetupDb() *sqlx.DB {
 func TearDownDb(db *sqlx.DB) {
 	tx := db.MustBegin()
 	tx.MustExec(`DELETE FROM "message";`)
-	tx.MustExec(`DELETE FROM "user_group";`)
-	tx.MustExec(`DELETE FROM "group";`)
+	tx.MustExec(`DELETE FROM "user_conversation";`)
+	tx.MustExec(`DELETE FROM "conversation";`)
 	tx.MustExec(`DELETE FROM "walk";`)
 	tx.MustExec(`DELETE FROM "user_walk";`)
 	tx.MustExec(`DELETE FROM "asset";`)
@@ -177,14 +177,14 @@ func AddMockAsset(mimeType string, db common.DBLogger, t *testing.T) *models.Ass
 	return a
 }
 
-func AddMockGroup(db common.DBLogger, t *testing.T, users ...*models.User) *models.Group {
-	g := &models.Group{}
+func AddMockConversation(db common.DBLogger, t *testing.T, users ...*models.User) *models.Conversation {
+	g := &models.Conversation{}
 	if err := g.Insert(context.Background(), db, boil.Infer()); err != nil {
 		t.Log(err)
 		t.Fail()
 	}
 	for _, user := range users {
-		ug := models.UserGroup{GroupID: g.ID, UserID: user.ID}
+		ug := models.UserConversation{ConversationID: g.ID, UserID: user.ID}
 		if err := ug.Insert(context.Background(), db, boil.Infer()); err != nil {
 			t.Log(err)
 			t.Fail()

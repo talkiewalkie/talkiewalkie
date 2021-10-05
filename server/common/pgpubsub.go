@@ -31,8 +31,9 @@ func (p PubSubEvent) Str() string {
 
 type NewMessageEvent struct {
 	PubSubEvent
-	Message      string `json:"message"`
-	AuthorHandle string `json:"authorHandle"`
+	Text             string `json:"text"`
+	AuthorHandle     string `json:"authorHandle"`
+	ConversationUuid string `json:"conversationUuid"`
 }
 
 func (ps PgPubSub) Subscribe(topic string) (*pq.Listener, func() error, error) {

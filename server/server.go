@@ -82,15 +82,15 @@ func main() {
 
 	router.HandleFunc("/user/{handle}", routes.UserByHandle).Methods(http.MethodGet)
 	router.HandleFunc("/me/friends", routes.Friends).Methods(http.MethodGet)
-	router.HandleFunc("/me/groups", routes.Groups).Methods(http.MethodGet)
+	router.HandleFunc("/me/conversations", routes.Conversations).Methods(http.MethodGet)
 	router.HandleFunc("/me", routes.Me).Methods(http.MethodGet)
 
-	router.HandleFunc("/group/{uuid}", routes.GroupByUuid).Methods(http.MethodGet)
+	router.HandleFunc("/conversation/{uuid}", routes.ConversationByUuid).Methods(http.MethodGet)
 	router.HandleFunc("/message", routes.Message).Methods(http.MethodPost)
 
 	router.HandleFunc("/asset", routes.UploadHandler).Methods(http.MethodPost)
 
-	router.HandleFunc("/ws/groups", websockets.GroupWebsocketHandler)
+	router.HandleFunc("/ws/conversations", websockets.ConversationWebsocketHandler)
 
 	corsWrapper := handlers.CORS(
 		handlers.AllowCredentials(),
