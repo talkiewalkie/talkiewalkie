@@ -11,6 +11,9 @@
 		E411D693270B5DBD001EBAF3 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = E411D692270B5DBD001EBAF3 /* Extensions.swift */; };
 		E411D695270B6A83001EBAF3 /* Conversation.swift in Sources */ = {isa = PBXBuildFile; fileRef = E411D694270B6A83001EBAF3 /* Conversation.swift */; };
 		E411D697270C481E001EBAF3 /* ModelExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = E411D696270C481E001EBAF3 /* ModelExtensions.swift */; };
+		E411D69A270C8755001EBAF3 /* GRPC in Frameworks */ = {isa = PBXBuildFile; productRef = E411D699270C8755001EBAF3 /* GRPC */; };
+		E411D69D270C8828001EBAF3 /* app.grpc.swift in Sources */ = {isa = PBXBuildFile; fileRef = E411D69B270C8828001EBAF3 /* app.grpc.swift */; };
+		E411D69E270C8828001EBAF3 /* app.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = E411D69C270C8828001EBAF3 /* app.pb.swift */; };
 		E43D8342270360DE00612C7B /* MessageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E43D8341270360DE00612C7B /* MessageView.swift */; };
 		E43D834B2707554500612C7B /* WebSocketConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = E43D834A2707554500612C7B /* WebSocketConnection.swift */; };
 		E43D834E270AE78D00612C7B /* User.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = E43D834C270AE78D00612C7B /* User.xcdatamodeld */; };
@@ -60,6 +63,8 @@
 		E411D692270B5DBD001EBAF3 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		E411D694270B6A83001EBAF3 /* Conversation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Conversation.swift; sourceTree = "<group>"; };
 		E411D696270C481E001EBAF3 /* ModelExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelExtensions.swift; sourceTree = "<group>"; };
+		E411D69B270C8828001EBAF3 /* app.grpc.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = app.grpc.swift; sourceTree = "<group>"; };
+		E411D69C270C8828001EBAF3 /* app.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = app.pb.swift; sourceTree = "<group>"; };
 		E43D8341270360DE00612C7B /* MessageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageView.swift; sourceTree = "<group>"; };
 		E43D834A2707554500612C7B /* WebSocketConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebSocketConnection.swift; sourceTree = "<group>"; };
 		E43D834D270AE78D00612C7B /* User.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = User.xcdatamodel; sourceTree = "<group>"; };
@@ -96,6 +101,7 @@
 			files = (
 				E47F0D0526EF5AB000995D8B /* AudioKitUI in Frameworks */,
 				E4953B1C26F23B3200244908 /* FirebaseAuth in Frameworks */,
+				E411D69A270C8755001EBAF3 /* GRPC in Frameworks */,
 				E47F0D0026EF59E800995D8B /* AudioKit in Frameworks */,
 				E4953B1926EF643400244908 /* MapKit.framework in Frameworks */,
 				E4953B1626EF5F8A00244908 /* SoundpipeAudioKit in Frameworks */,
@@ -173,6 +179,8 @@
 		E483919526FD352100BBA902 /* Lib */ = {
 			isa = PBXGroup;
 			children = (
+				E411D69B270C8828001EBAF3 /* app.grpc.swift */,
+				E411D69C270C8828001EBAF3 /* app.pb.swift */,
 				E483919726FD352B00BBA902 /* Api.swift */,
 				E483919626FD352B00BBA902 /* Format.swift */,
 				E43D834A2707554500612C7B /* WebSocketConnection.swift */,
@@ -275,6 +283,7 @@
 				E47F0D0426EF5AB000995D8B /* AudioKitUI */,
 				E4953B1526EF5F8A00244908 /* SoundpipeAudioKit */,
 				E4953B1B26F23B3200244908 /* FirebaseAuth */,
+				E411D699270C8755001EBAF3 /* GRPC */,
 			);
 			productName = talkiewalkie;
 			productReference = E4B9D70A26E8997E0007C62D /* talkiewalkie.app */;
@@ -352,6 +361,7 @@
 				E47F0D0326EF5AB000995D8B /* XCRemoteSwiftPackageReference "AudioKitUI" */,
 				E4953B1426EF5F8A00244908 /* XCRemoteSwiftPackageReference "SoundpipeAudioKit" */,
 				E4953B1A26F23B3200244908 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				E411D698270C8754001EBAF3 /* XCRemoteSwiftPackageReference "grpc-swift" */,
 			);
 			productRefGroup = E4B9D70B26E8997E0007C62D /* Products */;
 			projectDirPath = "";
@@ -398,6 +408,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				E411D693270B5DBD001EBAF3 /* Extensions.swift in Sources */,
+				E411D69D270C8828001EBAF3 /* app.grpc.swift in Sources */,
 				E483918F26FD34FA00BBA902 /* InboxViewModel.swift in Sources */,
 				E483919826FD352B00BBA902 /* Format.swift in Sources */,
 				E483919B26FD361C00BBA902 /* Refreshable.swift in Sources */,
@@ -412,6 +423,7 @@
 				E4B9D70E26E8997E0007C62D /* talkiewalkieApp.swift in Sources */,
 				E483918D26FD34CB00BBA902 /* ChatViewModel.swift in Sources */,
 				E483918926FD342B00BBA902 /* RootViewModel.swift in Sources */,
+				E411D69E270C8828001EBAF3 /* app.pb.swift in Sources */,
 				E483918E26FD34F700BBA902 /* InboxView.swift in Sources */,
 				E43D834B2707554500612C7B /* WebSocketConnection.swift in Sources */,
 				E483919326FD351800BBA902 /* RemoteImage.swift in Sources */,
@@ -736,6 +748,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		E411D698270C8754001EBAF3 /* XCRemoteSwiftPackageReference "grpc-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/grpc/grpc-swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.4.2;
+			};
+		};
 		E47F0CFE26EF59E800995D8B /* XCRemoteSwiftPackageReference "AudioKit" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/AudioKit/AudioKit/";
@@ -771,6 +791,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		E411D699270C8755001EBAF3 /* GRPC */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E411D698270C8754001EBAF3 /* XCRemoteSwiftPackageReference "grpc-swift" */;
+			productName = GRPC;
+		};
 		E47F0CFF26EF59E800995D8B /* AudioKit */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = E47F0CFE26EF59E800995D8B /* XCRemoteSwiftPackageReference "AudioKit" */;

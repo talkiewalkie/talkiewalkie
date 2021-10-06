@@ -7,10 +7,16 @@
 
 import CoreData
 import Foundation
+import OSLog
 
 extension NSManagedObject {
     static func getByUuidOrCreate(_ uuid: UUID, context: NSManagedObjectContext) -> Self {
-        let localUsersRq = NSFetchRequest<Self>(entityName: Self.entity().name!)
+        guard let ename = Self.entity().name else {
+            os_log("why am i here?")
+            return Self(context: context)
+        }
+        let localUsersRq = NSFetchRequest<Self>(entityName: ename)
+        os_log("local query for \(ename) with uuid: [\(uuid)]")
         localUsersRq.predicate = NSPredicate(format: "uuid = %@", uuid.uuidString)
         let localUsers = (try? context.fetch(localUsersRq)) ?? []
 

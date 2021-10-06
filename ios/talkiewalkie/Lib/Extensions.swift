@@ -20,3 +20,20 @@ extension NSManagedObjectContext {
         catch { os_log("Failed to save coredata: \(error.localizedDescription)") }
     }
 }
+
+extension String {
+    func uuidOrThrow() -> UUID {
+        return UUID(uuidString: self)!
+    }
+}
+
+extension Optional where Wrapped == String {
+    var repr: String {
+        switch self {
+        case .some(let str):
+            return str
+        case .none:
+            return "[nil]"
+        }
+    }
+}

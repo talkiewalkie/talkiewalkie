@@ -62,7 +62,7 @@ class WebSocketTaskConnection: NSObject, WebSocketConnection, URLSessionWebSocke
     }
 
     func connect() {
-        logger.debug("[\(url)] connecting to ws...")
+        logger.debug("[\(self.url)] connecting to ws...")
         webSocketTask = urlSession.webSocketTask(with: initialRequest)
         webSocketTask.resume()
 
@@ -92,7 +92,7 @@ class WebSocketTaskConnection: NSObject, WebSocketConnection, URLSessionWebSocke
     }
 
     func disconnect() {
-        logger.debug("[\(url)] disconnecting ws...")
+        logger.debug("[\(self.url)] disconnecting ws...")
         webSocketTask.cancel(with: .goingAway, reason: nil)
     }
 

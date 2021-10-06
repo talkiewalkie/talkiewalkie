@@ -11,13 +11,36 @@ struct ChatView: View {
     @State var message: String = ""
     @ObservedObject var model: ChatViewModel
 
+    @FetchRequest var conversations: FetchedResults<Conversation>
+    @FetchRequest var messages: FetchedResults<Message>
+
+    init(uuid: UUID, authed: AuthenticatedState) {
+        self._conversations = FetchRequest(
+            entity: Conversation.entity(),
+            sortDescriptors: [],
+            predicate: NSPredicate(format: "uuid = %@", uuid.uuidString)
+        )
+        self._messages = FetchRequest(
+            entity: Message.entity(),
+            sortDescriptors: [NSSortDescriptor(key: "createdAt", ascending: true)],
+            predicate: NSPredicate(format: "conversationUuid = %@", uuid.uuidString)
+        )
+        self.model = ChatViewModel(authed: authed, uuid: uuid)
+    }
+
     var body: some View {
         VStack {
             ScrollView {
-                if let msgs = model.messages {
-                    VStack(alignment: .leading) { ForEach(msgs, id: \.text) { m in
+//                if let msgs = conversations.first?.messages?.allObjects as? Array<Message> {
+//                    VStack(alignment: .leading) { ForEach(msgs, id: \.text) { m in
+//                        MessageView(message: m)
+//                    }}
+//                }
+
+                VStack(alignment: .leading) {
+                    ForEach(messages, id: \.text) { m in
                         MessageView(message: m)
-                    }}
+                    }
                 }
             }
             HStack {

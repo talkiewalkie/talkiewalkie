@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import OSLog
 
 class InboxViewModel: ObservableObject {
     let authed: AuthenticatedState
@@ -18,9 +19,33 @@ class InboxViewModel: ObservableObject {
     init(authed: AuthenticatedState) {
         self.authed = authed
 
+        self.authed.gApi.subscribeIncomingMessages { msg in
+            let savedMsg = Message(context: authed.context)
+            let author = User.getByUuidOrCreate(msg.authorUuid.uuidOrThrow(), context: authed.context)
+            author.uuid = msg.authorUuid.uuidOrThrow()
+            let conversation = Conversation.getByUuidOrCreate(msg.convUuid.uuidOrThrow(), context: authed.context)
+
+            savedMsg.conversationUuid = msg.convUuid.uuidOrThrow()
+            savedMsg.addToConversation(conversation)
+            savedMsg.author = author
+            savedMsg.createdAt = msg.createdAt.date
+            
+            switch msg.content {
+            case .textMessage(let content):
+                savedMsg.text = content.content
+            default:
+                os_log("received unknown message content type from server stream")
+            }
+            
+            savedMsg.objectWillChange.send()
+            conversation.objectWillChange.send()
+            
+            authed.context.saveOrLogError()
+        }
+        
         socketTask = authed.api.ws(path: "conversations")
         socketTask.delegate = self
-        socketTask.connect()
+//        socketTask.connect()
     }
 
     // MARK: - INBOX
@@ -33,12 +58,9 @@ class InboxViewModel: ObservableObject {
 
     func syncConversations() {
         loading = true
-        authed.api.conversations { conversations, _ in
-            self.loading = false
-            if let convs = conversations {
-                Conversation.dumpFromRemote(convs, context: self.authed.context)
-            }
-        }
+        let (convs, _) = authed.gApi.listConvs()
+        loading = false
+        Conversation.dumpFromRemote(convs, context: authed.context)
     }
 
     // MARK: - QUICK SEND

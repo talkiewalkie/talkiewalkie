@@ -69,6 +69,7 @@ enum AuthError: Error {
 class AuthenticatedState: ObservableObject {
     var user: FirebaseAuth.User
     var api: Api
+    var gApi: AuthedGrpcApi
     var context: NSManagedObjectContext
 
     var me: Me { Me.fromCache(context: context)! }
@@ -77,33 +78,36 @@ class AuthenticatedState: ObservableObject {
         fbU.getIDTokenResult { res, _ in
             if let token = res {
                 let api = Api(token: token.token)
+                let gApi = AuthedGrpcApi(token: token.token)
 
                 if let me = Me.fromCache(context: context) {
+                    // TODO: even in this case we should query the server to update
+                    // the local cache, just in case.
                     os_log("loaded user info from cache: \(me)")
-                    completion(AuthenticatedState(user: fbU, api: api, context: context))
+                    completion(AuthenticatedState(user: fbU, api: api, gApi: gApi, context: context))
                 } else {
-                    api.me { res, _ in
-                        if let u = res {
-                            let me = Me(context: context)
-                            me.firebaseUid = fbU.uid
-                            me.someOptions = true
-                            me.handle = u.handle
-                            me.uuid = u.uuid
+                    let (res, _) = gApi.me()
+                    if let res = res {
+                        let me = Me(context: context)
+                        me.firebaseUid = fbU.uid
+                        me.someOptions = true
+                        me.handle = res.user.handle
+                        me.uuid = UUID(uuidString: res.user.uuid)
 
-                            me.objectWillChange.send()
-                            context.saveOrLogError()
+                        me.objectWillChange.send()
+                        context.saveOrLogError()
 
-                            completion(AuthenticatedState(user: fbU, api: api, context: context))
-                        }
+                        completion(AuthenticatedState(user: fbU, api: api, gApi: gApi, context: context))
                     }
                 }
             }
         }
     }
 
-    private init(user: FirebaseAuth.User, api: Api, context: NSManagedObjectContext) {
+    private init(user: FirebaseAuth.User, api: Api, gApi: AuthedGrpcApi, context: NSManagedObjectContext) {
         self.user = user
         self.api = api
+        self.gApi = gApi
         self.context = context
     }
 }
