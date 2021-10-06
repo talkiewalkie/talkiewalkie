@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/friendsofgo/errors"
+	"github.com/satori/go.uuid"
 	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries"
@@ -24,11 +25,14 @@ import (
 
 // Message is an object representing the database table.
 type Message struct {
-	ID             int       `db:"id" boil:"id" json:"id" toml:"id" yaml:"id"`
-	Text           string    `db:"text" boil:"text" json:"text" toml:"text" yaml:"text"`
-	AuthorID       null.Int  `db:"author_id" boil:"author_id" json:"author_id,omitempty" toml:"author_id" yaml:"author_id,omitempty"`
-	ConversationID int       `db:"conversation_id" boil:"conversation_id" json:"conversation_id" toml:"conversation_id" yaml:"conversation_id"`
-	CreatedAt      time.Time `db:"created_at" boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
+	ID             int         `db:"id" boil:"id" json:"id" toml:"id" yaml:"id"`
+	Text           null.String `db:"text" boil:"text" json:"text,omitempty" toml:"text" yaml:"text,omitempty"`
+	AuthorID       null.Int    `db:"author_id" boil:"author_id" json:"author_id,omitempty" toml:"author_id" yaml:"author_id,omitempty"`
+	ConversationID int         `db:"conversation_id" boil:"conversation_id" json:"conversation_id" toml:"conversation_id" yaml:"conversation_id"`
+	CreatedAt      time.Time   `db:"created_at" boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
+	UUID           uuid.UUID   `db:"uuid" boil:"uuid" json:"uuid" toml:"uuid" yaml:"uuid"`
+	Type           string      `db:"type" boil:"type" json:"type" toml:"type" yaml:"type"`
+	RawAudioID     null.Int    `db:"raw_audio_id" boil:"raw_audio_id" json:"raw_audio_id,omitempty" toml:"raw_audio_id" yaml:"raw_audio_id,omitempty"`
 
 	R *messageR `db:"-" boil:"-" json:"-" toml:"-" yaml:"-"`
 	L messageL  `db:"-" boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -40,12 +44,18 @@ var MessageColumns = struct {
 	AuthorID       string
 	ConversationID string
 	CreatedAt      string
+	UUID           string
+	Type           string
+	RawAudioID     string
 }{
 	ID:             "id",
 	Text:           "text",
 	AuthorID:       "author_id",
 	ConversationID: "conversation_id",
 	CreatedAt:      "created_at",
+	UUID:           "uuid",
+	Type:           "type",
+	RawAudioID:     "raw_audio_id",
 }
 
 var MessageTableColumns = struct {
@@ -54,12 +64,18 @@ var MessageTableColumns = struct {
 	AuthorID       string
 	ConversationID string
 	CreatedAt      string
+	UUID           string
+	Type           string
+	RawAudioID     string
 }{
 	ID:             "message.id",
 	Text:           "message.text",
 	AuthorID:       "message.author_id",
 	ConversationID: "message.conversation_id",
 	CreatedAt:      "message.created_at",
+	UUID:           "message.uuid",
+	Type:           "message.type",
+	RawAudioID:     "message.raw_audio_id",
 }
 
 // Generated where
@@ -89,31 +105,40 @@ func (w whereHelpernull_Int) GTE(x null.Int) qm.QueryMod {
 
 var MessageWhere = struct {
 	ID             whereHelperint
-	Text           whereHelperstring
+	Text           whereHelpernull_String
 	AuthorID       whereHelpernull_Int
 	ConversationID whereHelperint
 	CreatedAt      whereHelpertime_Time
+	UUID           whereHelperuuid_UUID
+	Type           whereHelperstring
+	RawAudioID     whereHelpernull_Int
 }{
 	ID:             whereHelperint{field: "\"message\".\"id\""},
-	Text:           whereHelperstring{field: "\"message\".\"text\""},
+	Text:           whereHelpernull_String{field: "\"message\".\"text\""},
 	AuthorID:       whereHelpernull_Int{field: "\"message\".\"author_id\""},
 	ConversationID: whereHelperint{field: "\"message\".\"conversation_id\""},
 	CreatedAt:      whereHelpertime_Time{field: "\"message\".\"created_at\""},
+	UUID:           whereHelperuuid_UUID{field: "\"message\".\"uuid\""},
+	Type:           whereHelperstring{field: "\"message\".\"type\""},
+	RawAudioID:     whereHelpernull_Int{field: "\"message\".\"raw_audio_id\""},
 }
 
 // MessageRels is where relationship names are stored.
 var MessageRels = struct {
 	Author       string
 	Conversation string
+	RawAudio     string
 }{
 	Author:       "Author",
 	Conversation: "Conversation",
+	RawAudio:     "RawAudio",
 }
 
 // messageR is where relationships are stored.
 type messageR struct {
 	Author       *User         `db:"Author" boil:"Author" json:"Author" toml:"Author" yaml:"Author"`
 	Conversation *Conversation `db:"Conversation" boil:"Conversation" json:"Conversation" toml:"Conversation" yaml:"Conversation"`
+	RawAudio     *Asset        `db:"RawAudio" boil:"RawAudio" json:"RawAudio" toml:"RawAudio" yaml:"RawAudio"`
 }
 
 // NewStruct creates a new relationship struct
@@ -125,9 +150,9 @@ func (*messageR) NewStruct() *messageR {
 type messageL struct{}
 
 var (
-	messageAllColumns            = []string{"id", "text", "author_id", "conversation_id", "created_at"}
-	messageColumnsWithoutDefault = []string{"text", "author_id", "conversation_id"}
-	messageColumnsWithDefault    = []string{"id", "created_at"}
+	messageAllColumns            = []string{"id", "text", "author_id", "conversation_id", "created_at", "uuid", "type", "raw_audio_id"}
+	messageColumnsWithoutDefault = []string{"text", "author_id", "conversation_id", "type", "raw_audio_id"}
+	messageColumnsWithDefault    = []string{"id", "created_at", "uuid"}
 	messagePrimaryKeyColumns     = []string{"id"}
 )
 
@@ -434,6 +459,20 @@ func (o *Message) Conversation(mods ...qm.QueryMod) conversationQuery {
 	return query
 }
 
+// RawAudio pointed to by the foreign key.
+func (o *Message) RawAudio(mods ...qm.QueryMod) assetQuery {
+	queryMods := []qm.QueryMod{
+		qm.Where("\"id\" = ?", o.RawAudioID),
+	}
+
+	queryMods = append(queryMods, mods...)
+
+	query := Assets(queryMods...)
+	queries.SetFrom(query.Query, "\"asset\"")
+
+	return query
+}
+
 // LoadAuthor allows an eager lookup of values, cached into the
 // loaded structs of the objects. This is for an N-1 relationship.
 func (messageL) LoadAuthor(ctx context.Context, e boil.ContextExecutor, singular bool, maybeMessage interface{}, mods queries.Applicator) error {
@@ -646,6 +685,114 @@ func (messageL) LoadConversation(ctx context.Context, e boil.ContextExecutor, si
 	return nil
 }
 
+// LoadRawAudio allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for an N-1 relationship.
+func (messageL) LoadRawAudio(ctx context.Context, e boil.ContextExecutor, singular bool, maybeMessage interface{}, mods queries.Applicator) error {
+	var slice []*Message
+	var object *Message
+
+	if singular {
+		object = maybeMessage.(*Message)
+	} else {
+		slice = *maybeMessage.(*[]*Message)
+	}
+
+	args := make([]interface{}, 0, 1)
+	if singular {
+		if object.R == nil {
+			object.R = &messageR{}
+		}
+		if !queries.IsNil(object.RawAudioID) {
+			args = append(args, object.RawAudioID)
+		}
+
+	} else {
+	Outer:
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &messageR{}
+			}
+
+			for _, a := range args {
+				if queries.Equal(a, obj.RawAudioID) {
+					continue Outer
+				}
+			}
+
+			if !queries.IsNil(obj.RawAudioID) {
+				args = append(args, obj.RawAudioID)
+			}
+
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	query := NewQuery(
+		qm.From(`asset`),
+		qm.WhereIn(`asset.id in ?`, args...),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load Asset")
+	}
+
+	var resultSlice []*Asset
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice Asset")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results of eager load for asset")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for asset")
+	}
+
+	if len(messageAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+
+	if len(resultSlice) == 0 {
+		return nil
+	}
+
+	if singular {
+		foreign := resultSlice[0]
+		object.R.RawAudio = foreign
+		if foreign.R == nil {
+			foreign.R = &assetR{}
+		}
+		foreign.R.RawAudioMessages = append(foreign.R.RawAudioMessages, object)
+		return nil
+	}
+
+	for _, local := range slice {
+		for _, foreign := range resultSlice {
+			if queries.Equal(local.RawAudioID, foreign.ID) {
+				local.R.RawAudio = foreign
+				if foreign.R == nil {
+					foreign.R = &assetR{}
+				}
+				foreign.R.RawAudioMessages = append(foreign.R.RawAudioMessages, local)
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
 // SetAuthor of the message to the related item.
 // Sets o.R.Author to related.
 // Adds o to related.R.AuthorMessages.
@@ -770,6 +917,86 @@ func (o *Message) SetConversation(ctx context.Context, exec boil.ContextExecutor
 		related.R.Messages = append(related.R.Messages, o)
 	}
 
+	return nil
+}
+
+// SetRawAudio of the message to the related item.
+// Sets o.R.RawAudio to related.
+// Adds o to related.R.RawAudioMessages.
+func (o *Message) SetRawAudio(ctx context.Context, exec boil.ContextExecutor, insert bool, related *Asset) error {
+	var err error
+	if insert {
+		if err = related.Insert(ctx, exec, boil.Infer()); err != nil {
+			return errors.Wrap(err, "failed to insert into foreign table")
+		}
+	}
+
+	updateQuery := fmt.Sprintf(
+		"UPDATE \"message\" SET %s WHERE %s",
+		strmangle.SetParamNames("\"", "\"", 1, []string{"raw_audio_id"}),
+		strmangle.WhereClause("\"", "\"", 2, messagePrimaryKeyColumns),
+	)
+	values := []interface{}{related.ID, o.ID}
+
+	if boil.IsDebug(ctx) {
+		writer := boil.DebugWriterFrom(ctx)
+		fmt.Fprintln(writer, updateQuery)
+		fmt.Fprintln(writer, values)
+	}
+	if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+		return errors.Wrap(err, "failed to update local table")
+	}
+
+	queries.Assign(&o.RawAudioID, related.ID)
+	if o.R == nil {
+		o.R = &messageR{
+			RawAudio: related,
+		}
+	} else {
+		o.R.RawAudio = related
+	}
+
+	if related.R == nil {
+		related.R = &assetR{
+			RawAudioMessages: MessageSlice{o},
+		}
+	} else {
+		related.R.RawAudioMessages = append(related.R.RawAudioMessages, o)
+	}
+
+	return nil
+}
+
+// RemoveRawAudio relationship.
+// Sets o.R.RawAudio to nil.
+// Removes o from all passed in related items' relationships struct (Optional).
+func (o *Message) RemoveRawAudio(ctx context.Context, exec boil.ContextExecutor, related *Asset) error {
+	var err error
+
+	queries.SetScanner(&o.RawAudioID, nil)
+	if _, err = o.Update(ctx, exec, boil.Whitelist("raw_audio_id")); err != nil {
+		return errors.Wrap(err, "failed to update local table")
+	}
+
+	if o.R != nil {
+		o.R.RawAudio = nil
+	}
+	if related == nil || related.R == nil {
+		return nil
+	}
+
+	for i, ri := range related.R.RawAudioMessages {
+		if queries.Equal(o.RawAudioID, ri.RawAudioID) {
+			continue
+		}
+
+		ln := len(related.R.RawAudioMessages)
+		if ln > 1 && i < ln-1 {
+			related.R.RawAudioMessages[i] = related.R.RawAudioMessages[ln-1]
+		}
+		related.R.RawAudioMessages = related.R.RawAudioMessages[:ln-1]
+		break
+	}
 	return nil
 }
 

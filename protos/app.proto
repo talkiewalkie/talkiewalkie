@@ -38,16 +38,22 @@ service UserService {
 // -----------------------
 
 message Message {
-  string convUuid = 1;
+  string uuid = 1;
+  string convUuid = 2;
   oneof content {
-    TextMessage textMessage = 2;
+    TextMessage textMessage = 3;
+    VoiceMessage voiceMessage = 4;
   };
-  string authorUuid = 3;
-  google.protobuf.Timestamp createdAt = 4;
+  User author = 5;
+  google.protobuf.Timestamp createdAt = 6;
 }
 
 message TextMessage {
   string content = 1;
+}
+
+message VoiceMessage {
+  string url = 1;
 }
 
 message Handles {

@@ -24,21 +24,16 @@ struct InboxView: View {
     var body: some View {
         ZStack(alignment: .bottomLeading) {
             VStack(spacing: 20) {
-                if self.model.connected { Text("Connected").padding() }
-                else { Text("Disconnected").padding() }
-                
                 if self.model.loading {
                     ProgressView()
                 }
 
-                Button("Click for grpc call!") {
-                    print(model.authed.gApi.userByUuid(auth.me.uuid!))
-                }
-                .padding()
-                
+                Button("Refresh") { model.syncConversations() }
+                    .padding()
+
                 ScrollView {
                     ForEach(conversations, id: \.uuid?.uuidString) { conv in
-                        NavigationLink(destination: ChatView(uuid: conv.uuid!, authed: auth).environmentObject(auth)) {
+                        NavigationLink(destination: ChatView(conversation: conv, authed: auth).environmentObject(auth)) {
                             HStack(spacing: 10) {
                                 Circle().frame(width: 30, height: 30)
                                 Text(conv.display ?? "no title")

@@ -11,27 +11,11 @@ import Foundation
 import FirebaseAuth
 
 extension User {
-    static func byUuid(_ uuid: UUID, context: NSManagedObjectContext, api: Api) -> User {
-        let localUsersRq = NSFetchRequest<User>(entityName: "User")
-        localUsersRq.predicate = NSPredicate(format: "uuid = %@", uuid.uuidString)
-        let localUsers = (try? context.fetch(localUsersRq)) ?? []
-
-        if let me = localUsers.first {
-            return me
-        } else {
-            let u = Me(context: context)
-            api.me { res, _ in
-                if let remoteU = res {
-                    u.uuid = remoteU.uuid
-                    u.handle = remoteU.handle
-                }
-            }
-
-            u.objectWillChange.send()
-            try? context.save()
-
-            return u
-        }
+    static func upsert(_ u: App_User, context: NSManagedObjectContext) -> User {
+        let localU = User.getByUuidOrCreate(u.uuid.uuidOrThrow(), context: context)
+        localU.uuid = u.uuid.uuidOrThrow()
+        localU.handle = u.handle
+        return localU
     }
 }
 

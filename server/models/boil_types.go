@@ -50,3 +50,11 @@ func makeCacheKey(cols boil.Columns, nzDefaults []string) string {
 	strmangle.PutBuffer(buf)
 	return str
 }
+
+// Enum values for message_type
+const (
+	MessageTypeText  = "text"
+	MessageTypeVoice = "voice"
+	MessageTypeImage = "image"
+	MessageTypeVideo = "video"
+)

@@ -58,6 +58,14 @@ class RootViewModel: ObservableObject {
 
     func signOut() {
         try! auth.signOut()
+
+        // Clear coredata on logout
+        self.coredataCtx.executeOrLogError(NSBatchDeleteRequest(fetchRequest: Me.fetchRequest()))
+        self.coredataCtx.executeOrLogError(NSBatchDeleteRequest(fetchRequest: User.fetchRequest()))
+        self.coredataCtx.executeOrLogError(NSBatchDeleteRequest(fetchRequest: Conversation.fetchRequest()))
+        self.coredataCtx.executeOrLogError(NSBatchDeleteRequest(fetchRequest: Message.fetchRequest()))
+        
+        authed = nil
         user = nil
     }
 }

@@ -220,10 +220,12 @@ var AssetWhere = struct {
 
 // AssetRels is where relationship names are stored.
 var AssetRels = struct {
+	RawAudioMessages    string
 	ProfilePictureUsers string
 	AudioWalks          string
 	CoverWalks          string
 }{
+	RawAudioMessages:    "RawAudioMessages",
 	ProfilePictureUsers: "ProfilePictureUsers",
 	AudioWalks:          "AudioWalks",
 	CoverWalks:          "CoverWalks",
@@ -231,9 +233,10 @@ var AssetRels = struct {
 
 // assetR is where relationships are stored.
 type assetR struct {
-	ProfilePictureUsers UserSlice `db:"ProfilePictureUsers" boil:"ProfilePictureUsers" json:"ProfilePictureUsers" toml:"ProfilePictureUsers" yaml:"ProfilePictureUsers"`
-	AudioWalks          WalkSlice `db:"AudioWalks" boil:"AudioWalks" json:"AudioWalks" toml:"AudioWalks" yaml:"AudioWalks"`
-	CoverWalks          WalkSlice `db:"CoverWalks" boil:"CoverWalks" json:"CoverWalks" toml:"CoverWalks" yaml:"CoverWalks"`
+	RawAudioMessages    MessageSlice `db:"RawAudioMessages" boil:"RawAudioMessages" json:"RawAudioMessages" toml:"RawAudioMessages" yaml:"RawAudioMessages"`
+	ProfilePictureUsers UserSlice    `db:"ProfilePictureUsers" boil:"ProfilePictureUsers" json:"ProfilePictureUsers" toml:"ProfilePictureUsers" yaml:"ProfilePictureUsers"`
+	AudioWalks          WalkSlice    `db:"AudioWalks" boil:"AudioWalks" json:"AudioWalks" toml:"AudioWalks" yaml:"AudioWalks"`
+	CoverWalks          WalkSlice    `db:"CoverWalks" boil:"CoverWalks" json:"CoverWalks" toml:"CoverWalks" yaml:"CoverWalks"`
 }
 
 // NewStruct creates a new relationship struct
@@ -526,6 +529,27 @@ func (q assetQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (bool
 	return count > 0, nil
 }
 
+// RawAudioMessages retrieves all the message's Messages with an executor via raw_audio_id column.
+func (o *Asset) RawAudioMessages(mods ...qm.QueryMod) messageQuery {
+	var queryMods []qm.QueryMod
+	if len(mods) != 0 {
+		queryMods = append(queryMods, mods...)
+	}
+
+	queryMods = append(queryMods,
+		qm.Where("\"message\".\"raw_audio_id\"=?", o.ID),
+	)
+
+	query := Messages(queryMods...)
+	queries.SetFrom(query.Query, "\"message\"")
+
+	if len(queries.GetSelect(query.Query)) == 0 {
+		queries.SetSelect(query.Query, []string{"\"message\".*"})
+	}
+
+	return query
+}
+
 // ProfilePictureUsers retrieves all the user's Users with an executor via profile_picture column.
 func (o *Asset) ProfilePictureUsers(mods ...qm.QueryMod) userQuery {
 	var queryMods []qm.QueryMod
@@ -587,6 +611,104 @@ func (o *Asset) CoverWalks(mods ...qm.QueryMod) walkQuery {
 	}
 
 	return query
+}
+
+// LoadRawAudioMessages allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for a 1-M or N-M relationship.
+func (assetL) LoadRawAudioMessages(ctx context.Context, e boil.ContextExecutor, singular bool, maybeAsset interface{}, mods queries.Applicator) error {
+	var slice []*Asset
+	var object *Asset
+
+	if singular {
+		object = maybeAsset.(*Asset)
+	} else {
+		slice = *maybeAsset.(*[]*Asset)
+	}
+
+	args := make([]interface{}, 0, 1)
+	if singular {
+		if object.R == nil {
+			object.R = &assetR{}
+		}
+		args = append(args, object.ID)
+	} else {
+	Outer:
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &assetR{}
+			}
+
+			for _, a := range args {
+				if queries.Equal(a, obj.ID) {
+					continue Outer
+				}
+			}
+
+			args = append(args, obj.ID)
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	query := NewQuery(
+		qm.From(`message`),
+		qm.WhereIn(`message.raw_audio_id in ?`, args...),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load message")
+	}
+
+	var resultSlice []*Message
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice message")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results in eager load on message")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for message")
+	}
+
+	if len(messageAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+	if singular {
+		object.R.RawAudioMessages = resultSlice
+		for _, foreign := range resultSlice {
+			if foreign.R == nil {
+				foreign.R = &messageR{}
+			}
+			foreign.R.RawAudio = object
+		}
+		return nil
+	}
+
+	for _, foreign := range resultSlice {
+		for _, local := range slice {
+			if queries.Equal(local.ID, foreign.RawAudioID) {
+				local.R.RawAudioMessages = append(local.R.RawAudioMessages, foreign)
+				if foreign.R == nil {
+					foreign.R = &messageR{}
+				}
+				foreign.R.RawAudio = local
+				break
+			}
+		}
+	}
+
+	return nil
 }
 
 // LoadProfilePictureUsers allows an eager lookup of values, cached into the
@@ -877,6 +999,133 @@ func (assetL) LoadCoverWalks(ctx context.Context, e boil.ContextExecutor, singul
 				foreign.R.Cover = local
 				break
 			}
+		}
+	}
+
+	return nil
+}
+
+// AddRawAudioMessages adds the given related objects to the existing relationships
+// of the asset, optionally inserting them as new records.
+// Appends related to o.R.RawAudioMessages.
+// Sets related.R.RawAudio appropriately.
+func (o *Asset) AddRawAudioMessages(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Message) error {
+	var err error
+	for _, rel := range related {
+		if insert {
+			queries.Assign(&rel.RawAudioID, o.ID)
+			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
+				return errors.Wrap(err, "failed to insert into foreign table")
+			}
+		} else {
+			updateQuery := fmt.Sprintf(
+				"UPDATE \"message\" SET %s WHERE %s",
+				strmangle.SetParamNames("\"", "\"", 1, []string{"raw_audio_id"}),
+				strmangle.WhereClause("\"", "\"", 2, messagePrimaryKeyColumns),
+			)
+			values := []interface{}{o.ID, rel.ID}
+
+			if boil.IsDebug(ctx) {
+				writer := boil.DebugWriterFrom(ctx)
+				fmt.Fprintln(writer, updateQuery)
+				fmt.Fprintln(writer, values)
+			}
+			if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+				return errors.Wrap(err, "failed to update foreign table")
+			}
+
+			queries.Assign(&rel.RawAudioID, o.ID)
+		}
+	}
+
+	if o.R == nil {
+		o.R = &assetR{
+			RawAudioMessages: related,
+		}
+	} else {
+		o.R.RawAudioMessages = append(o.R.RawAudioMessages, related...)
+	}
+
+	for _, rel := range related {
+		if rel.R == nil {
+			rel.R = &messageR{
+				RawAudio: o,
+			}
+		} else {
+			rel.R.RawAudio = o
+		}
+	}
+	return nil
+}
+
+// SetRawAudioMessages removes all previously related items of the
+// asset replacing them completely with the passed
+// in related items, optionally inserting them as new records.
+// Sets o.R.RawAudio's RawAudioMessages accordingly.
+// Replaces o.R.RawAudioMessages with related.
+// Sets related.R.RawAudio's RawAudioMessages accordingly.
+func (o *Asset) SetRawAudioMessages(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Message) error {
+	query := "update \"message\" set \"raw_audio_id\" = null where \"raw_audio_id\" = $1"
+	values := []interface{}{o.ID}
+	if boil.IsDebug(ctx) {
+		writer := boil.DebugWriterFrom(ctx)
+		fmt.Fprintln(writer, query)
+		fmt.Fprintln(writer, values)
+	}
+	_, err := exec.ExecContext(ctx, query, values...)
+	if err != nil {
+		return errors.Wrap(err, "failed to remove relationships before set")
+	}
+
+	if o.R != nil {
+		for _, rel := range o.R.RawAudioMessages {
+			queries.SetScanner(&rel.RawAudioID, nil)
+			if rel.R == nil {
+				continue
+			}
+
+			rel.R.RawAudio = nil
+		}
+
+		o.R.RawAudioMessages = nil
+	}
+	return o.AddRawAudioMessages(ctx, exec, insert, related...)
+}
+
+// RemoveRawAudioMessages relationships from objects passed in.
+// Removes related items from R.RawAudioMessages (uses pointer comparison, removal does not keep order)
+// Sets related.R.RawAudio.
+func (o *Asset) RemoveRawAudioMessages(ctx context.Context, exec boil.ContextExecutor, related ...*Message) error {
+	if len(related) == 0 {
+		return nil
+	}
+
+	var err error
+	for _, rel := range related {
+		queries.SetScanner(&rel.RawAudioID, nil)
+		if rel.R != nil {
+			rel.R.RawAudio = nil
+		}
+		if _, err = rel.Update(ctx, exec, boil.Whitelist("raw_audio_id")); err != nil {
+			return err
+		}
+	}
+	if o.R == nil {
+		return nil
+	}
+
+	for _, rel := range related {
+		for i, ri := range o.R.RawAudioMessages {
+			if rel != ri {
+				continue
+			}
+
+			ln := len(o.R.RawAudioMessages)
+			if ln > 1 && i < ln-1 {
+				o.R.RawAudioMessages[i] = o.R.RawAudioMessages[ln-1]
+			}
+			o.R.RawAudioMessages = o.R.RawAudioMessages[:ln-1]
+			break
 		}
 	}
 

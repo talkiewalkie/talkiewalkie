@@ -138,6 +138,8 @@ public struct App_Message {
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
+  public var uuid: String = String()
+
   public var convUuid: String = String()
 
   public var content: App_Message.OneOf_Content? = nil
@@ -150,7 +152,22 @@ public struct App_Message {
     set {content = .textMessage(newValue)}
   }
 
-  public var authorUuid: String = String()
+  public var voiceMessage: App_VoiceMessage {
+    get {
+      if case .voiceMessage(let v)? = content {return v}
+      return App_VoiceMessage()
+    }
+    set {content = .voiceMessage(newValue)}
+  }
+
+  public var author: App_User {
+    get {return _author ?? App_User()}
+    set {_author = newValue}
+  }
+  /// Returns true if `author` has been explicitly set.
+  public var hasAuthor: Bool {return self._author != nil}
+  /// Clears the value of `author`. Subsequent reads from it will return its default value.
+  public mutating func clearAuthor() {self._author = nil}
 
   public var createdAt: SwiftProtobuf.Google_Protobuf_Timestamp {
     get {return _createdAt ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
@@ -165,6 +182,7 @@ public struct App_Message {
 
   public enum OneOf_Content: Equatable {
     case textMessage(App_TextMessage)
+    case voiceMessage(App_VoiceMessage)
 
   #if !swift(>=4.1)
     public static func ==(lhs: App_Message.OneOf_Content, rhs: App_Message.OneOf_Content) -> Bool {
@@ -176,6 +194,11 @@ public struct App_Message {
         guard case .textMessage(let l) = lhs, case .textMessage(let r) = rhs else { preconditionFailure() }
         return l == r
       }()
+      case (.voiceMessage, .voiceMessage): return {
+        guard case .voiceMessage(let l) = lhs, case .voiceMessage(let r) = rhs else { preconditionFailure() }
+        return l == r
+      }()
+      default: return false
       }
     }
   #endif
@@ -183,6 +206,7 @@ public struct App_Message {
 
   public init() {}
 
+  fileprivate var _author: App_User? = nil
   fileprivate var _createdAt: SwiftProtobuf.Google_Protobuf_Timestamp? = nil
 }
 
@@ -192,6 +216,18 @@ public struct App_TextMessage {
   // methods supported on all messages.
 
   public var content: String = String()
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+}
+
+public struct App_VoiceMessage {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  public var url: String = String()
 
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -324,6 +360,22 @@ public struct App_ConversationListInput {
   // methods supported on all messages.
 
   public var page: Int32 = 0
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+}
+
+public struct App_ConversationListOutput {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  public var convs: [App_Conversation] = []
+
+  public var hasMore_p: Bool = false
+
+  public var nextPage: Int32 = 0
 
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -534,10 +586,12 @@ extension App_UserListInput: SwiftProtobuf.Message, SwiftProtobuf._MessageImplem
 extension App_Message: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".Message"
   public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "convUuid"),
-    2: .same(proto: "textMessage"),
-    3: .same(proto: "authorUuid"),
-    4: .same(proto: "createdAt"),
+    1: .same(proto: "uuid"),
+    2: .same(proto: "convUuid"),
+    3: .same(proto: "textMessage"),
+    4: .same(proto: "voiceMessage"),
+    5: .same(proto: "author"),
+    6: .same(proto: "createdAt"),
   ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -546,8 +600,9 @@ extension App_Message: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementati
       // allocates stack space for every case branch when no optimizations are
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
-      case 1: try { try decoder.decodeSingularStringField(value: &self.convUuid) }()
-      case 2: try {
+      case 1: try { try decoder.decodeSingularStringField(value: &self.uuid) }()
+      case 2: try { try decoder.decodeSingularStringField(value: &self.convUuid) }()
+      case 3: try {
         var v: App_TextMessage?
         var hadOneofValue = false
         if let current = self.content {
@@ -560,8 +615,21 @@ extension App_Message: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementati
           self.content = .textMessage(v)
         }
       }()
-      case 3: try { try decoder.decodeSingularStringField(value: &self.authorUuid) }()
-      case 4: try { try decoder.decodeSingularMessageField(value: &self._createdAt) }()
+      case 4: try {
+        var v: App_VoiceMessage?
+        var hadOneofValue = false
+        if let current = self.content {
+          hadOneofValue = true
+          if case .voiceMessage(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.content = .voiceMessage(v)
+        }
+      }()
+      case 5: try { try decoder.decodeSingularMessageField(value: &self._author) }()
+      case 6: try { try decoder.decodeSingularMessageField(value: &self._createdAt) }()
       default: break
       }
     }
@@ -572,25 +640,37 @@ extension App_Message: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementati
     // allocates stack space for every if/case branch local when no optimizations
     // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
     // https://github.com/apple/swift-protobuf/issues/1182
+    if !self.uuid.isEmpty {
+      try visitor.visitSingularStringField(value: self.uuid, fieldNumber: 1)
+    }
     if !self.convUuid.isEmpty {
-      try visitor.visitSingularStringField(value: self.convUuid, fieldNumber: 1)
+      try visitor.visitSingularStringField(value: self.convUuid, fieldNumber: 2)
     }
-    try { if case .textMessage(let v)? = self.content {
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
-    } }()
-    if !self.authorUuid.isEmpty {
-      try visitor.visitSingularStringField(value: self.authorUuid, fieldNumber: 3)
-    }
-    try { if let v = self._createdAt {
+    switch self.content {
+    case .textMessage?: try {
+      guard case .textMessage(let v)? = self.content else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 3)
+    }()
+    case .voiceMessage?: try {
+      guard case .voiceMessage(let v)? = self.content else { preconditionFailure() }
       try visitor.visitSingularMessageField(value: v, fieldNumber: 4)
+    }()
+    case nil: break
+    }
+    try { if let v = self._author {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 5)
+    } }()
+    try { if let v = self._createdAt {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 6)
     } }()
     try unknownFields.traverse(visitor: &visitor)
   }
 
   public static func ==(lhs: App_Message, rhs: App_Message) -> Bool {
+    if lhs.uuid != rhs.uuid {return false}
     if lhs.convUuid != rhs.convUuid {return false}
     if lhs.content != rhs.content {return false}
-    if lhs.authorUuid != rhs.authorUuid {return false}
+    if lhs._author != rhs._author {return false}
     if lhs._createdAt != rhs._createdAt {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
@@ -624,6 +704,38 @@ extension App_TextMessage: SwiftProtobuf.Message, SwiftProtobuf._MessageImplemen
 
   public static func ==(lhs: App_TextMessage, rhs: App_TextMessage) -> Bool {
     if lhs.content != rhs.content {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension App_VoiceMessage: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".VoiceMessage"
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "url"),
+  ]
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularStringField(value: &self.url) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if !self.url.isEmpty {
+      try visitor.visitSingularStringField(value: self.url, fieldNumber: 1)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: App_VoiceMessage, rhs: App_VoiceMessage) -> Bool {
+    if lhs.url != rhs.url {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
@@ -847,6 +959,50 @@ extension App_ConversationListInput: SwiftProtobuf.Message, SwiftProtobuf._Messa
 
   public static func ==(lhs: App_ConversationListInput, rhs: App_ConversationListInput) -> Bool {
     if lhs.page != rhs.page {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension App_ConversationListOutput: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".ConversationListOutput"
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "convs"),
+    2: .same(proto: "hasMore"),
+    3: .same(proto: "nextPage"),
+  ]
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeRepeatedMessageField(value: &self.convs) }()
+      case 2: try { try decoder.decodeSingularBoolField(value: &self.hasMore_p) }()
+      case 3: try { try decoder.decodeSingularInt32Field(value: &self.nextPage) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if !self.convs.isEmpty {
+      try visitor.visitRepeatedMessageField(value: self.convs, fieldNumber: 1)
+    }
+    if self.hasMore_p != false {
+      try visitor.visitSingularBoolField(value: self.hasMore_p, fieldNumber: 2)
+    }
+    if self.nextPage != 0 {
+      try visitor.visitSingularInt32Field(value: self.nextPage, fieldNumber: 3)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: App_ConversationListOutput, rhs: App_ConversationListOutput) -> Bool {
+    if lhs.convs != rhs.convs {return false}
+    if lhs.hasMore_p != rhs.hasMore_p {return false}
+    if lhs.nextPage != rhs.nextPage {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

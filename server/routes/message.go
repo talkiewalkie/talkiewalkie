@@ -48,7 +48,7 @@ func Message(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		message := models.Message{
-			Text:           msg.Text,
+			//Text:           msg.Text,
 			AuthorID:       null.IntFrom(ctx.User.ID),
 			ConversationID: conversation.ID,
 		}
@@ -169,7 +169,7 @@ func Message(w http.ResponseWriter, r *http.Request) {
 	}
 
 	message := models.Message{
-		Text:           msg.Text,
+		//Text:           msg.Text,
 		AuthorID:       null.IntFrom(ctx.User.ID),
 		ConversationID: conversation.ID,
 	}
@@ -193,6 +193,7 @@ func Message(w http.ResponseWriter, r *http.Request) {
 			PubSubEvent:      common.PubSubEvent{Type: "newmessage", Timestamp: time.Now()},
 			Text:             msg.Text,
 			AuthorUuid:       ctx.User.UUID.String(),
+			AuthorHandle:     ctx.User.Handle,
 			ConversationUuid: msg.ConversationUuid,
 		}); err != nil {
 			log.Printf("failed to notify recipients of message: %+v", err)

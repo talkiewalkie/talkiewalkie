@@ -70,10 +70,10 @@ func (ms MessageService) Incoming(_ *pb.Empty, server pb.MessageService_Incoming
 			}
 
 			err = server.Send(&pb.Message{
-				ConvUuid:   msg.ConversationUuid,
-				Content:    &pb.Message_TextMessage{TextMessage: &pb.TextMessage{Content: msg.Text}},
-				AuthorUuid: msg.AuthorUuid,
-				CreatedAt:  timestamppb.New(msg.Timestamp),
+				ConvUuid:  msg.ConversationUuid,
+				Content:   &pb.Message_TextMessage{TextMessage: &pb.TextMessage{Content: msg.Text}},
+				Author:    &pb.User{Uuid: msg.AuthorUuid, Handle: msg.AuthorHandle},
+				CreatedAt: timestamppb.New(msg.Timestamp),
 			})
 			if err != nil {
 				log.Printf("failed to send message in server stream: %+v", err)
@@ -217,7 +217,8 @@ func (ms MessageService) Send(ctx context.Context, input *pb.MessageSendInput) (
 	}
 
 	msg := &models.Message{
-		Text:           text,
+		Type:           models.MessageTypeText,
+		Text:           null.StringFrom(text),
 		AuthorID:       null.IntFrom(u.ID),
 		ConversationID: conv.ID,
 		CreatedAt:      time.Now(),

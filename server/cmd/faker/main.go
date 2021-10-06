@@ -71,6 +71,8 @@ func main() {
 			log.Panicf("could not insert new conv: %+v", err)
 		}
 
+		fmt.Printf("[%s] new conv[%s]", u.Handle, conv.UUID.String())
+
 		for _, f := range friends {
 			uc := models.UserConversation{UserID: f.ID, ConversationID: conv.ID}
 			if err = uc.Insert(ctx, components.Db, boil.Infer()); err != nil {
@@ -78,7 +80,11 @@ func main() {
 			}
 		}
 
-		for j := 0; j < rand.Intn(150)+1; j += 1 {
+		fmt.Printf(", connected %d friends", len(friends))
+
+		numMsgs := rand.Intn(150) + 1
+		fmt.Printf(" - with %d messages\n", numMsgs)
+		for j := 0; j < numMsgs; j += 1 {
 			text := faker.Paragraph()
 			if rand.Int31()%2 == 0 {
 				text = faker.Sentence()
@@ -87,7 +93,12 @@ func main() {
 			frid := rand.Intn(len(friends))
 			authorId := friends[frid].ID
 
-			msg := models.Message{Text: text, AuthorID: null.IntFrom(authorId), ConversationID: conv.ID}
+			msg := models.Message{
+				Type:           models.MessageTypeText,
+				Text:           null.StringFrom(text),
+				AuthorID:       null.IntFrom(authorId),
+				ConversationID: conv.ID,
+			}
 			if err = msg.Insert(ctx, components.Db, boil.Infer()); err != nil {
 				log.Panicf("could not insert new message: %+v", err)
 			}

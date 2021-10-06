@@ -596,6 +596,57 @@ func testMessageToOneConversationUsingConversation(t *testing.T) {
 	}
 }
 
+func testMessageToOneAssetUsingRawAudio(t *testing.T) {
+	ctx := context.Background()
+	tx := MustTx(boil.BeginTx(ctx, nil))
+	defer func() { _ = tx.Rollback() }()
+
+	var local Message
+	var foreign Asset
+
+	seed := randomize.NewSeed()
+	if err := randomize.Struct(seed, &local, messageDBTypes, true, messageColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Message struct: %s", err)
+	}
+	if err := randomize.Struct(seed, &foreign, assetDBTypes, false, assetColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Asset struct: %s", err)
+	}
+
+	if err := foreign.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	queries.Assign(&local.RawAudioID, foreign.ID)
+	if err := local.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	check, err := local.RawAudio().One(ctx, tx)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !queries.Equal(check.ID, foreign.ID) {
+		t.Errorf("want: %v, got %v", foreign.ID, check.ID)
+	}
+
+	slice := MessageSlice{&local}
+	if err = local.L.LoadRawAudio(ctx, tx, false, (*[]*Message)(&slice), nil); err != nil {
+		t.Fatal(err)
+	}
+	if local.R.RawAudio == nil {
+		t.Error("struct should have been eager loaded")
+	}
+
+	local.R.RawAudio = nil
+	if err = local.L.LoadRawAudio(ctx, tx, true, &local, nil); err != nil {
+		t.Fatal(err)
+	}
+	if local.R.RawAudio == nil {
+		t.Error("struct should have been eager loaded")
+	}
+}
+
 func testMessageToOneSetOpUserUsingAuthor(t *testing.T) {
 	var err error
 
@@ -762,6 +813,114 @@ func testMessageToOneSetOpConversationUsingConversation(t *testing.T) {
 		}
 	}
 }
+func testMessageToOneSetOpAssetUsingRawAudio(t *testing.T) {
+	var err error
+
+	ctx := context.Background()
+	tx := MustTx(boil.BeginTx(ctx, nil))
+	defer func() { _ = tx.Rollback() }()
+
+	var a Message
+	var b, c Asset
+
+	seed := randomize.NewSeed()
+	if err = randomize.Struct(seed, &a, messageDBTypes, false, strmangle.SetComplement(messagePrimaryKeyColumns, messageColumnsWithoutDefault)...); err != nil {
+		t.Fatal(err)
+	}
+	if err = randomize.Struct(seed, &b, assetDBTypes, false, strmangle.SetComplement(assetPrimaryKeyColumns, assetColumnsWithoutDefault)...); err != nil {
+		t.Fatal(err)
+	}
+	if err = randomize.Struct(seed, &c, assetDBTypes, false, strmangle.SetComplement(assetPrimaryKeyColumns, assetColumnsWithoutDefault)...); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := a.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	for i, x := range []*Asset{&b, &c} {
+		err = a.SetRawAudio(ctx, tx, i != 0, x)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if a.R.RawAudio != x {
+			t.Error("relationship struct not set to correct value")
+		}
+
+		if x.R.RawAudioMessages[0] != &a {
+			t.Error("failed to append to foreign relationship struct")
+		}
+		if !queries.Equal(a.RawAudioID, x.ID) {
+			t.Error("foreign key was wrong value", a.RawAudioID)
+		}
+
+		zero := reflect.Zero(reflect.TypeOf(a.RawAudioID))
+		reflect.Indirect(reflect.ValueOf(&a.RawAudioID)).Set(zero)
+
+		if err = a.Reload(ctx, tx); err != nil {
+			t.Fatal("failed to reload", err)
+		}
+
+		if !queries.Equal(a.RawAudioID, x.ID) {
+			t.Error("foreign key was wrong value", a.RawAudioID, x.ID)
+		}
+	}
+}
+
+func testMessageToOneRemoveOpAssetUsingRawAudio(t *testing.T) {
+	var err error
+
+	ctx := context.Background()
+	tx := MustTx(boil.BeginTx(ctx, nil))
+	defer func() { _ = tx.Rollback() }()
+
+	var a Message
+	var b Asset
+
+	seed := randomize.NewSeed()
+	if err = randomize.Struct(seed, &a, messageDBTypes, false, strmangle.SetComplement(messagePrimaryKeyColumns, messageColumnsWithoutDefault)...); err != nil {
+		t.Fatal(err)
+	}
+	if err = randomize.Struct(seed, &b, assetDBTypes, false, strmangle.SetComplement(assetPrimaryKeyColumns, assetColumnsWithoutDefault)...); err != nil {
+		t.Fatal(err)
+	}
+
+	if err = a.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	if err = a.SetRawAudio(ctx, tx, true, &b); err != nil {
+		t.Fatal(err)
+	}
+
+	if err = a.RemoveRawAudio(ctx, tx, &b); err != nil {
+		t.Error("failed to remove relationship")
+	}
+
+	count, err := a.RawAudio().Count(ctx, tx)
+	if err != nil {
+		t.Error(err)
+	}
+	if count != 0 {
+		t.Error("want no relationships remaining")
+	}
+
+	if a.R.RawAudio != nil {
+		t.Error("R struct entry should be nil")
+	}
+
+	if !queries.IsValuerNil(a.RawAudioID) {
+		t.Error("foreign key value should be nil")
+	}
+
+	if len(b.R.RawAudioMessages) != 0 {
+		t.Error("failed to remove a from b's relationships")
+	}
+}
 
 func testMessagesReload(t *testing.T) {
 	t.Parallel()
@@ -837,7 +996,7 @@ func testMessagesSelect(t *testing.T) {
 }
 
 var (
-	messageDBTypes = map[string]string{`ID`: `integer`, `Text`: `text`, `AuthorID`: `integer`, `ConversationID`: `integer`, `CreatedAt`: `timestamp with time zone`}
+	messageDBTypes = map[string]string{`ID`: `integer`, `Text`: `text`, `AuthorID`: `integer`, `ConversationID`: `integer`, `CreatedAt`: `timestamp with time zone`, `UUID`: `uuid`, `Type`: `enum.message_type('text','voice','image','video')`, `RawAudioID`: `integer`}
 	_              = bytes.MinRead
 )
 

@@ -13,7 +13,6 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
-	"time"
 )
 
 // ---------------
@@ -144,13 +143,13 @@ func ConversationByUuid(w http.ResponseWriter, r *http.Request) {
 	}
 
 	messages := []ConversationMessage{}
-	for _, msg := range conversation.R.Messages {
-		messages = append(messages, ConversationMessage{
-			AuthorHandle: msg.R.Author.Handle,
-			Text:         msg.Text,
-			CreatedAt:    msg.CreatedAt.Format(time.RFC3339),
-		})
-	}
+	//for _, msg := range conversation.R.Messages {
+	//messages = append(messages, ConversationMessage{
+	//	AuthorHandle: msg.R.Author.Handle,
+	//	Text:         msg.Text,
+	//	CreatedAt:    msg.CreatedAt.Format(time.RFC3339),
+	//})
+	//}
 
 	handles := []string{}
 	for _, userConversation := range conversation.R.UserConversations {

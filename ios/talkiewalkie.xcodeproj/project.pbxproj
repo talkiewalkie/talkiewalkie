@@ -14,6 +14,7 @@
 		E411D69A270C8755001EBAF3 /* GRPC in Frameworks */ = {isa = PBXBuildFile; productRef = E411D699270C8755001EBAF3 /* GRPC */; };
 		E411D69D270C8828001EBAF3 /* app.grpc.swift in Sources */ = {isa = PBXBuildFile; fileRef = E411D69B270C8828001EBAF3 /* app.grpc.swift */; };
 		E411D69E270C8828001EBAF3 /* app.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = E411D69C270C8828001EBAF3 /* app.pb.swift */; };
+		E411D6A0270DDE8C001EBAF3 /* Message.swift in Sources */ = {isa = PBXBuildFile; fileRef = E411D69F270DDE8C001EBAF3 /* Message.swift */; };
 		E43D8342270360DE00612C7B /* MessageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E43D8341270360DE00612C7B /* MessageView.swift */; };
 		E43D834B2707554500612C7B /* WebSocketConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = E43D834A2707554500612C7B /* WebSocketConnection.swift */; };
 		E43D834E270AE78D00612C7B /* User.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = E43D834C270AE78D00612C7B /* User.xcdatamodeld */; };
@@ -65,6 +66,7 @@
 		E411D696270C481E001EBAF3 /* ModelExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelExtensions.swift; sourceTree = "<group>"; };
 		E411D69B270C8828001EBAF3 /* app.grpc.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = app.grpc.swift; sourceTree = "<group>"; };
 		E411D69C270C8828001EBAF3 /* app.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = app.pb.swift; sourceTree = "<group>"; };
+		E411D69F270DDE8C001EBAF3 /* Message.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Message.swift; sourceTree = "<group>"; };
 		E43D8341270360DE00612C7B /* MessageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageView.swift; sourceTree = "<group>"; };
 		E43D834A2707554500612C7B /* WebSocketConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebSocketConnection.swift; sourceTree = "<group>"; };
 		E43D834D270AE78D00612C7B /* User.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = User.xcdatamodel; sourceTree = "<group>"; };
@@ -131,6 +133,7 @@
 				E411D68C270B4DD4001EBAF3 /* User.swift */,
 				E411D694270B6A83001EBAF3 /* Conversation.swift */,
 				E411D696270C481E001EBAF3 /* ModelExtensions.swift */,
+				E411D69F270DDE8C001EBAF3 /* Message.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -413,6 +416,7 @@
 				E483919826FD352B00BBA902 /* Format.swift in Sources */,
 				E483919B26FD361C00BBA902 /* Refreshable.swift in Sources */,
 				E43D834E270AE78D00612C7B /* User.xcdatamodeld in Sources */,
+				E411D6A0270DDE8C001EBAF3 /* Message.swift in Sources */,
 				E483918C26FD34C300BBA902 /* ChatView.swift in Sources */,
 				E411D697270C481E001EBAF3 /* ModelExtensions.swift in Sources */,
 				E411D68D270B4DD4001EBAF3 /* User.swift in Sources */,

@@ -9,43 +9,28 @@ import CoreData
 import Foundation
 
 extension Conversation {
-    static func dumpFromRemote(_ convs: Api.ConversationsOutput, context: NSManagedObjectContext) {
-        let localConvs: [Conversation] = convs.conversations.map { conv in
-            let localConv = Conversation.getByUuidOrCreate(conv.uuid, context: context)
-            localConv.uuid = conv.uuid
-            print("local '\(localConv.display)' / remote '\(conv.display)'")
-            localConv.display = conv.display
+    static func upsert(_ conv: App_Conversation, context: NSManagedObjectContext) -> Conversation {
+        let localC = Conversation.getByUuidOrCreate(conv.uuid.uuidOrThrow(), context: context)
+        localC.uuid = conv.uuid.uuidOrThrow()
+        localC.display = conv.title
+        
+        let messages = conv.messages.map { Message.upsert($0, context: context) }
+        localC.addToMessages(NSSet(array: messages))
+        
+        // TODO: server should store and retrieve these
+        localC.lastActivityAt = Date()
+        localC.createdAt = Date()
 
-            // TODO: server should store and retrieve these
-            localConv.lastActivityAt = Date()
-            localConv.createdAt = Date()
-
-            return localConv
-        }
-
-        localConvs.forEach { $0.objectWillChange.send() }
-        context.saveOrLogError()
+        return localC
     }
 
     static func dumpFromRemote(_ convs: [App_Conversation], context: NSManagedObjectContext) {
-        let localConvs: [Conversation] = convs.map { conv in
-            let cUuid = UUID(uuidString: conv.uuid)!
-            let localConv = Conversation.getByUuidOrCreate(cUuid, context: context)
-            localConv.uuid = cUuid
-            localConv.display = conv.title
-
-            // TODO: server should store and retrieve these
-            localConv.lastActivityAt = Date()
-            localConv.createdAt = Date()
-
-            return localConv
-        }
-
+        let localConvs: [Conversation] = convs.map { Conversation.upsert($0, context: context) }
         localConvs.forEach { $0.objectWillChange.send() }
         context.saveOrLogError()
     }
 
-    func loadMessages(_: UUID, page _: Int = 0) {
-//        self.addToMessages(<#T##value: Message##Message#>)
+    var messages2: [Message] {
+        (messages?.allObjects as? [Message]) ?? []
     }
 }

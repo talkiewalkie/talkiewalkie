@@ -32,7 +32,8 @@ func (p PubSubEvent) Str() string {
 type NewMessageEvent struct {
 	PubSubEvent
 	Text             string `json:"text"`
-	AuthorUuid       string `json:"authorHandle"`
+	AuthorUuid       string `json:"authorUuid"`
+	AuthorHandle     string `json:"authorHandle"`
 	ConversationUuid string `json:"conversationUuid"`
 }
 

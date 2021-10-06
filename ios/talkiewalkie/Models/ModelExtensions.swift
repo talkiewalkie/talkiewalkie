@@ -15,14 +15,16 @@ extension NSManagedObject {
             os_log("why am i here?")
             return Self(context: context)
         }
+        
         let localUsersRq = NSFetchRequest<Self>(entityName: ename)
-        os_log("local query for \(ename) with uuid: [\(uuid)]")
         localUsersRq.predicate = NSPredicate(format: "uuid = %@", uuid.uuidString)
         let localUsers = (try? context.fetch(localUsersRq)) ?? []
 
         if let me = localUsers.first {
+            os_log(.debug, "[coredata:\(ename)] found item for uuid:[\(uuid)]")
             return me
         } else {
+            os_log(.debug, "[coredata:\(ename)] creating item for uuid:[\(uuid)]")
             let new = Self(context: context)
             try? context.save()
 

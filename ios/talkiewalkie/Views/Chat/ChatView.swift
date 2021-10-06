@@ -8,38 +8,51 @@
 import SwiftUI
 
 struct ChatView: View {
-    @State var message: String = ""
-    @ObservedObject var model: ChatViewModel
+    let uuid: UUID
 
+    @State var message: String = ""
+
+    @ObservedObject var model: ChatViewModel
     @FetchRequest var conversations: FetchedResults<Conversation>
     @FetchRequest var messages: FetchedResults<Message>
+    var conversation: Conversation? { conversations.first }
 
-    init(uuid: UUID, authed: AuthenticatedState) {
+    init(conversation: Conversation, authed: AuthenticatedState) {
+        self.uuid = conversation.uuid!
+        self.model = ChatViewModel(authed: authed, uuid: uuid)
+
         self._conversations = FetchRequest(
             entity: Conversation.entity(),
             sortDescriptors: [],
-            predicate: NSPredicate(format: "uuid = %@", uuid.uuidString)
+            predicate: NSPredicate(format: "uuid = %@", self.uuid.uuidString)
         )
         self._messages = FetchRequest(
             entity: Message.entity(),
             sortDescriptors: [NSSortDescriptor(key: "createdAt", ascending: true)],
-            predicate: NSPredicate(format: "conversationUuid = %@", uuid.uuidString)
+            // %K thingy from https://code.tutsplus.com/tutorials/core-data-and-swift-relationships-and-more-fetching--cms-25070
+            predicate: NSPredicate(format: "%K == %@", "conversation.uuid", conversation)
         )
-        self.model = ChatViewModel(authed: authed, uuid: uuid)
     }
 
     var body: some View {
         VStack {
-            ScrollView {
-//                if let msgs = conversations.first?.messages?.allObjects as? Array<Message> {
-//                    VStack(alignment: .leading) { ForEach(msgs, id: \.text) { m in
-//                        MessageView(message: m)
-//                    }}
-//                }
-
-                VStack(alignment: .leading) {
-                    ForEach(messages, id: \.text) { m in
-                        MessageView(message: m)
+            if model.loading {
+                ProgressView()
+            } else {
+                ScrollView {
+                    if let msgs = conversation?.messages2 {
+                        VStack(alignment: .leading) {
+                            ForEach(msgs, id: \.text) { m in
+                                MessageView(message: m)
+                            }
+                        }
+                    }
+                    Text("\(messages.count) messages to display:")
+                    Text("\(conversation?.messages2.count ?? 0) by the conversation fetch")
+                    VStack(alignment: .leading) {
+                        ForEach(messages, id: \.text) { m in
+                            MessageView(message: m)
+                        }
                     }
                 }
             }
@@ -55,7 +68,7 @@ struct ChatView: View {
         .onAppear {
             model.loadMessages(page: 0)
         }
-        .navigationTitle(Text(model.conversation?.display ?? "Loading conversation..."))
+        .navigationTitle(Text(conversation?.display ?? "no title"))
     }
 }
 

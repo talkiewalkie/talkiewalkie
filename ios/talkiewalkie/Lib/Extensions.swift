@@ -19,6 +19,11 @@ extension NSManagedObjectContext {
         do { try save() }
         catch { os_log("Failed to save coredata: \(error.localizedDescription)") }
     }
+
+    func executeOrLogError(_ request: NSPersistentStoreRequest) {
+        do { try execute(request) }
+        catch { os_log("failed to execute request: \(error.localizedDescription)") }
+    }
 }
 
 extension String {
