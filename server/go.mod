@@ -15,6 +15,7 @@ require (
 	github.com/gorilla/mux v1.8.0
 	github.com/gorilla/websocket v1.4.2
 	github.com/gosimple/slug v1.10.0
+	github.com/grpc-ecosystem/go-grpc-middleware v1.0.0
 	github.com/jmoiron/sqlx v1.3.1
 	github.com/joho/godotenv v1.3.0
 	github.com/kat-co/vala v0.0.0-20170210184112-42e1d8b61f12

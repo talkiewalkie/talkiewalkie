@@ -192,7 +192,7 @@ func Message(w http.ResponseWriter, r *http.Request) {
 		if err = ctx.Components.PgPubSub.Publish(entities.UserPubSubTopic(rec), common.NewMessageEvent{
 			PubSubEvent:      common.PubSubEvent{Type: "newmessage", Timestamp: time.Now()},
 			Text:             msg.Text,
-			AuthorHandle:     ctx.User.Handle,
+			AuthorUuid:       ctx.User.UUID.String(),
 			ConversationUuid: msg.ConversationUuid,
 		}); err != nil {
 			log.Printf("failed to notify recipients of message: %+v", err)

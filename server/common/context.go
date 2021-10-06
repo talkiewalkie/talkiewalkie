@@ -168,3 +168,12 @@ func WithAuthedContext(r *http.Request) Context {
 
 	return services
 }
+
+func GetUser(ctx context.Context) (*models.User, error) {
+	u, ok := ctx.Value("user").(*models.User)
+	if !ok {
+		return nil, errors.New("No [user] key in context")
+	}
+
+	return u, nil
+}

@@ -1,0 +1,98 @@
+syntax = "proto3";
+package app;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/talkiewalkie/talkiewalkie/pb";
+
+message Empty {}
+
+message User {
+  string handle = 1;
+  string uuid = 2;
+  repeated Conversation conversations = 3;
+}
+
+message MeUser {
+  User user = 1;
+  string languageUsed = 2;
+}
+
+message UserGetInput {
+  oneof id {
+    string handle = 1;
+    string uuid = 2;
+  }
+}
+
+message UserListInput {
+  int32 page = 1;
+}
+
+service UserService {
+  rpc Me(Empty)  returns (MeUser) {}
+  rpc Get(UserGetInput)  returns (User) {}
+  rpc List(UserListInput)  returns (stream User) {}
+}
+
+// -----------------------
+
+message Message {
+  string convUuid = 1;
+  oneof content {
+    TextMessage textMessage = 2;
+  };
+  string authorUuid = 3;
+  google.protobuf.Timestamp createdAt = 4;
+}
+
+message TextMessage {
+  string content = 1;
+}
+
+message Handles {
+  repeated string handles = 1;
+}
+
+message MessageSendInput {
+  oneof recipients {
+    string convUuid = 1;
+    Handles handles = 2;
+  }
+  oneof content {
+    TextMessage textMessage = 3;
+  }
+}
+
+service MessageService {
+  rpc Send(MessageSendInput) returns (Empty) {}
+  rpc Incoming(Empty) returns (stream Message) {}
+}
+
+// ----------------------
+
+message Conversation {
+  string uuid = 1;
+  string title = 2;
+  repeated Message messages = 3;
+}
+
+message ConversationGetInput {
+  string uuid = 1;
+}
+
+message ConversationListInput {
+  int32 page = 1;
+}
+
+message ConversationListOutput {
+  repeated Conversation convs = 1;
+  bool hasMore = 2;
+  int32 nextPage = 3;
+}
+
+service ConversationService {
+  rpc Get(ConversationGetInput) returns (Conversation) {}
+  rpc List(ConversationListInput) returns (stream Conversation) {}
+}
+

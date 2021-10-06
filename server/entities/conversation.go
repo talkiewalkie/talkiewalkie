@@ -7,6 +7,11 @@ import (
 )
 
 func ConversationDisplay(c models.Conversation) string {
+	display := c.Name.String
+	if c.Name.Valid {
+		return display
+	}
+
 	handles := []string{}
 	for _, ug := range c.R.UserConversations {
 		redundant := false
@@ -20,11 +25,7 @@ func ConversationDisplay(c models.Conversation) string {
 		}
 	}
 
-	display := c.Name.String
-	if !c.Name.Valid {
-		display = strings.Join(handles, ", ")
-	}
-	return display
+	return strings.Join(handles, ", ")
 }
 
 func CanAccessConversation(c *models.Conversation, u *models.User) (bool, error) {

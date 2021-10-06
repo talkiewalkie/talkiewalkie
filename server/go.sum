@@ -237,6 +237,7 @@ github.com/gosimple/slug v1.10.0 h1:3XbiQua1IpCdrvuntWvGBxVm+K99wCSxJjlxkP49GGQ=
 github.com/gosimple/slug v1.10.0/go.mod h1:MICb3w495l9KNdZm+Xn5b6T2Hn831f9DMxiJ1r+bAjw=
 github.com/gosimple/unidecode v1.0.0 h1:kPdvM+qy0tnk4/BrnkrbdJ82xe88xn7c9hcaipDz4dQ=
 github.com/gosimple/unidecode v1.0.0/go.mod h1:CP0Cr1Y1kogOtx0bJblKzsVWrqYaqfNOnHzpgWw4Awc=
+github.com/grpc-ecosystem/go-grpc-middleware v1.0.0 h1:Iju5GlWwrvL6UBg4zJJt3btmonfrMlCDdsejg4CZE7c=
 github.com/grpc-ecosystem/go-grpc-middleware v1.0.0/go.mod h1:FiyG127CGDf3tlThmgyCl78X/SZQqEOJBCDaAfeWzPs=
 github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0/go.mod h1:8NvIoxWQoOIhqOTXgfV/d3M/q6VIi02HzZEHgUlZvzk=
 github.com/grpc-ecosystem/grpc-gateway v1.9.0/go.mod h1:vNeuVxBJEsws4ogUvrchl83t/GYV9WGTSLVdBhOQFDY=
