@@ -65,3 +65,27 @@ resource "aws_iam_policy" "s3" {
 }
 EOF
 }
+
+// ---------------
+// ----------- LOG
+// ---------------
+
+resource "aws_iam_policy" "logging_writer" {
+  name        = "task-policy-logging-writer"
+  description = "Policy that allows to create logging events"
+
+  policy = <<EOF
+{
+   "Version": "2012-10-17",
+   "Statement": [
+       {
+           "Effect": "Allow",
+           "Action": [
+               "logs:*"
+           ],
+           "Resource": "*"
+       }
+   ]
+}
+EOF
+}
