@@ -16,6 +16,6 @@ resource "aws_ecs_service" "grpc" {
   load_balancer {
     target_group_arn = aws_alb_target_group.grpc.arn
     container_name   = "grpc"
-    container_port   = 8080
+    container_port   = 50051
   }
 }

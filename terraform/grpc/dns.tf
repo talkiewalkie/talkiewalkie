@@ -12,8 +12,8 @@ resource "aws_route53_record" "grpc" {
 
 resource "aws_alb_target_group" "grpc" {
   name             = "grpc"
-  port             = 80
-  protocol         = "HTTP"
+  port             = 443
+  protocol         = "HTTPS"
   protocol_version = "GRPC"
   vpc_id           = var.vpc_id
   target_type      = "ip"

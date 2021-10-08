@@ -10,8 +10,8 @@ module "grpc" {
   domain_name    = aws_route53_zone.main.name
 
   alb_listener_arn = aws_alb_listener.https.arn
-  alb_dns_name     = aws_lb.main.dns_name
-  alb_zone_id      = aws_lb.main.zone_id
+  alb_dns_name     = aws_alb.main.dns_name
+  alb_zone_id      = aws_alb.main.zone_id
 
   ecr_policy_arn  = aws_iam_policy.ecr.arn
   s3_policy_arn   = aws_iam_policy.s3.arn

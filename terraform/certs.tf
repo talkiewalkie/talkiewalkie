@@ -10,8 +10,8 @@ resource "aws_route53_record" "nginx" {
 
   alias {
     evaluate_target_health = false
-    name                   = aws_lb.main.dns_name
-    zone_id                = aws_lb.main.zone_id
+    name                   = aws_alb.main.dns_name
+    zone_id                = aws_alb.main.zone_id
   }
 }
 

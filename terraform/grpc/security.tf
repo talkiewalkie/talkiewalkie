@@ -4,8 +4,8 @@ resource "aws_security_group" "ecs_grpc_task" {
 
   ingress {
     protocol         = "tcp"
-    from_port        = 80
-    to_port          = 8080
+    from_port        = 443
+    to_port          = 50051
     cidr_blocks      = ["0.0.0.0/0"]
     ipv6_cidr_blocks = ["::/0"]
   }

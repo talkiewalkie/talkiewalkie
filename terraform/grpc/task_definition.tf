@@ -10,28 +10,32 @@ resource "aws_ecs_task_definition" "grpc" {
   container_definitions = jsonencode([
     {
       name  = "grpc"
-      image = "344467466667.dkr.ecr.eu-west-3.amazonaws.com/talkiewalkie:latest"
+      #      image = "344467466667.dkr.ecr.eu-west-3.amazonaws.com/talkiewalkie:latest"
+      image = "grpc/java-example-hostname"
+      #      image = "docker.pkg.github.com/aws-samples/grpc-examples/greeter_server:v0.1.0"
 
-      essential        = true
-      portMappings     = [
+      essential    = true
+      portMappings = [
         {
-          containerPort = 8080
-          hostPort      = 8080
+          #          containerPort = 8080
+          containerPort = 50051
+          #          hostPort      = 8080
+          hostPort      = 50051
         }
       ]
-      environment      = [
+      environment  = [
         { name : "POSTGRES_HOST", value : "postgres" },
         { name : "POSTGRES_USER", value : "postgres" },
         { name : "POSTGRES_PASSWORD", value : "verysecret" }
-      ],
-      logConfiguration = {
-        logDriver = "awslogs",
-        options   = {
-          awslogs-group         = aws_cloudwatch_log_group.grpc.name,
-          awslogs-region        = var.region,
-          awslogs-stream-prefix = "ecs"
-        }
-      }
+      ]
+      #      logConfiguration = {
+      #        logDriver = "awslogs",
+      #        options   = {
+      #          awslogs-group         = aws_cloudwatch_log_group.grpc.name,
+      #          awslogs-region        = var.region,
+      #          awslogs-stream-prefix = "ecs"
+      #        }
+      #      }
     },
   ])
 }

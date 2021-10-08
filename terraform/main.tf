@@ -35,7 +35,7 @@ resource "aws_ecs_cluster" "main" {
   name = "main"
 }
 
-resource "aws_lb" "main" {
+resource "aws_alb" "main" {
   name                       = "main"
   internal                   = false
   load_balancer_type         = "application"
@@ -63,7 +63,7 @@ resource "aws_alb_target_group" "main" {
 }
 
 resource "aws_alb_listener" "http" {
-  load_balancer_arn = aws_lb.main.id
+  load_balancer_arn = aws_alb.main.id
   port              = 80
   protocol          = "HTTP"
 
@@ -79,7 +79,7 @@ resource "aws_alb_listener" "http" {
 }
 
 resource "aws_alb_listener" "https" {
-  load_balancer_arn = aws_lb.main.id
+  load_balancer_arn = aws_alb.main.id
   port              = 443
   protocol          = "HTTPS"
 
@@ -87,7 +87,8 @@ resource "aws_alb_listener" "https" {
   certificate_arn = aws_acm_certificate.cert.arn
 
   default_action {
-    target_group_arn = aws_alb_target_group.main.id
+    target_group_arn = module.grpc.tg_id
+    #    target_group_arn = aws_alb_target_group.main.id
     type             = "forward"
   }
 }
