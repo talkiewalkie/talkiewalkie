@@ -14,6 +14,90 @@ import (
 // Requires gRPC-Go v1.32.0 or later.
 const _ = grpc.SupportPackageIsVersion7
 
+// UtilsClient is the client API for Utils service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+type UtilsClient interface {
+	HealthCheck(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Empty, error)
+}
+
+type utilsClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewUtilsClient(cc grpc.ClientConnInterface) UtilsClient {
+	return &utilsClient{cc}
+}
+
+func (c *utilsClient) HealthCheck(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Empty, error) {
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, "/app.Utils/HealthCheck", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// UtilsServer is the server API for Utils service.
+// All implementations should embed UnimplementedUtilsServer
+// for forward compatibility
+type UtilsServer interface {
+	HealthCheck(context.Context, *Empty) (*Empty, error)
+}
+
+// UnimplementedUtilsServer should be embedded to have forward compatible implementations.
+type UnimplementedUtilsServer struct {
+}
+
+func (UnimplementedUtilsServer) HealthCheck(context.Context, *Empty) (*Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method HealthCheck not implemented")
+}
+
+// UnsafeUtilsServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to UtilsServer will
+// result in compilation errors.
+type UnsafeUtilsServer interface {
+	mustEmbedUnimplementedUtilsServer()
+}
+
+func RegisterUtilsServer(s grpc.ServiceRegistrar, srv UtilsServer) {
+	s.RegisterService(&Utils_ServiceDesc, srv)
+}
+
+func _Utils_HealthCheck_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UtilsServer).HealthCheck(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/app.Utils/HealthCheck",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UtilsServer).HealthCheck(ctx, req.(*Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+// Utils_ServiceDesc is the grpc.ServiceDesc for Utils service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var Utils_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "app.Utils",
+	HandlerType: (*UtilsServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "HealthCheck",
+			Handler:    _Utils_HealthCheck_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "app.proto",
+}
+
 // UserServiceClient is the client API for UserService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.

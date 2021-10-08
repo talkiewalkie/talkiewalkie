@@ -43,6 +43,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
+  annotations:
+    cloud.google.com/app-protocols: '{"forwarded-theo":"HTTP2", "forwarded-alex":"HTTP2", "tunnel": "HTTP2"}'
+    # duplicating because mimicking https://gist.github.com/viglesiasce/bcdacc95068803be565a45b215bf069f
+    service.alpha.kubernetes.io/app-protocols: '{"forwarded-theo":"HTTP2", "forwarded-alex":"HTTP2", "tunnel": "HTTP2"}'
   name: chisel
 spec:
   selector:

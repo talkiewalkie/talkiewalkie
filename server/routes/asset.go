@@ -38,7 +38,7 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	contentType := http.DetectContentType(p)
 
-	var uploadedF io.Reader
+	var uploadedF io.ReadSeeker
 	if strings.HasPrefix(contentType, "image/") {
 		fsF, err := ioutil.TempFile("", h.Filename)
 		if err != nil {

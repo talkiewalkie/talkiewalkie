@@ -5,6 +5,12 @@ import "google/protobuf/timestamp.proto";
 
 option go_package = "github.com/talkiewalkie/talkiewalkie/pb";
 
+// utils
+
+service Utils {
+  rpc HealthCheck(Empty) returns (Empty) {}
+}
+
 message Empty {}
 
 message User {

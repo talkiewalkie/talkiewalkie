@@ -16,10 +16,14 @@ import (
 	"golang.org/x/oauth2/google"
 	"golang.org/x/oauth2/jwt"
 	"google.golang.org/api/option"
+
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3"
 )
 
 type StorageClient interface {
-	Upload(ctx context.Context, blob io.Reader) (*uuid.UUID, error)
+	Upload(ctx context.Context, blob io.ReadSeeker) (*uuid.UUID, error)
 	Download(blobName string, writer io.Writer) error
 	SignedUrl(bucket, blobName string) (string, error)
 	AssetUrl(asset *models.Asset) (string, error)
@@ -66,7 +70,7 @@ func initStorageClient(ctx context.Context) (StorageClient, error) {
 	return g, nil
 }
 
-func (g GoogleStorage) Upload(c context.Context, blob io.Reader) (*uuid.UUID, error) {
+func (g GoogleStorage) Upload(c context.Context, blob io.ReadSeeker) (*uuid.UUID, error) {
 	uid := uuid.NewV4()
 	remoteBlob := g.Bucket(g.BucketName).Object(uid.String())
 	wc := remoteBlob.NewWriter(c)
@@ -108,4 +112,70 @@ func (g GoogleStorage) Download(blobName string, writer io.Writer) error {
 
 func (g GoogleStorage) DefaultBucket() string {
 	return g.BucketName
+}
+
+type S3Storage struct {
+	*s3.S3
+	bucketName string
+	sess       *session.Session
+}
+
+func (s S3Storage) Upload(ctx context.Context, blob io.ReadSeeker) (*uuid.UUID, error) {
+	uid := uuid.NewV4()
+	_, err := s.PutObjectWithContext(ctx, &s3.PutObjectInput{
+		Body:   blob,
+		Bucket: aws.String(s.DefaultBucket()),
+		Key:    aws.String(uid.String()),
+	})
+	return &uid, err
+}
+
+func (s S3Storage) Download(blobName string, writer io.Writer) error {
+	o, err := s.GetObject(&s3.GetObjectInput{
+		Bucket: aws.String(s.DefaultBucket()),
+		Key:    aws.String(blobName),
+	})
+	if err != nil {
+		return nil
+	}
+
+	if _, err = io.Copy(writer, o.Body); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s S3Storage) SignedUrl(bucket, blobName string) (string, error) {
+	req, _ := s.GetObjectRequest(&s3.GetObjectInput{
+		Bucket: aws.String(bucket),
+		Key:    aws.String(blobName),
+	})
+
+	urlStr, err := req.Presign(10 * time.Minute)
+	if err != nil {
+		return "", nil
+	}
+
+	return urlStr, nil
+}
+
+func (s S3Storage) AssetUrl(asset *models.Asset) (string, error) {
+	if asset.Bucket.Valid {
+		return s.SignedUrl(asset.Bucket.String, asset.BlobName.String)
+	} else {
+		return s.SignedUrl(s.DefaultBucket(), asset.UUID.String())
+	}
+}
+
+func (s S3Storage) DefaultBucket() string {
+	return s.bucketName
+}
+
+var _ StorageClient = S3Storage{}
+
+func NewS3Storage() (*S3Storage, error) {
+	sess := session.Must(session.NewSession())
+	svc := s3.New(sess)
+	bn := os.Getenv("BUCKET_NAME")
+	return &S3Storage{S3: svc, sess: sess, bucketName: bn}, nil
 }
