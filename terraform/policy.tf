@@ -34,18 +34,21 @@ EOF
 }
 
 resource "aws_iam_role_policy_attachment" "ecr-task-role-policy-attachment" {
-  role       = aws_iam_role.nginx_task_role.name
+  for_each   = toset([
+    aws_iam_role.nginx_task_role.name,
+    aws_iam_role.nginx_task_execution_role.name
+  ])
+  role       = each.value
   policy_arn = aws_iam_policy.ecr.arn
 }
-
 
 // --------------
 // ----------- S3
 // --------------
 
 resource "aws_iam_policy" "s3" {
-  name        = "task-policy-s3"
-  description = "Policy that allows access to S3"
+  name        = "task-policy-s3-full"
+  description = "Policy that allows full access to S3"
 
   policy = <<EOF
 {
@@ -54,17 +57,7 @@ resource "aws_iam_policy" "s3" {
        {
            "Effect": "Allow",
            "Action": [
-               "dynamodb:CreateTable",
-               "dynamodb:UpdateTimeToLive",
-               "dynamodb:PutItem",
-               "dynamodb:DescribeTable",
-               "dynamodb:ListTables",
-               "dynamodb:DeleteItem",
-               "dynamodb:GetItem",
-               "dynamodb:Scan",
-               "dynamodb:Query",
-               "dynamodb:UpdateItem",
-               "dynamodb:UpdateTable"
+               "s3:*"
            ],
            "Resource": "*"
        }
