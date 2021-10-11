@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="19162" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" launchScreen="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="01J-lp-oVM">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19144"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--View Controller-->
+        <scene sceneID="EHf-IW-A2E">
+            <objects>
+                <viewController id="01J-lp-oVM" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="Ze5-6b-2t3">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" image="background.png" translatesAutoresizingMaskIntoConstraints="NO" id="NkF-R9-dvf">
+                                <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                            </imageView>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" alpha="0.97499999999999998" contentMode="scaleAspectFit" misplaced="YES" image="logo_bubble" translatesAutoresizingMaskIntoConstraints="NO" id="aOP-pi-BMd">
+                                <rect key="frame" x="94" y="359" width="226" height="178"/>
+                            </imageView>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="Fcg-aR-wSw"/>
+                        <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <constraints>
+                            <constraint firstItem="NkF-R9-dvf" firstAttribute="height" secondItem="Ze5-6b-2t3" secondAttribute="height" id="CMs-if-jn4"/>
+                            <constraint firstItem="aOP-pi-BMd" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="D9A-Ah-bQH"/>
+                            <constraint firstItem="aOP-pi-BMd" firstAttribute="centerY" secondItem="Ze5-6b-2t3" secondAttribute="centerY" id="Jc3-6f-V13"/>
+                            <constraint firstItem="aOP-pi-BMd" firstAttribute="height" secondItem="Ze5-6b-2t3" secondAttribute="height" multiplier="0.2" id="Q16-ux-ye3"/>
+                            <constraint firstItem="aOP-pi-BMd" firstAttribute="width" secondItem="Ze5-6b-2t3" secondAttribute="width" id="WZa-eQ-b8Z"/>
+                            <constraint firstItem="NkF-R9-dvf" firstAttribute="width" secondItem="Ze5-6b-2t3" secondAttribute="width" id="dQG-sl-jPx"/>
+                            <constraint firstItem="NkF-R9-dvf" firstAttribute="centerY" secondItem="Ze5-6b-2t3" secondAttribute="centerY" id="x3d-j1-ddg"/>
+                            <constraint firstItem="NkF-R9-dvf" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="yXK-Iw-6Gp"/>
+                        </constraints>
+                    </view>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="iYj-Kq-Ea1" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="52.173913043478265" y="375"/>
+        </scene>
+    </scenes>
+    <resources>
+        <image name="background.png" width="1708" height="3220"/>
+        <image name="logo_bubble" width="672" height="672"/>
+    </resources>
+</document>
