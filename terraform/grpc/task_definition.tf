@@ -11,7 +11,8 @@ resource "aws_ecs_task_definition" "grpc" {
     {
       name  = "grpc"
       #      image = "344467466667.dkr.ecr.eu-west-3.amazonaws.com/talkiewalkie:latest"
-      image = "grpc/java-example-hostname"
+      #      image = "grpc/java-example-hostname"
+      image = "344467466667.dkr.ecr.eu-west-3.amazonaws.com/talkiewalkie:grpc-helloworld"
       #      image = "docker.pkg.github.com/aws-samples/grpc-examples/greeter_server:v0.1.0"
 
       essential    = true

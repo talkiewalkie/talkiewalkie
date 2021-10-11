@@ -89,3 +89,30 @@ resource "aws_iam_policy" "logging_writer" {
 }
 EOF
 }
+
+
+// -------------------
+// ----------- SECRETS
+// -------------------
+
+resource "aws_iam_policy" "secrets_fetcher" {
+  name        = "task-policy-secrets-fetcher"
+  description = "Policy that allows to query secrets"
+
+  // TODO: `secretsmanager:GetSecretValue` was not enough to pull secrets
+  //        somehow, would be good to restrict to accurate set.
+  policy = <<EOF
+{
+   "Version": "2012-10-17",
+   "Statement": [
+       {
+           "Effect": "Allow",
+           "Action": [
+               "secretsmanager:*"
+           ],
+           "Resource": "*"
+       }
+   ]
+}
+EOF
+}

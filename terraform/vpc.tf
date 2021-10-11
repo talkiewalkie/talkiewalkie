@@ -9,6 +9,77 @@ resource "aws_vpc" "main" {
   }
 }
 
+resource "aws_security_group" "endpoint_sg" {
+  name   = "vpc-endpoints-sg"
+  vpc_id = aws_vpc.main.id
+
+  ingress {
+    protocol         = "tcp"
+    from_port        = 0
+    to_port          = 0
+    cidr_blocks      = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+  }
+
+  egress {
+    protocol         = "-1"
+    from_port        = 0
+    to_port          = 0
+    cidr_blocks      = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+  }
+}
+
+resource "aws_vpc_endpoint" "s3" {
+  vpc_id       = aws_vpc.main.id
+  service_name = "com.amazonaws.${local.region}.s3"
+}
+
+resource "aws_vpc_endpoint" "ecr" {
+  vpc_id              = aws_vpc.main.id
+  vpc_endpoint_type   = "Interface"
+  security_group_ids  = [aws_security_group.endpoint_sg.id]
+  private_dns_enabled = true
+  subnet_ids          = aws_subnet.public.*.id
+  service_name        = "com.amazonaws.${local.region}.ecr.dkr"
+}
+
+resource "aws_vpc_endpoint" "ecr2" {
+  vpc_id              = aws_vpc.main.id
+  vpc_endpoint_type   = "Interface"
+  security_group_ids  = [aws_security_group.endpoint_sg.id]
+  private_dns_enabled = true
+  subnet_ids          = aws_subnet.public.*.id
+  service_name        = "com.amazonaws.${local.region}.ecr.api"
+}
+
+resource "aws_vpc_endpoint" "secrets" {
+  vpc_id              = aws_vpc.main.id
+  vpc_endpoint_type   = "Interface"
+  security_group_ids  = [aws_security_group.endpoint_sg.id]
+  private_dns_enabled = true
+  subnet_ids          = aws_subnet.public.*.id
+  service_name        = "com.amazonaws.${local.region}.secretsmanager"
+}
+
+resource "aws_vpc_endpoint" "ssm" {
+  vpc_id              = aws_vpc.main.id
+  vpc_endpoint_type   = "Interface"
+  security_group_ids  = [aws_security_group.endpoint_sg.id]
+  private_dns_enabled = true
+  subnet_ids          = aws_subnet.public.*.id
+  service_name        = "com.amazonaws.${local.region}.ssm"
+}
+
+resource "aws_vpc_endpoint" "logs" {
+  vpc_id              = aws_vpc.main.id
+  vpc_endpoint_type   = "Interface"
+  security_group_ids  = [aws_security_group.endpoint_sg.id]
+  private_dns_enabled = true
+  subnet_ids          = aws_subnet.public.*.id
+  service_name        = "com.amazonaws.${local.region}.logs"
+}
+
 resource "aws_internet_gateway" "main" {
   vpc_id = aws_vpc.main.id
   tags   = {
