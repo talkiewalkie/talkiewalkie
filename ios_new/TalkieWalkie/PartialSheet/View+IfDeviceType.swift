@@ -16,18 +16,17 @@ internal enum DeviceType {
 
 internal var deviceType: DeviceType = {
     #if targetEnvironment(macCatalyst)
-    return .mac
+        return .mac
     #else
-    if UIDevice.current.userInterfaceIdiom == .pad {
-        return .ipad
-    } else {
-        return .iphone
-    }
+        if UIDevice.current.userInterfaceIdiom == .pad {
+            return .ipad
+        } else {
+            return .iphone
+        }
     #endif
 }()
 
 internal extension View {
-
     @ViewBuilder func ifIs<T>(_ condition: Bool, transform: (Self) -> T) -> some View where T: View {
         if condition {
             transform(self)
@@ -68,4 +67,3 @@ internal extension View {
         }
     }
 }
-

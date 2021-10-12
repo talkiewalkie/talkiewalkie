@@ -8,7 +8,6 @@
 import Foundation
 
 extension Bundle {
-
     var appName: String {
         return (infoDictionary?["CFBundleName"] as? String) ?? "Litso"
     }
@@ -24,5 +23,4 @@ extension Bundle {
     var buildNumber: String {
         return (infoDictionary?["CFBundleVersion"] as? String) ?? "1"
     }
-
 }

@@ -7,7 +7,6 @@
 
 import Foundation
 
-
 extension String {
     func uuidOrThrow() -> UUID {
         return UUID(uuidString: self)!

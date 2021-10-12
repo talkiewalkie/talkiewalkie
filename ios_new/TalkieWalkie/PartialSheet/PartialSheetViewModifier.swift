@@ -6,89 +6,88 @@
 //  Copyright © 2019 Miotto Andrea. All rights reserved.
 //
 
-import SwiftUI
 import Combine
+import SwiftUI
 
 /// This is the modifier for the Partial Sheet
 struct PartialSheet: ViewModifier {
-    
     // MARK: - Public Properties
 
     /// The Partial Sheet Style configuration
     var style: PartialSheetStyle
-    
+
     // MARK: - Private Properties
 
     @EnvironmentObject private var manager: PartialSheetManager
 
     /// The rect containing the presenter
     @State private var presenterContentRect: CGRect = .zero
-    
+
     /// The rect containing the sheet content
     @State private var sheetContentRect: CGRect = .zero
-    
+
     /// The offset for keyboard height
     @State private var keyboardOffset: CGFloat = 0
-    
+
     /// The offset for the drag gesture
     @State private var dragOffset: CGFloat = 0
 
     /// The point for the top anchor
     private var topAnchor: CGFloat {
         let bottomSafeArea = (UIApplication.shared.windows.first?.safeAreaInsets.bottom ?? 0)
-        
+
         let calculatedTop =
             presenterContentRect.height +
             bottomSafeArea -
             sheetContentRect.height -
             handlerSectionHeight
-          
+
         guard calculatedTop < style.minTopDistance else {
             return calculatedTop
         }
-        
+
         return style.minTopDistance
     }
-    
+
     /// The he point for the bottom anchor
     private var bottomAnchor: CGFloat {
         return UIScreen.main.bounds.height + 5
     }
-    
+
     /// The height of the handler bar section
     private var handlerSectionHeight: CGFloat {
         return 30
     }
-    
+
     /// Calculates the sheets y position
     private var sheetPosition: CGFloat {
-        if self.manager.isPresented {
+        if manager.isPresented {
             // 20.0 = To make sure we dont go under statusbar on screens without safe area inset
             let topInset = UIApplication.shared.windows.first?.safeAreaInsets.top ?? 20.0
-            let position = self.topAnchor + self.dragOffset - self.keyboardOffset
-            
+            let position = topAnchor + dragOffset - keyboardOffset
+
             if position < topInset {
                 return topInset
             }
-            
+
             return position
         } else {
-            return self.bottomAnchor - self.dragOffset
+            return bottomAnchor - dragOffset
         }
     }
 
     /// Background of sheet
     private var background: AnyView {
-        switch self.style.background {
-        case .solid(let color):
+        switch style.background {
+        case let .solid(color):
             return AnyView(color)
-        case .blur(let effect):
+        case let .blur(effect):
             return AnyView(BlurEffectView(style: effect).background(Color.clear))
         }
     }
-    
+
     // MARK: - Content Builders
-    
+
     func body(content: Content) -> some View {
         ZStack {
             content
@@ -103,8 +102,8 @@ struct PartialSheet: ViewModifier {
                                     value: [PreferenceData(bounds: proxy.frame(in: .global))]
                                 )
                             }
-                    )
-                        .onAppear{
+                        )
+                        .onAppear {
                             let notifier = NotificationCenter.default
                             let willShow = UIResponder.keyboardWillShowNotification
                             let willHide = UIResponder.keyboardWillHideNotification
@@ -116,15 +115,15 @@ struct PartialSheet: ViewModifier {
                                                  object: nil,
                                                  queue: .main,
                                                  using: self.keyboardHide)
-                    }
-                    .onDisappear {
-                        let notifier = NotificationCenter.default
-                        notifier.removeObserver(self)
-                    }
-                    .onPreferenceChange(PresenterPreferenceKey.self, perform: { (prefData) in
-                        self.presenterContentRect = prefData.first?.bounds ?? .zero
-                    })
-            }
+                        }
+                        .onDisappear {
+                            let notifier = NotificationCenter.default
+                            notifier.removeObserver(self)
+                        }
+                        .onPreferenceChange(PresenterPreferenceKey.self, perform: { prefData in
+                            self.presenterContentRect = prefData.first?.bounds ?? .zero
+                        })
+                }
                 // if the device type is not an iPhone,
                 // display the sheet content as a normal sheet
                 .iPadOrMac {
@@ -134,7 +133,7 @@ struct PartialSheet: ViewModifier {
                         }, content: {
                             self.iPadAndMacSheet()
                         })
-            }
+                }
             // if the device type is an iPhone,
             // display the sheet content as a draggableSheet
             if deviceType == .iphone {
@@ -145,10 +144,10 @@ struct PartialSheet: ViewModifier {
     }
 }
 
-//MARK: - Platfomr Specific Sheet Builders
-extension PartialSheet {
+// MARK: - Platfomr Specific Sheet Builders
 
-    //MARK: - Mac and iPad Sheet Builder
+extension PartialSheet {
+    // MARK: - Mac and iPad Sheet Builder
 
     /// This is the builder for the sheet content for iPad and Mac devices only
     private func iPadAndMacSheet() -> some View {
@@ -166,19 +165,18 @@ extension PartialSheet {
             }
             self.manager.content
             Spacer()
-        }.background(self.background)
+        }.background(background)
     }
 
-    //MARK: - iPhone Sheet Builder
+    // MARK: - iPhone Sheet Builder
 
     /// This is the builder for the sheet content for iPhone devices only
-    private func iPhoneSheet()-> some View {
+    private func iPhoneSheet() -> some View {
         // Build the drag gesture
         let drag = dragGesture()
-        
-        return ZStack {
 
-            //MARK: - iPhone Cover View
+        return ZStack {
+            // MARK: - iPhone Cover View
 
             if manager.isPresented {
                 Group {
@@ -217,11 +215,11 @@ extension PartialSheet {
                                 GeometryReader { proxy in
                                     Color.clear.preference(key: SheetPreferenceKey.self, value: [PreferenceData(bounds: proxy.frame(in: .global))])
                                 }
-                        )
+                            )
                     }
                     Spacer()
                 }
-                .onPreferenceChange(SheetPreferenceKey.self, perform: { (prefData) in
+                .onPreferenceChange(SheetPreferenceKey.self, perform: { prefData in
                     withAnimation(.interpolatingSpring(stiffness: 300.0, damping: 30.0, initialVelocity: 10.0)) {
                         self.sheetContentRect = prefData.first?.bounds ?? .zero
                     }
@@ -238,17 +236,17 @@ extension PartialSheet {
 }
 
 // MARK: - Drag Gesture & Handler
-extension PartialSheet {
 
+extension PartialSheet {
     /// Create a new **DragGesture** with *updating* and *onEndend* func
     private func dragGesture() -> _EndedGesture<_ChangedGesture<DragGesture>> {
         DragGesture(minimumDistance: 0, coordinateSpace: .local)
             .onChanged(onDragChanged)
             .onEnded(onDragEnded)
     }
-    
+
     private func onDragChanged(drag: DragGesture.Value) {
-        self.dismissKeyboard()
+        dismissKeyboard()
         let yOffset = drag.translation.height
         let threshold = CGFloat(-50)
         let stiffness = CGFloat(0.3)
@@ -256,20 +254,20 @@ extension PartialSheet {
             dragOffset = drag.translation.height
         } else if
             // if above threshold and belove ScreenHeight make it elastic
-            -yOffset + self.sheetContentRect.height <
-                UIScreen.main.bounds.height + self.handlerSectionHeight
+            -yOffset + sheetContentRect.height <
+            UIScreen.main.bounds.height + handlerSectionHeight
         {
             let distance = yOffset - threshold
             let translationHeight = threshold + (distance * stiffness)
             dragOffset = translationHeight
         }
     }
-    
+
     /// The method called when the drag ends. It moves the sheet in the correct position based on the last drag gesture
     private func onDragEnded(drag: DragGesture.Value) {
         /// The drag direction
         let verticalDirection = drag.predictedEndLocation.y - drag.location.y
-        
+
         // Set the correct anchor point based on the vertical direction of the drag
         if verticalDirection > 1 {
             DispatchQueue.main.async {
@@ -287,16 +285,16 @@ extension PartialSheet {
         } else {
             /// The current sheet position
             let cardTopEdgeLocation = topAnchor + drag.translation.height
-            
+
             // Get the closest anchor point based on the current position of the sheet
             let closestPosition: CGFloat
-            
+
             if (cardTopEdgeLocation - topAnchor) < (bottomAnchor - cardTopEdgeLocation) {
                 closestPosition = topAnchor
             } else {
                 closestPosition = bottomAnchor
             }
-            
+
             withAnimation(.interpolatingSpring(stiffness: 300.0, damping: 30.0, initialVelocity: 10.0)) {
                 dragOffset = 0
                 self.manager.isPresented = (closestPosition == topAnchor)
@@ -309,8 +307,8 @@ extension PartialSheet {
 }
 
 // MARK: - Keyboard Handlers Methods
-extension PartialSheet {
 
+extension PartialSheet {
     /// Add the keyboard offset
     private func keyboardShow(notification: Notification) {
         let endFrame = UIResponder.keyboardFrameEndUserInfoKey
@@ -324,14 +322,14 @@ extension PartialSheet {
     }
 
     /// Remove the keyboard offset
-    private func keyboardHide(notification: Notification) {
+    private func keyboardHide(notification _: Notification) {
         DispatchQueue.main.async {
             withAnimation(.interpolatingSpring(stiffness: 300.0, damping: 30.0, initialVelocity: 10.0)) {
                 self.keyboardOffset = 0
             }
         }
     }
-    
+
     /// Dismiss the keyboard
     private func dismissKeyboard() {
         let resign = #selector(UIResponder.resignFirstResponder)
@@ -342,13 +340,14 @@ extension PartialSheet {
 }
 
 // MARK: - PreferenceKeys Handlers
-extension PartialSheet {
 
+extension PartialSheet {
     /// Preference Key for the Sheet Presener
     struct PresenterPreferenceKey: PreferenceKey {
         static func reduce(value: inout [PartialSheet.PreferenceData], nextValue: () -> [PartialSheet.PreferenceData]) {
             value.append(contentsOf: nextValue())
         }
+
         static var defaultValue: [PreferenceData] = []
     }
 
@@ -357,6 +356,7 @@ extension PartialSheet {
         static func reduce(value: inout [PartialSheet.PreferenceData], nextValue: () -> [PartialSheet.PreferenceData]) {
             value.append(contentsOf: nextValue())
         }
+
         static var defaultValue: [PreferenceData] = []
     }
 
@@ -364,29 +364,27 @@ extension PartialSheet {
     struct PreferenceData: Equatable {
         let bounds: CGRect
     }
-
 }
 
 struct PartialSheetAddView<Base: View, InnerContent: View>: View {
     @EnvironmentObject var partialSheetManager: PartialSheetManager
-    
+
     @Binding var isPresented: Bool
     let content: () -> InnerContent
     let base: Base
-    
+
     var body: some View {
         base
-            .onChange(of: isPresented) { value in
+            .onChange(of: isPresented) { _ in
                 DispatchQueue.main.async(execute: updateContent)
             }
     }
-    
+
     func updateContent() {
         partialSheetManager.updatePartialSheet(isPresented: isPresented, content: content, onDismiss: {
             self.isPresented = false
         })
     }
-
 }
 
 public extension View {

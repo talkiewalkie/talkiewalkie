@@ -20,18 +20,18 @@ class OnboardingViewModel: ObservableObject {
     @Published var phoneNumber: String
     @Published var verificationCode: String = ""
     @Published var verificationID: String = ""
-    
+
     init(name: Binding<String>, phoneCountryCode: Int, phoneRegionID: String, phoneNumber: String) {
-        self._name = name
+        _name = name
         self.phoneCountryCode = phoneCountryCode
         self.phoneRegionID = phoneRegionID.isEmpty ? nil : phoneRegionID
         self.phoneNumber = phoneNumber
     }
-    
+
     var fullPhoneNumber: String {
         "+\(phoneCountryCode)\(phoneNumber)"
     }
-    
+
     func next() {
         page += 1
     }
@@ -39,12 +39,12 @@ class OnboardingViewModel: ObservableObject {
 
 struct OnboardingView: View {
     var onboardingDone: () -> Void
-    
+
     @AppStorage("name") var name: String = ""
     @AppStorage("phoneCountryCode") var phoneCountryCode: Int = 33
     @AppStorage("phoneRegionID") var phoneRegionID: String = "FR"
     @AppStorage("phoneNumber") var phoneNumber: String = ""
-    
+
     var body: some View {
         Onboarding(
             onboardingDone: onboardingDone,
@@ -60,11 +60,11 @@ struct Onboarding: View {
     var onboardingDone: () -> Void
 
     @StateObject var model: OnboardingViewModel
-    
+
     var body: some View {
         ZStack {
             Color.blue.opacity(0.5).ignoresSafeArea()
-            
+
             Group {
                 switch model.page {
                 case 0: FirstScreen()
@@ -89,14 +89,14 @@ struct Onboarding: View {
 
 struct OnboardingNavControls: View {
     @Binding var page: Int
-    
+
     var showPrev: Bool = true
     var showNext: Bool = true
-    
+
     var loading: Bool = false
-    
+
     var onNext: (() -> Void)?
-    
+
     var body: some View {
         HStack {
             if showPrev && !loading {
@@ -107,9 +107,9 @@ struct OnboardingNavControls: View {
                         .font(.system(size: 22, weight: .heavy))
                 }
             }
-            
+
             Spacer()
-            
+
             if showNext {
                 TWButton(action: {
                     guard let next = onNext else { return page += 1 }
@@ -134,7 +134,7 @@ struct OnboardingNavControls: View {
 
 struct OnboardingTitle: View {
     var text: String
-    
+
     var body: some View {
         Text(text.uppercased())
             .font(.title2)
@@ -148,12 +148,12 @@ struct OnboardingTitle: View {
 
 struct FirstScreen: View {
     @EnvironmentObject var model: OnboardingViewModel
-    
+
     var body: some View {
         ZStack {
             VStack {
                 Spacer()
-                
+
                 Image("curves")
                     .resizable()
                     .aspectRatio(contentMode: .fit)
@@ -161,30 +161,30 @@ struct FirstScreen: View {
                     .opacity(0.5)
             }
             .ignoresSafeArea()
-            
+
             ZStack {
                 VStack {
                     LottieView(name: "speech-therapy")
                         .frame(maxHeight: 250)
-                    
+
                     Spacer()
                 }
-                
+
                 VStack {
                     Image("logo_text")
                         .resizable()
                         .aspectRatio(contentMode: .fit)
                         .scaleEffect(0.75)
-                    
+
                     Text("Voice messaging, done right.")
                         .font(.title2)
                         .fontWeight(.medium)
                         .foregroundColor(.white)
                 }
-                
+
                 VStack {
                     Spacer()
-                    
+
                     VStack {
                         Text("By tapping on \"Sign up & Accept\", you agree to the Privacy Policy and Terms of Services.")
                             .font(.callout)
@@ -192,7 +192,7 @@ struct FirstScreen: View {
                             .foregroundColor(.init(.tertiaryLabel))
                             .multilineTextAlignment(.center)
                             .scaleEffect(0.9)
-                        
+
                         TWButton(action: model.next) {
                             Text("Sign up & Accept".uppercased())
                         }
@@ -208,17 +208,17 @@ struct FirstScreen: View {
 
 struct TypeNameView: View {
     @EnvironmentObject var model: OnboardingViewModel
-    
+
     @State var showInvalidNameAlert: Bool = false
-    
+
     var body: some View {
         ZStack {
             VStack {
                 OnboardingTitle(text: "Hi! What's your name?")
-                
+
                 Spacer()
             }
-            
+
             TextField("Your Name", text: $model.name, onCommit: validate)
                 .disableAutocorrection(true)
                 .textContentType(UITextContentType.givenName)
@@ -228,7 +228,7 @@ struct TypeNameView: View {
                 .introspectTextField { textField in
                     textField.becomeFirstResponder()
                 }
-            
+
             OnboardingNavControls(page: $model.page, showPrev: false, onNext: validate)
         }
         .alert(isPresented: $showInvalidNameAlert) {
@@ -236,10 +236,10 @@ struct TypeNameView: View {
         }
         .padding()
     }
-        
+
     func validate() {
         guard model.name.count > 0 else { return showInvalidNameAlert = true }
-        
+
         model.next()
     }
 }
@@ -249,22 +249,22 @@ struct TypeNameView: View {
 struct PhoneCountryCodeButtonView: View {
     @Binding var countryCode: Int
     @Binding var regionID: String?
-    
+
     var flag: String {
         guard let regionID = regionID else { return "" }
         return getFlag(from: regionID)
     }
-    
+
     var body: some View {
         TWButton(action: {}, primary: false, padding: 10) {
             Text("\(flag)+\(countryCode)")
         }
     }
-    
+
     func getFlag(from regionID: String) -> String {
         regionID
             .unicodeScalars
-            .map { 127397 + $0.value }
+            .map { 127_397 + $0.value }
             .compactMap(UnicodeScalar.init)
             .map(String.init)
             .joined()
@@ -273,16 +273,16 @@ struct PhoneCountryCodeButtonView: View {
 
 struct TypePhoneNumberView: View {
     @EnvironmentObject var model: OnboardingViewModel
-    
+
     @State var showInvalidPhoneNumberAlert: Bool = false
     @State var showSendingSMSAlert: Bool = false
-    
+
     @State var phoneNumberKit = PhoneNumberKit()
-    
+
     @AppStorage("phoneCountryCode") var storedPhoneCountryCode: Int = 33
     @AppStorage("phoneRegionID") var storedPhoneRegionID: String = "FR"
     @AppStorage("phoneNumber") var storedPhoneNumber: String = ""
-    
+
     var body: some View {
         let phoneNumber = Binding<String>(
             get: {
@@ -296,17 +296,17 @@ struct TypePhoneNumberView: View {
                 }
             }
         )
-        
+
         ZStack {
             VStack {
                 OnboardingTitle(text: "Hey \(model.name), I need your phone number to identify you.")
-                
+
                 Spacer()
             }
-            
+
             HStack {
                 PhoneCountryCodeButtonView(countryCode: $model.phoneCountryCode, regionID: $model.phoneRegionID)
-                
+
                 TextField("Phone number", text: phoneNumber, onCommit: validate)
                     .disableAutocorrection(true)
                     .keyboardType(.numberPad)
@@ -318,7 +318,7 @@ struct TypePhoneNumberView: View {
                     }
             }
             .padding(.horizontal)
-            
+
             OnboardingNavControls(page: $model.page, showPrev: false, onNext: validate)
         }
         .padding()
@@ -333,34 +333,34 @@ struct TypePhoneNumberView: View {
                 }
         )
     }
-    
+
     func parseNumber(_ numberString: String, withRegion: String? = nil) -> Bool {
         guard let phoneNumber = try? phoneNumberKit.parse(
             numberString,
             withRegion: withRegion ?? PhoneNumberKit.defaultRegionCode()
         ) else { return false }
-        
+
         model.phoneNumber = "\(phoneNumber.nationalNumber)"; storedPhoneNumber = model.phoneNumber
         model.phoneCountryCode = Int(phoneNumber.countryCode); storedPhoneCountryCode = model.phoneCountryCode
         model.phoneRegionID = phoneNumber.regionID ?? ""; storedPhoneRegionID = model.phoneRegionID ?? ""
-        
+
         return true
     }
-    
+
     func validate() {
         let valid = parseNumber(model.phoneNumber, withRegion: model.phoneRegionID)
-        
+
         guard valid else { return showInvalidPhoneNumberAlert = true }
-        
+
         showSendingSMSAlert = true
-        
+
         PhoneAuthProvider.provider()
             .verifyPhoneNumber(model.fullPhoneNumber, uiDelegate: nil) { verificationID, error in
                 if let error = error {
                     os_log(.error, "failed to verify phone number: \(error.localizedDescription)") // TODO:
                     return
                 }
-                
+
                 guard let verificationID = verificationID else { return }
 
                 model.verificationID = verificationID
@@ -370,11 +370,11 @@ struct TypePhoneNumberView: View {
 
 struct VerifyPhoneNumberView: View {
     @EnvironmentObject var model: OnboardingViewModel
-    
+
     @State var showInvalidVerificationCodeAlert: Bool = false
-    
+
     @State var loading: Bool = false
-    
+
     var body: some View {
         ZStack {
             VStack {
@@ -384,10 +384,10 @@ struct VerifyPhoneNumberView: View {
                         .font(.caption.weight(.semibold))
                         .foregroundColor(Color("DarkBlue"))
                 }
-                
+
                 Spacer()
             }
-        
+
             TextField("••••••", text: $model.verificationCode, onCommit: validate)
                 .disableAutocorrection(true)
                 .multilineTextAlignment(.center)
@@ -398,7 +398,7 @@ struct VerifyPhoneNumberView: View {
                 .introspectTextField { textField in
                     textField.becomeFirstResponder()
                 }
-            
+
             OnboardingNavControls(page: $model.page, loading: loading, onNext: validate)
         }
         .alert(isPresented: $showInvalidVerificationCodeAlert) {
@@ -406,20 +406,20 @@ struct VerifyPhoneNumberView: View {
         }
         .padding()
     }
-    
+
     func validate() {
         guard model.verificationCode.count == 6 else { return showInvalidVerificationCodeAlert = true }
-        
+
         loading = true
-        
+
         let credential = PhoneAuthProvider.provider().credential(
             withVerificationID: model.verificationID,
             verificationCode: model.verificationCode
         )
-        
+
         Auth.auth().signIn(with: credential) { _, error in
             loading = false
-            
+
             if let error = error {
                 let authError = error as NSError
                 os_log(.error, "failed to auth: \(authError.description)")
@@ -436,7 +436,7 @@ struct VerifyPhoneNumberView: View {
 
 struct PhoneNumberSuccessView: View {
     @EnvironmentObject var model: OnboardingViewModel
-    
+
     var body: some View {
         ZStack {
             LottieView(name: "confetti2")
@@ -454,31 +454,31 @@ struct PhoneNumberSuccessView: View {
 
 struct TurnOnNotificationsView: View {
     @EnvironmentObject var model: OnboardingViewModel
-    
+
     @State var notificationAuthorizationStatus: AVCaptureDevice.AuthorizationStatus?
-    
+
     var body: some View {
         ZStack {
             VStack {
                 OnboardingTitle(text: "TalkieWalkie works better with notifications on.")
-                
+
                 HStack {
                     Spacer()
-                    
+
                     TWButton(action: model.next, primary: false) {
                         Text("Later".uppercased())
                     }
                     .opacity(0.75)
                 }
-                
+
                 Spacer()
             }
-            
+
             VStack {
                 LottieView(name: "notification")
                     .scaleEffect(0.8)
                     .frame(maxHeight: 400)
-                
+
                 Text("(TODO)")
 //                TWButton(action: {
 //                    // UserStore.requestNotificationAuthorization()
@@ -486,7 +486,7 @@ struct TurnOnNotificationsView: View {
 //                    Text("Turn on notifications".uppercased())
 //                }
             }
-            
+
 //            OnboardingNavControls(page: $model.page, showPrev: false)
         }
         .padding()
@@ -497,9 +497,9 @@ struct TurnOnNotificationsView: View {
 
 struct MicrophoneAuthorizationView: View {
     @EnvironmentObject var model: OnboardingViewModel
-    
+
     @State var audioAuthorizationStatus: AVCaptureDevice.AuthorizationStatus?
-    
+
     func authorizeAudio() {
         DispatchQueue.global(qos: .userInitiated).async {
             AVCaptureDevice.authorizeAudio(completion: { audioStatus in
@@ -513,18 +513,18 @@ struct MicrophoneAuthorizationView: View {
             })
         }
     }
-    
+
     func openSettings() {
         if let appSettings = URL(string: UIApplication.openSettingsURLString) {
             UIApplication.shared.open(appSettings)
         }
     }
-    
+
     var body: some View {
         ZStack {
             VStack {
                 OnboardingTitle(text: "For TalkieWalkie to work, allow microphone access.")
-                
+
                 Spacer()
             }
             if audioAuthorizationStatus?.superStatus == .authorized {
@@ -537,15 +537,15 @@ struct MicrophoneAuthorizationView: View {
         }
         .padding()
     }
-    
+
     var requestAuthorizationView: some View {
         ZStack {
             LottieView(name: "52786-recording-bubble")
                 .frame(maxHeight: 400)
-            
+
             VStack {
                 Spacer()
-                
+
                 TWButton(action: {
                     authorizeAudio()
                 }, compact: false) {
@@ -554,28 +554,28 @@ struct MicrophoneAuthorizationView: View {
             }
         }
     }
-    
+
     var authorizationSuccessView: some View {
         ZStack {}
             .onAppear(perform: model.next)
     }
-    
+
     var authorizationDeniedView: some View {
         ZStack {
             VStack {
                 LottieView(name: "mic-off")
                     .frame(maxHeight: 200)
-                
+
                 Text("Go to settings, and toggle \"Microphone\"".uppercased())
-                
+
                 Image("microphone_toggle")
                     .resizable()
                     .aspectRatio(contentMode: .fit)
             }
-            
+
             VStack {
                 Spacer()
-                
+
                 TWButton(action: {
                     openSettings()
                 }, compact: false) {
@@ -590,11 +590,11 @@ struct MicrophoneAuthorizationView: View {
 
 struct PickFriendsIntroView: View {
     @EnvironmentObject var model: OnboardingViewModel
-    
+
     var body: some View {
         ZStack {
             Text("Text.")
-            
+
             OnboardingNavControls(page: $model.page)
         }
         .padding()
@@ -603,11 +603,11 @@ struct PickFriendsIntroView: View {
 
 struct AddTalkieWalkieContactsView: View {
     @EnvironmentObject var model: OnboardingViewModel
-    
+
     var body: some View {
         ZStack {
             Text("Hello")
-            
+
             OnboardingNavControls(page: $model.page)
         }
         .padding()
@@ -616,11 +616,11 @@ struct AddTalkieWalkieContactsView: View {
 
 struct AddOtherContactsView: View {
     @EnvironmentObject var model: OnboardingViewModel
-    
+
     var body: some View {
         ZStack {
             Text("Hello")
-            
+
             OnboardingNavControls(page: $model.page)
         }
         .padding()
@@ -632,14 +632,14 @@ struct AddOtherContactsView: View {
 struct FinalSuccessView: View {
     @EnvironmentObject var model: OnboardingViewModel
     var onboardingDone: () -> Void
-    
+
     var body: some View {
         ZStack {
             LottieView(name: "check_success", loopMode: .playOnce)
-            
+
             VStack {
                 Spacer()
-                
+
                 TWButton(action: { onboardingDone() }) {
                     Text("Let's start!".uppercased())
                 }
@@ -653,17 +653,16 @@ struct Onboarding_Previews: PreviewProvider {
     static var previews: some View {
         TestView()
     }
-    
+
     struct TestView: View {
         @StateObject var model: OnboardingViewModel = {
             let model = OnboardingViewModel(name: .constant("Alex"), phoneCountryCode: 33, phoneRegionID: "FR", phoneNumber: "")
             model.page = 6
             return model
         }()
-        
+
         var body: some View {
             Onboarding(onboardingDone: {}, model: model)
         }
     }
 }
- 

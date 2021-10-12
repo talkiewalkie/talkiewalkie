@@ -7,10 +7,9 @@
 
 import SwiftUI
 
-
 extension View {
     public func addGuidedTour() -> some View {
-        self.modifier(
+        modifier(
             GuidedTour()
         )
     }
@@ -32,7 +31,6 @@ struct GuidedTour: ViewModifier {
 
     func body(content: Content) -> some View {
         ZStack {
-
             content
 
             Group {
@@ -40,10 +38,9 @@ struct GuidedTour: ViewModifier {
                     Color.black.opacity(0.4)
                         .maskWithHole(rect: manager.baseFrame, shape: Capsule())
 
-                ToolTipView(content: manager.content)
-                    .background(sizeReader($toolTipSize))
-                    .position(tooltipPosition())
-
+                    ToolTipView(content: manager.content)
+                        .background(sizeReader($toolTipSize))
+                        .position(tooltipPosition())
                 }
             }
             .ignoresSafeArea(.all)
@@ -104,6 +101,7 @@ public class GuidedTourManager: ObservableObject {
             }
         }
     }
+
     /// The content of the sheet
     @Published private(set) var content: AnyView
     /// the onDismiss code runned when the partial sheet is closed
@@ -112,15 +110,15 @@ public class GuidedTourManager: ObservableObject {
     @Published var baseFrame: CGRect = .zero
 
     public init() {
-        self.content = AnyView(EmptyView())
+        content = AnyView(EmptyView())
     }
 
     /**
-     Updates some properties of the **Partial Sheet**
-    - parameter isPresented: If the partial sheet is presented
-    - parameter content: The content to place inside of the Partial Sheet.
-    - parameter onDismiss: This code will be runned when the sheet is dismissed.
-    */
+      Updates some properties of the **Partial Sheet**
+     - parameter isPresented: If the partial sheet is presented
+     - parameter content: The content to place inside of the Partial Sheet.
+     - parameter onDismiss: This code will be runned when the sheet is dismissed.
+     */
     public func updateGuidedTour<T>(isPresented: Bool? = nil, content: (() -> T)? = nil, onDismiss: (() -> Void)? = nil) where T: View {
         if let content = content {
             self.content = AnyView(content())
@@ -133,10 +131,8 @@ public class GuidedTourManager: ObservableObject {
                 self.isPresented = isPresented
             }
         }
-
     }
 }
-
 
 struct OnboardingTourView_Previews: PreviewProvider {
     static var previews: some View {
@@ -152,7 +148,6 @@ struct OnboardingTourView_Previews: PreviewProvider {
                     .ignoresSafeArea(.all)
 
                 VStack {
-                    
                     Spacer()
 
                     Button(action: {
@@ -174,12 +169,10 @@ struct OnboardingTourView_Previews: PreviewProvider {
                         })
 
                     Spacer()
-
                 }
             }
             .addGuidedTour()
             .environmentObject(GuidedTourManager())
         }
     }
-
 }

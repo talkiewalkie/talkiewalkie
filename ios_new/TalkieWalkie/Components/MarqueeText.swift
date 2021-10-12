@@ -8,7 +8,7 @@
 import SwiftUI
 
 extension String {
-   func widthOfString(usingFont font: UIFont) -> CGFloat {
+    func widthOfString(usingFont font: UIFont) -> CGFloat {
         let fontAttributes = [NSAttributedString.Key.font: font]
         let size = self.size(withAttributes: fontAttributes)
         return size.width
@@ -23,7 +23,7 @@ struct MarqueeText: View {
 
     @State var offset: CGFloat = .zero
 
-    @State var timer : Timer?
+    @State var timer: Timer?
 
     var textWidth: CGFloat {
         text.widthOfString(usingFont: UIFont.systemFont(ofSize: textSize))
@@ -31,7 +31,7 @@ struct MarqueeText: View {
 
     var body: some View {
         let marqueeWidth = min(maxWidth, textWidth + spacing)
-        
+
         ZStack {
             Text(text).font(.system(size: textSize)).fixedSize()
                 .offset(x: offset)
@@ -62,7 +62,7 @@ struct MarqueeText: View {
         offset = .zero
         animate()
 
-        timer = Timer.scheduledTimer(withTimeInterval: 2.5, repeats: true) { timer in
+        timer = Timer.scheduledTimer(withTimeInterval: 2.5, repeats: true) { _ in
             offset = .zero
             animate()
         }

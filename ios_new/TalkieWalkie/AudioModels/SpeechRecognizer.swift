@@ -1,6 +1,6 @@
 /*
-See LICENSE folder for this sample’s licensing information.
-*/
+ See LICENSE folder for this sample’s licensing information.
+ */
 
 import AVFoundation
 import Foundation
@@ -14,7 +14,7 @@ struct SpeechRecognizer {
         var recognitionRequest: SFSpeechAudioBufferRecognitionRequest?
         var recognitionTask: SFSpeechRecognitionTask?
         let speechRecognizer = SFSpeechRecognizer(locale: .init(identifier: "fr_FR"))
-        
+
         deinit {
             reset()
         }
@@ -29,15 +29,15 @@ struct SpeechRecognizer {
     }
 
     private let assistant = SpeechAssist()
-    
+
     var onTranscriptReady: ((Transcript) -> Void)?
-    
+
     /**
         Begin transcribing audio.
-     
+
         Creates a `SFSpeechRecognitionTask` that transcribes speech to text until you call `stopRecording()`.
         The resulting transcription is continuously written to the provided text binding.
-     
+
         -  Parameters:
             - speech: A binding to a string where the transcription is written.
      */
@@ -64,18 +64,18 @@ struct SpeechRecognizer {
                 let inputNode = audioEngine.inputNode
 
                 let recordingFormat = inputNode.outputFormat(forBus: 0)
-                inputNode.installTap(onBus: 0, bufferSize: 1024, format: recordingFormat) { (buffer: AVAudioPCMBuffer, when: AVAudioTime) in
+                inputNode.installTap(onBus: 0, bufferSize: 1024, format: recordingFormat) { (buffer: AVAudioPCMBuffer, _: AVAudioTime) in
                     recognitionRequest.append(buffer)
                 }
-                
+
                 audioEngine.prepare()
                 try audioEngine.start()
-                assistant.recognitionTask = assistant.speechRecognizer?.recognitionTask(with: recognitionRequest) { (result, error) in
+                assistant.recognitionTask = assistant.speechRecognizer?.recognitionTask(with: recognitionRequest) { result, _ in
                     if let result = result {
                         let transcript = Transcript.fromTranscription(transcript: result.bestTranscription)
                         onTranscriptReady?(transcript)
                     }
-                    
+
                     audioEngine.stop()
                     inputNode.removeTap(onBus: 0)
                     self.assistant.recognitionRequest = nil
@@ -86,12 +86,12 @@ struct SpeechRecognizer {
             }
         }
     }
-    
+
     /// Stop transcribing audio.
     func stopRecording() {
         assistant.reset()
     }
-    
+
     private func canAccess(withHandler handler: @escaping (Bool) -> Void) {
         SFSpeechRecognizer.requestAuthorization { status in
             if status == .authorized {

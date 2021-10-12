@@ -8,16 +8,14 @@
 import Foundation
 import SwiftUI
 
-
-class UserStore : ObservableObject {
+class UserStore: ObservableObject {
     static var languageCode: String {
-            return Locale.current.languageCode ?? "en"
-        }
-    
+        return Locale.current.languageCode ?? "en"
+    }
+
     static func openSettings() {
-            if let appSettings = URL(string: UIApplication.openSettingsURLString) {
-                UIApplication.shared.open(appSettings)
-            }
+        if let appSettings = URL(string: UIApplication.openSettingsURLString) {
+            UIApplication.shared.open(appSettings)
         }
-    
+    }
 }

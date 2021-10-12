@@ -22,7 +22,6 @@ import SwiftUI
  ```
  */
 public class PartialSheetManager: ObservableObject {
-
     /// Published var to present or hide the partial sheet
     @Published var isPresented: Bool = false {
         didSet {
@@ -34,15 +33,16 @@ public class PartialSheetManager: ObservableObject {
             }
         }
     }
+
     /// The content of the sheet
     @Published private(set) var content: AnyView
     /// the onDismiss code runned when the partial sheet is closed
     private(set) var onDismiss: (() -> Void)?
-    
+
     public var defaultAnimation: Animation = .interpolatingSpring(stiffness: 300.0, damping: 30.0, initialVelocity: 10.0)
-    
+
     public init() {
-        self.content = AnyView(EmptyView())
+        content = AnyView(EmptyView())
     }
 
     /**
@@ -60,7 +60,8 @@ public class PartialSheetManager: ObservableObject {
                             content()
                         }
                     },
-                    onDismiss: onDismiss)
+                    onDismiss: onDismiss
+                )
             }
             return
         }
@@ -75,16 +76,16 @@ public class PartialSheetManager: ObservableObject {
     }
 
     /**
-     Updates some properties of the **Partial Sheet**
-    - parameter isPresented: If the partial sheet is presented
-    - parameter content: The content to place inside of the Partial Sheet.
-    - parameter onDismiss: This code will be runned when the sheet is dismissed.
-    */
+      Updates some properties of the **Partial Sheet**
+     - parameter isPresented: If the partial sheet is presented
+     - parameter content: The content to place inside of the Partial Sheet.
+     - parameter onDismiss: This code will be runned when the sheet is dismissed.
+     */
     public func updatePartialSheet<T>(isPresented: Bool? = nil, content: (() -> T)? = nil, onDismiss: (() -> Void)? = nil) where T: View {
         if let content = content {
             self.content = AnyView(content())
         }
-        
+
         if let onDismiss = onDismiss {
             self.onDismiss = onDismiss
         }
@@ -100,6 +101,6 @@ public class PartialSheetManager: ObservableObject {
         withAnimation(.interpolatingSpring(stiffness: 300.0, damping: 30.0, initialVelocity: 10.0)) {
             self.isPresented = false
         }
-        self.onDismiss?()
+        onDismiss?()
     }
 }

@@ -15,7 +15,7 @@ extension AVCaptureDevice {
         case justAuthorized
         case alreadyAuthorized
         case unknown
-        
+
         var superStatus: AVAuthorizationStatus {
             switch self {
             case .justDenied, .alreadyDenied:
@@ -48,7 +48,7 @@ extension AVCaptureDevice {
         case .restricted:
             completion?(.restricted)
         case .notDetermined:
-            AVCaptureDevice.requestAccess(for: mediaType, completionHandler: { (granted) in
+            AVCaptureDevice.requestAccess(for: mediaType, completionHandler: { granted in
                 DispatchQueue.main.async {
                     if granted {
                         completion?(.justAuthorized)

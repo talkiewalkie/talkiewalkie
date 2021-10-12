@@ -9,9 +9,9 @@ import SwiftUI
 
 struct AudiogramView: View {
     var transcript: Transcript
-    
+
     @State var displayedText: String = ""
-    
+
     var body: some View {
         ZStack {
             Image("background-image")
@@ -20,7 +20,7 @@ struct AudiogramView: View {
                 .saturation(0.1)
                 .grayscale(0.5)
                 .brightness(-0.15)
-            
+
             ZStack {
                 ZStack {
                     ScalingShape(color: .red, scale: 0.95, duration: 0.3) {
@@ -29,7 +29,7 @@ struct AudiogramView: View {
                             .rotationEffect(.init(degrees: 30))
                     }
                     .scaleEffect(0.55)
-                    
+
                     ScalingShape(color: .red, scale: 0.95, duration: 0.35) {
                         RoundedRectangle(cornerRadius: 80)
                             .aspectRatio(1, contentMode: .fit)
@@ -38,7 +38,7 @@ struct AudiogramView: View {
                     .scaleEffect(0.6)
                 }
                 .opacity(0.4)
-                
+
                 Text(displayedText)
                     .font(.largeTitle)
                     .fontWeight(.bold)
@@ -61,15 +61,15 @@ struct AudiogramView: View {
             alignment: .topTrailing
         )
     }
-    
+
     func animate() {
-        self.displayedText = ""
-        
+        displayedText = ""
+
         transcript.segments.forEach { segment in
             DispatchQueue.main.asyncAfter(deadline: .now() + Double(segment.timestamp)) {
                 self.displayedText = segment.string
             }
-            
+
             DispatchQueue.main.asyncAfter(deadline: .now() + transcript.totalDuration, execute: animate)
         }
     }
@@ -80,4 +80,3 @@ struct AudiogramView_Previews: PreviewProvider {
         AudiogramView(transcript: dummyTranscript)
     }
 }
-

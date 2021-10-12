@@ -1,9 +1,9 @@
 /*
-See LICENSE folder for this sample’s licensing information.
-*/
+ See LICENSE folder for this sample’s licensing information.
+ */
 
-import Foundation
 import AVFoundation
+import Foundation
 
 extension AVPlayer {
     static let sharedDingPlayer: AVPlayer = {

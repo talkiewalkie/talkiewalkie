@@ -8,13 +8,11 @@
 import SwiftUI
 
 struct Audiogram1: View {
-    
     var text: String
-    
+
     @State var displayedText: String = ""
-    
+
     var body: some View {
-        
         ZStack {
             Image("background-image")
                 .resizable()
@@ -22,15 +20,14 @@ struct Audiogram1: View {
                 .saturation(0.1)
                 .grayscale(0.5)
                 .brightness(-0.15)
-            
+
             ZStack(alignment: .topLeading) {
-                
                 Text(text)
                     .font(.title)
                     .fontWeight(.bold)
                     .colorInvert()
                     .opacity(0.5)
-                
+
                 Text(displayedText)
                     .font(.title)
                     .fontWeight(.bold)
@@ -55,15 +52,15 @@ struct Audiogram1: View {
             alignment: .topTrailing
         )
     }
-    
+
     func animate() {
-        self.displayedText = ""
-        
+        displayedText = ""
+
         let words = text.components(separatedBy: " ")
         words.enumerated().forEach { index, word in
             DispatchQueue.main.asyncAfter(deadline: .now() + Double(index) * 0.3) {
                 self.displayedText += word + " "
-                
+
                 if index == words.count - 1 {
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                         self.animate()

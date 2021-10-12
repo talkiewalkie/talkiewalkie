@@ -9,42 +9,36 @@ import SwiftUI
 
 struct Audiogram2: View {
     var text: String
-    
+
     @State var displayedText: String = ""
-    
-    
-    
+
     var body: some View {
         ZStack {
             Image("chuck")
                 .resizable()
                 .aspectRatio(contentMode: .fill)
-            
+
             ZStack {
                 ScalingShape(color: .red, scale: 0.95, duration: 0.3) {
                     RoundedRectangle(cornerRadius: 80)
                         .aspectRatio(1, contentMode: .fit)
                         .rotationEffect(.init(degrees: 30))
                 }
-                    .scaleEffect(0.6)
-                
+                .scaleEffect(0.6)
+
                 ScalingShape(color: .red, scale: 0.95, duration: 0.4) {
                     RoundedRectangle(cornerRadius: 80)
                         .aspectRatio(1, contentMode: .fit)
                         .rotationEffect(.init(degrees: 10))
                 }
-                    .scaleEffect(0.6)
+                .scaleEffect(0.6)
             }
             .opacity(0.3)
-            
-                
 
-            
             Text(displayedText)
                 .font(.largeTitle)
                 .fontWeight(.medium)
                 .colorInvert()
-            
         }
         .frame(width: 300, height: 300)
         .clipped()
@@ -55,7 +49,7 @@ struct Audiogram2: View {
             animate()
         }
     }
-    
+
     func animate() {
         let words = text.components(separatedBy: " ")
         words.enumerated().forEach { index, word in
@@ -71,9 +65,9 @@ struct ScalingShape<ShapeView>: View where ShapeView: View {
     var scale: CGFloat
     var duration: Double
     var shape: () -> ShapeView
-    
+
     @State var currScale: CGFloat = 1
-    
+
     var body: some View {
         shape()
             .foregroundColor(color)

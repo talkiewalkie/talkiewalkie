@@ -10,7 +10,7 @@ import SwiftUI
 import SwiftUI
 // import Intercom
 
-struct LanguageChoice : Identifiable {
+struct LanguageChoice: Identifiable {
     var id: String
     var name: String
 }
@@ -19,7 +19,7 @@ let availableLanguages = [
     LanguageChoice(id: "en", name: "English"),
     LanguageChoice(id: "fr", name: "Français"),
     LanguageChoice(id: "de", name: "Deutsch"),
-    LanguageChoice(id: "ru", name: "Русский")
+    LanguageChoice(id: "ru", name: "Русский"),
 ]
 
 enum SocialMediaType {
@@ -53,10 +53,9 @@ enum SocialMediaType {
 }
 
 struct SettingsView: View {
-
     @Binding var show: Bool
 
-    var languageSelection : Int {
+    var languageSelection: Int {
         guard let index = availableLanguages.firstIndex(where: { lang in
             lang.id == UserStore.languageCode
         }) else { return 0 }
@@ -75,109 +74,103 @@ struct SettingsView: View {
     }
 
     var body: some View {
-
         let languageBinding = Binding<Int>(
             get: { languageSelection }, set: { _ in }
         )
 
         NavigationView {
-                List {
-                    Section() {
-                        NavigationLink(destination: GeneralSettingsView()) {
-                            Text(LocalizedStringKey("General"))
-                        }
+            List {
+                Section {
+                    NavigationLink(destination: GeneralSettingsView()) {
+                        Text(LocalizedStringKey("General"))
+                    }
 
-                        #if DEBUG
+                    #if DEBUG
                         NavigationLink(destination: DebugSettingsInfoView()) {
                             Text(LocalizedStringKey("Debug Info"))
                         }
-                        #endif
+                    #endif
 
-                        Button(action: UserStore.openSettings) {
-                            Picker(selection: languageBinding, label: Text(LocalizedStringKey("Language"))) {
-                                ForEach(availableLanguages.indices) { index in
-                                    Text(availableLanguages[index].name).tag(index)
-                                }
+                    Button(action: UserStore.openSettings) {
+                        Picker(selection: languageBinding, label: Text(LocalizedStringKey("Language"))) {
+                            ForEach(availableLanguages.indices) { index in
+                                Text(availableLanguages[index].name).tag(index)
                             }
-                        }.buttonStyle(PlainButtonStyle())
-
-                        Button(action: {
-                            // Intercom.presentMessenger()
-                        }, label: {
-                            NavigationLink(LocalizedStringKey("Contact support"), destination: EmptyView())
-                        }).buttonStyle(PlainButtonStyle())
-
-                        NavigationLink(destination: AboutSettingsView()) {
-                            Text(LocalizedStringKey("About"))
                         }
+                    }.buttonStyle(PlainButtonStyle())
 
+                    Button(action: {
+                        // Intercom.presentMessenger()
+                    }, label: {
+                        NavigationLink(LocalizedStringKey("Contact support"), destination: EmptyView())
+                    }).buttonStyle(PlainButtonStyle())
+
+                    NavigationLink(destination: AboutSettingsView()) {
+                        Text(LocalizedStringKey("About"))
                     }
-
-                    Section(header: HStack {
-                        Image(systemName: "bubble.right")
-                        Text(LocalizedStringKey("Follow us on Social media!"))
-                    }) {
-                        Button(action: { openSocialMedia(socialMedia: .Twitter) }) {
-                            HStack {
-                                Image("twitter")
-                                    .resizable().aspectRatio(contentMode: .fit)
-                                    .frame(height: 20)
-                                Text("Twitter")
-                            }
-                        }
-                        Button(action: { openSocialMedia(socialMedia: .Instagram) }) {
-                            HStack {
-                                Image("instagram")
-                                    .resizable().aspectRatio(contentMode: .fit)
-                                    .frame(height: 20)
-                                Text("Instagram")
-                            }
-                        }
-                        Button(action: { openSocialMedia(socialMedia: .Snapchat) }) {
-                            HStack {
-                                Image("snapchat")
-                                    .resizable().aspectRatio(contentMode: .fit)
-                                    .frame(height: 20)
-                                Text("Snapchat")
-                            }
-                        }
-                        
-                        Button(action: { openSocialMedia(socialMedia: .TikTok) }) {
-                            HStack {
-                                Image("tiktok")
-                                    .resizable().aspectRatio(contentMode: .fit)
-                                    .frame(height: 20)
-                                Text("TikTok")
-                            }
-                        }
-                        
-                        Button(action: { openSocialMedia(socialMedia: .Discord) }) {
-                            HStack {
-                                Image("discord")
-                                    .resizable().aspectRatio(contentMode: .fit)
-                                    .frame(height: 20)
-                                Text("Discord")
-                            }
-                        }
-                    }
-
-                    Section(header: HStack {
-                        Text(LocalizedStringKey("Terms"))
-                    }) {
-                        Link(LocalizedStringKey("Privacy policy"), destination: URL(string: "https://talkiewalkie.app/privacy")!)
-                        Link(LocalizedStringKey("Terms of use"), destination: URL(string: "https://talkiewalkie.app/terms")!)
-                    }
-
                 }
-                .listStyle(InsetGroupedListStyle())
-                .navigationBarTitle(LocalizedStringKey("Settings"), displayMode: .inline)
-                .navigationBarItems(leading: CloseButton(show: $show))
 
+                Section(header: HStack {
+                    Image(systemName: "bubble.right")
+                    Text(LocalizedStringKey("Follow us on Social media!"))
+                }) {
+                    Button(action: { openSocialMedia(socialMedia: .Twitter) }) {
+                        HStack {
+                            Image("twitter")
+                                .resizable().aspectRatio(contentMode: .fit)
+                                .frame(height: 20)
+                            Text("Twitter")
+                        }
+                    }
+                    Button(action: { openSocialMedia(socialMedia: .Instagram) }) {
+                        HStack {
+                            Image("instagram")
+                                .resizable().aspectRatio(contentMode: .fit)
+                                .frame(height: 20)
+                            Text("Instagram")
+                        }
+                    }
+                    Button(action: { openSocialMedia(socialMedia: .Snapchat) }) {
+                        HStack {
+                            Image("snapchat")
+                                .resizable().aspectRatio(contentMode: .fit)
+                                .frame(height: 20)
+                            Text("Snapchat")
+                        }
+                    }
+
+                    Button(action: { openSocialMedia(socialMedia: .TikTok) }) {
+                        HStack {
+                            Image("tiktok")
+                                .resizable().aspectRatio(contentMode: .fit)
+                                .frame(height: 20)
+                            Text("TikTok")
+                        }
+                    }
+
+                    Button(action: { openSocialMedia(socialMedia: .Discord) }) {
+                        HStack {
+                            Image("discord")
+                                .resizable().aspectRatio(contentMode: .fit)
+                                .frame(height: 20)
+                            Text("Discord")
+                        }
+                    }
+                }
+
+                Section(header: HStack {
+                    Text(LocalizedStringKey("Terms"))
+                }) {
+                    Link(LocalizedStringKey("Privacy policy"), destination: URL(string: "https://talkiewalkie.app/privacy")!)
+                    Link(LocalizedStringKey("Terms of use"), destination: URL(string: "https://talkiewalkie.app/terms")!)
+                }
+            }
+            .listStyle(InsetGroupedListStyle())
+            .navigationBarTitle(LocalizedStringKey("Settings"), displayMode: .inline)
+            .navigationBarItems(leading: CloseButton(show: $show))
         }
-
     }
 }
-
 
 struct GeneralSettingsView: View {
     @EnvironmentObject var userStore: UserStore
@@ -190,7 +183,7 @@ struct GeneralSettingsView: View {
 
     var body: some View {
         let fakeWatermarkBinding = Binding<Bool>(
-            get: { true } ,
+            get: { true },
             set: { _ in showProCTA = true }
         )
 
@@ -209,9 +202,7 @@ struct GeneralSettingsView: View {
                 .pickerStyle(SegmentedPickerStyle())
             }
 
-            Section {
-
-            }
+            Section {}
         }
         .listStyle(InsetGroupedListStyle())
         .navigationBarTitle(LocalizedStringKey("General"), displayMode: .inline)
@@ -226,17 +217,12 @@ struct DebugSettingsInfoView: View {
 
     var body: some View {
         List {
-
             Section {
-
                 HStack {
                     Text("Device ID")
                     Spacer()
                 }
-
             }
-
-
         }
     }
 }
@@ -262,7 +248,6 @@ struct AboutSettingsView: View {
     }
 }
 
-
 struct LegalSettingsView: View {
     var body: some View {
         ScrollView {
@@ -276,10 +261,8 @@ struct LegalSettingsView: View {
                     .fontWeight(.bold)
 
                 Text("The emojis used in this app are provided by Tweemoji (tweemoji.twitter.com) and are licensed under CC BY 4.0 (creativecommons.org/licenses/by/4.0).")
-
             }
             .padding()
-
         }
         .navigationBarTitle(LocalizedStringKey("Legal"), displayMode: .inline)
     }

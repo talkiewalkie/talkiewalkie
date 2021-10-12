@@ -7,14 +7,12 @@
 
 import SwiftUI
 
-
 struct WrapHStack<Content: View>: View {
-    
     var spacing: CGFloat = 4
     var content: [Content]
-    
+
     @State private var size: CGSize = .zero
-    
+
     var body: some View {
         GeometryReader { geom in
             var width = CGFloat.zero
@@ -25,8 +23,7 @@ struct WrapHStack<Content: View>: View {
                     content[index]
                         .padding(spacing)
                         .alignmentGuide(.leading) { d in
-                            if (abs(width - d.width) > geom.size.width)
-                            {
+                            if abs(width - d.width) > geom.size.width {
                                 width = 0
                                 height -= d.height
                             }
@@ -38,9 +35,9 @@ struct WrapHStack<Content: View>: View {
                             }
                             return result
                         }
-                        .alignmentGuide(.top) { d in
+                        .alignmentGuide(.top) { _ in
                             let result = height
-                            if index == content.indices.count - 1  {
+                            if index == content.indices.count - 1 {
                                 height = 0
                             }
                             return result
@@ -52,7 +49,6 @@ struct WrapHStack<Content: View>: View {
         .frame(height: size.height)
     }
 }
-
 
 struct WrapStack_Previews: PreviewProvider {
     static var previews: some View {
@@ -84,19 +80,18 @@ struct WrapStack_Previews: PreviewProvider {
                 WrapTestView(text: "Lorem Ipsum"), WrapTestView(text: "Lorem Ipsum"), WrapTestView(text: "Lorem Ipsum"),
                 WrapTestView(text: "Lorem Ipsum"), WrapTestView(text: "Lorem Ipsum"), WrapTestView(text: "Lorem Ipsum"),
                 WrapTestView(text: "Lorem Ipsum"), WrapTestView(text: "Lorem Ipsum"),
-                WrapTestView(text: "Lorem Ipsum"), WrapTestView(text: "Lorem Ipsum"), WrapTestView(text: "Lorem Ipsum")
+                WrapTestView(text: "Lorem Ipsum"), WrapTestView(text: "Lorem Ipsum"), WrapTestView(text: "Lorem Ipsum"),
             ])
         }
     }
-    
+
     struct WrapTestView: View {
         var text: String
-        
+
         var body: some View {
             Text(text).padding()
                 .background(RoundedRectangle(cornerRadius: 8).fill(Color.red))
                 .foregroundColor(.white)
         }
     }
-
 }

@@ -9,10 +9,10 @@ import SwiftUI
 
 struct RecordButton: View {
     @Binding var isRecording: Bool
-    
+
     @State var isOuterCircleThin = true
     @State var timer: Timer?
-    
+
     var body: some View {
         ZStack {
             Rectangle()
@@ -21,7 +21,7 @@ struct RecordButton: View {
                 .frame(width: 60, height: 60)
                 .scaleEffect(isRecording ? 0.7 : 1.0)
                 .animation(.easeInOut(duration: 0.3), value: isRecording)
-            
+
             Circle()
                 .stroke(Color.red,
                         style: StrokeStyle(lineWidth: !isRecording ? 6 : isOuterCircleThin ? 4 : 7,
@@ -31,7 +31,6 @@ struct RecordButton: View {
                 .frame(width: 70, height: 70)
                 .scaleEffect(isRecording ? 1.3 : 1.0)
                 .animation(.easeInOut(duration: 0.3), value: isRecording)
-
         }
         .onTapGesture {
 //            let currentClipLength = recordViewModel.sequenceRecorder.currentClipLength
@@ -42,12 +41,12 @@ struct RecordButton: View {
 //                }
 //                return
 //            }
-            
+
             isRecording.toggle()
         }
-        .onChange(of: isRecording) { value in
+        .onChange(of: isRecording) { _ in
             timer?.invalidate()
-            
+
             if !isRecording {
                 isOuterCircleThin = true
             } else {
@@ -64,10 +63,10 @@ struct RecordButton_Previews: PreviewProvider {
     static var previews: some View {
         TestView()
     }
-    
+
     struct TestView: View {
         @State var isRecording = false
-        
+
         var body: some View {
             RecordButton(isRecording: $isRecording)
         }

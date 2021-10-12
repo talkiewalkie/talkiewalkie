@@ -10,15 +10,14 @@ import SwiftUI
 
 /// An UIViewRepresentable for the UIBlurEffectView
 struct BlurEffectView: UIViewRepresentable {
-
     /// The style of the Blut Effect View
     var style: UIBlurEffect.Style = .systemMaterial
 
-    func makeUIView(context: Context) -> UIVisualEffectView {
+    func makeUIView(context _: Context) -> UIVisualEffectView {
         return UIVisualEffectView(effect: UIBlurEffect(style: style))
     }
 
-    func updateUIView(_ uiView: UIVisualEffectView, context: Context) {
+    func updateUIView(_ uiView: UIVisualEffectView, context _: Context) {
         uiView.effect = UIBlurEffect(style: style)
     }
 }

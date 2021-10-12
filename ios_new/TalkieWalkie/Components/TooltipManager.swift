@@ -7,12 +7,11 @@
 
 import SwiftUI
 
-
 /// ROOT-VIEW MODIFIER
 
-extension View {
-    public func addTooltip() -> some View {
-        self.modifier(
+public extension View {
+    func addTooltip() -> some View {
+        modifier(
             Tooltip()
         )
     }
@@ -72,7 +71,6 @@ struct Tooltip: ViewModifier {
     func body(content: Content) -> some View {
         GeometryReader { geom in
             ZStack {
-
                 content
 
                 Group {
@@ -82,10 +80,10 @@ struct Tooltip: ViewModifier {
                         Group {
                             if manager.options.touchableHole {
                                 Color.black.opacity(0.4)
-                                .contentShape(
-                                    HoledShape(rect: contentShape(frame: geom.frame(in: .global)), shape: manager.options.shape),
-                                    eoFill: true
-                                )
+                                    .contentShape(
+                                        HoledShape(rect: contentShape(frame: geom.frame(in: .global)), shape: manager.options.shape),
+                                        eoFill: true
+                                    )
                             } else {
                                 Color.black.opacity(0.4)
                                     .maskWithHole(rect: contentShape(frame: geom.frame(in: .global)), shape: manager.options.shape)
@@ -133,7 +131,6 @@ struct Tooltip: ViewModifier {
     }
 }
 
-
 /// VIEW MODIFIER
 
 extension View {
@@ -146,10 +143,10 @@ public struct TooltipOptions {
     var elongated = false
     var touchableHole = false
     var orientation: TooltipShape.Orientation = .top
-    var shape: AnyShape = AnyShape(Capsule())
+    var shape = AnyShape(Capsule())
     var padding: CGFloat = .zero
 
-    var color: Color = Color(#colorLiteral(red: 0.8786171876, green: 0.8786171876, blue: 0.8786171876, alpha: 1))
+    var color = Color(#colorLiteral(red: 0.8786171876, green: 0.8786171876, blue: 0.8786171876, alpha: 1))
 
     var offset: CGFloat = 10
     var touchOffset: CGFloat = 15
@@ -184,7 +181,6 @@ struct TooltipAddView<Base: View, InnerContent: View>: View {
     }
 }
 
-
 /// MANAGER
 
 public class TooltipManager: ObservableObject {
@@ -200,6 +196,7 @@ public class TooltipManager: ObservableObject {
 //            }
         }
     }
+
     @Published var baseFrame: CGRect = .zero
 
     /// The content of the tooltip
@@ -211,15 +208,15 @@ public class TooltipManager: ObservableObject {
     private(set) var onDismiss: (() -> Void)?
 
     public init() {
-        self.content = AnyView(EmptyView())
+        content = AnyView(EmptyView())
     }
 
     /**
-     Updates some properties of the **Tooltip**
-    - parameter isPresented: If the tooltip is presented
-    - parameter content: The content to place inside of the Tooltip.
-    - parameter onDismiss: This code will be runned when the tooltip is dismissed.
-    */
+      Updates some properties of the **Tooltip**
+     - parameter isPresented: If the tooltip is presented
+     - parameter content: The content to place inside of the Tooltip.
+     - parameter onDismiss: This code will be runned when the tooltip is dismissed.
+     */
     public func update<T>(isPresented: Bool? = nil, baseFrame: CGRect? = nil, content: (() -> T)? = nil, options: TooltipOptions, onDismiss: (() -> Void)? = nil) where T: View {
         if let content = content {
             self.content = AnyView(content())
@@ -235,10 +232,8 @@ public class TooltipManager: ObservableObject {
         if let isPresented = isPresented {
             self.isPresented = isPresented
         }
-
     }
 }
-
 
 struct TooltipManager_Previews: PreviewProvider {
     static var previews: some View {
@@ -282,15 +277,14 @@ struct TooltipManager_Previews: PreviewProvider {
                                     .padding()
                                     .background(Capsule().fill(Color.white))
                             })
-                            .tooltip(selectionState: selectionState, options: TooltipOptions(floating: true), content: {
-                                Text("Lorem Ipsum")
-                            })
+                                .tooltip(selectionState: selectionState, options: TooltipOptions(floating: true), content: {
+                                    Text("Lorem Ipsum")
+                                })
 
                             Spacer()
                         }
 
                         Spacer()
-
                     }
                 }
 
@@ -303,5 +297,4 @@ struct TooltipManager_Previews: PreviewProvider {
             }
         }
     }
-
 }

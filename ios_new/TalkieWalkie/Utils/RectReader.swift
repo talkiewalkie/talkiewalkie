@@ -8,7 +8,7 @@
 import SwiftUI
 
 func rectReader(_ binding: Binding<CGRect>) -> some View {
-    return GeometryReader { (geometry) -> AnyView in
+    return GeometryReader { geometry -> AnyView in
         let rect = geometry.frame(in: .global)
         DispatchQueue.main.async {
             binding.wrappedValue = rect
@@ -18,7 +18,7 @@ func rectReader(_ binding: Binding<CGRect>) -> some View {
 }
 
 func sizeReader(_ binding: Binding<CGSize>) -> some View {
-    return GeometryReader { (geometry) -> AnyView in
+    return GeometryReader { geometry -> AnyView in
         let size = geometry.size
         DispatchQueue.main.async {
             binding.wrappedValue = size

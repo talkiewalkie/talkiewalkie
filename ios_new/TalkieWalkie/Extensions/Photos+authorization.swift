@@ -17,7 +17,7 @@ extension PHPhotoLibrary {
         case justAuthorized
         case alreadyAuthorized
         case unknown
-        
+
         var superStatus: PHAuthorizationStatus {
             switch self {
             case .justDenied, .alreadyDenied:
@@ -33,7 +33,7 @@ extension PHPhotoLibrary {
             }
         }
     }
-    
+
     class func checkAuthorization(completion: ((AuthorizationStatus?) -> Void)?) {
         let status = PHPhotoLibrary.authorizationStatus()
         switch status {
@@ -49,7 +49,7 @@ extension PHPhotoLibrary {
             completion?(.unknown)
         }
     }
-    
+
     class func authorize(completion: ((AuthorizationStatus) -> Void)?) {
         let status = PHPhotoLibrary.authorizationStatus()
         switch status {
@@ -63,7 +63,7 @@ extension PHPhotoLibrary {
             completion?(.restricted)
         case .notDetermined:
             PHPhotoLibrary.requestAuthorization { status in
-                
+
                 DispatchQueue.main.async {
                     switch status {
                     case .authorized:

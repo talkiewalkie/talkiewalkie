@@ -11,8 +11,7 @@ struct SplashScreen: View {
     var body: some View {
         ZStack {
             LinearGradient(colors: [Color("Purple"), Color("Red"), Color("Yellow")], startPoint: .init(x: -0.2, y: -0.4), endPoint: .bottomTrailing)
-            
-            
+
             Image("logo_bubble")
                 .resizable()
                 .aspectRatio(contentMode: .fit)

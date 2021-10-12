@@ -40,16 +40,13 @@ struct ErrorPopup_Previews: PreviewProvider {
         @State var show = false
 
         var body: some View {
-
             ZStack {
-
                 VStack {
                     ErrorPopup(show: $show, message: "Error message")
 
                     Spacer()
                 }
                 .padding()
-
 
                 Button(action: {
                     withAnimation(.default) {
@@ -59,7 +56,6 @@ struct ErrorPopup_Previews: PreviewProvider {
                     Text("Click")
                 }
             }
-
         }
     }
 }

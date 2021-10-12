@@ -15,16 +15,16 @@ extension Message {
         localM.author = User.upsert(msg.author, context: context)
         localM.createdAt = msg.createdAt.date
         switch msg.content {
-        case .textMessage(let txt):
+        case let .textMessage(txt):
             let tm = TextMessage(context: context)
             tm.text = txt.content
-            
+
             localM.content = tm
-        case .voiceMessage(let voice):
+        case let .voiceMessage(voice):
             let vm = VoiceMessage(context: context)
             // TODO: download from bucket now if we don't ship the audio direclty through gRPC
             vm.rawAudio = voice.url.data(using: .utf8)
-            
+
             localM.content = vm
         default:
             fatalError()

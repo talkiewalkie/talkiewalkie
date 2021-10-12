@@ -11,14 +11,14 @@ struct TWButton<Content>: View where Content: View {
     var action: () -> Void
     var primary: Bool = true
     var compact: Bool = true
-    
+
     var font: Font = .callout.weight(.heavy)
     var padding: CGFloat = 15
-    
+
     var content: () -> Content
-    
+
     @State var scale: CGFloat = 1
-    
+
     var body: some View {
         Button(action: action) {
             content()
@@ -30,7 +30,6 @@ struct TWButton<Content>: View where Content: View {
                     Group {
                         primary ? Color("Bordeaux") : Color("LightBlue")
                     }.cornerRadius(15))
-                
         }
         .buttonStyle(ScaleButtonStyle())
     }

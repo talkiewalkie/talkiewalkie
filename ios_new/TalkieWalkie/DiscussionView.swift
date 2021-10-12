@@ -5,19 +5,18 @@
 //  Created by Alexandre Carlier on 05.10.21.
 //
 
-import SwiftUI
 import AVKit
+import SwiftUI
 
 struct DiscussionView: View {
-    
     var discussion: DiscussionModel
     var namespace: Namespace.ID
-    
+
     var body: some View {
         VStack {
             Rectangle().frame(height: 0)
-            
-            ScrollViewReader { scrollView in
+
+            ScrollViewReader { _ in
                 ReversedScrollView(.vertical, showsIndicators: false) {
                     VStack {
                         ForEach(dummyChatMessages) { message in
@@ -27,10 +26,9 @@ struct DiscussionView: View {
                     .frame(maxWidth: .infinity, alignment: .trailing)
                     .padding(.vertical)
                     .padding(.horizontal)
-
                 }
                 .background(Color(#colorLiteral(red: 0.9024571472, green: 0.9024571472, blue: 0.9024571472, alpha: 1)))
-                
+
                 Rectangle()
                     .foregroundColor(.clear)
                     .frame(height: 50)
@@ -45,15 +43,15 @@ struct DiscussionView: View {
 struct ChatBubble: View {
     var message: ChatMessage
     var namespace: Namespace.ID
-    
+
     @EnvironmentObject var messageViewModel: MessageViewModel
-    
+
     var body: some View {
         /* RoundedRectangle(cornerRadius: 12)
-            .foregroundColor(.gray)
-            .frame(width: 200, height: 50)
-            .padding(.horizontal) */
-        
+         .foregroundColor(.gray)
+         .frame(width: 200, height: 50)
+         .padding(.horizontal) */
+
         HStack {
             if let m = messageViewModel.message, m.id == message.id {
                 Group {
@@ -65,7 +63,7 @@ struct ChatBubble: View {
                         EmptyView()
                     }
                 }
-                
+
             } else {
                 Group {
                     switch message.type {
@@ -79,31 +77,26 @@ struct ChatBubble: View {
                 }
                 .onTapGesture {
                     messageViewModel.message = message
-                    
+
                     withAnimation {
                         messageViewModel.showDetailView = true
                     }
                 }
-                
             }
-            
         }
-        
     }
 }
 
-
-
 struct DiscussionBarView: View {
     var discussion: DiscussionModel
-    
+
     var body: some View {
         HStack {
             DiscussionAvatar(discussion: discussion)
-            
+
             VStack(alignment: .leading) {
                 Text(discussion.name)
-                
+
                 Text("Last seen at \(discussion.date, formatter: Self.dateFormat)")
                     .fontWeight(.regular)
                     .foregroundColor(.secondary)
@@ -111,14 +104,14 @@ struct DiscussionBarView: View {
         }
         .frame(height: DrawingConstraints.height)
     }
-    
+
     static let dateFormat: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateFormat = "HH:mm"
         return formatter
     }()
-    
-    struct DrawingConstraints {
+
+    enum DrawingConstraints {
         static let height: CGFloat = 30
     }
 }
@@ -127,10 +120,10 @@ struct DiscussionView_Previews: PreviewProvider {
     static var previews: some View {
         TestView()
     }
-    
+
     struct TestView: View {
         @Namespace var namespace
-        
+
         var body: some View {
             DiscussionView(discussion: dummyDiscussions[0], namespace: namespace)
         }
@@ -139,11 +132,11 @@ struct DiscussionView_Previews: PreviewProvider {
 
 struct ChatMessage: Identifiable {
     let id = UUID()
-    
+
     var author: String?
     var type: ChatMessageType
     var date: Date
-    
+
     enum ChatMessageType {
         case text(content: String)
         case audio(url: URL)
@@ -151,15 +144,14 @@ struct ChatMessage: Identifiable {
     }
 }
 
-
 let dummyChatMessages = [
     ChatMessage(type: .text(content: "Hello hello hello hello hello hello hello hello hello hello hello hello hello!!!"),
                 date: Calendar.current.date(byAdding: .minute, value: -18, to: Date())!),
-    
+
     ChatMessage(author: "",
                 type: .text(content: "How are you are you are you are you are you are you are you?"),
                 date: Calendar.current.date(byAdding: .minute, value: -12, to: Date())!),
-    
+
     ChatMessage(author: "",
                 type: .text(content: "Ok cool cool cool cool cool cool cool cool cool cool"),
                 date: Calendar.current.date(byAdding: .minute, value: 0, to: Date())!),

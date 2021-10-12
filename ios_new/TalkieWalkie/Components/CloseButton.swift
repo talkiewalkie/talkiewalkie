@@ -26,18 +26,18 @@ struct CloseButtonView: View {
 
 struct CloseButton: View {
     @Binding var show: Bool
-    
+
     var animation: Animation?
 
     var body: some View {
         Button(action: {
             guard let animation = animation else { return show = false }
-            
+
             withAnimation(animation) {
                 show = false
             }
         }) {
-           CloseButtonView()
+            CloseButtonView()
         }
     }
 }

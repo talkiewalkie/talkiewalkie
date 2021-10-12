@@ -7,16 +7,14 @@
 
 import SwiftUI
 
-
 struct MemeFontUILabel: UIViewRepresentable {
-
     var frame: CGRect
 
-    func getStringAttributes() -> [NSAttributedString.Key : Any] {
+    func getStringAttributes() -> [NSAttributedString.Key: Any] {
         let paragraphStyle = NSMutableParagraphStyle()
         paragraphStyle.alignment = .left
 
-        let attributes: [NSAttributedString.Key : Any] = [
+        let attributes: [NSAttributedString.Key: Any] = [
             NSAttributedString.Key.font: UIFont(name: "Futura Bold Oblique", size: 14) ?? UIFont.systemFont(ofSize: 50),
             NSAttributedString.Key.paragraphStyle: paragraphStyle,
 
@@ -29,22 +27,18 @@ struct MemeFontUILabel: UIViewRepresentable {
         return attributes
     }
 
-    func makeUIView(context: Context) -> UILabel {
+    func makeUIView(context _: Context) -> UILabel {
         let label = UILabel(frame: frame)
         label.attributedText = NSAttributedString(string: "Good morning, Starshine! The world says Hello. bla bla bla bla bla bla",
                                                   attributes: getStringAttributes())
-
 
         label.numberOfLines = 0
         label.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
         return label
     }
 
-    func updateUIView(_ uiView: UILabel, context: Context) {
-
-    }
+    func updateUIView(_: UILabel, context _: Context) {}
 }
-
 
 struct MemeFontText: View {
     var body: some View {
@@ -61,9 +55,8 @@ struct MemeFont_Previews: PreviewProvider {
                 .opacity(0.8)
                 .edgesIgnoringSafeArea(.all)
 
-                MemeFontText()
-                    .background(Color.red)
+            MemeFontText()
+                .background(Color.red)
         }
-
     }
 }

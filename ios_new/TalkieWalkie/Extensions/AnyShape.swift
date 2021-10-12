@@ -5,18 +5,17 @@
 //  Created by Alexandre Carlier on 05.10.21.
 //
 
-
 import SwiftUI
 
 public struct AnyShape: Shape {
-    public var make: (CGRect, inout Path) -> ()
+    public var make: (CGRect, inout Path) -> Void
 
-    public init(_ make: @escaping (CGRect, inout Path) -> ()) {
+    public init(_ make: @escaping (CGRect, inout Path) -> Void) {
         self.make = make
     }
 
     public init<S: Shape>(_ shape: S) {
-        self.make = { rect, path in
+        make = { rect, path in
             path = shape.path(in: rect)
         }
     }

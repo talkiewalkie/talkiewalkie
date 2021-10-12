@@ -13,12 +13,12 @@ struct AnimatedEllipsis: View {
     var animationDelay: Double = 0.2
     var color = Color.primary
     var fontSize: CGFloat = 20
-    
+
     @State private var opacity: Double = 1
-    
+
     var body: some View {
         HStack(spacing: 0) {
-            ForEach(0..<3) { index in
+            ForEach(0 ..< 3) { index in
                 Text(" .")
                     .font(.system(size: fontSize))
                     .kerning(-(fontSize / 20))

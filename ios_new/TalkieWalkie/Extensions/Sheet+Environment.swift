@@ -9,8 +9,9 @@ import SwiftUI
 
 extension View {
     func sheetWithThemeEnvironment<Content>(colorScheme: ColorScheme,
-                                            isPresented: Binding<Bool>, onDismiss: (() -> Void)? = nil, content: @escaping () -> Content) -> some View where Content : View {
-        return self.sheet(isPresented: isPresented, onDismiss: onDismiss, content: {
+                                            isPresented: Binding<Bool>, onDismiss: (() -> Void)? = nil, content: @escaping () -> Content) -> some View where Content: View
+    {
+        return sheet(isPresented: isPresented, onDismiss: onDismiss, content: {
             content()
                 .preferredColorScheme(colorScheme)
                 .environment(\.colorScheme, colorScheme)
@@ -18,11 +19,11 @@ extension View {
     }
 }
 
-
 extension View {
     func partialSheetWithThemeEnvironment<Content>(colorScheme: ColorScheme,
-                                            isPresented: Binding<Bool>, content: @escaping () -> Content) -> some View where Content : View {
-        return self.partialSheet(isPresented: isPresented, content: {
+                                                   isPresented: Binding<Bool>, content: @escaping () -> Content) -> some View where Content: View
+    {
+        return partialSheet(isPresented: isPresented, content: {
             content()
                 .preferredColorScheme(colorScheme)
                 .environment(\.colorScheme, colorScheme)

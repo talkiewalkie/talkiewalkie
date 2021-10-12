@@ -26,7 +26,6 @@ struct EnabledView<Content: View>: View {
     }
 }
 
-
 struct EnabledButton<Label>: View where Label: View {
     var enabled: Bool = true
     var disabledAction: (() -> Void)?
@@ -42,7 +41,7 @@ struct EnabledButton<Label>: View where Label: View {
                 disabledAction?()
             }
         }, label: label)
-        .opacity(enabled ? 1 : opacity)
+            .opacity(enabled ? 1 : opacity)
     }
 }
 
