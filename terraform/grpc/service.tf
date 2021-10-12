@@ -5,7 +5,7 @@ resource "aws_ecs_service" "grpc" {
   launch_type                        = "FARGATE"
   deployment_minimum_healthy_percent = 0
   deployment_maximum_percent         = 200
-  desired_count                      = 2
+  desired_count                      = 1
 
   network_configuration {
     security_groups  = [aws_security_group.ecs_grpc_task.id]

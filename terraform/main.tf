@@ -2,6 +2,17 @@
 // https://engineering.finleap.com/posts/2020-02-20-ecs-fargate-terraform/
 // https://github.dev/finleap/tf-ecs-fargate-tmpl
 
+/*
+
+Open an issue?
+**Describe the bug**
+
+[This statement](https://github.com/finleap/tf-ecs-fargate-tmpl/blob/master/README.md?plain=1#L15) from both the blog and the repo's README contradict [the code](https://github.com/finleap/tf-ecs-fargate-tmpl/blob/master/vpc/main.tf#L24).
+
+My understanding would be that the README has the right assumption, but I'm new to all of this so I'd love to get some feedback! At the moment my task executions
+
+*/
+
 resource "aws_security_group" "alb" {
   name   = "alb"
   vpc_id = aws_vpc.main.id

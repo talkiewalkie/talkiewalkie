@@ -66,7 +66,7 @@ resource "aws_ecs_service" "nginx" {
   launch_type                        = "FARGATE"
   deployment_minimum_healthy_percent = 0
   deployment_maximum_percent         = 200
-  desired_count                      = 1
+  desired_count                      = 0
 
   network_configuration {
     security_groups  = [aws_security_group.ecs_nginx-task.id]

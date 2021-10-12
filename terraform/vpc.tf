@@ -90,7 +90,7 @@ resource "aws_internet_gateway" "main" {
 resource "aws_nat_gateway" "main" {
   count         = length(local.availability_zones)
   allocation_id = element(aws_eip.nat.*.id, count.index)
-  subnet_id     = element(aws_subnet.public.*.id, count.index)
+  subnet_id     = element(aws_subnet.private.*.id, count.index)
   depends_on    = [aws_internet_gateway.main]
 
   tags = {

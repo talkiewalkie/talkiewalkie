@@ -23,7 +23,11 @@ func main() {
 
 	conn, err := grpc.DialContext(connCtx,
 		*addr,
+		// with hosted containers we can enable security like so - unclear how it's handling TLS but
+		// we're getting through somehow.
 		grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{})),
+		// with ngrok we should do insecure loads - let's see how that translate in swift-grpc
+		//grpc.WithInsecure(),
 		grpc.WithBlock(),
 	)
 	if err != nil {
