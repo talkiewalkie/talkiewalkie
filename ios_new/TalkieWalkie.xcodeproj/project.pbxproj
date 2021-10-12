@@ -90,7 +90,6 @@
 		73853DB2270C57EB00B0B4BF /* Sheet+Environment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73853DB1270C57EB00B0B4BF /* Sheet+Environment.swift */; };
 		73853DB4270C57FB00B0B4BF /* Photos+authorization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73853DB3270C57FB00B0B4BF /* Photos+authorization.swift */; };
 		73853DB6270C580300B0B4BF /* AVCaptureDevice+authorization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73853DB5270C580300B0B4BF /* AVCaptureDevice+authorization.swift */; };
-		73853DB8270C581300B0B4BF /* Dictionary+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73853DB7270C581300B0B4BF /* Dictionary+Extension.swift */; };
 		73853DC0270C58BF00B0B4BF /* PartialSheetManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73853DBA270C58BF00B0B4BF /* PartialSheetManager.swift */; };
 		73853DC1270C58BF00B0B4BF /* View+IfDeviceType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73853DBB270C58BF00B0B4BF /* View+IfDeviceType.swift */; };
 		73853DC2270C58BF00B0B4BF /* PartialSheetStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73853DBC270C58BF00B0B4BF /* PartialSheetStyle.swift */; };
@@ -105,6 +104,19 @@
 		73B63B472710851200994B92 /* recording-bubble.json in Resources */ = {isa = PBXBuildFile; fileRef = 73B63B462710851200994B92 /* recording-bubble.json */; };
 		73B63B492710859500994B92 /* 52786-recording-bubble.json in Resources */ = {isa = PBXBuildFile; fileRef = 73B63B482710859500994B92 /* 52786-recording-bubble.json */; };
 		73B63B4D2710879A00994B92 /* mic-off.json in Resources */ = {isa = PBXBuildFile; fileRef = 73B63B4C2710879A00994B92 /* mic-off.json */; };
+		E4D9BD7827157530005CD3A0 /* LocalModels.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = E4D9BD762715752F005CD3A0 /* LocalModels.xcdatamodeld */; };
+		E4D9BD7B271577C4005CD3A0 /* GrpcClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4D9BD7A271577C4005CD3A0 /* GrpcClient.swift */; };
+		E4D9BD7E27157A26005CD3A0 /* SwiftProtobuf in Frameworks */ = {isa = PBXBuildFile; productRef = E4D9BD7D27157A26005CD3A0 /* SwiftProtobuf */; };
+		E4D9BD8027157A26005CD3A0 /* SwiftProtobufPluginLibrary in Frameworks */ = {isa = PBXBuildFile; productRef = E4D9BD7F27157A26005CD3A0 /* SwiftProtobufPluginLibrary */; };
+		E4D9BD8527157BFE005CD3A0 /* CGRPCZlib in Frameworks */ = {isa = PBXBuildFile; productRef = E4D9BD8427157BFE005CD3A0 /* CGRPCZlib */; };
+		E4D9BD8727157BFE005CD3A0 /* GRPC in Frameworks */ = {isa = PBXBuildFile; productRef = E4D9BD8627157BFE005CD3A0 /* GRPC */; };
+		E4D9BD8C27157D39005CD3A0 /* app.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4D9BD8A27157D39005CD3A0 /* app.pb.swift */; };
+		E4D9BD8D27157D39005CD3A0 /* app.grpc.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4D9BD8B27157D39005CD3A0 /* app.grpc.swift */; };
+		E4D9BD9327157DC3005CD3A0 /* Message.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4D9BD8F27157DC2005CD3A0 /* Message.swift */; };
+		E4D9BD9427157DC3005CD3A0 /* Conversation.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4D9BD9027157DC3005CD3A0 /* Conversation.swift */; };
+		E4D9BD9527157DC3005CD3A0 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4D9BD9127157DC3005CD3A0 /* User.swift */; };
+		E4D9BD9927157E01005CD3A0 /* String.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4D9BD9827157E01005CD3A0 /* String.swift */; };
+		E4D9BD9D27157F70005CD3A0 /* CoreData.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4D9BD9C27157F70005CD3A0 /* CoreData.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -187,7 +199,6 @@
 		73853DB1270C57EB00B0B4BF /* Sheet+Environment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sheet+Environment.swift"; sourceTree = "<group>"; };
 		73853DB3270C57FB00B0B4BF /* Photos+authorization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Photos+authorization.swift"; sourceTree = "<group>"; };
 		73853DB5270C580300B0B4BF /* AVCaptureDevice+authorization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AVCaptureDevice+authorization.swift"; sourceTree = "<group>"; };
-		73853DB7270C581300B0B4BF /* Dictionary+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Dictionary+Extension.swift"; sourceTree = "<group>"; };
 		73853DBA270C58BF00B0B4BF /* PartialSheetManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PartialSheetManager.swift; sourceTree = "<group>"; };
 		73853DBB270C58BF00B0B4BF /* View+IfDeviceType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "View+IfDeviceType.swift"; sourceTree = "<group>"; };
 		73853DBC270C58BF00B0B4BF /* PartialSheetStyle.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PartialSheetStyle.swift; sourceTree = "<group>"; };
@@ -201,6 +212,15 @@
 		73B63B462710851200994B92 /* recording-bubble.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = "recording-bubble.json"; sourceTree = "<group>"; };
 		73B63B482710859500994B92 /* 52786-recording-bubble.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = "52786-recording-bubble.json"; sourceTree = "<group>"; };
 		73B63B4C2710879A00994B92 /* mic-off.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = "mic-off.json"; sourceTree = "<group>"; };
+		E4D9BD7727157530005CD3A0 /* LocalModels.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = LocalModels.xcdatamodel; sourceTree = "<group>"; };
+		E4D9BD7A271577C4005CD3A0 /* GrpcClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrpcClient.swift; sourceTree = "<group>"; };
+		E4D9BD8A27157D39005CD3A0 /* app.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = app.pb.swift; sourceTree = "<group>"; };
+		E4D9BD8B27157D39005CD3A0 /* app.grpc.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = app.grpc.swift; sourceTree = "<group>"; };
+		E4D9BD8F27157DC2005CD3A0 /* Message.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Message.swift; sourceTree = "<group>"; };
+		E4D9BD9027157DC3005CD3A0 /* Conversation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Conversation.swift; sourceTree = "<group>"; };
+		E4D9BD9127157DC3005CD3A0 /* User.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
+		E4D9BD9827157E01005CD3A0 /* String.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = String.swift; sourceTree = "<group>"; };
+		E4D9BD9C27157F70005CD3A0 /* CoreData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreData.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -210,12 +230,16 @@
 			files = (
 				73766089270DA18F001BA79F /* FirebaseMessaging in Frameworks */,
 				73B14AE5271046DE003542D6 /* PhoneNumberKit in Frameworks */,
+				E4D9BD8027157A26005CD3A0 /* SwiftProtobufPluginLibrary in Frameworks */,
 				73853D9D270C52A400B0B4BF /* SDWebImageSwiftUI in Frameworks */,
+				E4D9BD8527157BFE005CD3A0 /* CGRPCZlib in Frameworks */,
 				735BDC4E270D106C00B07E77 /* Introspect in Frameworks */,
 				7376608B270DA18F001BA79F /* FirebaseRemoteConfig in Frameworks */,
+				E4D9BD8727157BFE005CD3A0 /* GRPC in Frameworks */,
 				73766087270DA18F001BA79F /* FirebaseCrashlytics in Frameworks */,
 				73853DA0270C52B300B0B4BF /* Lottie in Frameworks */,
 				73766085270DA18F001BA79F /* FirebaseAuth in Frameworks */,
+				E4D9BD7E27157A26005CD3A0 /* SwiftProtobuf in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -257,6 +281,7 @@
 		73519D27270B3A34009BA6FF /* TalkieWalkie */ = {
 			isa = PBXGroup;
 			children = (
+				E4D9BD79271577A9005CD3A0 /* Clients */,
 				734F00AF270F9DEA002B91FC /* LaunchScreen.storyboard */,
 				7368C2C4270F5BFE00B73DB7 /* Old */,
 				73766080270D9CAD001BA79F /* TalkieWalkie.entitlements */,
@@ -336,7 +361,11 @@
 		73853D50270C4F9000B0B4BF /* Stores */ = {
 			isa = PBXGroup;
 			children = (
+				E4D9BD9027157DC3005CD3A0 /* Conversation.swift */,
+				E4D9BD8F27157DC2005CD3A0 /* Message.swift */,
+				E4D9BD9127157DC3005CD3A0 /* User.swift */,
 				73853D51270C4F9A00B0B4BF /* UserStore.swift */,
+				E4D9BD762715752F005CD3A0 /* LocalModels.xcdatamodeld */,
 				734BF832270CBB78008438D9 /* DummyVariables.swift */,
 			);
 			path = Stores;
@@ -438,8 +467,9 @@
 				73853DB1270C57EB00B0B4BF /* Sheet+Environment.swift */,
 				73853DB3270C57FB00B0B4BF /* Photos+authorization.swift */,
 				73853DB5270C580300B0B4BF /* AVCaptureDevice+authorization.swift */,
-				73853DB7270C581300B0B4BF /* Dictionary+Extension.swift */,
 				7368C2C0270F4A4E00B73DB7 /* String+NSRange.swift */,
+				E4D9BD9827157E01005CD3A0 /* String.swift */,
+				E4D9BD9C27157F70005CD3A0 /* CoreData.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -455,6 +485,16 @@
 				73853DBF270C58BF00B0B4BF /* View+PartialSheetModifier.swift */,
 			);
 			path = PartialSheet;
+			sourceTree = "<group>";
+		};
+		E4D9BD79271577A9005CD3A0 /* Clients */ = {
+			isa = PBXGroup;
+			children = (
+				E4D9BD8B27157D39005CD3A0 /* app.grpc.swift */,
+				E4D9BD8A27157D39005CD3A0 /* app.pb.swift */,
+				E4D9BD7A271577C4005CD3A0 /* GrpcClient.swift */,
+			);
+			path = Clients;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -482,6 +522,10 @@
 				73766088270DA18F001BA79F /* FirebaseMessaging */,
 				7376608A270DA18F001BA79F /* FirebaseRemoteConfig */,
 				73B14AE4271046DE003542D6 /* PhoneNumberKit */,
+				E4D9BD7D27157A26005CD3A0 /* SwiftProtobuf */,
+				E4D9BD7F27157A26005CD3A0 /* SwiftProtobufPluginLibrary */,
+				E4D9BD8427157BFE005CD3A0 /* CGRPCZlib */,
+				E4D9BD8627157BFE005CD3A0 /* GRPC */,
 			);
 			productName = TalkieWalkie;
 			productReference = 73519D25270B3A34009BA6FF /* TalkieWalkie.app */;
@@ -517,6 +561,8 @@
 				735BDC4C270D106C00B07E77 /* XCRemoteSwiftPackageReference "SwiftUI-Introspect" */,
 				73766083270DA18F001BA79F /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 				73B14AE3271046DD003542D6 /* XCRemoteSwiftPackageReference "PhoneNumberKit" */,
+				E4D9BD7C27157A26005CD3A0 /* XCRemoteSwiftPackageReference "swift-protobuf" */,
+				E4D9BD8327157BFE005CD3A0 /* XCRemoteSwiftPackageReference "grpc-swift" */,
 			);
 			productRefGroup = 73519D26270B3A34009BA6FF /* Products */;
 			projectDirPath = "";
@@ -579,8 +625,11 @@
 				73853D59270C506900B0B4BF /* ErrorPopup.swift in Sources */,
 				73853D49270C3D3F00B0B4BF /* SplashScreen.swift in Sources */,
 				73853DB0270C57E200B0B4BF /* TimeInterval.swift in Sources */,
+				E4D9BD9527157DC3005CD3A0 /* User.swift in Sources */,
+				E4D9BD8D27157D39005CD3A0 /* app.grpc.swift in Sources */,
 				734BF82D270CAF7C008438D9 /* DiscussionListView.swift in Sources */,
 				73853D4B270C458500B0B4BF /* DiscussionView.swift in Sources */,
+				E4D9BD7B271577C4005CD3A0 /* GrpcClient.swift in Sources */,
 				7368C2B6270F2A4300B73DB7 /* SpeechRecognizer.swift in Sources */,
 				7368C2B8270F2ABB00B73DB7 /* AVPlayer+Ding.swift in Sources */,
 				73853D6F270C518900B0B4BF /* TooltipManager.swift in Sources */,
@@ -598,12 +647,14 @@
 				73853DC0270C58BF00B0B4BF /* PartialSheetManager.swift in Sources */,
 				73853D47270C3D2100B0B4BF /* HomeView.swift in Sources */,
 				7368C2BD270F43E200B73DB7 /* Transcript.swift in Sources */,
+				E4D9BD9927157E01005CD3A0 /* String.swift in Sources */,
 				73853D57270C505000B0B4BF /* CloseButton.swift in Sources */,
 				73853DC1270C58BF00B0B4BF /* View+IfDeviceType.swift in Sources */,
 				73853D63270C50DC00B0B4BF /* EnabledButton.swift in Sources */,
 				73519D38270B3EDE009BA6FF /* Audiogram1.swift in Sources */,
+				E4D9BD8C27157D39005CD3A0 /* app.pb.swift in Sources */,
 				73853D5F270C50AB00B0B4BF /* AnimatedEllipsis.swift in Sources */,
-				73853DB8270C581300B0B4BF /* Dictionary+Extension.swift in Sources */,
+				E4D9BD7827157530005CD3A0 /* LocalModels.xcdatamodeld in Sources */,
 				737660B2270DD519001BA79F /* ReversedScrollView.swift in Sources */,
 				73853DAA270C57A800B0B4BF /* Date+Format.swift in Sources */,
 				734BF829270C9E33008438D9 /* TWButton.swift in Sources */,
@@ -611,6 +662,7 @@
 				73853D4D270C4E1000B0B4BF /* HeaderView.swift in Sources */,
 				73853D71270C519C00B0B4BF /* TooltipShape.swift in Sources */,
 				73853D52270C4F9A00B0B4BF /* UserStore.swift in Sources */,
+				E4D9BD9427157DC3005CD3A0 /* Conversation.swift in Sources */,
 				73853D73270C51AE00B0B4BF /* WebURLView.swift in Sources */,
 				73853DA6270C579300B0B4BF /* AnyShape.swift in Sources */,
 				737660B6270DFED3001BA79F /* AudioRecorderView.swift in Sources */,
@@ -618,11 +670,13 @@
 				73853DAE270C57D000B0B4BF /* View+rotated.swift in Sources */,
 				73853D55270C503200B0B4BF /* LottieView.swift in Sources */,
 				73519D3A270B5AB2009BA6FF /* Audiogram2.swift in Sources */,
+				E4D9BD9D27157F70005CD3A0 /* CoreData.swift in Sources */,
 				734BF833270CBB78008438D9 /* DummyVariables.swift in Sources */,
 				7368C2C1270F4A4E00B73DB7 /* String+NSRange.swift in Sources */,
 				73853D65270C511000B0B4BF /* MarqueeText.swift in Sources */,
 				73853DB6270C580300B0B4BF /* AVCaptureDevice+authorization.swift in Sources */,
 				734BF82F270CB139008438D9 /* HashColor.swift in Sources */,
+				E4D9BD9327157DC3005CD3A0 /* Message.swift in Sources */,
 				730B7CED270C81F3007191FF /* OnboardingView.swift in Sources */,
 				73853DC3270C58BF00B0B4BF /* BlurEffectView.swift in Sources */,
 				73853DB2270C57EB00B0B4BF /* Sheet+Environment.swift in Sources */,
@@ -763,7 +817,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_ASSET_PATHS = "\"TalkieWalkie/Preview Content\"";
-				DEVELOPMENT_TEAM = QMXSNNG56P;
+				DEVELOPMENT_TEAM = CX8J2P7A85;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = TalkieWalkie/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
@@ -771,10 +825,10 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.alexandrecarlier.TalkieWalkie;
+				PRODUCT_BUNDLE_IDENTIFIER = com.theomatussiere.talkiewalkie;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -787,7 +841,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_ASSET_PATHS = "\"TalkieWalkie/Preview Content\"";
-				DEVELOPMENT_TEAM = QMXSNNG56P;
+				DEVELOPMENT_TEAM = CX8J2P7A85;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = TalkieWalkie/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
@@ -795,10 +849,10 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.alexandrecarlier.TalkieWalkie;
+				PRODUCT_BUNDLE_IDENTIFIER = com.theomatussiere.talkiewalkie;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};
@@ -866,6 +920,22 @@
 				minimumVersion = 3.3.3;
 			};
 		};
+		E4D9BD7C27157A26005CD3A0 /* XCRemoteSwiftPackageReference "swift-protobuf" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-protobuf.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.0;
+			};
+		};
+		E4D9BD8327157BFE005CD3A0 /* XCRemoteSwiftPackageReference "grpc-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/grpc/grpc-swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -909,7 +979,40 @@
 			package = 73B14AE3271046DD003542D6 /* XCRemoteSwiftPackageReference "PhoneNumberKit" */;
 			productName = PhoneNumberKit;
 		};
+		E4D9BD7D27157A26005CD3A0 /* SwiftProtobuf */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E4D9BD7C27157A26005CD3A0 /* XCRemoteSwiftPackageReference "swift-protobuf" */;
+			productName = SwiftProtobuf;
+		};
+		E4D9BD7F27157A26005CD3A0 /* SwiftProtobufPluginLibrary */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E4D9BD7C27157A26005CD3A0 /* XCRemoteSwiftPackageReference "swift-protobuf" */;
+			productName = SwiftProtobufPluginLibrary;
+		};
+		E4D9BD8427157BFE005CD3A0 /* CGRPCZlib */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E4D9BD8327157BFE005CD3A0 /* XCRemoteSwiftPackageReference "grpc-swift" */;
+			productName = CGRPCZlib;
+		};
+		E4D9BD8627157BFE005CD3A0 /* GRPC */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E4D9BD8327157BFE005CD3A0 /* XCRemoteSwiftPackageReference "grpc-swift" */;
+			productName = GRPC;
+		};
 /* End XCSwiftPackageProductDependency section */
+
+/* Begin XCVersionGroup section */
+		E4D9BD762715752F005CD3A0 /* LocalModels.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				E4D9BD7727157530005CD3A0 /* LocalModels.xcdatamodel */,
+			);
+			currentVersion = E4D9BD7727157530005CD3A0 /* LocalModels.xcdatamodel */;
+			path = LocalModels.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+/* End XCVersionGroup section */
 	};
 	rootObject = 73519D1D270B3A34009BA6FF /* Project object */;
 }

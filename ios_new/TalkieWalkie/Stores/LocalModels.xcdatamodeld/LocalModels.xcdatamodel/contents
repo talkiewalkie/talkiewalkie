@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="19206" systemVersion="20E241" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+    <entity name="Conversation" representedClassName="Conversation" syncable="YES" codeGenerationType="class">
+        <attribute name="createdAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="lastMemberReadUntil" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="title" optional="YES" attributeType="String"/>
+        <attribute name="uuid" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <relationship name="messages" optional="YES" toMany="YES" deletionRule="Nullify" ordered="YES" destinationEntity="Message" inverseName="conversation" inverseEntity="Message"/>
+        <relationship name="users" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="User" inverseName="conversations" inverseEntity="User"/>
+    </entity>
+    <entity name="Me" representedClassName="Me" syncable="YES" codeGenerationType="class">
+        <attribute name="firebaseUid" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="locale" optional="YES" attributeType="String"/>
+    </entity>
+    <entity name="Message" representedClassName="Message" syncable="YES" codeGenerationType="class">
+        <attribute name="createdAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="uuid" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <relationship name="author" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="User" inverseName="authoredMessages_" inverseEntity="User"/>
+        <relationship name="content" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="MessageContent" inverseName="message" inverseEntity="MessageContent"/>
+        <relationship name="conversation" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Conversation" inverseName="messages" inverseEntity="Conversation"/>
+    </entity>
+    <entity name="MessageContent" representedClassName="MessageContent" isAbstract="YES" syncable="YES" codeGenerationType="class">
+        <relationship name="message" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Message" inverseName="content" inverseEntity="Message"/>
+    </entity>
+    <entity name="TextMessage" representedClassName="TextMessage" parentEntity="MessageContent" syncable="YES" codeGenerationType="class">
+        <attribute name="text" optional="YES" attributeType="String"/>
+    </entity>
+    <entity name="User" representedClassName="User" syncable="YES" codeGenerationType="class">
+        <attribute name="displayName" optional="YES" attributeType="String"/>
+        <attribute name="uuid" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <relationship name="authoredMessages_" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Message" inverseName="author" inverseEntity="Message"/>
+        <relationship name="conversations" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Conversation" inverseName="users" inverseEntity="Conversation"/>
+    </entity>
+    <entity name="VoiceMessage" representedClassName="VoiceMessage" parentEntity="MessageContent" syncable="YES" codeGenerationType="class">
+        <attribute name="processedAudio" optional="YES" attributeType="Binary"/>
+        <attribute name="rawAudio" optional="YES" attributeType="Binary"/>
+        <attribute name="transcriptSiriJson" optional="YES" attributeType="String"/>
+    </entity>
+    <elements>
+        <element name="User" positionX="-63" positionY="-18" width="128" height="14"/>
+        <element name="Message" positionX="-54" positionY="9" width="128" height="14"/>
+        <element name="MessageContent" positionX="-36" positionY="36" width="128" height="14"/>
+        <element name="TextMessage" positionX="-18" positionY="45" width="128" height="14"/>
+        <element name="VoiceMessage" positionX="0" positionY="54" width="128" height="14"/>
+        <element name="Conversation" positionX="18" positionY="63" width="128" height="119"/>
+        <element name="Me" positionX="36" positionY="81" width="128" height="14"/>
+    </elements>
+</model>
