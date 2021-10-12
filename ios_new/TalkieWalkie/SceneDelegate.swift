@@ -7,9 +7,25 @@
 
 import SwiftUI
 import UIKit
+import CoreData
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
+    
+    
+    lazy var persistentContainer: NSPersistentContainer = {
+        let container = NSPersistentContainer(name: "User")
+
+        container.loadPersistentStores { _, error in
+            container.viewContext.automaticallyMergesChangesFromParent = true
+
+            if let error = error {
+                fatalError("Unable to load persistent stores: \(error)")
+            }
+        }
+
+        return container
+    }()
 
     func scene(_ scene: UIScene, willConnectTo _: UISceneSession, options _: UIScene.ConnectionOptions) {
         // Use this method to optionally configure and attach the UIWindow `window` to the provided UIWindowScene `scene`.
@@ -19,7 +35,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let tooltipManager = TooltipManager()
 
         let contentView = HomeView()
-            .environmentObject(UserStore())
+            .environmentObject(UserStore(persistentContainer.viewContext))
 
             .addTooltip()
             .environmentObject(tooltipManager)

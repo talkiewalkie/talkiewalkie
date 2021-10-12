@@ -54,6 +54,7 @@ enum SocialMediaType {
 
 struct SettingsView: View {
     @Binding var show: Bool
+    @EnvironmentObject var userStore: UserStore
 
     var languageSelection: Int {
         guard let index = availableLanguages.firstIndex(where: { lang in
@@ -163,6 +164,12 @@ struct SettingsView: View {
                 }) {
                     Link(LocalizedStringKey("Privacy policy"), destination: URL(string: "https://talkiewalkie.app/privacy")!)
                     Link(LocalizedStringKey("Terms of use"), destination: URL(string: "https://talkiewalkie.app/terms")!)
+                }
+                
+                Section {
+                    Button("Log out") {
+                        userStore.logout()
+                    }
                 }
             }
             .listStyle(InsetGroupedListStyle())

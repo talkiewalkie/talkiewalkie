@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftUI
+import CoreData
 
 struct DummyVariables {
     static let shared = DummyVariables()
@@ -22,7 +23,7 @@ struct DummyVariables {
     var dummyMessageViewModel: MessageViewModel
 
     init() {
-        dummyUserStore = UserStore()
+        dummyUserStore = UserStore(NSManagedObjectContext(concurrencyType: .mainQueueConcurrencyType))
 
         dummyMessageViewModel = MessageViewModel()
         dummyMessageViewModel.message = dummyChatMessages[0]

@@ -354,10 +354,14 @@ struct TypePhoneNumberView: View {
 
         showSendingSMSAlert = true
 
+        
+        os_log("verif id: '\(model.verificationID)'")
+        os_log("verif code: '\(model.verificationCode)'")
+        
         PhoneAuthProvider.provider()
             .verifyPhoneNumber(model.fullPhoneNumber, uiDelegate: nil) { verificationID, error in
                 if let error = error {
-                    os_log(.error, "failed to verify phone number: \(error.localizedDescription)") // TODO:
+                    os_log(.error, "failed to verify phone number '\(model.fullPhoneNumber)':  \(error.localizedDescription)") // TODO:
                     return
                 }
 
