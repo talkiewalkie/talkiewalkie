@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import OSLog
 import Firebase
 import FirebaseMessaging
 
@@ -26,7 +27,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         
         if let path = FileManager.default.urls(for: .libraryDirectory, in: .userDomainMask).last {
-            print("CoreData sqlite files: '\(path)Application\\ Support'")
+            os_log(.debug, "CoreData sqlite files: '\(path)Application\\ Support'")
         }
         
         // HACK: display LaunchScreen 1s longer
@@ -54,7 +55,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                          -> Void) {
         
         #if DEBUG
-        print(userInfo)
+        os_log("notification received with \(userInfo)")
         #endif
 
         completionHandler(UIBackgroundFetchResult.newData)
@@ -71,7 +72,7 @@ extension AppDelegate : UNUserNotificationCenterDelegate {
         let userInfo = notification.request.content.userInfo
 
         #if DEBUG
-        print(userInfo)
+        os_log("notification center received notif with \(userInfo)")
         #endif
 
         // Change this to your preferred presentation option
@@ -87,7 +88,7 @@ extension AppDelegate : MessagingDelegate {
     guard let token = fcmToken else { return }
     
     #if DEBUG
-    print("Firebase registration token: \(token)")
+      os_log(.debug, "Firebase registration token: \(token), \(messaging)")
     #endif
   }
 

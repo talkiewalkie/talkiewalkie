@@ -3,9 +3,9 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>719337728540-2t1p2mh105nasdu1c4pomh1eqqou5h30.apps.googleusercontent.com</string>
+	<string>719337728540-ed9f5oo10b90cde3nfppbtk03ce3kfe9.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.719337728540-2t1p2mh105nasdu1c4pomh1eqqou5h30</string>
+	<string>com.googleusercontent.apps.719337728540-ed9f5oo10b90cde3nfppbtk03ce3kfe9</string>
 	<key>API_KEY</key>
 	<string>AIzaSyCi1J8CkQzCF0O90Q0O781ajC5vS-LBzi0</string>
 	<key>GCM_SENDER_ID</key>
@@ -13,7 +13,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.alexandrecarlier.TalkieWalkie</string>
+	<string>com.talkiewalkie.TalkieWalkie</string>
 	<key>PROJECT_ID</key>
 	<string>talkiewalkie-305117</string>
 	<key>STORAGE_BUCKET</key>
@@ -29,7 +29,7 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:719337728540:ios:93680dd3b055064da78dd9</string>
+	<string>1:719337728540:ios:32e4a2084d833a97a78dd9</string>
 	<key>DATABASE_URL</key>
 	<string>https://talkiewalkie-305117-default-rtdb.europe-west1.firebasedatabase.app</string>
 </dict>

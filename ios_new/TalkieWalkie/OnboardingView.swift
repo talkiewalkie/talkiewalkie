@@ -5,12 +5,12 @@
 //  Created by Alexandre Carlier on 05.10.21.
 //
 
-import SwiftUI
-import Introspect
-import FirebaseAuth
-import PhoneNumberKit
 import AVFoundation
-
+import FirebaseAuth
+import Introspect
+import OSLog
+import PhoneNumberKit
+import SwiftUI
 
 class OnboardingViewModel: ObservableObject {
     @Published var page: Int = 0
@@ -37,9 +37,7 @@ class OnboardingViewModel: ObservableObject {
     }
 }
 
-
 struct OnboardingView: View {
-    
     var onboardingDone: () -> Void
     
     @AppStorage("name") var name: String = ""
@@ -58,40 +56,34 @@ struct OnboardingView: View {
     }
 }
 
-
 struct Onboarding: View {
-    
     var onboardingDone: () -> Void
 
     @StateObject var model: OnboardingViewModel
     
     var body: some View {
-        
         ZStack {
-            
             Color.blue.opacity(0.5).ignoresSafeArea()
             
             Group {
                 switch model.page {
                 case 0: FirstScreen()
-                    case 1: TypeNameView()
-                    case 2: TypePhoneNumberView()
-                    case 3: VerifyPhoneNumberView()
-                    case 4: PhoneNumberSuccessView()
-                    case 5: TurnOnNotificationsView()
-                    case 6: MicrophoneAuthorizationView()
-                    case 7: PickFriendsIntroView()
-                    case 8: AddTalkieWalkieContactsView()
-                    case 9: AddOtherContactsView()
-                    case 10: FinalSuccessView(onboardingDone: onboardingDone)
-                    default: EmptyView()
+                case 1: TypeNameView()
+                case 2: TypePhoneNumberView()
+                case 3: VerifyPhoneNumberView()
+                case 4: PhoneNumberSuccessView()
+                case 5: TurnOnNotificationsView()
+                case 6: MicrophoneAuthorizationView()
+                case 7: PickFriendsIntroView()
+                case 8: AddTalkieWalkieContactsView()
+                case 9: AddOtherContactsView()
+                case 10: FinalSuccessView(onboardingDone: onboardingDone)
+                default: EmptyView()
                 }
             }
-            
         }
         .environmentObject(model)
         .foregroundColor(.white)
-        
     }
 }
 
@@ -134,7 +126,6 @@ struct OnboardingNavControls: View {
                     }
                 }
             }
-            
         }
         .frame(maxHeight: .infinity, alignment: .bottom)
         .padding()
@@ -159,7 +150,6 @@ struct FirstScreen: View {
     @EnvironmentObject var model: OnboardingViewModel
     
     var body: some View {
-        
         ZStack {
             VStack {
                 Spacer()
@@ -180,7 +170,6 @@ struct FirstScreen: View {
                     Spacer()
                 }
                 
-                
                 VStack {
                     Image("logo_text")
                         .resizable()
@@ -192,7 +181,6 @@ struct FirstScreen: View {
                         .fontWeight(.medium)
                         .foregroundColor(.white)
                 }
-                
                 
                 VStack {
                     Spacer()
@@ -209,16 +197,12 @@ struct FirstScreen: View {
                             Text("Sign up & Accept".uppercased())
                         }
                     }
-                    
                 }
-                
             }
             .padding()
         }
     }
-    
 }
-
 
 // MARK: Type Name
 
@@ -229,7 +213,6 @@ struct TypeNameView: View {
     
     var body: some View {
         ZStack {
-            
             VStack {
                 OnboardingTitle(text: "Hi! What's your name?")
                 
@@ -247,7 +230,6 @@ struct TypeNameView: View {
                 }
             
             OnboardingNavControls(page: $model.page, showPrev: false, onNext: validate)
-            
         }
         .alert(isPresented: $showInvalidNameAlert) {
             Alert(title: Text("This doesn't look like a real name! 😛"))
@@ -260,9 +242,7 @@ struct TypeNameView: View {
         
         model.next()
     }
-    
 }
-
 
 // MARK: Type Phone
 
@@ -284,7 +264,7 @@ struct PhoneCountryCodeButtonView: View {
     func getFlag(from regionID: String) -> String {
         regionID
             .unicodeScalars
-            .map({ 127397 + $0.value })
+            .map { 127397 + $0.value }
             .compactMap(UnicodeScalar.init)
             .map(String.init)
             .joined()
@@ -304,14 +284,13 @@ struct TypePhoneNumberView: View {
     @AppStorage("phoneNumber") var storedPhoneNumber: String = ""
     
     var body: some View {
-        
         let phoneNumber = Binding<String>(
             get: {
                 model.phoneNumber
             },
             set: {
                 if $0.count > model.phoneNumber.count + 1 {
-                    self.parseNumber($0)  // AutoFill
+                    self.parseNumber($0) // AutoFill
                 } else {
                     model.phoneNumber = $0
                 }
@@ -319,7 +298,6 @@ struct TypePhoneNumberView: View {
         )
         
         ZStack {
-            
             VStack {
                 OnboardingTitle(text: "Hey \(model.name), I need your phone number to identify you.")
                 
@@ -342,7 +320,6 @@ struct TypePhoneNumberView: View {
             .padding(.horizontal)
             
             OnboardingNavControls(page: $model.page, showPrev: false, onNext: validate)
-            
         }
         .padding()
         .alert(isPresented: $showSendingSMSAlert) {
@@ -379,17 +356,16 @@ struct TypePhoneNumberView: View {
         
         PhoneAuthProvider.provider()
             .verifyPhoneNumber(model.fullPhoneNumber, uiDelegate: nil) { verificationID, error in
-              if let error = error {
-                print("Error: \(error.localizedDescription)") /// TODO
-                return
-              }
+                if let error = error {
+                    os_log(.error, "failed to verify phone number: \(error.localizedDescription)") // TODO:
+                    return
+                }
                 
-            guard let verificationID = verificationID else { return }
+                guard let verificationID = verificationID else { return }
 
-            model.verificationID = verificationID
-          }
+                model.verificationID = verificationID
+            }
     }
-    
 }
 
 struct VerifyPhoneNumberView: View {
@@ -429,7 +405,6 @@ struct VerifyPhoneNumberView: View {
             Alert(title: Text("Please enter a valid code 😙"))
         }
         .padding()
-        
     }
     
     func validate() {
@@ -442,30 +417,27 @@ struct VerifyPhoneNumberView: View {
             verificationCode: model.verificationCode
         )
         
-        Auth.auth().signIn(with: credential) { (authResult, error) in
+        Auth.auth().signIn(with: credential) { _, error in
             loading = false
             
-          if let error = error {
-            let authError = error as NSError
-            print(authError.description)
-            return
-          }
+            if let error = error {
+                let authError = error as NSError
+                os_log(.error, "failed to auth: \(authError.description)")
+                return
+            }
 
-          // User has signed in successfully and currentUser object is valid
-          let currentUserInstance = Auth.auth().currentUser
-            print("Success! \(currentUserInstance)")
+            // User has signed in successfully and currentUser object is valid
+            let currentUserInstance = Auth.auth().currentUser
+            os_log(.debug, "Success! \(currentUserInstance!)")
             model.next()
         }
-         
     }
-    
 }
 
 struct PhoneNumberSuccessView: View {
     @EnvironmentObject var model: OnboardingViewModel
     
     var body: some View {
-        
         ZStack {
             LottieView(name: "confetti2")
         }
@@ -476,7 +448,6 @@ struct PhoneNumberSuccessView: View {
             }
         }
     }
-    
 }
 
 // MARK: Allow Notifications
@@ -501,15 +472,12 @@ struct TurnOnNotificationsView: View {
                 }
                 
                 Spacer()
-                
-                
             }
             
             VStack {
                 LottieView(name: "notification")
                     .scaleEffect(0.8)
                     .frame(maxHeight: 400)
-                
                 
                 Text("(TODO)")
 //                TWButton(action: {
@@ -522,11 +490,8 @@ struct TurnOnNotificationsView: View {
 //            OnboardingNavControls(page: $model.page, showPrev: false)
         }
         .padding()
-        
     }
-    
 }
-
 
 // MARK: Allow microphone
 
@@ -537,7 +502,7 @@ struct MicrophoneAuthorizationView: View {
     
     func authorizeAudio() {
         DispatchQueue.global(qos: .userInitiated).async {
-            AVCaptureDevice.authorizeAudio(completion: { (audioStatus) in
+            AVCaptureDevice.authorizeAudio(completion: { audioStatus in
                 print("Status: ", audioStatus, " superstatus: ", audioStatus.superStatus)
                 DispatchQueue.main.async {
                     withAnimation {
@@ -573,7 +538,7 @@ struct MicrophoneAuthorizationView: View {
         .padding()
     }
     
-    var requestAuthorizationView: some View  {
+    var requestAuthorizationView: some View {
         ZStack {
             LottieView(name: "52786-recording-bubble")
                 .frame(maxHeight: 400)
@@ -590,16 +555,13 @@ struct MicrophoneAuthorizationView: View {
         }
     }
     
-    var authorizationSuccessView: some View  {
-        ZStack {
-            
-        }
-        .onAppear(perform: model.next)
+    var authorizationSuccessView: some View {
+        ZStack {}
+            .onAppear(perform: model.next)
     }
     
     var authorizationDeniedView: some View {
         ZStack {
-            
             VStack {
                 LottieView(name: "mic-off")
                     .frame(maxHeight: 200)
@@ -610,9 +572,6 @@ struct MicrophoneAuthorizationView: View {
                     .resizable()
                     .aspectRatio(contentMode: .fit)
             }
-            
-            
-            
             
             VStack {
                 Spacer()
@@ -627,41 +586,32 @@ struct MicrophoneAuthorizationView: View {
     }
 }
 
-
 // MARK: Access contacts
 
 struct PickFriendsIntroView: View {
     @EnvironmentObject var model: OnboardingViewModel
     
     var body: some View {
-        
         ZStack {
             Text("Text.")
             
             OnboardingNavControls(page: $model.page)
         }
         .padding()
-        
     }
-    
 }
-
 
 struct AddTalkieWalkieContactsView: View {
     @EnvironmentObject var model: OnboardingViewModel
     
     var body: some View {
-        
         ZStack {
-            
             Text("Hello")
             
             OnboardingNavControls(page: $model.page)
         }
         .padding()
-        
     }
-    
 }
 
 struct AddOtherContactsView: View {
@@ -674,11 +624,8 @@ struct AddOtherContactsView: View {
             OnboardingNavControls(page: $model.page)
         }
         .padding()
-        
     }
-    
 }
-
 
 // MARK: Final Screen
 
@@ -687,7 +634,6 @@ struct FinalSuccessView: View {
     var onboardingDone: () -> Void
     
     var body: some View {
-        
         ZStack {
             LottieView(name: "check_success", loopMode: .playOnce)
             
@@ -700,7 +646,6 @@ struct FinalSuccessView: View {
             }
         }
         .padding()
-       
     }
 }
 
