@@ -117,6 +117,8 @@
 		E4D9BD9527157DC3005CD3A0 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4D9BD9127157DC3005CD3A0 /* User.swift */; };
 		E4D9BD9927157E01005CD3A0 /* String.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4D9BD9827157E01005CD3A0 /* String.swift */; };
 		E4D9BD9D27157F70005CD3A0 /* CoreData.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4D9BD9C27157F70005CD3A0 /* CoreData.swift */; };
+		E4D9BD9F2715E972005CD3A0 /* AuthedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4D9BD9E2715E972005CD3A0 /* AuthedView.swift */; };
+		E4D9BDA12716019A005CD3A0 /* OSLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4D9BDA02716019A005CD3A0 /* OSLog.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -221,6 +223,8 @@
 		E4D9BD9127157DC3005CD3A0 /* User.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 		E4D9BD9827157E01005CD3A0 /* String.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = String.swift; sourceTree = "<group>"; };
 		E4D9BD9C27157F70005CD3A0 /* CoreData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreData.swift; sourceTree = "<group>"; };
+		E4D9BD9E2715E972005CD3A0 /* AuthedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthedView.swift; sourceTree = "<group>"; };
+		E4D9BDA02716019A005CD3A0 /* OSLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OSLog.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -281,6 +285,7 @@
 		73519D27270B3A34009BA6FF /* TalkieWalkie */ = {
 			isa = PBXGroup;
 			children = (
+				E4D9BD762715752F005CD3A0 /* LocalModels.xcdatamodeld */,
 				E4D9BD79271577A9005CD3A0 /* Clients */,
 				734F00AF270F9DEA002B91FC /* LaunchScreen.storyboard */,
 				7368C2C4270F5BFE00B73DB7 /* Old */,
@@ -291,6 +296,7 @@
 				7376608C270DA281001BA79F /* AppDelegate.swift */,
 				7376608E270DA305001BA79F /* SceneDelegate.swift */,
 				73853D46270C3D2100B0B4BF /* HomeView.swift */,
+				E4D9BD9E2715E972005CD3A0 /* AuthedView.swift */,
 				730B7CEC270C81F3007191FF /* OnboardingView.swift */,
 				734BF82C270CAF7C008438D9 /* DiscussionListView.swift */,
 				734BF830270CB6E5008438D9 /* RecordButton.swift */,
@@ -365,7 +371,6 @@
 				E4D9BD8F27157DC2005CD3A0 /* Message.swift */,
 				E4D9BD9127157DC3005CD3A0 /* User.swift */,
 				73853D51270C4F9A00B0B4BF /* UserStore.swift */,
-				E4D9BD762715752F005CD3A0 /* LocalModels.xcdatamodeld */,
 				734BF832270CBB78008438D9 /* DummyVariables.swift */,
 			);
 			path = Stores;
@@ -470,6 +475,7 @@
 				7368C2C0270F4A4E00B73DB7 /* String+NSRange.swift */,
 				E4D9BD9827157E01005CD3A0 /* String.swift */,
 				E4D9BD9C27157F70005CD3A0 /* CoreData.swift */,
+				E4D9BDA02716019A005CD3A0 /* OSLog.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -636,6 +642,7 @@
 				73519D3C270B60FE009BA6FF /* CirclesBackground.swift in Sources */,
 				7368C2BF270F465200B73DB7 /* AudiogramView.swift in Sources */,
 				73853D61270C50CA00B0B4BF /* EmojiChooser.swift in Sources */,
+				E4D9BD9F2715E972005CD3A0 /* AuthedView.swift in Sources */,
 				73853DA8270C579F00B0B4BF /* Bundle+AppInfo.swift in Sources */,
 				73853D5B270C508100B0B4BF /* MemeFont.swift in Sources */,
 				7376608D270DA281001BA79F /* AppDelegate.swift in Sources */,
@@ -675,6 +682,7 @@
 				7368C2C1270F4A4E00B73DB7 /* String+NSRange.swift in Sources */,
 				73853D65270C511000B0B4BF /* MarqueeText.swift in Sources */,
 				73853DB6270C580300B0B4BF /* AVCaptureDevice+authorization.swift in Sources */,
+				E4D9BDA12716019A005CD3A0 /* OSLog.swift in Sources */,
 				734BF82F270CB139008438D9 /* HashColor.swift in Sources */,
 				E4D9BD9327157DC3005CD3A0 /* Message.swift in Sources */,
 				730B7CED270C81F3007191FF /* OnboardingView.swift in Sources */,

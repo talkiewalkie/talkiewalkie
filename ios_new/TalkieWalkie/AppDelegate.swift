@@ -79,11 +79,5 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
 }
 
 extension AppDelegate: MessagingDelegate {
-    func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
-        guard let token = fcmToken else { return }
-
-        #if DEBUG
-            os_log(.debug, "Firebase registration token: \(token), \(messaging)")
-        #endif
-    }
+    func messaging(_: Messaging, didReceiveRegistrationToken _: String?) {}
 }

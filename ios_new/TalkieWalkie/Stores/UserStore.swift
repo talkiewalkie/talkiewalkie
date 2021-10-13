@@ -21,6 +21,8 @@ class UserStore: ObservableObject {
     static var languageCode: String {
         return Locale.current.languageCode ?? "en"
     }
+    
+    var me: Me { Me.fromCache(context: coredataCtx)! }
 
     static func openSettings() {
         if let appSettings = URL(string: UIApplication.openSettingsURLString) {
@@ -36,13 +38,13 @@ class UserStore: ObservableObject {
         }
         
         // Clear coredata on logout
-        self.coredataCtx.executeOrLogError(NSBatchDeleteRequest(fetchRequest: User.fetchRequest()))
-        self.coredataCtx.executeOrLogError(NSBatchDeleteRequest(fetchRequest: Me.fetchRequest()))
-        self.coredataCtx.executeOrLogError(NSBatchDeleteRequest(fetchRequest: Conversation.fetchRequest()))
-        self.coredataCtx.executeOrLogError(NSBatchDeleteRequest(fetchRequest: Message.fetchRequest()))
-        
-        self.coredataCtx.executeOrLogError(NSBatchDeleteRequest(fetchRequest: MessageContent.fetchRequest()))
-        self.coredataCtx.executeOrLogError(NSBatchDeleteRequest(fetchRequest: TextMessage.fetchRequest()))
-        self.coredataCtx.executeOrLogError(NSBatchDeleteRequest(fetchRequest: VoiceMessage.fetchRequest()))
+        // No strong candidate to do this better: https://stackoverflow.com/questions/1077810
+        self.coredataCtx.executeOrLogError(NSBatchDeleteRequest(fetchRequest: NSFetchRequest(entityName: User.entity().name!)))
+        self.coredataCtx.executeOrLogError(NSBatchDeleteRequest(fetchRequest: NSFetchRequest(entityName: Me.entity().name!)))
+        self.coredataCtx.executeOrLogError(NSBatchDeleteRequest(fetchRequest: NSFetchRequest(entityName: Conversation.entity().name!)))
+        self.coredataCtx.executeOrLogError(NSBatchDeleteRequest(fetchRequest: NSFetchRequest(entityName: Message.entity().name!)))
+        self.coredataCtx.executeOrLogError(NSBatchDeleteRequest(fetchRequest: NSFetchRequest(entityName: MessageContent.entity().name!)))
+        self.coredataCtx.executeOrLogError(NSBatchDeleteRequest(fetchRequest: NSFetchRequest(entityName: TextMessage.entity().name!)))
+        self.coredataCtx.executeOrLogError(NSBatchDeleteRequest(fetchRequest: NSFetchRequest(entityName: VoiceMessage.entity().name!)))
     }
 }

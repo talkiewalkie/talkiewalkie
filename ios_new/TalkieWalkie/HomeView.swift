@@ -5,6 +5,9 @@
 //  Created by Alexandre Carlier on 05.10.21.
 //
 
+import CoreData
+import FirebaseAuth
+import OSLog
 import SwiftUI
 
 class MessageViewModel: ObservableObject {
@@ -12,73 +15,103 @@ class MessageViewModel: ObservableObject {
     @Published var showDetailView: Bool = false
 }
 
-struct HomeView: View {
+class HomeViewModel: ObservableObject {
+    private var auth = Auth.auth()
+    private var coredataCtx: NSManagedObjectContext
+
     @AppStorage("showOnboarding") var showOnboarding: Bool = true
+    @Published var user: FirebaseAuth.User?
+    @Published var authed: AuthenticatedState?
 
-    @State var isRecording = false
+    init(_ ctx: NSManagedObjectContext) {
+        coredataCtx = ctx
+        user = auth.currentUser
 
-    @EnvironmentObject var tooltipManager: TooltipManager
-    @State var guideState = false
-    @AppStorage("onboardGuideShown") var onboardGuideShown: Bool = false
+        auth.addStateDidChangeListener { _, user in
+            self.user = user
 
-    @StateObject var messageViewModel = MessageViewModel()
-    @Namespace var namespace
+            if let user = user, self.showOnboarding {
+                AuthenticatedState.build(fbU: user, context: self.coredataCtx) { s in
+                    self.authed = s
+                }
+            } else {
+                self.authed = nil
+                self.showOnboarding = true
+            }
+        }
+    }
+}
 
-    func showGuide() {
-        if onboardGuideShown { return }
+class AuthenticatedState: ObservableObject {
+    var user: FirebaseAuth.User
+    var gApi: AuthedGrpcApi
+    var context: NSManagedObjectContext
 
-        guideState.toggle()
+    var me: Me { Me.fromCache(context: context)! }
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-            withAnimation(.easeIn) {
-                tooltipManager.isPresented = true
+    static func build(fbU: FirebaseAuth.User, context: NSManagedObjectContext, completion: @escaping (AuthenticatedState) -> Void) {
+        fbU.getIDTokenResult { res, _ in
+            if let token = res {
+                let gApi = AuthedGrpcApi(token: token.token)
+
+                if let me = Me.fromCache(context: context) {
+                    // TODO: even in this case we should query the server to update
+                    // the local cache, just in case.
+                    os_log("loaded user info from cache: \(me)")
+                    completion(AuthenticatedState(user: fbU, gApi: gApi, context: context))
+                } else {
+                    // TODO: add a timeout to api calls.
+                    gApi.queue.async {
+                        let (res, _) = gApi.me()
+                        if let res = res {
+                            let me = Me(context: context)
+                            me.uuid = UUID(uuidString: res.user.uuid)
+                            me.displayName = res.user.handle
+
+                            me.firebaseUid = fbU.uid
+
+                            me.objectWillChange.send()
+                            context.saveOrLogError()
+
+                            completion(AuthenticatedState(user: fbU, gApi: gApi, context: context))
+                        }
+                    }
+                }
             }
         }
     }
 
+    private init(user: FirebaseAuth.User, gApi: AuthedGrpcApi, context: NSManagedObjectContext) {
+        self.user = user
+        self.gApi = gApi
+        self.context = context
+    }
+}
+
+struct HomeView: View {
+    @StateObject var messageViewModel = MessageViewModel()
+    @ObservedObject var homeViewModel: HomeViewModel
+
     var body: some View {
+        let _ = print("show ob: \(homeViewModel.showOnboarding)")
         Group {
-            if showOnboarding {
-                OnboardingView(onboardingDone: onboardingDone)
+            if homeViewModel.showOnboarding {
+                OnboardingView { homeViewModel.showOnboarding = false }
+            } else if let authState = homeViewModel.authed {
+                AuthedView()
+                    .environmentObject(authState)
             } else {
-                ZStack {
-                    DiscussionListView(namespace: namespace)
-
-                    VStack {
-                        Spacer()
-
-                        RecordButton(isRecording: $isRecording)
-                            .tooltip(selectionState: guideState,
-                                     options: .init(orientation: .bottom,
-                                                    padding: 0,
-                                                    floating: true), content: {
-                                         Text("Record a first voice message!")
-                                     }, onDismiss: {
-                                         onboardGuideShown = true
-                                     })
-                            .padding()
-                    }
-
-                    if messageViewModel.showDetailView {
-                        MessageDetailView(namespace: namespace)
-                    }
-                }
-                .onAppear {
-                    showGuide()
-                }
+                ProgressView()
+                    .onAppear { homeViewModel.showOnboarding = true }
             }
         }
         .environmentObject(messageViewModel)
-    }
-
-    func onboardingDone() {
-        showOnboarding = false
     }
 }
 
 struct HomeView_Previews: PreviewProvider {
     static var previews: some View {
-        HomeView(showOnboarding: false, onboardGuideShown: true)
+        HomeView(homeViewModel: HomeViewModel(NSManagedObjectContext(concurrencyType: .mainQueueConcurrencyType)))
             .withDummyVariables()
     }
 }

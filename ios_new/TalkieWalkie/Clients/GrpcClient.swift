@@ -11,16 +11,28 @@ import GRPC
 import NIO
 import OSLog
 
+private class GrpcConnectivityState: ConnectivityStateDelegate {
+    private let logger = Logger.withLabel("grpc-status")
+    func connectivityStateDidChange(from oldState: ConnectivityState, to newState: ConnectivityState) {
+        if oldState != .ready, newState == .ready { logger.debug("got connected") }
+        else if oldState == .ready, newState != .ready { logger.debug("got disconnected") }
+        if newState == .connecting { logger.debug("connecting") }
+        if newState == .transientFailure { logger.debug("error (transient failure)") }
+    }
+}
+
 class AuthedGrpcApi {
     #if DEBUG
         // static let url = URL(string: "https://theo.dev.talkiewalkie.app:443")!
-        // static let url = URL(string: "http://localhost:8080")!
-        static let url = URL(string: "https://7081-2a01-e34-ec46-8190-bd43-eb20-d561-c195.ngrok.io:443")!
+        static let url = URL(string: "http://localhost:8080")!
+        // static let url = URL(string: "https://996a-2a01-cb08-888-9b00-1891-c14-d5f6-9852.ngrok.io:443")!
+        // static let url = URL(string: "http://3245-2a01-cb08-888-9b00-1891-c14-d5f6-9852.ngrok.io:80")!
     #else
         static let url = URL(string: "https://api.talkiewalkie.app:443")!
     #endif
 
-    private let logger = Logger()
+    private let logger = Logger.withLabel("grpc-client")
+    private let stateDelegate = GrpcConnectivityState()
     private let empty = App_Empty()
 
     private let group: EventLoopGroup
@@ -30,13 +42,21 @@ class AuthedGrpcApi {
     private let convClient: App_ConversationServiceClient
     private let mssgClient: App_MessageServiceClient
 
+    public let queue = DispatchQueue(label: "grpc-client")
+
     init(token: String) {
         self.token = token
         group = PlatformSupport.makeEventLoopGroup(loopCount: 1)
 
-        channel = ClientConnection.insecure(group: group)
+        channel = ClientConnection
+            .insecure(group: group)
+            // .usingPlatformAppropriateTLS(for: group)
+            // .usingTLSBackedByNetworkFramework(on: group)
+            // .usingTLSBackedByNIOSSL(on: group)
+            // .usingTLS(with: .makeClientDefault(for: .best), on: group)
             .withKeepalive(ClientConnectionKeepalive(interval: TimeAmount.seconds(10), timeout: TimeAmount.seconds(5)))
             .withConnectionReestablishment(enabled: true)
+            .withConnectivityStateDelegate(stateDelegate, executingOn: queue)
             .connect(host: AuthedGrpcApi.url.host!, port: AuthedGrpcApi.url.port!)
 
         let authedOption = CallOptions(customMetadata: ["Authorization": "Bearer \(token)"])
@@ -104,14 +124,15 @@ class AuthedGrpcApi {
 extension UnaryCall {
     @discardableResult
     func waitForOutput() -> (ResponsePayload?, Error?) {
-        os_log("[grpc] waiting for \(path)")
+        os_log(.debug, "[grpc] \(path) waiting")
 
         let res: ResponsePayload?
         do {
             res = try response.wait()
+            os_log(.debug, "[grpc] \(path) returned")
             return (res, nil)
         } catch {
-            os_log("[grpc] unary call failed with: \(error.localizedDescription)")
+            os_log(.debug, "[grpc] \(path) failed with: \(error.localizedDescription)")
             return (nil, error)
         }
     }
@@ -119,7 +140,7 @@ extension UnaryCall {
 
 extension ServerStreamingCall {
     func waitCompletion() -> Error? {
-        os_log("[grpc] waiting for \(path)")
+        os_log(.debug, "[grpc] \(path) waiting")
         var error: Error?
         var st: GRPCStatus?
 
@@ -133,11 +154,11 @@ extension ServerStreamingCall {
 
         if let code = st?.code, let msg = st?.message, code != .ok {
             let errMsg: String = error?.localizedDescription ?? "[did not catch error]"
-            os_log("[grpc] \(path) returned with status \(code.description), \(msg) error: \(errMsg)")
+            os_log(.debug, "[grpc] \(path) returned with status \(code.description), \(msg) error: \(errMsg)")
             return error
         }
 
-        os_log("[grpc] \(path) completed")
+        os_log(.debug, "[grpc] \(path) completed")
         return nil
     }
 }

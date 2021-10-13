@@ -13,7 +13,7 @@ import PhoneNumberKit
 import SwiftUI
 
 class OnboardingViewModel: ObservableObject {
-    @Published var page: Int = 0
+    @Published var page: Int = Auth.auth().currentUser != nil ? 5 : 0
     @Binding var name: String
     @Published var phoneCountryCode: Int
     @Published var phoneRegionID: String?

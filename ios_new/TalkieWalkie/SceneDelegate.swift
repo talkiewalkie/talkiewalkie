@@ -14,7 +14,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     
     
     lazy var persistentContainer: NSPersistentContainer = {
-        let container = NSPersistentContainer(name: "User")
+        let container = NSPersistentContainer(name: "LocalModels")
 
         container.loadPersistentStores { _, error in
             container.viewContext.automaticallyMergesChangesFromParent = true
@@ -33,10 +33,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
 
         let tooltipManager = TooltipManager()
+        let hmv = HomeViewModel(persistentContainer.viewContext)
 
-        let contentView = HomeView()
+        let contentView = HomeView(homeViewModel: hmv)
             .environmentObject(UserStore(persistentContainer.viewContext))
-
             .addTooltip()
             .environmentObject(tooltipManager)
 
