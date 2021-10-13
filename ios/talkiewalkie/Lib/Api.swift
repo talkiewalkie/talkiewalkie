@@ -215,6 +215,14 @@ struct Api {
 }
 
 class AuthedGrpcApi {
+    #if DEBUG
+        // static let url = URL(string: "https://theo.dev.talkiewalkie.app:443")!
+        // static let url = URL(string: "http://localhost:8080")!
+        static let url = URL(string: "https://7081-2a01-e34-ec46-8190-bd43-eb20-d561-c195.ngrok.io:443")!
+    #else
+        static let url = URL(string: "https://api.talkiewalkie.app:443")!
+    #endif
+
     private let logger = Logger()
     private let empty = App_Empty()
 
@@ -232,7 +240,7 @@ class AuthedGrpcApi {
         channel = ClientConnection.insecure(group: group)
             .withKeepalive(ClientConnectionKeepalive(interval: TimeAmount.seconds(10), timeout: TimeAmount.seconds(5)))
             .withConnectionReestablishment(enabled: true)
-            .connect(host: "localhost", port: 8080)
+            .connect(host: AuthedGrpcApi.url.host!, port: AuthedGrpcApi.url.port!)
 
         let authedOption = CallOptions(customMetadata: ["Authorization": "Bearer \(token)"])
 
