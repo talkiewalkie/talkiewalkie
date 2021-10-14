@@ -17,7 +17,6 @@ import (
 	grpc_ctxtags "github.com/grpc-ecosystem/go-grpc-middleware/tags"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
-	"github.com/soheilhy/cmux"
 	coco "github.com/talkiewalkie/talkiewalkie/grpc"
 	"github.com/talkiewalkie/talkiewalkie/models"
 	"github.com/talkiewalkie/talkiewalkie/pb"
@@ -25,6 +24,8 @@ import (
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/health"
+	"google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 	"log"
@@ -115,6 +116,7 @@ func main() {
 			//grpc_prometheus.StreamServerInterceptor,
 			grpc_auth.StreamServerInterceptor(myAuth(components)),
 		)),
+
 		grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
 			grpc_recovery.UnaryServerInterceptor(),
 			grpc_ctxtags.UnaryServerInterceptor(),
@@ -133,7 +135,14 @@ func main() {
 			//grpc_opentracing.UnaryServerInterceptor(),
 			//grpc_prometheus.UnaryServerInterceptor,
 			//grpc_zap.UnaryServerInterceptor(zapLogger),
-			grpc_auth.UnaryServerInterceptor(myAuth(components)),
+			func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
+				if strings.HasPrefix(info.FullMethod, "/grpc.health.v1.Health/") {
+					return handler(ctx, req)
+				} else {
+					return grpc_auth.UnaryServerInterceptor(myAuth(components))(ctx, req, info, handler)
+				}
+			},
+			//grpc_auth.UnaryServerInterceptor(myAuth(components)),
 		)),
 	)
 
@@ -143,42 +152,18 @@ func main() {
 	pb.RegisterConversationServiceServer(server, cs)
 	ms := coco.NewMessageService(components)
 	pb.RegisterMessageServiceServer(server, ms)
+	grpc_health_v1.RegisterHealthServer(server, health.NewServer())
 
 	lis, err := net.Listen("tcp", *port)
 	if err != nil {
 		panic(err)
 	}
 
-	m := cmux.New(lis)
-	grpcLis := m.Match(cmux.HTTP2HeaderField("content-type", "application/grpc"))
-	httpLis := m.Match(cmux.HTTP1Fast())
-
-	go func() {
-		corsWrapper := handlers.CORS(
-			handlers.AllowCredentials(),
-			// TODO: The sentry-trace header is sent by the web client on initial calls for some reason. It's a bit strange
-			//    and should be investigated - but I wasted enough time on strange CORS errors for the day.
-			handlers.AllowedHeaders([]string{"Authorization", "Content-Type", "sentry-trace", "X-TalkieWalkie-Auth"}),
-			handlers.AllowedOrigins([]string{host}),
-			handlers.AllowedMethods([]string{http.MethodPost, http.MethodGet, http.MethodOptions, http.MethodHead}))
-
-		s := &http.Server{Handler: corsWrapper(router)}
-		log.Printf("http server listening to [%s]", *port)
-		if err := s.Serve(httpLis); err != nil {
-			panic(err)
-		}
-	}()
-
-	go func() {
-		log.Printf("grpc server listening to [%s]", *port)
-		if err = server.Serve(grpcLis); err != nil {
-			panic(err)
-		}
-	}()
-
-	if err = m.Serve(); err != nil {
+	log.Printf("grpc server listening to [%s]", *port)
+	if err = server.Serve(lis); err != nil {
 		panic(err)
 	}
+
 }
 
 func myAuth(c *common.Components) func(ctx context.Context) (context.Context, error) {

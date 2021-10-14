@@ -21,7 +21,7 @@ spec:
             secretName: backend-service-account
 
       containers:
-        - image: gcr.io/talkiewalkie-305117/talkiewalkie-back:86d82d9f61bead709fed7e54db26d8bae73c2700
+        - image: gcr.io/talkiewalkie-305117/talkiewalkie-back:187e73796b5897c443d06a58a8b2b5f915fb2cf7
           imagePullPolicy: Always
           name: back
           ports:
@@ -29,7 +29,7 @@ spec:
           volumeMounts:
             - name: google-cloud-key
               mountPath: /var/secrets/google
-          livenessProbe:
+          readinessProbe:
             exec:
               command: [ "/bin/grpc_health_probe", "-addr=:8080" ]
             timeoutSeconds: 5
