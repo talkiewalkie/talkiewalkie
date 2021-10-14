@@ -16,12 +16,6 @@ spec:
           - backend:
               serviceName: back
               servicePort: 8080
-    - host: grpc.talkiewalkie.app
-      http:
-        paths:
-          - backend:
-              serviceName: back2
-              servicePort: 8080
     - host: web.talkiewalkie.app
       http:
         paths:
