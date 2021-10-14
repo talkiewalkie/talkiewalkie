@@ -19,7 +19,10 @@ class HomeViewModel: ObservableObject {
     private var auth = Auth.auth()
     private var coredataCtx: NSManagedObjectContext
 
-    @AppStorage("showOnboarding") var showOnboarding: Bool = true
+    @AppStorage("showOnboarding") var showOnboarding: Bool = true {
+        willSet { objectWillChange.send() }
+    }
+
     @Published var user: FirebaseAuth.User?
     @Published var authed: AuthenticatedState?
 
@@ -50,7 +53,7 @@ class AuthenticatedState: ObservableObject {
     var me: Me { Me.fromCache(context: context)! }
 
     static func build(_ config: Config, fbU: FirebaseAuth.User, context: NSManagedObjectContext, completion: @escaping (AuthenticatedState) -> Void) {
-        fbU.getIDTokenResult { res, _ in
+        fbU.getIDTokenResult { res, error in
             if let token = res {
                 let gApi = AuthedGrpcApi(url: config.apiUrl, token: token.token)
 
@@ -77,6 +80,8 @@ class AuthenticatedState: ObservableObject {
                         }
                     }
                 }
+            } else if let error = error {
+                os_log(.error, "could not get firebase token: \(error.localizedDescription)")
             }
         }
     }
@@ -93,7 +98,6 @@ struct HomeView: View {
     @ObservedObject var homeViewModel: HomeViewModel
 
     var body: some View {
-        let _ = print("show ob: \(homeViewModel.showOnboarding)")
         Group {
             if homeViewModel.showOnboarding {
                 OnboardingView { homeViewModel.showOnboarding = false }
