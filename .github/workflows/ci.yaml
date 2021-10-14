@@ -57,6 +57,7 @@ jobs:
 
       # Setup gcloud CLI
       - uses: google-github-actions/setup-gcloud@master
+        if: ${{ false }}
         with:
           version: '336.0.0'
           service_account_email: ${{ secrets.GKE_EMAIL }}
@@ -64,6 +65,8 @@ jobs:
 
       # Build the Docker image
       - name: Build
+        # Disable since we have Cloud Build - but keeping since we're lacking an automatic deployment mechanism
+        if: ${{ false }}
         run: |
           # Set up docker to authenticate
           # via gcloud command-line tool.
