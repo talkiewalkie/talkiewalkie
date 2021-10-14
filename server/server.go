@@ -148,9 +148,9 @@ func main() {
 		panic(err)
 	}
 
-	mux := cmux.New(lis)
-	grpcLis := mux.Match(cmux.HTTP2HeaderField("content-type", "application/grpc"))
-	httpLis := mux.Match(cmux.HTTP1Fast())
+	m := cmux.New(lis)
+	grpcLis := m.Match(cmux.HTTP2HeaderField("content-type", "application/grpc"))
+	httpLis := m.Match(cmux.HTTP1Fast())
 
 	go func() {
 		corsWrapper := handlers.CORS(
@@ -168,8 +168,14 @@ func main() {
 		}
 	}()
 
-	log.Printf("grpc server listening to [%s]", *port)
-	if err = server.Serve(grpcLis); err != nil {
+	go func() {
+		log.Printf("grpc server listening to [%s]", *port)
+		if err = server.Serve(grpcLis); err != nil {
+			panic(err)
+		}
+	}()
+
+	if err = m.Serve(); err != nil {
 		panic(err)
 	}
 }
