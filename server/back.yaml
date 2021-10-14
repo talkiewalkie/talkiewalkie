@@ -30,6 +30,8 @@ spec:
             - name: google-cloud-key
               mountPath: /var/secrets/google
           livenessProbe:
+            exec:
+              command: [ "/bin/grpc_health_probe", "-addr=:8080" ]
             httpGet:
               port: 8080
               path: /

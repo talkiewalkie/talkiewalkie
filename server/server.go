@@ -50,6 +50,7 @@ func main() {
 	flag.Parse()
 
 	var host string
+	println(host)
 	switch *env {
 	case "dev":
 		host = "http://localhost:3000"
