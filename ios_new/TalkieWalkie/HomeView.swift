@@ -23,7 +23,7 @@ class HomeViewModel: ObservableObject {
     @Published var user: FirebaseAuth.User?
     @Published var authed: AuthenticatedState?
 
-    init(_ ctx: NSManagedObjectContext) {
+    init(_ ctx: NSManagedObjectContext, config: Config) {
         coredataCtx = ctx
         user = auth.currentUser
 
@@ -31,7 +31,7 @@ class HomeViewModel: ObservableObject {
             self.user = user
 
             if let user = user, self.showOnboarding {
-                AuthenticatedState.build(fbU: user, context: self.coredataCtx) { s in
+                AuthenticatedState.build(config, fbU: user, context: self.coredataCtx) { s in
                     self.authed = s
                 }
             } else {
@@ -49,10 +49,10 @@ class AuthenticatedState: ObservableObject {
 
     var me: Me { Me.fromCache(context: context)! }
 
-    static func build(fbU: FirebaseAuth.User, context: NSManagedObjectContext, completion: @escaping (AuthenticatedState) -> Void) {
+    static func build(_ config: Config, fbU: FirebaseAuth.User, context: NSManagedObjectContext, completion: @escaping (AuthenticatedState) -> Void) {
         fbU.getIDTokenResult { res, _ in
             if let token = res {
-                let gApi = AuthedGrpcApi(token: token.token)
+                let gApi = AuthedGrpcApi(url: config.apiUrl, token: token.token)
 
                 if let me = Me.fromCache(context: context) {
                     // TODO: even in this case we should query the server to update
@@ -111,7 +111,7 @@ struct HomeView: View {
 
 struct HomeView_Previews: PreviewProvider {
     static var previews: some View {
-        HomeView(homeViewModel: HomeViewModel(NSManagedObjectContext(concurrencyType: .mainQueueConcurrencyType)))
+        HomeView(homeViewModel: HomeViewModel(NSManagedObjectContext(concurrencyType: .mainQueueConcurrencyType), config: Config.load(version: "dev")))
             .withDummyVariables()
     }
 }

@@ -22,14 +22,7 @@ private class GrpcConnectivityState: ConnectivityStateDelegate {
 }
 
 class AuthedGrpcApi {
-    #if DEBUG
-        // static let url = URL(string: "https://theo.dev.talkiewalkie.app:443")!
-        static let url = URL(string: "http://localhost:8080")!
-        // static let url = URL(string: "https://996a-2a01-cb08-888-9b00-1891-c14-d5f6-9852.ngrok.io:443")!
-        // static let url = URL(string: "http://3245-2a01-cb08-888-9b00-1891-c14-d5f6-9852.ngrok.io:80")!
-    #else
-        static let url = URL(string: "https://api.talkiewalkie.app:443")!
-    #endif
+    private let url: URL
 
     private let logger = Logger.withLabel("grpc-client")
     private let stateDelegate = GrpcConnectivityState()
@@ -44,20 +37,21 @@ class AuthedGrpcApi {
 
     public let queue = DispatchQueue(label: "grpc-client")
 
-    init(token: String) {
+    init(url: URL, token: String) {
+        self.url = url
         self.token = token
+
         group = PlatformSupport.makeEventLoopGroup(loopCount: 1)
 
-        channel = ClientConnection
-            .insecure(group: group)
-            // .usingPlatformAppropriateTLS(for: group)
-            // .usingTLSBackedByNetworkFramework(on: group)
-            // .usingTLSBackedByNIOSSL(on: group)
-            // .usingTLS(with: .makeClientDefault(for: .best), on: group)
-            .withKeepalive(ClientConnectionKeepalive(interval: TimeAmount.seconds(10), timeout: TimeAmount.seconds(5)))
+        #if DEBUG
+        let channelBuilder = ClientConnection.insecure(group: group)
+        #else
+        let channelBuilder = ClientConnection.usingPlatformAppropriateTLS(for: group)
+        #endif
+        channel = channelBuilder.withKeepalive(ClientConnectionKeepalive(interval: TimeAmount.seconds(10), timeout: TimeAmount.seconds(5)))
             .withConnectionReestablishment(enabled: true)
             .withConnectivityStateDelegate(stateDelegate, executingOn: queue)
-            .connect(host: AuthedGrpcApi.url.host!, port: AuthedGrpcApi.url.port!)
+            .connect(host: url.host!, port: url.port!)
 
         let authedOption = CallOptions(customMetadata: ["Authorization": "Bearer \(token)"])
 

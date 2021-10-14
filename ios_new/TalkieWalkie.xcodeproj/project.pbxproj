@@ -119,6 +119,8 @@
 		E4D9BD9D27157F70005CD3A0 /* CoreData.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4D9BD9C27157F70005CD3A0 /* CoreData.swift */; };
 		E4D9BD9F2715E972005CD3A0 /* AuthedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4D9BD9E2715E972005CD3A0 /* AuthedView.swift */; };
 		E4D9BDA12716019A005CD3A0 /* OSLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4D9BDA02716019A005CD3A0 /* OSLog.swift */; };
+		E4D9BDA32718AA90005CD3A0 /* Config.dev.plist in Resources */ = {isa = PBXBuildFile; fileRef = E4D9BDA22718AA90005CD3A0 /* Config.dev.plist */; };
+		E4D9BDA52718AD75005CD3A0 /* Config.prod.plist in Resources */ = {isa = PBXBuildFile; fileRef = E4D9BDA42718AD75005CD3A0 /* Config.prod.plist */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -225,6 +227,8 @@
 		E4D9BD9C27157F70005CD3A0 /* CoreData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreData.swift; sourceTree = "<group>"; };
 		E4D9BD9E2715E972005CD3A0 /* AuthedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthedView.swift; sourceTree = "<group>"; };
 		E4D9BDA02716019A005CD3A0 /* OSLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OSLog.swift; sourceTree = "<group>"; };
+		E4D9BDA22718AA90005CD3A0 /* Config.dev.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Config.dev.plist; sourceTree = "<group>"; };
+		E4D9BDA42718AD75005CD3A0 /* Config.prod.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Config.prod.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -285,6 +289,8 @@
 		73519D27270B3A34009BA6FF /* TalkieWalkie */ = {
 			isa = PBXGroup;
 			children = (
+				E4D9BDA22718AA90005CD3A0 /* Config.dev.plist */,
+				E4D9BDA42718AD75005CD3A0 /* Config.prod.plist */,
 				E4D9BD762715752F005CD3A0 /* LocalModels.xcdatamodeld */,
 				E4D9BD79271577A9005CD3A0 /* Clients */,
 				734F00AF270F9DEA002B91FC /* LaunchScreen.storyboard */,
@@ -588,10 +594,12 @@
 				73B63B4527107C6700994B92 /* notification-happy.json in Resources */,
 				73853D84270C522300B0B4BF /* BigCaslon.ttf in Resources */,
 				73853D81270C522300B0B4BF /* Futura Bold Oblique.otf in Resources */,
+				E4D9BDA32718AA90005CD3A0 /* Config.dev.plist in Resources */,
 				73519D2D270B3A35009BA6FF /* Assets.xcassets in Resources */,
 				73B63B472710851200994B92 /* recording-bubble.json in Resources */,
 				73853D87270C522300B0B4BF /* Brush Script.ttf in Resources */,
 				73B63B4127107BF900994B92 /* notification-bell.json in Resources */,
+				E4D9BDA52718AD75005CD3A0 /* Config.prod.plist in Resources */,
 				73853D9A270C523D00B0B4BF /* favorite.json in Resources */,
 				73853D82270C522300B0B4BF /* Arial Rounded.ttf in Resources */,
 				734F00B0270F9DEA002B91FC /* LaunchScreen.storyboard in Resources */,

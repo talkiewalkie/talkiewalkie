@@ -5,14 +5,41 @@
 //  Created by Alexandre Carlier on 06.10.21.
 //
 
+import CoreData
 import SwiftUI
 import UIKit
-import CoreData
+
+
+class Config: Decodable, ObservableObject {
+    private enum CodingKeys: String, CodingKey {
+        case apiHost, apiPort
+    }
+
+    let apiHost: String
+    let apiPort: Int
+
+    static func load(version: String) -> Config {
+        let url = Bundle.main.url(forResource: "Config.\(version)", withExtension: "plist")!
+        let data = try! Data(contentsOf: url)
+        let decoder = PropertyListDecoder()
+        return try! decoder.decode(Config.self, from: data)
+    }
+    
+    var apiUrl: URL {
+        #if DEBUG
+        let transport = "http://"
+        #else
+        let transport = "https://"
+        #endif
+        
+        return URL(string: "\(transport)\(apiHost):\(apiPort)")!
+    }
+}
+
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
-    
-    
+
     lazy var persistentContainer: NSPersistentContainer = {
         let container = NSPersistentContainer(name: "LocalModels")
 
@@ -32,13 +59,19 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // If using a storyboard, the `window` property will automatically be initialized and attached to the scene.
         // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
 
+        #if DEBUG
+        let config = Config.load(version: "dev")
+        #else
+        let config = Config.load(version: "prod")
+        #endif
         let tooltipManager = TooltipManager()
-        let hmv = HomeViewModel(persistentContainer.viewContext)
+        let hmv = HomeViewModel(persistentContainer.viewContext, config: config)
 
         let contentView = HomeView(homeViewModel: hmv)
             .environmentObject(UserStore(persistentContainer.viewContext))
             .addTooltip()
             .environmentObject(tooltipManager)
+            .environmentObject(config)
 
         // Use a UIHostingController as window root view controller.
         if let windowScene = scene as? UIWindowScene {
