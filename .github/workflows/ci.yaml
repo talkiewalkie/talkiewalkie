@@ -47,7 +47,9 @@ jobs:
           curl -LO https://golang.org/dl/go1.16.4.linux-amd64.tar.gz
           sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf go1.16.4.linux-amd64.tar.gz
           export PATH=$PATH:/usr/local/go/bin
-          pushd server && go get -d -v ./... && popd
+          # following
+          # https://github.com/golang-migrate/migrate/issues/622#issuecomment-923893440
+          pushd server && go get -d -v ./... && go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest && popd
 
       - name: Test
         run: |
