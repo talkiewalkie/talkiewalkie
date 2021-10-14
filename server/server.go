@@ -17,11 +17,10 @@ import (
 	grpc_ctxtags "github.com/grpc-ecosystem/go-grpc-middleware/tags"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
+	"github.com/soheilhy/cmux"
 	coco "github.com/talkiewalkie/talkiewalkie/grpc"
 	"github.com/talkiewalkie/talkiewalkie/models"
 	"github.com/talkiewalkie/talkiewalkie/pb"
-	"github.com/talkiewalkie/talkiewalkie/routes"
-	"github.com/talkiewalkie/talkiewalkie/websockets"
 	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"google.golang.org/grpc"
@@ -62,8 +61,6 @@ func main() {
 	default:
 		log.Panicf("bad env: %s", *env)
 	}
-	// USELESS
-	log.Printf(host)
 
 	dbUrl := common.DbUrl(
 		"talkiewalkie",
@@ -96,22 +93,6 @@ func main() {
 		},
 		common.WithContextMiddleWare(components),
 		common.RecoverMiddleWare)
-
-	router.HandleFunc("/walks", routes.Walks).Methods(http.MethodGet)
-	router.HandleFunc("/walk/{uuid}", routes.WalkByUuid).Methods(http.MethodGet)
-	router.HandleFunc("/walk", routes.CreateWalk).Methods(http.MethodPost)
-
-	router.HandleFunc("/user/{handle}", routes.UserByHandle).Methods(http.MethodGet)
-	router.HandleFunc("/me/friends", routes.Friends).Methods(http.MethodGet)
-	router.HandleFunc("/me/conversations", routes.Conversations).Methods(http.MethodGet)
-	router.HandleFunc("/me", routes.Me).Methods(http.MethodGet)
-
-	router.HandleFunc("/conversation/{uuid}", routes.ConversationByUuid).Methods(http.MethodGet)
-	router.HandleFunc("/message", routes.Message).Methods(http.MethodPost)
-
-	router.HandleFunc("/asset", routes.UploadHandler).Methods(http.MethodPost)
-
-	router.HandleFunc("/ws/conversations", websockets.ConversationWebsocketHandler)
 
 	server := grpc.NewServer(
 		grpc.StreamInterceptor(grpc_middleware.ChainStreamServer(
@@ -167,23 +148,30 @@ func main() {
 		panic(err)
 	}
 
+	mux := cmux.New(lis)
+	grpcLis := mux.Match(cmux.HTTP2HeaderField("content-type", "application/grpc"))
+	httpLis := mux.Match(cmux.HTTP1Fast())
+
+	go func() {
+		corsWrapper := handlers.CORS(
+			handlers.AllowCredentials(),
+			// TODO: The sentry-trace header is sent by the web client on initial calls for some reason. It's a bit strange
+			//    and should be investigated - but I wasted enough time on strange CORS errors for the day.
+			handlers.AllowedHeaders([]string{"Authorization", "Content-Type", "sentry-trace", "X-TalkieWalkie-Auth"}),
+			handlers.AllowedOrigins([]string{host}),
+			handlers.AllowedMethods([]string{http.MethodPost, http.MethodGet, http.MethodOptions, http.MethodHead}))
+
+		s := &http.Server{Handler: corsWrapper(router)}
+		log.Printf("http server listening to [%s]", *port)
+		if err := s.Serve(httpLis); err != nil {
+			panic(err)
+		}
+	}()
+
 	log.Printf("grpc server listening to [%s]", *port)
-	if err = server.Serve(lis); err != nil {
+	if err = server.Serve(grpcLis); err != nil {
 		panic(err)
 	}
-
-	//corsWrapper := handlers.CORS(
-	//	handlers.AllowCredentials(),
-	//	// TODO: The sentry-trace header is sent by the web client on initial calls for some reason. It's a bit strange
-	//	//    and should be investigated - but I wasted enough time on strange CORS errors for the day.
-	//	handlers.AllowedHeaders([]string{"Authorization", "Content-Type", "sentry-trace", "X-TalkieWalkie-Auth"}),
-	//	handlers.AllowedOrigins([]string{host}),
-	//	handlers.AllowedMethods([]string{http.MethodPost, http.MethodGet, http.MethodOptions, http.MethodHead}))
-	//
-	//log.Printf("listening on port %s", *port)
-	//if err := http.ListenAndServe(*port, corsWrapper(router)); err != nil {
-	//	log.Printf("could not serve: %v", err)
-	//}
 }
 
 func myAuth(c *common.Components) func(ctx context.Context) (context.Context, error) {
