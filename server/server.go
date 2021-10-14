@@ -27,6 +27,7 @@ import (
 	"google.golang.org/grpc/health"
 	"google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/reflection"
 	"google.golang.org/grpc/status"
 	"log"
 	"net"
@@ -114,7 +115,13 @@ func main() {
 			},
 			//grpc_opentracing.StreamServerInterceptor(),
 			//grpc_prometheus.StreamServerInterceptor,
-			grpc_auth.StreamServerInterceptor(myAuth(components)),
+			func(srv interface{}, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
+				if strings.HasPrefix(info.FullMethod, "/grpc.reflection") {
+					return handler(srv, ss)
+				} else {
+					return grpc_auth.StreamServerInterceptor(myAuth(components))(srv, ss, info, handler)
+				}
+			},
 		)),
 
 		grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
@@ -136,7 +143,8 @@ func main() {
 			//grpc_prometheus.UnaryServerInterceptor,
 			//grpc_zap.UnaryServerInterceptor(zapLogger),
 			func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
-				if strings.HasPrefix(info.FullMethod, "/grpc.health.v1.Health/") {
+				if strings.HasPrefix(info.FullMethod, "/grpc.health.v1.Health/") ||
+					strings.HasPrefix(info.FullMethod, "/grpc.reflection") {
 					return handler(ctx, req)
 				} else {
 					return grpc_auth.UnaryServerInterceptor(myAuth(components))(ctx, req, info, handler)
@@ -153,6 +161,10 @@ func main() {
 	ms := coco.NewMessageService(components)
 	pb.RegisterMessageServiceServer(server, ms)
 	grpc_health_v1.RegisterHealthServer(server, health.NewServer())
+
+	if *env != "prod" {
+		reflection.Register(server)
+	}
 
 	lis, err := net.Listen("tcp", *port)
 	if err != nil {

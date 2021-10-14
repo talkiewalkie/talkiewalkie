@@ -65,10 +65,13 @@ apiVersion: v1
 kind: Service
 metadata:
   name: back
+  annotations:
+    cloud.google.com/app-protocols: '{"main":"HTTP2"}'
 spec:
   type: ClusterIP
   selector:
     app: back
   ports:
     - port: 8080
+      name: main
 
