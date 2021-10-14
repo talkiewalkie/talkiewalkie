@@ -15,7 +15,6 @@ import (
 	"time"
 
 	"github.com/jmoiron/sqlx"
-	uuid "github.com/satori/go.uuid"
 	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/types/pgeo"
@@ -48,32 +47,6 @@ func TearDownDb(db *sqlx.DB) {
 		log.Panicf("could not reset db state: %+v", err)
 	}
 }
-
-type FakeStorageClient struct{}
-
-func (f FakeStorageClient) AssetUrl(asset *models.Asset) (string, error) {
-	return "https://some.fake.url/123", nil
-}
-
-func (f FakeStorageClient) DefaultBucket() string {
-	return "test-bucket"
-}
-
-func (f FakeStorageClient) Download(blobName string, writer io.Writer) error {
-	_, err := writer.Write([]byte("hello this is test content"))
-	return err
-}
-
-func (f FakeStorageClient) Upload(ctx context.Context, blob io.Reader) (*uuid.UUID, error) {
-	uid := uuid.NewV4()
-	return &uid, nil
-}
-
-func (f FakeStorageClient) SignedUrl(bucket, blobName string) (string, error) {
-	return "https://some.fake.url/123", nil
-}
-
-var _ common.StorageClient = FakeStorageClient{}
 
 func AddFakeComponentsToRequest(r *http.Request, u *models.User, db *sqlx.DB) *http.Request {
 	pgps := common.NewPgPubSub(db, testDbUrl())
