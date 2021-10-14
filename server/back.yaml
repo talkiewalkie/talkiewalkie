@@ -29,13 +29,6 @@ spec:
           volumeMounts:
             - name: google-cloud-key
               mountPath: /var/secrets/google
-          readinessProbe:
-            httpGet:
-              path: /
-              port: 8080
-            initialDelaySeconds: 2
-            periodSeconds: 3
-            successThreshold: 1
           livenessProbe:
             httpGet:
               port: 8080
