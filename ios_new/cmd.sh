@@ -17,15 +17,15 @@ ios_dev_install() {
 }
 
 codegen() {
-  protoc -I=protos \
-      --proto_path=../protos \
+  protoc -I=../server/protos \
+      --proto_path=../server/protos \
       --plugin="${HOME}/.local/bin/protoc-gen-swift" \
       --swift_opt=Visibility=Public \
       --swift_out=TalkieWalkie/Clients \
       --plugin="${HOME}/.local/bin/protoc-gen-grpc-swift" \
       --grpc-swift_opt=Visibility=Public \
       --grpc-swift_out=TalkieWalkie/Clients \
-      ../protos/app.proto
+      ../server/protos/app.proto
 }
 
 refresh_config() {

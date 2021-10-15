@@ -30,7 +30,7 @@ func MessageToPb(m *models.Message) (*pb.Message, error) {
 		Uuid:      m.UUID.String(),
 		ConvUuid:  m.R.Conversation.UUID.String(),
 		Content:   content,
-		Author:    &pb.User{Uuid: m.R.Author.UUID.String(), Handle: m.R.Author.Handle},
+		Author:    &pb.User{Uuid: m.R.Author.UUID.String(), DisplayName: UserDisplayName(m.R.Author)},
 		CreatedAt: timestamppb.New(m.CreatedAt),
 	}, nil
 }

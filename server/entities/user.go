@@ -33,6 +33,14 @@ func UserConversations(ctx common.Context, offset, pageSz int) (models.Conversat
 	return conversations, nil
 }
 
+func UserDisplayName(u *models.User) string {
+	if u.DisplayName.Valid {
+		return u.DisplayName.String
+	} else {
+		return u.PhoneNumber
+	}
+}
+
 func UserPubSubTopic(u *models.User) string {
 	return strings.Replace(fmt.Sprintf("user-conn-%s", u.UUID), "-", "_", -1)
 }

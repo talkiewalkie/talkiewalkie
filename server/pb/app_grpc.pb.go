@@ -102,6 +102,7 @@ var Utils_ServiceDesc = grpc.ServiceDesc{
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type UserServiceClient interface {
+	Onboarding(ctx context.Context, in *OnboardingInput, opts ...grpc.CallOption) (*MeUser, error)
 	Me(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*MeUser, error)
 	Get(ctx context.Context, in *UserGetInput, opts ...grpc.CallOption) (*User, error)
 	List(ctx context.Context, in *UserListInput, opts ...grpc.CallOption) (UserService_ListClient, error)
@@ -113,6 +114,15 @@ type userServiceClient struct {
 
 func NewUserServiceClient(cc grpc.ClientConnInterface) UserServiceClient {
 	return &userServiceClient{cc}
+}
+
+func (c *userServiceClient) Onboarding(ctx context.Context, in *OnboardingInput, opts ...grpc.CallOption) (*MeUser, error) {
+	out := new(MeUser)
+	err := c.cc.Invoke(ctx, "/app.UserService/Onboarding", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *userServiceClient) Me(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*MeUser, error) {
@@ -169,6 +179,7 @@ func (x *userServiceListClient) Recv() (*User, error) {
 // All implementations should embed UnimplementedUserServiceServer
 // for forward compatibility
 type UserServiceServer interface {
+	Onboarding(context.Context, *OnboardingInput) (*MeUser, error)
 	Me(context.Context, *Empty) (*MeUser, error)
 	Get(context.Context, *UserGetInput) (*User, error)
 	List(*UserListInput, UserService_ListServer) error
@@ -178,6 +189,9 @@ type UserServiceServer interface {
 type UnimplementedUserServiceServer struct {
 }
 
+func (UnimplementedUserServiceServer) Onboarding(context.Context, *OnboardingInput) (*MeUser, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Onboarding not implemented")
+}
 func (UnimplementedUserServiceServer) Me(context.Context, *Empty) (*MeUser, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Me not implemented")
 }
@@ -197,6 +211,24 @@ type UnsafeUserServiceServer interface {
 
 func RegisterUserServiceServer(s grpc.ServiceRegistrar, srv UserServiceServer) {
 	s.RegisterService(&UserService_ServiceDesc, srv)
+}
+
+func _UserService_Onboarding_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(OnboardingInput)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).Onboarding(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/app.UserService/Onboarding",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).Onboarding(ctx, req.(*OnboardingInput))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _UserService_Me_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -263,6 +295,10 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "app.UserService",
 	HandlerType: (*UserServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "Onboarding",
+			Handler:    _UserService_Onboarding_Handler,
+		},
 		{
 			MethodName: "Me",
 			Handler:    _UserService_Me_Handler,

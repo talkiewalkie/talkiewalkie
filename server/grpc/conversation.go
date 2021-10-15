@@ -11,7 +11,6 @@ import (
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"strings"
 )
 
 type ConversationService struct {
@@ -52,7 +51,7 @@ func (c ConversationService) Get(ctx context.Context, input *pb.ConversationGetI
 
 	return &pb.Conversation{
 		Uuid:     conv.UUID.String(),
-		Title:    entities.ConversationDisplay(*conv),
+		Title:    entities.ConversationDisplay(conv),
 		Messages: msgs,
 	}, nil
 }
@@ -73,19 +72,7 @@ func (c ConversationService) List(input *pb.ConversationListInput, server pb.Con
 		conv := uc.R.Conversation
 		title := conv.Name.String
 		if !conv.Name.Valid {
-			handles := []string{}
-			for _, participant := range conv.R.UserConversations {
-				redundant := false
-				for _, h := range handles {
-					if h == participant.R.User.Handle {
-						redundant = true
-					}
-				}
-				if !redundant {
-					handles = append(handles, participant.R.User.Handle)
-				}
-			}
-			title = strings.Join(handles, ", ")
+			title = entities.ConversationDisplay(conv)
 		}
 		if err = server.Send(&pb.Conversation{
 			Uuid:  conv.UUID.String(),

@@ -5,6 +5,7 @@ metadata:
     kubernetes.io/ingress.class: "gce"
     networking.gke.io/managed-certificates: talkiewalkie
     kubernetes.io/ingress.global-static-ip-name: tw-ip
+    cloud.google.com/backend-config: '{"ports": {"back": "back-lb-rules"}}'
   labels:
     app: talkiewalkie
   name: ingress

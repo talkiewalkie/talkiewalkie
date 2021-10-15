@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"github.com/bxcodec/faker/v3"
 	"github.com/friendsofgo/errors"
-	"github.com/gosimple/slug"
 	"github.com/joho/godotenv"
 	"github.com/talkiewalkie/talkiewalkie/common"
 	"github.com/talkiewalkie/talkiewalkie/models"
@@ -18,14 +17,14 @@ import (
 )
 
 var (
-	email = flag.String("email", "", "an email address you'll login with")
+	phone = flag.String("phone", "", "normalized phone number, e.g. +33685930995")
 )
 
 func main() {
 	flag.Parse()
 	ctx := context.Background()
 
-	if *email == "" {
+	if *phone == "" {
 		fmt.Println("you need to provide your email address")
 		return
 	}
@@ -39,7 +38,7 @@ func main() {
 		log.Panicf("could not initiate components: %+v", err)
 	}
 
-	fbu, err := components.FbAuth.GetUserByEmail(ctx, *email)
+	fbu, err := components.FbAuth.GetUserByPhoneNumber(ctx, *phone)
 	if err != nil {
 		log.Panicf("could not fetch firebase user: %+v", err)
 	}
@@ -47,7 +46,7 @@ func main() {
 	u, err := models.Users(models.UserWhere.FirebaseUID.EQ(null.StringFrom(fbu.UID))).One(ctx, components.Db)
 	if err != nil {
 		if errors.Cause(err) == sql.ErrNoRows {
-			u = &models.User{Handle: slug.Make(*email), FirebaseUID: null.StringFrom(fbu.UID)}
+			u = &models.User{DisplayName: null.StringFrom("me(dev)"), FirebaseUID: null.StringFrom(fbu.UID)}
 			if err = u.Insert(ctx, components.Db, boil.Infer()); err != nil {
 				log.Panicf("could create user for email: %+v", err)
 			}
@@ -59,7 +58,7 @@ func main() {
 	for i := 0; i < 10; i += 1 {
 		friends := []*models.User{u}
 		for j := 0; j < rand.Intn(6)+1; j += 1 {
-			friend := &models.User{Handle: faker.Username(), FirebaseUID: null.String{}}
+			friend := &models.User{DisplayName: null.StringFrom(faker.Username()), FirebaseUID: null.String{}}
 			if err = friend.Insert(ctx, components.Db, boil.Infer()); err != nil {
 				log.Panicf("could not insert new friend: %+v", err)
 			}
@@ -71,7 +70,7 @@ func main() {
 			log.Panicf("could not insert new conv: %+v", err)
 		}
 
-		fmt.Printf("[%s] new conv[%s]", u.Handle, conv.UUID.String())
+		fmt.Printf("[%s] new conv[%s]", u.DisplayName, conv.UUID.String())
 
 		for _, f := range friends {
 			uc := models.UserConversation{UserID: f.ID, ConversationID: conv.ID}

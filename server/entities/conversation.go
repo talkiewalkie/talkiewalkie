@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-func ConversationDisplay(c models.Conversation) string {
+func ConversationDisplay(c *models.Conversation) string {
 	display := c.Name.String
 	if c.Name.Valid {
 		return display
@@ -15,13 +15,14 @@ func ConversationDisplay(c models.Conversation) string {
 	handles := []string{}
 	for _, ug := range c.R.UserConversations {
 		redundant := false
+		displayName := UserDisplayName(ug.R.User)
 		for _, h := range handles {
-			if h == ug.R.User.Handle {
+			if h == displayName {
 				redundant = true
 			}
 		}
 		if !redundant {
-			handles = append(handles, ug.R.User.Handle)
+			handles = append(handles, displayName)
 		}
 	}
 

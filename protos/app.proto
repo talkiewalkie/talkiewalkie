@@ -14,7 +14,7 @@ service Utils {
 message Empty {}
 
 message User {
-  string handle = 1;
+  string displayName = 1;
   string uuid = 2;
   repeated Conversation conversations = 3;
 }
@@ -35,7 +35,13 @@ message UserListInput {
   int32 page = 1;
 }
 
+message OnboardingInput {
+  string displayName = 1;
+  repeated string locales = 2;
+}
+
 service UserService {
+  rpc Onboarding(OnboardingInput) returns (MeUser) {}
   rpc Me(Empty)  returns (MeUser) {}
   rpc Get(UserGetInput)  returns (User) {}
   rpc List(UserListInput)  returns (stream User) {}

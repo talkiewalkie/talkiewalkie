@@ -6,10 +6,7 @@ import (
 	"firebase.google.com/go/v4/auth"
 	"fmt"
 	"github.com/go-chi/jwtauth"
-	"github.com/gosimple/slug"
 	"github.com/jmoiron/sqlx"
-	"github.com/talkiewalkie/talkiewalkie/models"
-	"github.com/volatiletech/sqlboiler/v4/boil"
 	"log"
 	"math/rand"
 	"os"
@@ -64,19 +61,6 @@ func InitComponents() (*Components, error) {
 	}
 
 	pgPubSub := NewPgPubSub(db, dsName)
-
-	models.AddUserHook(boil.BeforeInsertHook, func(ctx context.Context, db boil.ContextExecutor, u *models.User) error {
-		u.Handle = slug.Make(u.Handle)
-		return nil
-	})
-	models.AddUserHook(boil.BeforeUpdateHook, func(ctx context.Context, db boil.ContextExecutor, u *models.User) error {
-		u.Handle = slug.Make(u.Handle)
-		return nil
-	})
-	models.AddUserHook(boil.BeforeUpsertHook, func(ctx context.Context, db boil.ContextExecutor, u *models.User) error {
-		u.Handle = slug.Make(u.Handle)
-		return nil
-	})
 
 	return &Components{
 		Db:          db,

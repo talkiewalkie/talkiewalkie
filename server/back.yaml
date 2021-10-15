@@ -26,6 +26,9 @@ spec:
           name: back
           ports:
             - containerPort: 8080
+              name: grpc
+            - containerPort: 8081
+              name: health
           volumeMounts:
             - name: google-cloud-key
               mountPath: /var/secrets/google
@@ -74,4 +77,5 @@ spec:
   ports:
     - port: 8080
       name: main
-
+    - port: 8081
+      name: health

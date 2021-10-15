@@ -20,62 +20,78 @@ import (
 	"github.com/volatiletech/sqlboiler/v4/queries"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 	"github.com/volatiletech/sqlboiler/v4/queries/qmhelper"
+	"github.com/volatiletech/sqlboiler/v4/types"
 	"github.com/volatiletech/strmangle"
 )
 
 // User is an object representing the database table.
 type User struct {
-	ID             int         `db:"id" boil:"id" json:"id" toml:"id" yaml:"id"`
-	UUID           uuid.UUID   `db:"uuid" boil:"uuid" json:"uuid" toml:"uuid" yaml:"uuid"`
-	Handle         string      `db:"handle" boil:"handle" json:"handle" toml:"handle" yaml:"handle"`
-	FirebaseUID    null.String `db:"firebase_uid" boil:"firebase_uid" json:"firebase_uid,omitempty" toml:"firebase_uid" yaml:"firebase_uid,omitempty"`
-	ProfilePicture null.Int    `db:"profile_picture" boil:"profile_picture" json:"profile_picture,omitempty" toml:"profile_picture" yaml:"profile_picture,omitempty"`
-	CreatedAt      null.Time   `db:"created_at" boil:"created_at" json:"created_at,omitempty" toml:"created_at" yaml:"created_at,omitempty"`
-	UpdatedAt      null.Time   `db:"updated_at" boil:"updated_at" json:"updated_at,omitempty" toml:"updated_at" yaml:"updated_at,omitempty"`
-	Bio            null.String `db:"bio" boil:"bio" json:"bio,omitempty" toml:"bio" yaml:"bio,omitempty"`
+	ID                 int               `db:"id" boil:"id" json:"id" toml:"id" yaml:"id"`
+	UUID               uuid.UUID         `db:"uuid" boil:"uuid" json:"uuid" toml:"uuid" yaml:"uuid"`
+	FirebaseUID        null.String       `db:"firebase_uid" boil:"firebase_uid" json:"firebase_uid,omitempty" toml:"firebase_uid" yaml:"firebase_uid,omitempty"`
+	ProfilePicture     null.Int          `db:"profile_picture" boil:"profile_picture" json:"profile_picture,omitempty" toml:"profile_picture" yaml:"profile_picture,omitempty"`
+	CreatedAt          null.Time         `db:"created_at" boil:"created_at" json:"created_at,omitempty" toml:"created_at" yaml:"created_at,omitempty"`
+	UpdatedAt          null.Time         `db:"updated_at" boil:"updated_at" json:"updated_at,omitempty" toml:"updated_at" yaml:"updated_at,omitempty"`
+	Bio                null.String       `db:"bio" boil:"bio" json:"bio,omitempty" toml:"bio" yaml:"bio,omitempty"`
+	PhoneNumber        string            `db:"phone_number" boil:"phone_number" json:"phone_number" toml:"phone_number" yaml:"phone_number"`
+	OnboardingFinished bool              `db:"onboarding_finished" boil:"onboarding_finished" json:"onboarding_finished" toml:"onboarding_finished" yaml:"onboarding_finished"`
+	DisplayName        null.String       `db:"display_name" boil:"display_name" json:"display_name,omitempty" toml:"display_name" yaml:"display_name,omitempty"`
+	Locales            types.StringArray `db:"locales" boil:"locales" json:"locales,omitempty" toml:"locales" yaml:"locales,omitempty"`
 
 	R *userR `db:"-" boil:"-" json:"-" toml:"-" yaml:"-"`
 	L userL  `db:"-" boil:"-" json:"-" toml:"-" yaml:"-"`
 }
 
 var UserColumns = struct {
-	ID             string
-	UUID           string
-	Handle         string
-	FirebaseUID    string
-	ProfilePicture string
-	CreatedAt      string
-	UpdatedAt      string
-	Bio            string
+	ID                 string
+	UUID               string
+	FirebaseUID        string
+	ProfilePicture     string
+	CreatedAt          string
+	UpdatedAt          string
+	Bio                string
+	PhoneNumber        string
+	OnboardingFinished string
+	DisplayName        string
+	Locales            string
 }{
-	ID:             "id",
-	UUID:           "uuid",
-	Handle:         "handle",
-	FirebaseUID:    "firebase_uid",
-	ProfilePicture: "profile_picture",
-	CreatedAt:      "created_at",
-	UpdatedAt:      "updated_at",
-	Bio:            "bio",
+	ID:                 "id",
+	UUID:               "uuid",
+	FirebaseUID:        "firebase_uid",
+	ProfilePicture:     "profile_picture",
+	CreatedAt:          "created_at",
+	UpdatedAt:          "updated_at",
+	Bio:                "bio",
+	PhoneNumber:        "phone_number",
+	OnboardingFinished: "onboarding_finished",
+	DisplayName:        "display_name",
+	Locales:            "locales",
 }
 
 var UserTableColumns = struct {
-	ID             string
-	UUID           string
-	Handle         string
-	FirebaseUID    string
-	ProfilePicture string
-	CreatedAt      string
-	UpdatedAt      string
-	Bio            string
+	ID                 string
+	UUID               string
+	FirebaseUID        string
+	ProfilePicture     string
+	CreatedAt          string
+	UpdatedAt          string
+	Bio                string
+	PhoneNumber        string
+	OnboardingFinished string
+	DisplayName        string
+	Locales            string
 }{
-	ID:             "user.id",
-	UUID:           "user.uuid",
-	Handle:         "user.handle",
-	FirebaseUID:    "user.firebase_uid",
-	ProfilePicture: "user.profile_picture",
-	CreatedAt:      "user.created_at",
-	UpdatedAt:      "user.updated_at",
-	Bio:            "user.bio",
+	ID:                 "user.id",
+	UUID:               "user.uuid",
+	FirebaseUID:        "user.firebase_uid",
+	ProfilePicture:     "user.profile_picture",
+	CreatedAt:          "user.created_at",
+	UpdatedAt:          "user.updated_at",
+	Bio:                "user.bio",
+	PhoneNumber:        "user.phone_number",
+	OnboardingFinished: "user.onboarding_finished",
+	DisplayName:        "user.display_name",
+	Locales:            "user.locales",
 }
 
 // Generated where
@@ -103,24 +119,64 @@ func (w whereHelpernull_Time) GTE(x null.Time) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.GTE, x)
 }
 
+type whereHelperbool struct{ field string }
+
+func (w whereHelperbool) EQ(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
+func (w whereHelperbool) NEQ(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
+func (w whereHelperbool) LT(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
+func (w whereHelperbool) LTE(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
+func (w whereHelperbool) GT(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
+func (w whereHelperbool) GTE(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
+
+type whereHelpertypes_StringArray struct{ field string }
+
+func (w whereHelpertypes_StringArray) EQ(x types.StringArray) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, false, x)
+}
+func (w whereHelpertypes_StringArray) NEQ(x types.StringArray) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, true, x)
+}
+func (w whereHelpertypes_StringArray) IsNull() qm.QueryMod { return qmhelper.WhereIsNull(w.field) }
+func (w whereHelpertypes_StringArray) IsNotNull() qm.QueryMod {
+	return qmhelper.WhereIsNotNull(w.field)
+}
+func (w whereHelpertypes_StringArray) LT(x types.StringArray) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelpertypes_StringArray) LTE(x types.StringArray) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelpertypes_StringArray) GT(x types.StringArray) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelpertypes_StringArray) GTE(x types.StringArray) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
+
 var UserWhere = struct {
-	ID             whereHelperint
-	UUID           whereHelperuuid_UUID
-	Handle         whereHelperstring
-	FirebaseUID    whereHelpernull_String
-	ProfilePicture whereHelpernull_Int
-	CreatedAt      whereHelpernull_Time
-	UpdatedAt      whereHelpernull_Time
-	Bio            whereHelpernull_String
+	ID                 whereHelperint
+	UUID               whereHelperuuid_UUID
+	FirebaseUID        whereHelpernull_String
+	ProfilePicture     whereHelpernull_Int
+	CreatedAt          whereHelpernull_Time
+	UpdatedAt          whereHelpernull_Time
+	Bio                whereHelpernull_String
+	PhoneNumber        whereHelperstring
+	OnboardingFinished whereHelperbool
+	DisplayName        whereHelpernull_String
+	Locales            whereHelpertypes_StringArray
 }{
-	ID:             whereHelperint{field: "\"user\".\"id\""},
-	UUID:           whereHelperuuid_UUID{field: "\"user\".\"uuid\""},
-	Handle:         whereHelperstring{field: "\"user\".\"handle\""},
-	FirebaseUID:    whereHelpernull_String{field: "\"user\".\"firebase_uid\""},
-	ProfilePicture: whereHelpernull_Int{field: "\"user\".\"profile_picture\""},
-	CreatedAt:      whereHelpernull_Time{field: "\"user\".\"created_at\""},
-	UpdatedAt:      whereHelpernull_Time{field: "\"user\".\"updated_at\""},
-	Bio:            whereHelpernull_String{field: "\"user\".\"bio\""},
+	ID:                 whereHelperint{field: "\"user\".\"id\""},
+	UUID:               whereHelperuuid_UUID{field: "\"user\".\"uuid\""},
+	FirebaseUID:        whereHelpernull_String{field: "\"user\".\"firebase_uid\""},
+	ProfilePicture:     whereHelpernull_Int{field: "\"user\".\"profile_picture\""},
+	CreatedAt:          whereHelpernull_Time{field: "\"user\".\"created_at\""},
+	UpdatedAt:          whereHelpernull_Time{field: "\"user\".\"updated_at\""},
+	Bio:                whereHelpernull_String{field: "\"user\".\"bio\""},
+	PhoneNumber:        whereHelperstring{field: "\"user\".\"phone_number\""},
+	OnboardingFinished: whereHelperbool{field: "\"user\".\"onboarding_finished\""},
+	DisplayName:        whereHelpernull_String{field: "\"user\".\"display_name\""},
+	Locales:            whereHelpertypes_StringArray{field: "\"user\".\"locales\""},
 }
 
 // UserRels is where relationship names are stored.
@@ -156,9 +212,9 @@ func (*userR) NewStruct() *userR {
 type userL struct{}
 
 var (
-	userAllColumns            = []string{"id", "uuid", "handle", "firebase_uid", "profile_picture", "created_at", "updated_at", "bio"}
-	userColumnsWithoutDefault = []string{"handle", "firebase_uid", "profile_picture", "bio"}
-	userColumnsWithDefault    = []string{"id", "uuid", "created_at", "updated_at"}
+	userAllColumns            = []string{"id", "uuid", "firebase_uid", "profile_picture", "created_at", "updated_at", "bio", "phone_number", "onboarding_finished", "display_name", "locales"}
+	userColumnsWithoutDefault = []string{"firebase_uid", "profile_picture", "bio", "phone_number", "display_name", "locales"}
+	userColumnsWithDefault    = []string{"id", "uuid", "created_at", "updated_at", "onboarding_finished"}
 	userPrimaryKeyColumns     = []string{"id"}
 )
 

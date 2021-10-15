@@ -2,15 +2,9 @@ package main
 
 import (
 	"context"
-	"database/sql"
-	"errors"
 	"flag"
 	"fmt"
-	errors2 "github.com/friendsofgo/errors"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
-	"github.com/gorilla/handlers"
-	"github.com/gorilla/mux"
-	"github.com/gosimple/slug"
 	"github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_auth "github.com/grpc-ecosystem/go-grpc-middleware/auth"
 	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
@@ -18,17 +12,12 @@ import (
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	coco "github.com/talkiewalkie/talkiewalkie/grpc"
-	"github.com/talkiewalkie/talkiewalkie/models"
 	"github.com/talkiewalkie/talkiewalkie/pb"
-	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/health"
 	"google.golang.org/grpc/health/grpc_health_v1"
-	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/reflection"
-	"google.golang.org/grpc/status"
 	"log"
 	"net"
 	"net/http"
@@ -79,24 +68,6 @@ func main() {
 
 	boil.DebugMode = true
 
-	router := mux.NewRouter()
-	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-	})
-	router.Use(
-		// No logging for root
-		func(next http.Handler) http.Handler {
-			return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				if r.URL.String() == "/" {
-					next.ServeHTTP(w, r)
-				} else {
-					handlers.CombinedLoggingHandler(os.Stdout, next).ServeHTTP(w, r)
-				}
-			})
-		},
-		common.WithContextMiddleWare(components),
-		common.RecoverMiddleWare)
-
 	server := grpc.NewServer(
 		grpc.StreamInterceptor(grpc_middleware.ChainStreamServer(
 			grpc_recovery.StreamServerInterceptor(),
@@ -119,7 +90,7 @@ func main() {
 				if strings.HasPrefix(info.FullMethod, "/grpc.reflection") {
 					return handler(srv, ss)
 				} else {
-					return grpc_auth.StreamServerInterceptor(myAuth(components))(srv, ss, info, handler)
+					return grpc_auth.StreamServerInterceptor(common.AuthInterceptor(components))(srv, ss, info, handler)
 				}
 			},
 		)),
@@ -147,7 +118,7 @@ func main() {
 					strings.HasPrefix(info.FullMethod, "/grpc.reflection") {
 					return handler(ctx, req)
 				} else {
-					return grpc_auth.UnaryServerInterceptor(myAuth(components))(ctx, req, info, handler)
+					return grpc_auth.UnaryServerInterceptor(common.AuthInterceptor(components))(ctx, req, info, handler)
 				}
 			},
 			//grpc_auth.UnaryServerInterceptor(myAuth(components)),
@@ -166,6 +137,20 @@ func main() {
 		reflection.Register(server)
 	}
 
+	go func() {
+		lis, err := net.Listen("tcp", ":8081")
+		if err != nil {
+			panic(err)
+		}
+
+		err = http.Serve(lis, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusOK)
+		}))
+		if err != nil {
+			panic(err)
+		}
+	}()
+
 	lis, err := net.Listen("tcp", *port)
 	if err != nil {
 		panic(err)
@@ -176,51 +161,4 @@ func main() {
 		panic(err)
 	}
 
-}
-
-func myAuth(c *common.Components) func(ctx context.Context) (context.Context, error) {
-	return func(ctx context.Context) (context.Context, error) {
-		md, ok := metadata.FromIncomingContext(ctx)
-		if !ok {
-			return nil, errors.New("failed to get call metadata")
-		}
-		jwts := md.Get("Authorization")
-		if len(jwts) != 1 {
-			return nil, status.Error(codes.PermissionDenied, "missing authorization metadata key")
-		}
-
-		tok, err := c.FbAuth.VerifyIDTokenAndCheckRevoked(ctx, strings.Replace(jwts[0], "Bearer ", "", 1))
-		if err != nil {
-			return nil, status.Error(codes.PermissionDenied, fmt.Sprintf("auth header provided couldn't be verified: %+v", err))
-		}
-
-		u, err := models.Users(models.UserWhere.FirebaseUID.EQ(null.StringFrom(tok.UID))).One(ctx, c.Db)
-		if err != nil && errors2.Cause(err) == sql.ErrNoRows {
-			var handle, picture string
-			if name, ok := tok.Claims["name"]; ok {
-				handle = slug.Make(name.(string))
-			}
-			if email, ok := tok.Claims["email"]; ok && handle == "" {
-				handle = slug.Make(email.(string))
-			}
-			if url, ok := tok.Claims["picture"]; ok {
-				picture = url.(string)
-			}
-
-			fmt.Printf("%s %s", handle, picture)
-			u = &models.User{
-				Handle:         handle,
-				FirebaseUID:    null.NewString(tok.UID, true),
-				ProfilePicture: null.NewInt(0, false), // TODO reupload picture
-			}
-			if err = u.Insert(ctx, c.Db, boil.Infer()); err != nil {
-				return nil, status.Error(codes.Internal, fmt.Sprintf("could not create matching db user for new firebase user: %+v", err))
-			}
-		} else if err != nil {
-			return nil, status.Error(codes.Internal, fmt.Sprintf("failed to query for user uid: %+v", err))
-		}
-
-		newCtx := context.WithValue(ctx, "user", u)
-		return newCtx, nil
-	}
 }
