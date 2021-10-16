@@ -68,14 +68,15 @@ message VoiceMessage {
   string url = 1;
 }
 
-message Handles {
-  repeated string handles = 1;
+message MessageSendInputRecipientUuids {
+  repeated string uuids = 1;
+  string title = 2;
 }
 
 message MessageSendInput {
   oneof recipients {
     string convUuid = 1;
-    Handles handles = 2;
+    MessageSendInputRecipientUuids recipientUuids = 2;
   }
   oneof content {
     TextMessage textMessage = 3;

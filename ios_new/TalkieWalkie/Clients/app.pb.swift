@@ -248,12 +248,14 @@ public struct App_VoiceMessage {
   public init() {}
 }
 
-public struct App_Handles {
+public struct App_MessageSendInputRecipientUuids {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  public var handles: [String] = []
+  public var uuids: [String] = []
+
+  public var title: String = String()
 
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -275,12 +277,12 @@ public struct App_MessageSendInput {
     set {recipients = .convUuid(newValue)}
   }
 
-  public var handles: App_Handles {
+  public var recipientUuids: App_MessageSendInputRecipientUuids {
     get {
-      if case .handles(let v)? = recipients {return v}
-      return App_Handles()
+      if case .recipientUuids(let v)? = recipients {return v}
+      return App_MessageSendInputRecipientUuids()
     }
-    set {recipients = .handles(newValue)}
+    set {recipients = .recipientUuids(newValue)}
   }
 
   public var content: App_MessageSendInput.OneOf_Content? = nil
@@ -297,7 +299,7 @@ public struct App_MessageSendInput {
 
   public enum OneOf_Recipients: Equatable {
     case convUuid(String)
-    case handles(App_Handles)
+    case recipientUuids(App_MessageSendInputRecipientUuids)
 
   #if !swift(>=4.1)
     public static func ==(lhs: App_MessageSendInput.OneOf_Recipients, rhs: App_MessageSendInput.OneOf_Recipients) -> Bool {
@@ -309,8 +311,8 @@ public struct App_MessageSendInput {
         guard case .convUuid(let l) = lhs, case .convUuid(let r) = rhs else { preconditionFailure() }
         return l == r
       }()
-      case (.handles, .handles): return {
-        guard case .handles(let l) = lhs, case .handles(let r) = rhs else { preconditionFailure() }
+      case (.recipientUuids, .recipientUuids): return {
+        guard case .recipientUuids(let l) = lhs, case .recipientUuids(let r) = rhs else { preconditionFailure() }
         return l == r
       }()
       default: return false
@@ -795,10 +797,11 @@ extension App_VoiceMessage: SwiftProtobuf.Message, SwiftProtobuf._MessageImpleme
   }
 }
 
-extension App_Handles: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  public static let protoMessageName: String = _protobuf_package + ".Handles"
+extension App_MessageSendInputRecipientUuids: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".MessageSendInputRecipientUuids"
   public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "handles"),
+    1: .same(proto: "uuids"),
+    2: .same(proto: "title"),
   ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -807,21 +810,26 @@ extension App_Handles: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementati
       // allocates stack space for every case branch when no optimizations are
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
-      case 1: try { try decoder.decodeRepeatedStringField(value: &self.handles) }()
+      case 1: try { try decoder.decodeRepeatedStringField(value: &self.uuids) }()
+      case 2: try { try decoder.decodeSingularStringField(value: &self.title) }()
       default: break
       }
     }
   }
 
   public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    if !self.handles.isEmpty {
-      try visitor.visitRepeatedStringField(value: self.handles, fieldNumber: 1)
+    if !self.uuids.isEmpty {
+      try visitor.visitRepeatedStringField(value: self.uuids, fieldNumber: 1)
+    }
+    if !self.title.isEmpty {
+      try visitor.visitSingularStringField(value: self.title, fieldNumber: 2)
     }
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  public static func ==(lhs: App_Handles, rhs: App_Handles) -> Bool {
-    if lhs.handles != rhs.handles {return false}
+  public static func ==(lhs: App_MessageSendInputRecipientUuids, rhs: App_MessageSendInputRecipientUuids) -> Bool {
+    if lhs.uuids != rhs.uuids {return false}
+    if lhs.title != rhs.title {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
@@ -831,7 +839,7 @@ extension App_MessageSendInput: SwiftProtobuf.Message, SwiftProtobuf._MessageImp
   public static let protoMessageName: String = _protobuf_package + ".MessageSendInput"
   public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .same(proto: "convUuid"),
-    2: .same(proto: "handles"),
+    2: .same(proto: "recipientUuids"),
     3: .same(proto: "textMessage"),
   ]
 
@@ -850,16 +858,16 @@ extension App_MessageSendInput: SwiftProtobuf.Message, SwiftProtobuf._MessageImp
         }
       }()
       case 2: try {
-        var v: App_Handles?
+        var v: App_MessageSendInputRecipientUuids?
         var hadOneofValue = false
         if let current = self.recipients {
           hadOneofValue = true
-          if case .handles(let m) = current {v = m}
+          if case .recipientUuids(let m) = current {v = m}
         }
         try decoder.decodeSingularMessageField(value: &v)
         if let v = v {
           if hadOneofValue {try decoder.handleConflictingOneOf()}
-          self.recipients = .handles(v)
+          self.recipients = .recipientUuids(v)
         }
       }()
       case 3: try {
@@ -890,8 +898,8 @@ extension App_MessageSendInput: SwiftProtobuf.Message, SwiftProtobuf._MessageImp
       guard case .convUuid(let v)? = self.recipients else { preconditionFailure() }
       try visitor.visitSingularStringField(value: v, fieldNumber: 1)
     }()
-    case .handles?: try {
-      guard case .handles(let v)? = self.recipients else { preconditionFailure() }
+    case .recipientUuids?: try {
+      guard case .recipientUuids(let v)? = self.recipients else { preconditionFailure() }
       try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
     }()
     case nil: break
