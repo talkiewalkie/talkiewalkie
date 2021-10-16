@@ -65,15 +65,22 @@ func (c ConversationService) List(input *pb.ConversationListInput, server pb.Con
 	myConvs, err := models.UserConversations(
 		models.UserConversationWhere.UserID.EQ(u.ID),
 		qm.Load(qm.Rels(models.UserConversationRels.Conversation, models.ConversationRels.UserConversations, models.UserConversationRels.User)),
+		qm.Load(qm.Rels(models.UserConversationRels.Conversation, models.ConversationRels.Messages, models.MessageRels.Author), qm.Limit(10), qm.OrderBy(fmt.Sprintf("%s DESC", models.MessageColumns.CreatedAt))),
 		qm.Limit(20), qm.Offset(int(input.Page)),
 	).All(server.Context(), c.Db)
 
 	for _, uc := range myConvs {
 		conv := uc.R.Conversation
-		title := conv.Name.String
-		if !conv.Name.Valid {
-			title = entities.ConversationDisplay(conv)
+		title := entities.ConversationDisplay(conv)
+		messages := []*pb.Message{}
+		for _, m := range conv.R.Messages {
+			pbm, err := entities.MessageToPb(m)
+			if err != nil {
+				return err
+			}
+			messages = append(messages, pbm)
 		}
+
 		if err = server.Send(&pb.Conversation{
 			Uuid:  conv.UUID.String(),
 			Title: title,

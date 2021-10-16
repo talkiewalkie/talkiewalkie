@@ -50,11 +50,6 @@ spec:
               value: "/var/secrets/google/key.json"
             - name: POSTGRES_USER
               value: "postgres"
-            - name: JWT_SECRET
-              valueFrom:
-                secretKeyRef:
-                  key: jwt_secret
-                  name: mysecrets
             - name: BUCKET_NAME
               valueFrom:
                 secretKeyRef:

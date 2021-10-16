@@ -38,7 +38,7 @@ func InitComponents() (*Components, error) {
 	}
 	fbAuth, err := app.Auth(context.Background())
 
-	storageClient, err := NewS3Storage()
+	storageClient, err := initStorageClient(context.Background())
 	if err != nil {
 		log.Panicf("could not init the storage: %+v", err)
 	}

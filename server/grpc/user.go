@@ -13,6 +13,7 @@ import (
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"strings"
 )
 
 type UserService struct {
@@ -98,7 +99,7 @@ func (us UserService) Onboarding(ctx context.Context, input *pb.OnboardingInput)
 		return nil, status.Error(codes.PermissionDenied, err.Error())
 	}
 
-	u.DisplayName = null.StringFrom(input.DisplayName)
+	u.DisplayName = null.StringFrom(strings.TrimSpace(input.DisplayName))
 	u.Locales = input.Locales
 	u.OnboardingFinished = true
 	if _, err = u.Update(ctx, us.Db, boil.Infer()); err != nil {
