@@ -17,8 +17,6 @@ func TestParent(t *testing.T) {
 	t.Run("Messages", testMessages)
 	t.Run("Users", testUsers)
 	t.Run("UserConversations", testUserConversations)
-	t.Run("UserWalks", testUserWalks)
-	t.Run("Walks", testWalks)
 }
 
 func TestDelete(t *testing.T) {
@@ -27,8 +25,6 @@ func TestDelete(t *testing.T) {
 	t.Run("Messages", testMessagesDelete)
 	t.Run("Users", testUsersDelete)
 	t.Run("UserConversations", testUserConversationsDelete)
-	t.Run("UserWalks", testUserWalksDelete)
-	t.Run("Walks", testWalksDelete)
 }
 
 func TestQueryDeleteAll(t *testing.T) {
@@ -37,8 +33,6 @@ func TestQueryDeleteAll(t *testing.T) {
 	t.Run("Messages", testMessagesQueryDeleteAll)
 	t.Run("Users", testUsersQueryDeleteAll)
 	t.Run("UserConversations", testUserConversationsQueryDeleteAll)
-	t.Run("UserWalks", testUserWalksQueryDeleteAll)
-	t.Run("Walks", testWalksQueryDeleteAll)
 }
 
 func TestSliceDeleteAll(t *testing.T) {
@@ -47,8 +41,6 @@ func TestSliceDeleteAll(t *testing.T) {
 	t.Run("Messages", testMessagesSliceDeleteAll)
 	t.Run("Users", testUsersSliceDeleteAll)
 	t.Run("UserConversations", testUserConversationsSliceDeleteAll)
-	t.Run("UserWalks", testUserWalksSliceDeleteAll)
-	t.Run("Walks", testWalksSliceDeleteAll)
 }
 
 func TestExists(t *testing.T) {
@@ -57,8 +49,6 @@ func TestExists(t *testing.T) {
 	t.Run("Messages", testMessagesExists)
 	t.Run("Users", testUsersExists)
 	t.Run("UserConversations", testUserConversationsExists)
-	t.Run("UserWalks", testUserWalksExists)
-	t.Run("Walks", testWalksExists)
 }
 
 func TestFind(t *testing.T) {
@@ -67,8 +57,6 @@ func TestFind(t *testing.T) {
 	t.Run("Messages", testMessagesFind)
 	t.Run("Users", testUsersFind)
 	t.Run("UserConversations", testUserConversationsFind)
-	t.Run("UserWalks", testUserWalksFind)
-	t.Run("Walks", testWalksFind)
 }
 
 func TestBind(t *testing.T) {
@@ -77,8 +65,6 @@ func TestBind(t *testing.T) {
 	t.Run("Messages", testMessagesBind)
 	t.Run("Users", testUsersBind)
 	t.Run("UserConversations", testUserConversationsBind)
-	t.Run("UserWalks", testUserWalksBind)
-	t.Run("Walks", testWalksBind)
 }
 
 func TestOne(t *testing.T) {
@@ -87,8 +73,6 @@ func TestOne(t *testing.T) {
 	t.Run("Messages", testMessagesOne)
 	t.Run("Users", testUsersOne)
 	t.Run("UserConversations", testUserConversationsOne)
-	t.Run("UserWalks", testUserWalksOne)
-	t.Run("Walks", testWalksOne)
 }
 
 func TestAll(t *testing.T) {
@@ -97,8 +81,6 @@ func TestAll(t *testing.T) {
 	t.Run("Messages", testMessagesAll)
 	t.Run("Users", testUsersAll)
 	t.Run("UserConversations", testUserConversationsAll)
-	t.Run("UserWalks", testUserWalksAll)
-	t.Run("Walks", testWalksAll)
 }
 
 func TestCount(t *testing.T) {
@@ -107,8 +89,6 @@ func TestCount(t *testing.T) {
 	t.Run("Messages", testMessagesCount)
 	t.Run("Users", testUsersCount)
 	t.Run("UserConversations", testUserConversationsCount)
-	t.Run("UserWalks", testUserWalksCount)
-	t.Run("Walks", testWalksCount)
 }
 
 func TestHooks(t *testing.T) {
@@ -117,8 +97,6 @@ func TestHooks(t *testing.T) {
 	t.Run("Messages", testMessagesHooks)
 	t.Run("Users", testUsersHooks)
 	t.Run("UserConversations", testUserConversationsHooks)
-	t.Run("UserWalks", testUserWalksHooks)
-	t.Run("Walks", testWalksHooks)
 }
 
 func TestInsert(t *testing.T) {
@@ -132,10 +110,6 @@ func TestInsert(t *testing.T) {
 	t.Run("Users", testUsersInsertWhitelist)
 	t.Run("UserConversations", testUserConversationsInsert)
 	t.Run("UserConversations", testUserConversationsInsertWhitelist)
-	t.Run("UserWalks", testUserWalksInsert)
-	t.Run("UserWalks", testUserWalksInsertWhitelist)
-	t.Run("Walks", testWalksInsert)
-	t.Run("Walks", testWalksInsertWhitelist)
 }
 
 // TestToOne tests cannot be run in parallel
@@ -147,11 +121,6 @@ func TestToOne(t *testing.T) {
 	t.Run("UserToAssetUsingProfilePictureAsset", testUserToOneAssetUsingProfilePictureAsset)
 	t.Run("UserConversationToConversationUsingConversation", testUserConversationToOneConversationUsingConversation)
 	t.Run("UserConversationToUserUsingUser", testUserConversationToOneUserUsingUser)
-	t.Run("UserWalkToUserUsingUser", testUserWalkToOneUserUsingUser)
-	t.Run("UserWalkToWalkUsingWalk", testUserWalkToOneWalkUsingWalk)
-	t.Run("WalkToAssetUsingAudio", testWalkToOneAssetUsingAudio)
-	t.Run("WalkToUserUsingAuthor", testWalkToOneUserUsingAuthor)
-	t.Run("WalkToAssetUsingCover", testWalkToOneAssetUsingCover)
 }
 
 // TestOneToOne tests cannot be run in parallel
@@ -163,15 +132,10 @@ func TestOneToOne(t *testing.T) {}
 func TestToMany(t *testing.T) {
 	t.Run("AssetToRawAudioMessages", testAssetToManyRawAudioMessages)
 	t.Run("AssetToProfilePictureUsers", testAssetToManyProfilePictureUsers)
-	t.Run("AssetToAudioWalks", testAssetToManyAudioWalks)
-	t.Run("AssetToCoverWalks", testAssetToManyCoverWalks)
 	t.Run("ConversationToMessages", testConversationToManyMessages)
 	t.Run("ConversationToUserConversations", testConversationToManyUserConversations)
 	t.Run("UserToAuthorMessages", testUserToManyAuthorMessages)
 	t.Run("UserToUserConversations", testUserToManyUserConversations)
-	t.Run("UserToUserWalks", testUserToManyUserWalks)
-	t.Run("UserToAuthorWalks", testUserToManyAuthorWalks)
-	t.Run("WalkToUserWalks", testWalkToManyUserWalks)
 }
 
 // TestToOneSet tests cannot be run in parallel
@@ -183,11 +147,6 @@ func TestToOneSet(t *testing.T) {
 	t.Run("UserToAssetUsingProfilePictureUsers", testUserToOneSetOpAssetUsingProfilePictureAsset)
 	t.Run("UserConversationToConversationUsingUserConversations", testUserConversationToOneSetOpConversationUsingConversation)
 	t.Run("UserConversationToUserUsingUserConversations", testUserConversationToOneSetOpUserUsingUser)
-	t.Run("UserWalkToUserUsingUserWalks", testUserWalkToOneSetOpUserUsingUser)
-	t.Run("UserWalkToWalkUsingUserWalks", testUserWalkToOneSetOpWalkUsingWalk)
-	t.Run("WalkToAssetUsingAudioWalks", testWalkToOneSetOpAssetUsingAudio)
-	t.Run("WalkToUserUsingAuthorWalks", testWalkToOneSetOpUserUsingAuthor)
-	t.Run("WalkToAssetUsingCoverWalks", testWalkToOneSetOpAssetUsingCover)
 }
 
 // TestToOneRemove tests cannot be run in parallel
@@ -196,8 +155,6 @@ func TestToOneRemove(t *testing.T) {
 	t.Run("MessageToUserUsingAuthorMessages", testMessageToOneRemoveOpUserUsingAuthor)
 	t.Run("MessageToAssetUsingRawAudioMessages", testMessageToOneRemoveOpAssetUsingRawAudio)
 	t.Run("UserToAssetUsingProfilePictureUsers", testUserToOneRemoveOpAssetUsingProfilePictureAsset)
-	t.Run("WalkToAssetUsingAudioWalks", testWalkToOneRemoveOpAssetUsingAudio)
-	t.Run("WalkToAssetUsingCoverWalks", testWalkToOneRemoveOpAssetUsingCover)
 }
 
 // TestOneToOneSet tests cannot be run in parallel
@@ -213,15 +170,10 @@ func TestOneToOneRemove(t *testing.T) {}
 func TestToManyAdd(t *testing.T) {
 	t.Run("AssetToRawAudioMessages", testAssetToManyAddOpRawAudioMessages)
 	t.Run("AssetToProfilePictureUsers", testAssetToManyAddOpProfilePictureUsers)
-	t.Run("AssetToAudioWalks", testAssetToManyAddOpAudioWalks)
-	t.Run("AssetToCoverWalks", testAssetToManyAddOpCoverWalks)
 	t.Run("ConversationToMessages", testConversationToManyAddOpMessages)
 	t.Run("ConversationToUserConversations", testConversationToManyAddOpUserConversations)
 	t.Run("UserToAuthorMessages", testUserToManyAddOpAuthorMessages)
 	t.Run("UserToUserConversations", testUserToManyAddOpUserConversations)
-	t.Run("UserToUserWalks", testUserToManyAddOpUserWalks)
-	t.Run("UserToAuthorWalks", testUserToManyAddOpAuthorWalks)
-	t.Run("WalkToUserWalks", testWalkToManyAddOpUserWalks)
 }
 
 // TestToManySet tests cannot be run in parallel
@@ -229,8 +181,6 @@ func TestToManyAdd(t *testing.T) {
 func TestToManySet(t *testing.T) {
 	t.Run("AssetToRawAudioMessages", testAssetToManySetOpRawAudioMessages)
 	t.Run("AssetToProfilePictureUsers", testAssetToManySetOpProfilePictureUsers)
-	t.Run("AssetToAudioWalks", testAssetToManySetOpAudioWalks)
-	t.Run("AssetToCoverWalks", testAssetToManySetOpCoverWalks)
 	t.Run("UserToAuthorMessages", testUserToManySetOpAuthorMessages)
 }
 
@@ -239,8 +189,6 @@ func TestToManySet(t *testing.T) {
 func TestToManyRemove(t *testing.T) {
 	t.Run("AssetToRawAudioMessages", testAssetToManyRemoveOpRawAudioMessages)
 	t.Run("AssetToProfilePictureUsers", testAssetToManyRemoveOpProfilePictureUsers)
-	t.Run("AssetToAudioWalks", testAssetToManyRemoveOpAudioWalks)
-	t.Run("AssetToCoverWalks", testAssetToManyRemoveOpCoverWalks)
 	t.Run("UserToAuthorMessages", testUserToManyRemoveOpAuthorMessages)
 }
 
@@ -250,8 +198,6 @@ func TestReload(t *testing.T) {
 	t.Run("Messages", testMessagesReload)
 	t.Run("Users", testUsersReload)
 	t.Run("UserConversations", testUserConversationsReload)
-	t.Run("UserWalks", testUserWalksReload)
-	t.Run("Walks", testWalksReload)
 }
 
 func TestReloadAll(t *testing.T) {
@@ -260,8 +206,6 @@ func TestReloadAll(t *testing.T) {
 	t.Run("Messages", testMessagesReloadAll)
 	t.Run("Users", testUsersReloadAll)
 	t.Run("UserConversations", testUserConversationsReloadAll)
-	t.Run("UserWalks", testUserWalksReloadAll)
-	t.Run("Walks", testWalksReloadAll)
 }
 
 func TestSelect(t *testing.T) {
@@ -270,8 +214,6 @@ func TestSelect(t *testing.T) {
 	t.Run("Messages", testMessagesSelect)
 	t.Run("Users", testUsersSelect)
 	t.Run("UserConversations", testUserConversationsSelect)
-	t.Run("UserWalks", testUserWalksSelect)
-	t.Run("Walks", testWalksSelect)
 }
 
 func TestUpdate(t *testing.T) {
@@ -280,8 +222,6 @@ func TestUpdate(t *testing.T) {
 	t.Run("Messages", testMessagesUpdate)
 	t.Run("Users", testUsersUpdate)
 	t.Run("UserConversations", testUserConversationsUpdate)
-	t.Run("UserWalks", testUserWalksUpdate)
-	t.Run("Walks", testWalksUpdate)
 }
 
 func TestSliceUpdateAll(t *testing.T) {
@@ -290,6 +230,4 @@ func TestSliceUpdateAll(t *testing.T) {
 	t.Run("Messages", testMessagesSliceUpdateAll)
 	t.Run("Users", testUsersSliceUpdateAll)
 	t.Run("UserConversations", testUserConversationsSliceUpdateAll)
-	t.Run("UserWalks", testUserWalksSliceUpdateAll)
-	t.Run("Walks", testWalksSliceUpdateAll)
 }

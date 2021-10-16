@@ -184,14 +184,10 @@ var UserRels = struct {
 	ProfilePictureAsset string
 	AuthorMessages      string
 	UserConversations   string
-	UserWalks           string
-	AuthorWalks         string
 }{
 	ProfilePictureAsset: "ProfilePictureAsset",
 	AuthorMessages:      "AuthorMessages",
 	UserConversations:   "UserConversations",
-	UserWalks:           "UserWalks",
-	AuthorWalks:         "AuthorWalks",
 }
 
 // userR is where relationships are stored.
@@ -199,8 +195,6 @@ type userR struct {
 	ProfilePictureAsset *Asset                `db:"ProfilePictureAsset" boil:"ProfilePictureAsset" json:"ProfilePictureAsset" toml:"ProfilePictureAsset" yaml:"ProfilePictureAsset"`
 	AuthorMessages      MessageSlice          `db:"AuthorMessages" boil:"AuthorMessages" json:"AuthorMessages" toml:"AuthorMessages" yaml:"AuthorMessages"`
 	UserConversations   UserConversationSlice `db:"UserConversations" boil:"UserConversations" json:"UserConversations" toml:"UserConversations" yaml:"UserConversations"`
-	UserWalks           UserWalkSlice         `db:"UserWalks" boil:"UserWalks" json:"UserWalks" toml:"UserWalks" yaml:"UserWalks"`
-	AuthorWalks         WalkSlice             `db:"AuthorWalks" boil:"AuthorWalks" json:"AuthorWalks" toml:"AuthorWalks" yaml:"AuthorWalks"`
 }
 
 // NewStruct creates a new relationship struct
@@ -549,48 +543,6 @@ func (o *User) UserConversations(mods ...qm.QueryMod) userConversationQuery {
 	return query
 }
 
-// UserWalks retrieves all the user_walk's UserWalks with an executor.
-func (o *User) UserWalks(mods ...qm.QueryMod) userWalkQuery {
-	var queryMods []qm.QueryMod
-	if len(mods) != 0 {
-		queryMods = append(queryMods, mods...)
-	}
-
-	queryMods = append(queryMods,
-		qm.Where("\"user_walk\".\"user_id\"=?", o.ID),
-	)
-
-	query := UserWalks(queryMods...)
-	queries.SetFrom(query.Query, "\"user_walk\"")
-
-	if len(queries.GetSelect(query.Query)) == 0 {
-		queries.SetSelect(query.Query, []string{"\"user_walk\".*"})
-	}
-
-	return query
-}
-
-// AuthorWalks retrieves all the walk's Walks with an executor via author_id column.
-func (o *User) AuthorWalks(mods ...qm.QueryMod) walkQuery {
-	var queryMods []qm.QueryMod
-	if len(mods) != 0 {
-		queryMods = append(queryMods, mods...)
-	}
-
-	queryMods = append(queryMods,
-		qm.Where("\"walk\".\"author_id\"=?", o.ID),
-	)
-
-	query := Walks(queryMods...)
-	queries.SetFrom(query.Query, "\"walk\"")
-
-	if len(queries.GetSelect(query.Query)) == 0 {
-		queries.SetSelect(query.Query, []string{"\"walk\".*"})
-	}
-
-	return query
-}
-
 // LoadProfilePictureAsset allows an eager lookup of values, cached into the
 // loaded structs of the objects. This is for an N-1 relationship.
 func (userL) LoadProfilePictureAsset(ctx context.Context, e boil.ContextExecutor, singular bool, maybeUser interface{}, mods queries.Applicator) error {
@@ -895,202 +847,6 @@ func (userL) LoadUserConversations(ctx context.Context, e boil.ContextExecutor, 
 	return nil
 }
 
-// LoadUserWalks allows an eager lookup of values, cached into the
-// loaded structs of the objects. This is for a 1-M or N-M relationship.
-func (userL) LoadUserWalks(ctx context.Context, e boil.ContextExecutor, singular bool, maybeUser interface{}, mods queries.Applicator) error {
-	var slice []*User
-	var object *User
-
-	if singular {
-		object = maybeUser.(*User)
-	} else {
-		slice = *maybeUser.(*[]*User)
-	}
-
-	args := make([]interface{}, 0, 1)
-	if singular {
-		if object.R == nil {
-			object.R = &userR{}
-		}
-		args = append(args, object.ID)
-	} else {
-	Outer:
-		for _, obj := range slice {
-			if obj.R == nil {
-				obj.R = &userR{}
-			}
-
-			for _, a := range args {
-				if a == obj.ID {
-					continue Outer
-				}
-			}
-
-			args = append(args, obj.ID)
-		}
-	}
-
-	if len(args) == 0 {
-		return nil
-	}
-
-	query := NewQuery(
-		qm.From(`user_walk`),
-		qm.WhereIn(`user_walk.user_id in ?`, args...),
-	)
-	if mods != nil {
-		mods.Apply(query)
-	}
-
-	results, err := query.QueryContext(ctx, e)
-	if err != nil {
-		return errors.Wrap(err, "failed to eager load user_walk")
-	}
-
-	var resultSlice []*UserWalk
-	if err = queries.Bind(results, &resultSlice); err != nil {
-		return errors.Wrap(err, "failed to bind eager loaded slice user_walk")
-	}
-
-	if err = results.Close(); err != nil {
-		return errors.Wrap(err, "failed to close results in eager load on user_walk")
-	}
-	if err = results.Err(); err != nil {
-		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for user_walk")
-	}
-
-	if len(userWalkAfterSelectHooks) != 0 {
-		for _, obj := range resultSlice {
-			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
-				return err
-			}
-		}
-	}
-	if singular {
-		object.R.UserWalks = resultSlice
-		for _, foreign := range resultSlice {
-			if foreign.R == nil {
-				foreign.R = &userWalkR{}
-			}
-			foreign.R.User = object
-		}
-		return nil
-	}
-
-	for _, foreign := range resultSlice {
-		for _, local := range slice {
-			if local.ID == foreign.UserID {
-				local.R.UserWalks = append(local.R.UserWalks, foreign)
-				if foreign.R == nil {
-					foreign.R = &userWalkR{}
-				}
-				foreign.R.User = local
-				break
-			}
-		}
-	}
-
-	return nil
-}
-
-// LoadAuthorWalks allows an eager lookup of values, cached into the
-// loaded structs of the objects. This is for a 1-M or N-M relationship.
-func (userL) LoadAuthorWalks(ctx context.Context, e boil.ContextExecutor, singular bool, maybeUser interface{}, mods queries.Applicator) error {
-	var slice []*User
-	var object *User
-
-	if singular {
-		object = maybeUser.(*User)
-	} else {
-		slice = *maybeUser.(*[]*User)
-	}
-
-	args := make([]interface{}, 0, 1)
-	if singular {
-		if object.R == nil {
-			object.R = &userR{}
-		}
-		args = append(args, object.ID)
-	} else {
-	Outer:
-		for _, obj := range slice {
-			if obj.R == nil {
-				obj.R = &userR{}
-			}
-
-			for _, a := range args {
-				if a == obj.ID {
-					continue Outer
-				}
-			}
-
-			args = append(args, obj.ID)
-		}
-	}
-
-	if len(args) == 0 {
-		return nil
-	}
-
-	query := NewQuery(
-		qm.From(`walk`),
-		qm.WhereIn(`walk.author_id in ?`, args...),
-	)
-	if mods != nil {
-		mods.Apply(query)
-	}
-
-	results, err := query.QueryContext(ctx, e)
-	if err != nil {
-		return errors.Wrap(err, "failed to eager load walk")
-	}
-
-	var resultSlice []*Walk
-	if err = queries.Bind(results, &resultSlice); err != nil {
-		return errors.Wrap(err, "failed to bind eager loaded slice walk")
-	}
-
-	if err = results.Close(); err != nil {
-		return errors.Wrap(err, "failed to close results in eager load on walk")
-	}
-	if err = results.Err(); err != nil {
-		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for walk")
-	}
-
-	if len(walkAfterSelectHooks) != 0 {
-		for _, obj := range resultSlice {
-			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
-				return err
-			}
-		}
-	}
-	if singular {
-		object.R.AuthorWalks = resultSlice
-		for _, foreign := range resultSlice {
-			if foreign.R == nil {
-				foreign.R = &walkR{}
-			}
-			foreign.R.Author = object
-		}
-		return nil
-	}
-
-	for _, foreign := range resultSlice {
-		for _, local := range slice {
-			if local.ID == foreign.AuthorID {
-				local.R.AuthorWalks = append(local.R.AuthorWalks, foreign)
-				if foreign.R == nil {
-					foreign.R = &walkR{}
-				}
-				foreign.R.Author = local
-				break
-			}
-		}
-	}
-
-	return nil
-}
-
 // SetProfilePictureAsset of the user to the related item.
 // Sets o.R.ProfilePictureAsset to related.
 // Adds o to related.R.ProfilePictureUsers.
@@ -1346,112 +1102,6 @@ func (o *User) AddUserConversations(ctx context.Context, exec boil.ContextExecut
 			}
 		} else {
 			rel.R.User = o
-		}
-	}
-	return nil
-}
-
-// AddUserWalks adds the given related objects to the existing relationships
-// of the user, optionally inserting them as new records.
-// Appends related to o.R.UserWalks.
-// Sets related.R.User appropriately.
-func (o *User) AddUserWalks(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*UserWalk) error {
-	var err error
-	for _, rel := range related {
-		if insert {
-			rel.UserID = o.ID
-			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
-				return errors.Wrap(err, "failed to insert into foreign table")
-			}
-		} else {
-			updateQuery := fmt.Sprintf(
-				"UPDATE \"user_walk\" SET %s WHERE %s",
-				strmangle.SetParamNames("\"", "\"", 1, []string{"user_id"}),
-				strmangle.WhereClause("\"", "\"", 2, userWalkPrimaryKeyColumns),
-			)
-			values := []interface{}{o.ID, rel.ID}
-
-			if boil.IsDebug(ctx) {
-				writer := boil.DebugWriterFrom(ctx)
-				fmt.Fprintln(writer, updateQuery)
-				fmt.Fprintln(writer, values)
-			}
-			if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
-				return errors.Wrap(err, "failed to update foreign table")
-			}
-
-			rel.UserID = o.ID
-		}
-	}
-
-	if o.R == nil {
-		o.R = &userR{
-			UserWalks: related,
-		}
-	} else {
-		o.R.UserWalks = append(o.R.UserWalks, related...)
-	}
-
-	for _, rel := range related {
-		if rel.R == nil {
-			rel.R = &userWalkR{
-				User: o,
-			}
-		} else {
-			rel.R.User = o
-		}
-	}
-	return nil
-}
-
-// AddAuthorWalks adds the given related objects to the existing relationships
-// of the user, optionally inserting them as new records.
-// Appends related to o.R.AuthorWalks.
-// Sets related.R.Author appropriately.
-func (o *User) AddAuthorWalks(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Walk) error {
-	var err error
-	for _, rel := range related {
-		if insert {
-			rel.AuthorID = o.ID
-			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
-				return errors.Wrap(err, "failed to insert into foreign table")
-			}
-		} else {
-			updateQuery := fmt.Sprintf(
-				"UPDATE \"walk\" SET %s WHERE %s",
-				strmangle.SetParamNames("\"", "\"", 1, []string{"author_id"}),
-				strmangle.WhereClause("\"", "\"", 2, walkPrimaryKeyColumns),
-			)
-			values := []interface{}{o.ID, rel.ID}
-
-			if boil.IsDebug(ctx) {
-				writer := boil.DebugWriterFrom(ctx)
-				fmt.Fprintln(writer, updateQuery)
-				fmt.Fprintln(writer, values)
-			}
-			if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
-				return errors.Wrap(err, "failed to update foreign table")
-			}
-
-			rel.AuthorID = o.ID
-		}
-	}
-
-	if o.R == nil {
-		o.R = &userR{
-			AuthorWalks: related,
-		}
-	} else {
-		o.R.AuthorWalks = append(o.R.AuthorWalks, related...)
-	}
-
-	for _, rel := range related {
-		if rel.R == nil {
-			rel.R = &walkR{
-				Author: o,
-			}
-		} else {
-			rel.R.Author = o
 		}
 	}
 	return nil

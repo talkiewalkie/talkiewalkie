@@ -9,14 +9,10 @@ var TableNames = struct {
 	Message          string
 	User             string
 	UserConversation string
-	UserWalk         string
-	Walk             string
 }{
 	Asset:            "asset",
 	Conversation:     "conversation",
 	Message:          "message",
 	User:             "user",
 	UserConversation: "user_conversation",
-	UserWalk:         "user_walk",
-	Walk:             "walk",
 }

@@ -15,8 +15,4 @@ func TestUpsert(t *testing.T) {
 	t.Run("Users", testUsersUpsert)
 
 	t.Run("UserConversations", testUserConversationsUpsert)
-
-	t.Run("UserWalks", testUserWalksUpsert)
-
-	t.Run("Walks", testWalksUpsert)
 }

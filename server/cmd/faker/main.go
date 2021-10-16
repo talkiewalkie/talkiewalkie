@@ -14,6 +14,7 @@ import (
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"log"
 	"math/rand"
+	"os"
 )
 
 var (
@@ -25,7 +26,7 @@ func main() {
 	ctx := context.Background()
 
 	if *phone == "" {
-		fmt.Println("you need to provide your email address")
+		fmt.Println("you need to provide a normalized phone number e.g. '-phone +33685930995'")
 		return
 	}
 
@@ -46,7 +47,13 @@ func main() {
 	u, err := models.Users(models.UserWhere.FirebaseUID.EQ(null.StringFrom(fbu.UID))).One(ctx, components.Db)
 	if err != nil {
 		if errors.Cause(err) == sql.ErrNoRows {
-			u = &models.User{DisplayName: null.StringFrom("me(dev)"), FirebaseUID: null.StringFrom(fbu.UID)}
+			u = &models.User{
+				DisplayName:        null.StringFrom(os.Getenv("USER")),
+				FirebaseUID:        null.StringFrom(fbu.UID),
+				PhoneNumber:        *phone,
+				OnboardingFinished: true,
+				Locales:            []string{"fr"},
+			}
 			if err = u.Insert(ctx, components.Db, boil.Infer()); err != nil {
 				log.Panicf("could create user for email: %+v", err)
 			}
@@ -58,7 +65,13 @@ func main() {
 	for i := 0; i < 10; i += 1 {
 		friends := []*models.User{u}
 		for j := 0; j < rand.Intn(6)+1; j += 1 {
-			friend := &models.User{DisplayName: null.StringFrom(faker.Username()), FirebaseUID: null.String{}}
+			friend := &models.User{
+				DisplayName:        null.StringFrom(faker.Username()),
+				FirebaseUID:        null.String{},
+				PhoneNumber:        faker.Phonenumber(),
+				OnboardingFinished: true,
+				Locales:            []string{"fr"},
+			}
 			if err = friend.Insert(ctx, components.Db, boil.Infer()); err != nil {
 				log.Panicf("could not insert new friend: %+v", err)
 			}
@@ -70,7 +83,7 @@ func main() {
 			log.Panicf("could not insert new conv: %+v", err)
 		}
 
-		fmt.Printf("[%s] new conv[%s]", u.DisplayName, conv.UUID.String())
+		fmt.Printf("[%s] new conv[%s]", u.DisplayName.String, conv.UUID.String())
 
 		for _, f := range friends {
 			uc := models.UserConversation{UserID: f.ID, ConversationID: conv.ID}
