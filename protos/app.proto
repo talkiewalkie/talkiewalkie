@@ -93,6 +93,7 @@ message Conversation {
   string uuid = 1;
   string title = 2;
   repeated Message messages = 3;
+  repeated User participants = 4;
 }
 
 message ConversationGetInput {
@@ -111,6 +112,7 @@ message ConversationListOutput {
 
 service ConversationService {
   rpc Get(ConversationGetInput) returns (Conversation) {}
+  // TODO: Use ConversationService as output, delayed for demo
   rpc List(ConversationListInput) returns (stream Conversation) {}
 }
 

@@ -17,6 +17,9 @@ extension Conversation {
         let messages = conv.messages.map { Message.upsert($0, context: context) }
         localC.addToMessages(NSOrderedSet(array: messages))
 
+        let participants = conv.participants.map { User.upsert($0, context: context) }
+        localC.addToUsers(NSSet(array: participants))
+
         // TODO: server should store and retrieve these
         // localC.lastMemberReadUntil = Date().addingTimeInterval()
         localC.createdAt = Date()
@@ -28,5 +31,15 @@ extension Conversation {
         let localConvs: [Conversation] = convs.map { Conversation.upsert($0, context: context) }
         localConvs.forEach { $0.objectWillChange.send() }
         context.saveOrLogError()
+    }
+
+    var lastActivity: Date? {
+        (self.messages?.array as? [Message] ?? []).last?.createdAt
+    }
+
+    func firstParticipant(thatIsNot user: User) -> User? {
+        let allUsers: Set<User> = (self.users as? Set<User>) ?? Set()
+        let others: [User] = allUsers.filter { $0.uuid != user.uuid }
+        return others.sorted(by: { $0.uuid?.uuidString ?? "a" < $1.uuid?.uuidString ?? "b" }).first
     }
 }

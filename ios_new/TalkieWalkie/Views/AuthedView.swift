@@ -30,7 +30,7 @@ struct AuthedView: View {
 
     var body: some View {
         ZStack {
-            DiscussionListView(namespace: namespace, model: InboxViewModel(authed))
+            InboxView(namespace: namespace, model: InboxViewModel(authed))
 
             VStack {
                 Spacer()

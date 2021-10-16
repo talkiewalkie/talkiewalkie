@@ -12,6 +12,8 @@ extension Message {
     static func upsert(_ msg: App_Message, context: NSManagedObjectContext) -> Message {
         let localM = Message.getByUuidOrCreate(msg.uuid.uuidOrThrow(), context: context)
         localM.uuid = msg.uuid.uuidOrThrow()
+        // TODO: grpc zeroes out msg.author when author is nil in db, which is a valid state (user deleted their accounts)
+        //       this need to be handled in the next line.
         localM.author = User.upsert(msg.author, context: context)
         localM.createdAt = msg.createdAt.date
         switch msg.content {

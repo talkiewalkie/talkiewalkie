@@ -100,6 +100,8 @@
 		73B63B472710851200994B92 /* recording-bubble.json in Resources */ = {isa = PBXBuildFile; fileRef = 73B63B462710851200994B92 /* recording-bubble.json */; };
 		73B63B492710859500994B92 /* 52786-recording-bubble.json in Resources */ = {isa = PBXBuildFile; fileRef = 73B63B482710859500994B92 /* 52786-recording-bubble.json */; };
 		73B63B4D2710879A00994B92 /* mic-off.json in Resources */ = {isa = PBXBuildFile; fileRef = 73B63B4C2710879A00994B92 /* mic-off.json */; };
+		E482102E271AD91E00A84A2C /* InboxViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E482102D271AD91E00A84A2C /* InboxViewModel.swift */; };
+		E4821030271B0CF600A84A2C /* ConversationViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E482102F271B0CF500A84A2C /* ConversationViewModel.swift */; };
 		E4D9BD7827157530005CD3A0 /* LocalModels.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = E4D9BD762715752F005CD3A0 /* LocalModels.xcdatamodeld */; };
 		E4D9BD7B271577C4005CD3A0 /* GrpcClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4D9BD7A271577C4005CD3A0 /* GrpcClient.swift */; };
 		E4D9BD7E27157A26005CD3A0 /* SwiftProtobuf in Frameworks */ = {isa = PBXBuildFile; productRef = E4D9BD7D27157A26005CD3A0 /* SwiftProtobuf */; };
@@ -222,6 +224,8 @@
 		73B63B462710851200994B92 /* recording-bubble.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = "recording-bubble.json"; sourceTree = "<group>"; };
 		73B63B482710859500994B92 /* 52786-recording-bubble.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = "52786-recording-bubble.json"; sourceTree = "<group>"; };
 		73B63B4C2710879A00994B92 /* mic-off.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = "mic-off.json"; sourceTree = "<group>"; };
+		E482102D271AD91E00A84A2C /* InboxViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InboxViewModel.swift; sourceTree = "<group>"; };
+		E482102F271B0CF500A84A2C /* ConversationViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationViewModel.swift; sourceTree = "<group>"; };
 		E4D9BD7727157530005CD3A0 /* LocalModels.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = LocalModels.xcdatamodel; sourceTree = "<group>"; };
 		E4D9BD7A271577C4005CD3A0 /* GrpcClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrpcClient.swift; sourceTree = "<group>"; };
 		E4D9BD8A27157D39005CD3A0 /* app.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = app.pb.swift; sourceTree = "<group>"; };
@@ -522,6 +526,7 @@
 			isa = PBXGroup;
 			children = (
 				734BF82C270CAF7C008438D9 /* InboxView.swift */,
+				E482102D271AD91E00A84A2C /* InboxViewModel.swift */,
 			);
 			path = Inbox;
 			sourceTree = "<group>";
@@ -530,6 +535,7 @@
 			isa = PBXGroup;
 			children = (
 				73853D4A270C458500B0B4BF /* ConversationView.swift */,
+				E482102F271B0CF500A84A2C /* ConversationViewModel.swift */,
 			);
 			path = Conversation;
 			sourceTree = "<group>";
@@ -743,6 +749,7 @@
 				73853DA8270C579F00B0B4BF /* Bundle+AppInfo.swift in Sources */,
 				73853D5B270C508100B0B4BF /* MemeFont.swift in Sources */,
 				7376608D270DA281001BA79F /* AppDelegate.swift in Sources */,
+				E482102E271AD91E00A84A2C /* InboxViewModel.swift in Sources */,
 				73853D5D270C509700B0B4BF /* HoledMask.swift in Sources */,
 				73853DA3270C549000B0B4BF /* RectReader.swift in Sources */,
 				73853DC2270C58BF00B0B4BF /* PartialSheetStyle.swift in Sources */,
@@ -790,6 +797,7 @@
 				73853DB4270C57FB00B0B4BF /* Photos+authorization.swift in Sources */,
 				73853D4F270C4ED900B0B4BF /* SettingsView.swift in Sources */,
 				737660B4270DDFB9001BA79F /* MessageDetailView.swift in Sources */,
+				E4821030271B0CF600A84A2C /* ConversationViewModel.swift in Sources */,
 				734BF831270CB6E5008438D9 /* RecordButton.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

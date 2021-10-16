@@ -39,9 +39,14 @@ func AuthInterceptor(c *Components) func(ctx context.Context) (context.Context, 
 
 		u, err := models.Users(models.UserWhere.FirebaseUID.EQ(null.StringFrom(tok.UID))).One(ctx, c.Db)
 		if err != nil && errors2.Cause(err) == sql.ErrNoRows {
-			phonePayload, ok := tok.Claims["phone"]
+			phonePayload, ok := tok.Claims["phone_number"]
 			if !ok {
-				return nil, status.Error(codes.Internal, fmt.Sprintf("firebase user has no phone claim"))
+				// TODO: investigate why there are multiple phone claims payloads!
+				otherPhonePayload, otherOk := tok.Claims["phone"]
+				if !otherOk {
+					return nil, status.Error(codes.Internal, fmt.Sprintf("firebase user has no phone claim"))
+				}
+				phonePayload = otherPhonePayload
 			}
 			phone, ok := phonePayload.(string)
 			if !ok {

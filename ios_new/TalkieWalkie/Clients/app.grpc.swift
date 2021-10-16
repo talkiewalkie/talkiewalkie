@@ -366,7 +366,7 @@ extension App_ConversationServiceClientProtocol {
     )
   }
 
-  /// Server streaming call to List
+  /// TODO: Use ConversationService as output, delayed for demo
   ///
   /// - Parameters:
   ///   - request: Request to send to List.
@@ -599,6 +599,7 @@ public protocol App_ConversationServiceProvider: CallHandlerProvider {
 
   func get(request: App_ConversationGetInput, context: StatusOnlyCallContext) -> EventLoopFuture<App_Conversation>
 
+  /// TODO: Use ConversationService as output, delayed for demo
   func list(request: App_ConversationListInput, context: StreamingResponseCallContext<App_Conversation>) -> EventLoopFuture<GRPCStatus>
 }
 

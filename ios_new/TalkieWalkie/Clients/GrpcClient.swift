@@ -35,8 +35,6 @@ class AuthedGrpcApi {
     private let convClient: App_ConversationServiceClient
     private let mssgClient: App_MessageServiceClient
 
-    public let queue = DispatchQueue(label: "grpc-client")
-
     init(url: URL, token: String) {
         self.url = url
         self.token = token
@@ -50,7 +48,7 @@ class AuthedGrpcApi {
         #endif
         channel = channelBuilder.withKeepalive(ClientConnectionKeepalive(interval: TimeAmount.seconds(10), timeout: TimeAmount.seconds(5)))
             .withConnectionReestablishment(enabled: true)
-            .withConnectivityStateDelegate(stateDelegate, executingOn: queue)
+            .withConnectivityStateDelegate(stateDelegate, executingOn: DispatchQueue.main)
             .connect(host: url.host!, port: url.port!)
 
         let authedOption = CallOptions(customMetadata: ["Authorization": "Bearer \(token)"])

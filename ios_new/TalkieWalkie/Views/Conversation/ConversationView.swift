@@ -9,18 +9,32 @@ import AVKit
 import SwiftUI
 
 struct ConversationView: View {
-    var discussion: DiscussionModel
+    var conversation: Conversation
     var namespace: Namespace.ID
+    
+    let model: ConversationViewModel
 
     var body: some View {
         VStack {
+            if model.loading { ProgressView() } 
             Rectangle().frame(height: 0)
 
             ScrollViewReader { _ in
                 ReversedScrollView(.vertical, showsIndicators: false) {
                     VStack {
-                        ForEach(dummyChatMessages) { message in
-                            ChatBubble(message: message, namespace: namespace)
+//                        ForEach(dummyChatMessages) { message in
+//                            ChatBubble(message: message, namespace: namespace)
+//                        }
+                        Text("\(conversation.messages?.count ?? 0) messages here")
+                        ForEach(conversation.messages!.array as! [Message]) { message in
+                            switch message.content! {
+                            case let tmee as TextMessage:
+                                Text(tmee.text ?? "no text")
+                            case let vm as VoiceMessage:
+                                Text(String(data: vm.rawAudio!, encoding: .utf8) ?? "no audio")
+                            default:
+                                Text("fatalerrrrrrror")
+                            }
                         }
                     }
                     .frame(maxWidth: .infinity, alignment: .trailing)
@@ -35,8 +49,9 @@ struct ConversationView: View {
             }
         }
         .navigationBarTitleDisplayMode(.inline)
-        .navigationBarItems(leading: DiscussionBarView(discussion: discussion),
+        .navigationBarItems(leading: ConversationBarView(conversation: conversation),
                             trailing: EmptyView())
+        .onAppear { model.loadMessages() }
     }
 }
 
@@ -87,17 +102,17 @@ struct ChatBubble: View {
     }
 }
 
-struct DiscussionBarView: View {
-    var discussion: DiscussionModel
+struct ConversationBarView: View {
+    var conversation: Conversation
 
     var body: some View {
         HStack {
-            DiscussionAvatar(discussion: discussion)
+            ConversationAvatar(conversation: conversation)
 
             VStack(alignment: .leading) {
-                Text(discussion.name)
+                Text(conversation.title ?? "no conv title")
 
-                Text("Last seen at \(discussion.date, formatter: Self.dateFormat)")
+                Text("Last seen at \(conversation.lastActivity ?? Date(), formatter: Self.dateFormat)")
                     .fontWeight(.regular)
                     .foregroundColor(.secondary)
             }
@@ -116,19 +131,19 @@ struct DiscussionBarView: View {
     }
 }
 
-struct DiscussionView_Previews: PreviewProvider {
-    static var previews: some View {
-        TestView()
-    }
-
-    struct TestView: View {
-        @Namespace var namespace
-
-        var body: some View {
-            ConversationView(discussion: dummyDiscussions[0], namespace: namespace)
-        }
-    }
-}
+// struct DiscussionView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        TestView()
+//    }
+//
+//    struct TestView: View {
+//        @Namespace var namespace
+//
+//        var body: some View {
+//            ConversationView(conversation: dummyDiscussions[0], namespace: namespace)
+//        }
+//    }
+// }
 
 struct ChatMessage: Identifiable {
     let id = UUID()

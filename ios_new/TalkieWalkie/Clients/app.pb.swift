@@ -351,6 +351,8 @@ public struct App_Conversation {
 
   public var messages: [App_Message] = []
 
+  public var participants: [App_User] = []
+
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
   public init() {}
@@ -914,6 +916,7 @@ extension App_Conversation: SwiftProtobuf.Message, SwiftProtobuf._MessageImpleme
     1: .same(proto: "uuid"),
     2: .same(proto: "title"),
     3: .same(proto: "messages"),
+    4: .same(proto: "participants"),
   ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -925,6 +928,7 @@ extension App_Conversation: SwiftProtobuf.Message, SwiftProtobuf._MessageImpleme
       case 1: try { try decoder.decodeSingularStringField(value: &self.uuid) }()
       case 2: try { try decoder.decodeSingularStringField(value: &self.title) }()
       case 3: try { try decoder.decodeRepeatedMessageField(value: &self.messages) }()
+      case 4: try { try decoder.decodeRepeatedMessageField(value: &self.participants) }()
       default: break
       }
     }
@@ -940,6 +944,9 @@ extension App_Conversation: SwiftProtobuf.Message, SwiftProtobuf._MessageImpleme
     if !self.messages.isEmpty {
       try visitor.visitRepeatedMessageField(value: self.messages, fieldNumber: 3)
     }
+    if !self.participants.isEmpty {
+      try visitor.visitRepeatedMessageField(value: self.participants, fieldNumber: 4)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -947,6 +954,7 @@ extension App_Conversation: SwiftProtobuf.Message, SwiftProtobuf._MessageImpleme
     if lhs.uuid != rhs.uuid {return false}
     if lhs.title != rhs.title {return false}
     if lhs.messages != rhs.messages {return false}
+    if lhs.participants != rhs.participants {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

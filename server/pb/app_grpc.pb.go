@@ -471,6 +471,7 @@ var MessageService_ServiceDesc = grpc.ServiceDesc{
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ConversationServiceClient interface {
 	Get(ctx context.Context, in *ConversationGetInput, opts ...grpc.CallOption) (*Conversation, error)
+	// TODO: Use ConversationService as output, delayed for demo
 	List(ctx context.Context, in *ConversationListInput, opts ...grpc.CallOption) (ConversationService_ListClient, error)
 }
 
@@ -528,6 +529,7 @@ func (x *conversationServiceListClient) Recv() (*Conversation, error) {
 // for forward compatibility
 type ConversationServiceServer interface {
 	Get(context.Context, *ConversationGetInput) (*Conversation, error)
+	// TODO: Use ConversationService as output, delayed for demo
 	List(*ConversationListInput, ConversationService_ListServer) error
 }
 

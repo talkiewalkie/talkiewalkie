@@ -64,7 +64,7 @@ class AuthenticatedState: ObservableObject {
                     completion(AuthenticatedState(user: fbU, gApi: gApi, context: context))
                 } else {
                     // TODO: add a timeout to api calls.
-                    gApi.queue.async {
+                    DispatchQueue.main.async {
                         let (res, _) = gApi.me()
                         if let res = res {
                             let me = Me(context: context)

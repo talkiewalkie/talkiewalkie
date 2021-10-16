@@ -46,5 +46,6 @@ class UserStore: ObservableObject {
         self.coredataCtx.executeOrLogError(NSBatchDeleteRequest(fetchRequest: NSFetchRequest(entityName: MessageContent.entity().name!)))
         self.coredataCtx.executeOrLogError(NSBatchDeleteRequest(fetchRequest: NSFetchRequest(entityName: TextMessage.entity().name!)))
         self.coredataCtx.executeOrLogError(NSBatchDeleteRequest(fetchRequest: NSFetchRequest(entityName: VoiceMessage.entity().name!)))
+        self.coredataCtx.saveOrLogError()
     }
 }

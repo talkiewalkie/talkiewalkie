@@ -6,41 +6,13 @@
 //
 
 import CoreData
-import SwiftUI
 import OSLog
+import SwiftUI
 
-class InboxViewModel: ObservableObject {
-    private let authed: AuthenticatedState
-
-    @Published var loading = true
-
-    init(_ authed: AuthenticatedState) {
-        self.authed = authed
-        self.authed.gApi.subscribeIncomingMessages { msg in
-            let savedMsg = Message.upsert(msg, context: authed.context)
-            let conversation = Conversation.getByUuidOrCreate(msg.convUuid.uuidOrThrow(), context: authed.context)
-
-            conversation.addToMessages(savedMsg)
-
-            savedMsg.objectWillChange.send()
-            conversation.objectWillChange.send()
-
-            authed.context.saveOrLogError()
-        }
-    }
-
-    func syncConversations() {
-        loading = true
-        let (convs, _) = authed.gApi.listConvs()
-        loading = false
-        os_log(.debug, "loading = false")
-        Conversation.dumpFromRemote(convs, context: authed.context)
-    }
-}
-
-struct DiscussionListView: View {
+struct InboxView: View {
     var namespace: Namespace.ID
     @ObservedObject var model: InboxViewModel
+    @EnvironmentObject var authed: AuthenticatedState
 
     @FetchRequest(
         entity: Conversation.entity(),
@@ -51,17 +23,11 @@ struct DiscussionListView: View {
         NavigationView {
             VStack {
                 if model.loading { ProgressView("syncing...") }
-
-                Text("\(conversations.count) conv loaded")
-                List(conversations) { conv in
-                    Text(conv.title ?? "conv without title")
-                }
-
-                List(dummyDiscussions) { discussion in
+                List(conversations) { conversation in
                     NavigationLink(
-                        destination: ConversationView(discussion: discussion, namespace: namespace)
+                        destination: ConversationView(conversation: conversation, namespace: namespace, model: ConversationViewModel(authed, conversation: conversation))
                     ) {
-                        DiscussionListItemView(discussion: discussion)
+                        ConversationListItemView(conversation: conversation)
                     }
                 }
                 .listStyle(.plain)
@@ -78,51 +44,53 @@ struct DiscussionListView: View {
     }
 }
 
-struct DiscussionAvatar: View {
-    var discussion: DiscussionModel
+struct ConversationAvatar: View {
+    var conversation: Conversation
+    @EnvironmentObject var authed: AuthenticatedState
 
     var body: some View {
         Group {
-            if let image = discussion.image {
-                image
-                    .resizable()
-                    .aspectRatio(1, contentMode: .fit)
-            } else {
-                let initialLetter = discussion.name.prefix(1)
-                let color = generateColorFor(text: discussion.id.uuidString)
+//            dummyImages[conversation.uuid.hashValue % dummyImages.count]
+//            if let image = conversation.image {
+//                image
+//                    .resizable()
+//                    .aspectRatio(1, contentMode: .fit)
+//            } else {
+            let initialLetter = conversation.firstParticipant(thatIsNot: authed.me)?.displayName?.prefix(1) ?? "T"
+            let color = generateColorFor(text: conversation.uuid?.uuidString ?? UUID().uuidString)
 
-                ZStack {
-                    Color(color)
-                        .brightness(-0.1)
+            ZStack {
+                Color(color)
+                    .brightness(-0.1)
 
-                    Text(initialLetter.count > 0 ? initialLetter : "A")
-                        .font(.title2)
-                        .fontWeight(.medium)
-                        .foregroundColor(.white)
-                }
-                .aspectRatio(1, contentMode: .fit)
+                Text(initialLetter.count > 0 ? initialLetter : "A")
+                    .font(.title2)
+                    .fontWeight(.medium)
+                    .foregroundColor(.white)
             }
+            .aspectRatio(1, contentMode: .fit)
         }
+        // }
         .clipShape(Circle())
     }
 }
 
-struct DiscussionListItemView: View {
-    var discussion: DiscussionModel
+struct ConversationListItemView: View {
+    var conversation: Conversation
 
     var body: some View {
         HStack(alignment: .top) {
-            DiscussionAvatar(discussion: discussion)
+            ConversationAvatar(conversation: conversation)
 
             HStack {
                 VStack {
-                    Text(discussion.name)
+                    Text(conversation.title ?? "new conv")
                         .fontWeight(.medium)
                 }
 
                 Spacer()
 
-                Text("\(discussion.date, formatter: Self.dateFormat)")
+                Text("\(conversation.lastActivity ?? Date(), formatter: Self.dateFormat)")
                     .foregroundColor(.secondary)
             }.padding(.vertical, 5)
         }
@@ -162,6 +130,13 @@ struct DiscussionModel: Identifiable {
     var name: String
     var date: Date
 }
+
+let dummyImages = [
+    Image(uiImage: #imageLiteral(resourceName: "profile4")),
+    Image(uiImage: #imageLiteral(resourceName: "profile1")),
+    Image(uiImage: #imageLiteral(resourceName: "profile2")),
+    Image(uiImage: #imageLiteral(resourceName: "profile3")),
+]
 
 let dummyDiscussions = [
     DiscussionModel(image: Image(uiImage: #imageLiteral(resourceName: "profile4")),
