@@ -223,5 +223,19 @@ func (ms MessageService) Send(ctx context.Context, input *pb.MessageSendInput) (
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
+	for _, uc := range conv.R.UserConversations {
+		err = ms.PgPubSub.Publish(entities.UserPubSubTopic(uc.R.User), common.NewMessageEvent{
+			PubSubEvent: common.PubSubEvent{Type: "newmessage", Timestamp: time.Now()},
+			// TODO: notif of voice message is not handled properly here... maybe just send uuid and listeners will retrieve in the db
+			Text:             msg.Text.String,
+			AuthorUuid:       u.UUID.String(),
+			AuthorHandle:     entities.UserDisplayName(u),
+			ConversationUuid: conv.UUID.String(),
+		})
+		if err != nil {
+			log.Printf("failed to notify user channel: %+v", err)
+		}
+	}
+
 	return &pb.Empty{}, nil
 }
