@@ -81,6 +81,15 @@ class AuthedGrpcApi {
     func me() -> (App_MeUser?, Error?) {
         return userClient.me(empty).waitForOutput()
     }
+    
+    func onboardingComplete(displayName: String, locales: [String]) -> (App_MeUser?, Error?) {
+        let input = App_OnboardingInput.with {
+            $0.displayName = displayName
+            $0.locales = locales
+        }
+        
+        return userClient.onboarding(input).waitForOutput()
+    }
 
     func listConvs() -> ([App_Conversation], Error?) {
         let input = App_ConversationListInput.with { $0.page = 0 }

@@ -5,21 +5,67 @@
 //  Created by Alexandre Carlier on 05.10.21.
 //
 
+import CoreData
 import SwiftUI
+import OSLog
+
+class InboxViewModel: ObservableObject {
+    private let authed: AuthenticatedState
+
+    @Published var loading = true
+
+    init(_ authed: AuthenticatedState) {
+        self.authed = authed
+        self.authed.gApi.subscribeIncomingMessages { msg in
+            let savedMsg = Message.upsert(msg, context: authed.context)
+            let conversation = Conversation.getByUuidOrCreate(msg.convUuid.uuidOrThrow(), context: authed.context)
+
+            conversation.addToMessages(savedMsg)
+
+            savedMsg.objectWillChange.send()
+            conversation.objectWillChange.send()
+
+            authed.context.saveOrLogError()
+        }
+    }
+
+    func syncConversations() {
+        loading = true
+        let (convs, _) = authed.gApi.listConvs()
+        loading = false
+        os_log(.debug, "loading = false")
+        Conversation.dumpFromRemote(convs, context: authed.context)
+    }
+}
 
 struct DiscussionListView: View {
     var namespace: Namespace.ID
+    @ObservedObject var model: InboxViewModel
+
+    @FetchRequest(
+        entity: Conversation.entity(),
+        sortDescriptors: []
+    ) var conversations: FetchedResults<Conversation>
 
     var body: some View {
         NavigationView {
-            List(dummyDiscussions) { discussion in
-                NavigationLink(
-                    destination: DiscussionView(discussion: discussion, namespace: namespace)
-                ) {
-                    DiscussionListItemView(discussion: discussion)
+            VStack {
+                if model.loading { ProgressView("syncing...") }
+
+                Text("\(conversations.count) conv loaded")
+                List(conversations) { conv in
+                    Text(conv.title ?? "conv without title")
                 }
+
+                List(dummyDiscussions) { discussion in
+                    NavigationLink(
+                        destination: DiscussionView(discussion: discussion, namespace: namespace)
+                    ) {
+                        DiscussionListItemView(discussion: discussion)
+                    }
+                }
+                .listStyle(.plain)
             }
-            .listStyle(.plain)
             .navigationTitle("Chats")
             .navigationBarItems(leading: HeaderSettingsView())
             .toolbar {
@@ -27,6 +73,7 @@ struct DiscussionListView: View {
                     Text("TalkieWalkie")
                 }
             }
+            .onAppear { model.syncConversations() }
         }
     }
 }
@@ -93,19 +140,20 @@ struct DiscussionListItemView: View {
     }
 }
 
-struct DiscussionListView_Previews: PreviewProvider {
-    static var previews: some View {
-        TestView()
-    }
-
-    struct TestView: View {
-        @Namespace var namespace
-
-        var body: some View {
-            DiscussionListView(namespace: namespace)
-        }
-    }
-}
+// struct DiscussionListView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        TestView()
+//    }
+//
+//    struct TestView: View {
+//        @Namespace var namespace
+//
+//        let vm =AuthenticatedState.dummy()
+//        var body: some View {
+//            DiscussionListView(namespace: namespace, model: vm)
+//        }
+//    }
+// }
 
 struct DiscussionModel: Identifiable {
     let id = UUID()

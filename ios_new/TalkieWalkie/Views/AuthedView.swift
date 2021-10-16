@@ -11,6 +11,7 @@ struct AuthedView: View {
     @EnvironmentObject var tooltipManager: TooltipManager
     @Namespace var namespace
     @AppStorage("onboardGuideShown") var onboardGuideShown: Bool = false
+    @EnvironmentObject var authed: AuthenticatedState
 
     @State var guideState = false
     @State var isRecording = false
@@ -29,7 +30,7 @@ struct AuthedView: View {
 
     var body: some View {
         ZStack {
-            DiscussionListView(namespace: namespace)
+            DiscussionListView(namespace: namespace, model: InboxViewModel(authed))
 
             VStack {
                 Spacer()

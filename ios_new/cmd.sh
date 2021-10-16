@@ -43,6 +43,8 @@ refresh_config() {
 </dict>
 </plist>
 EOF
+
+  cat TalkieWalkie/Config.dev.plist
 }
 
 "$@"

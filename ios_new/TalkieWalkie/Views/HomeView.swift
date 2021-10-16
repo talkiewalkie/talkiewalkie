@@ -19,7 +19,7 @@ class HomeViewModel: ObservableObject {
     private var auth = Auth.auth()
     private var coredataCtx: NSManagedObjectContext
 
-    @AppStorage("showOnboarding") var showOnboarding: Bool = true {
+    @AppStorage("showOnboarding") var showOnboarding: Bool = false {
         willSet { objectWillChange.send() }
     }
 
@@ -51,7 +51,7 @@ class AuthenticatedState: ObservableObject {
     var context: NSManagedObjectContext
 
     var me: Me { Me.fromCache(context: context)! }
-
+    
     static func build(_ config: Config, fbU: FirebaseAuth.User, context: NSManagedObjectContext, completion: @escaping (AuthenticatedState) -> Void) {
         fbU.getIDTokenResult { res, error in
             if let token = res {
@@ -68,8 +68,9 @@ class AuthenticatedState: ObservableObject {
                         let (res, _) = gApi.me()
                         if let res = res {
                             let me = Me(context: context)
+                            // TODO: Me.upsert??
                             me.uuid = UUID(uuidString: res.user.uuid)
-                            me.displayName = res.user.handle
+                            me.displayName = res.user.displayName
 
                             me.firebaseUid = fbU.uid
 
@@ -106,7 +107,10 @@ struct HomeView: View {
                     .environmentObject(authState)
             } else {
                 ProgressView()
-                    .onAppear { homeViewModel.showOnboarding = true }
+                    .onAppear {
+                        sleep(1)
+                        homeViewModel.showOnboarding = true
+                    }
             }
         }
         .environmentObject(messageViewModel)

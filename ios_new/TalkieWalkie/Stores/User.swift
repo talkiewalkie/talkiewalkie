@@ -14,7 +14,7 @@ extension User {
     static func upsert(_ u: App_User, context: NSManagedObjectContext) -> User {
         let localU = User.getByUuidOrCreate(u.uuid.uuidOrThrow(), context: context)
         localU.uuid = u.uuid.uuidOrThrow()
-        localU.displayName = u.handle
+        localU.displayName = u.displayName
         return localU
     }
 }

@@ -68,6 +68,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let hmv = HomeViewModel(persistentContainer.viewContext, config: config)
 
         let contentView = HomeView(homeViewModel: hmv)
+            .environment(\.managedObjectContext, persistentContainer.viewContext)
             .environmentObject(UserStore(persistentContainer.viewContext))
             .addTooltip()
             .environmentObject(tooltipManager)

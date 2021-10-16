@@ -21,11 +21,11 @@
       },
       {
         "package": "Firebase",
-        "repositoryURL": "https://github.com/firebase/firebase-ios-sdk.git",
+        "repositoryURL": "https://github.com/talkiewalkie/firebase-ios-sdk",
         "state": {
-          "branch": "master",
-          "revision": "c7c01493517aeaa0e6c2aa5af5acbe76a19c998f",
-          "version": null
+          "branch": null,
+          "revision": "81b568348ab4e113dd8bcef5a83c5dd431741ae4",
+          "version": "8.8.1"
         }
       },
       {
