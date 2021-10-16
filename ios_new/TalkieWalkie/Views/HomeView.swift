@@ -51,7 +51,7 @@ class AuthenticatedState: ObservableObject {
     var context: NSManagedObjectContext
 
     var me: Me { Me.fromCache(context: context)! }
-    
+
     static func build(_ config: Config, fbU: FirebaseAuth.User, context: NSManagedObjectContext, completion: @escaping (AuthenticatedState) -> Void) {
         fbU.getIDTokenResult { res, error in
             if let token = res {
@@ -98,10 +98,19 @@ struct HomeView: View {
     @StateObject var messageViewModel = MessageViewModel()
     @ObservedObject var homeViewModel: HomeViewModel
 
+    @AppStorage("name") var name: String = ""
+
     var body: some View {
         Group {
             if homeViewModel.showOnboarding {
-                OnboardingView { homeViewModel.showOnboarding = false }
+                OnboardingView {
+                    homeViewModel.showOnboarding = false
+                    guard let authState = homeViewModel.authed else {
+                        fatalError("on onboarding finish we cannot be in a state without a token")
+                    }
+
+                    _ = authState.gApi.onboardingComplete(displayName: name, locales: ["fr"])
+                }
             } else if let authState = homeViewModel.authed {
                 AuthedView()
                     .environmentObject(authState)

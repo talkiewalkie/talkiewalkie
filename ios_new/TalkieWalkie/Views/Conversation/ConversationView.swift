@@ -8,7 +8,7 @@
 import AVKit
 import SwiftUI
 
-struct DiscussionView: View {
+struct ConversationView: View {
     var discussion: DiscussionModel
     var namespace: Namespace.ID
 
@@ -125,7 +125,7 @@ struct DiscussionView_Previews: PreviewProvider {
         @Namespace var namespace
 
         var body: some View {
-            DiscussionView(discussion: dummyDiscussions[0], namespace: namespace)
+            ConversationView(discussion: dummyDiscussions[0], namespace: namespace)
         }
     }
 }

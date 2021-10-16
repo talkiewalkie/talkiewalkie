@@ -59,7 +59,7 @@ struct DiscussionListView: View {
 
                 List(dummyDiscussions) { discussion in
                     NavigationLink(
-                        destination: DiscussionView(discussion: discussion, namespace: namespace)
+                        destination: ConversationView(discussion: discussion, namespace: namespace)
                     ) {
                         DiscussionListItemView(discussion: discussion)
                     }
