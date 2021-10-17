@@ -98,6 +98,7 @@ struct ContactListView: View {
                                 twCL.users.forEach { u in
                                     _ = User.upsert(u, context: persistentContainer.viewContext)
                                 }
+                                persistentContainer.viewContext.saveOrLogError()
                             }
                         }
                     } else {
