@@ -7,6 +7,7 @@
 
 import CoreData
 import FirebaseAuth
+import FirebaseMessaging
 import OSLog
 import SwiftUI
 
@@ -47,17 +48,21 @@ class HomeViewModel: ObservableObject {
             }
         }
 
-        auth.addStateDidChangeListener { _, user in
-            self.user = user
-
-            if let user = user, self.showOnboarding {
-                AuthenticatedState.build(config, fbU: user, context: self.coredataCtx) { s in
+        auth.addStateDidChangeListener { _, newUser in
+            if let newUser = newUser, self.showOnboarding {
+                Messaging.messaging().subscribe(toTopic: newUser.uid)
+                os_log(.debug, "subscribed to '\(newUser.uid)'")
+                AuthenticatedState.build(config, fbU: newUser, context: self.coredataCtx) { s in
                     self.authed = s
                 }
             } else {
+                if let existingUser = self.user {
+                    Messaging.messaging().unsubscribe(fromTopic: existingUser.uid)
+                }
                 self.authed = nil
                 self.showOnboarding = true
             }
+            self.user = newUser
         }
     }
 }
@@ -123,7 +128,8 @@ struct HomeView: View {
                 OnboardingView {
                     homeViewModel.showOnboarding = false
                     guard let authState = homeViewModel.authed else {
-                        fatalError("on onboarding finish we cannot be in a state without a token")
+                        os_log(.error, "on onboarding finish we cannot be in a state without a token")
+                        return
                     }
 
                     _ = authState.gApi.onboardingComplete(displayName: name, locales: ["fr"])

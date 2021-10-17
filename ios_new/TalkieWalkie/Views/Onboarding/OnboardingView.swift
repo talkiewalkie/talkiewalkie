@@ -98,30 +98,33 @@ struct OnboardingNavControls: View {
     var onNext: (() -> Void)?
 
     var body: some View {
-        HStack {
-            if showPrev && !loading {
-                TWButton(action: {
-                    page -= 1
-                }, primary: false) {
-                    Image(systemName: "arrow.backward")
-                        .font(.system(size: 22, weight: .heavy))
-                }
-            }
-
+        VStack {
             Spacer()
+            HStack {
+                if showPrev && !loading {
+                    TWButton(action: {
+                        page -= 1
+                    }, primary: false) {
+                        Image(systemName: "arrow.backward")
+                            .font(.system(size: 22, weight: .heavy))
+                    }
+                }
 
-            if showNext {
-                TWButton(action: {
-                    guard let next = onNext else { return page += 1 }
-                    next()
-                }) {
-                    Group {
-                        if loading {
-                            ProgressView()
-                                .environment(\.colorScheme, .dark)
-                        } else {
-                            Image(systemName: "arrow.forward")
-                                .font(.system(size: 22, weight: .heavy))
+                Spacer()
+
+                if showNext {
+                    TWButton(action: {
+                        guard let next = onNext else { return page += 1 }
+                        next()
+                    }) {
+                        Group {
+                            if loading {
+                                ProgressView()
+                                    .environment(\.colorScheme, .dark)
+                            } else {
+                                Image(systemName: "arrow.forward")
+                                    .font(.system(size: 22, weight: .heavy))
+                            }
                         }
                     }
                 }
@@ -464,16 +467,6 @@ struct TurnOnNotificationsView: View {
         ZStack {
             VStack {
                 OnboardingTitle(text: "TalkieWalkie works better with notifications on.")
-
-                HStack {
-                    Spacer()
-
-                    TWButton(action: model.next, primary: false) {
-                        Text("Later".uppercased())
-                    }
-                    .opacity(0.75)
-                }
-
                 Spacer()
             }
 
@@ -482,15 +475,28 @@ struct TurnOnNotificationsView: View {
                     .scaleEffect(0.8)
                     .frame(maxHeight: 400)
 
-                Text("(TODO)")
-//                TWButton(action: {
-//                    // UserStore.requestNotificationAuthorization()
-//                }) {
-//                    Text("Turn on notifications".uppercased())
-//                }
-            }
+                TWButton(action: {
+                    let center = UNUserNotificationCenter.current()
+                    center.requestAuthorization(options: [.alert, .sound, .badge]) { _, error in
+                        if let error = error {
+                            os_log(.error, "\(error.localizedDescription)")
+                        }
+                    }
+                    model.next()
+                }, primary: true) {
+                    Text("Activate!")
+                }
+                
+                Spacer()
+                HStack {
+                    Spacer()
 
-//            OnboardingNavControls(page: $model.page, showPrev: false)
+                    TWButton(action: model.next, primary: false) {
+                        Text("Later".uppercased())
+                    }
+                    .opacity(0.75)
+                }
+            }
         }
         .padding()
     }

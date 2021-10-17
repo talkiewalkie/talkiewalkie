@@ -264,14 +264,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		730B7CF2270C9A6F007191FF /* UIElements */ = {
-			isa = PBXGroup;
-			children = (
-				734BF828270C9E33008438D9 /* TWButton.swift */,
-			);
-			path = UIElements;
-			sourceTree = "<group>";
-		};
 		734F00B1270FA5CD002B91FC /* Images */ = {
 			isa = PBXGroup;
 			children = (
@@ -308,7 +300,6 @@
 				7368C2C4270F5BFE00B73DB7 /* Old */,
 				73766080270D9CAD001BA79F /* TalkieWalkie.entitlements */,
 				73853D50270C4F9000B0B4BF /* Stores */,
-				730B7CF2270C9A6F007191FF /* UIElements */,
 				7376608C270DA281001BA79F /* AppDelegate.swift */,
 				7376608E270DA305001BA79F /* SceneDelegate.swift */,
 				737660B0270DD2A0001BA79F /* TestViews */,
@@ -384,6 +375,7 @@
 		73853D53270C4FEB00B0B4BF /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				734BF828270C9E33008438D9 /* TWButton.swift */,
 				E482102C271AD6F600A84A2C /* Audiogram */,
 				737660B3270DDFB9001BA79F /* MessageDetailView.swift */,
 				73853D4C270C4E1000B0B4BF /* HeaderView.swift */,

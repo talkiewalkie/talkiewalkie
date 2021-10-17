@@ -135,7 +135,7 @@ func (us UserService) SyncContacts(ctx context.Context, input *pb.SyncContactsIn
 		})
 	}
 
-	if u.BroadcastArrival {
+	if u.BroadcastArrival && len(users) > 0 {
 		u.BroadcastArrival = false
 		if _, err = u.Update(ctx, us.Db, boil.Infer()); err != nil {
 			return nil, status.Error(codes.Internal, err.Error())
