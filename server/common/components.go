@@ -4,6 +4,7 @@ import (
 	"context"
 	"firebase.google.com/go/v4"
 	"firebase.google.com/go/v4/auth"
+	"firebase.google.com/go/v4/messaging"
 	"fmt"
 	"github.com/go-chi/jwtauth"
 	"github.com/jmoiron/sqlx"
@@ -22,6 +23,7 @@ type Components struct {
 	EmailClient EmailClient
 	JwtAuth     *jwtauth.JWTAuth
 	FbAuth      *auth.Client
+	FbMssg      *messaging.Client
 	Storage     StorageClient
 	Audio       *pb.CompressionClient
 
@@ -37,6 +39,13 @@ func InitComponents() (*Components, error) {
 		log.Panicf("could not init the firebase sdk: %+v", err)
 	}
 	fbAuth, err := app.Auth(context.Background())
+	if err != nil {
+		log.Panicf("could not instantiate firebase auth service: %+v", err)
+	}
+	fbMssg, err := app.Messaging(context.Background())
+	if err != nil {
+		log.Panicf("could not instantiate firebase messaging service: %+v", err)
+	}
 
 	storageClient, err := initStorageClient(context.Background())
 	if err != nil {
@@ -68,6 +77,7 @@ func InitComponents() (*Components, error) {
 		EmailClient: emailClient,
 		JwtAuth:     tokenAuth,
 		FbAuth:      fbAuth,
+		FbMssg:      fbMssg,
 		Storage:     storageClient,
 		Audio:       &audioClient,
 		CompressImg: func(path string, width int) (string, error) {

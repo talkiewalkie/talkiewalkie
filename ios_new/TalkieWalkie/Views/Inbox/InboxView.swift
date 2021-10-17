@@ -50,12 +50,6 @@ struct ConversationAvatar: View {
 
     var body: some View {
         Group {
-//            dummyImages[conversation.uuid.hashValue % dummyImages.count]
-//            if let image = conversation.image {
-//                image
-//                    .resizable()
-//                    .aspectRatio(1, contentMode: .fit)
-//            } else {
             let initialLetter = conversation.firstParticipant(thatIsNot: authed.me)?.displayName?.prefix(1) ?? "T"
             let color = generateColorFor(text: conversation.uuid?.uuidString ?? UUID().uuidString)
 
@@ -70,7 +64,6 @@ struct ConversationAvatar: View {
             }
             .aspectRatio(1, contentMode: .fit)
         }
-        // }
         .clipShape(Circle())
     }
 }

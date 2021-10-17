@@ -18,6 +18,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         FirebaseApp.configure()
 
         Messaging.messaging().delegate = self
+        Messaging.messaging().subscribe(toTopic: "all")
+        if let fbu = Auth.auth().currentUser {
+            Messaging.messaging().subscribe(toTopic: fbu.uid)
+            os_log(.debug, "subscribed to '\(fbu.uid)'")
+        }
 
         // Push Notifcations
         UNUserNotificationCenter.current().delegate = self

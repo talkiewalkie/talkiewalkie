@@ -3,6 +3,8 @@ package coco
 import (
 	"context"
 	"errors"
+	"firebase.google.com/go/v4/messaging"
+	"fmt"
 	uuid2 "github.com/satori/go.uuid"
 	"github.com/talkiewalkie/talkiewalkie/common"
 	"github.com/talkiewalkie/talkiewalkie/entities"
@@ -13,6 +15,7 @@ import (
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"log"
 	"strings"
 )
 
@@ -117,7 +120,7 @@ func (us UserService) Onboarding(ctx context.Context, input *pb.OnboardingInput)
 }
 
 func (us UserService) SyncContacts(ctx context.Context, input *pb.SyncContactsInput) (*pb.SyncContactsOutput, error) {
-	_, err := common.GetUser(ctx)
+	u, err := common.GetUser(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -130,6 +133,52 @@ func (us UserService) SyncContacts(ctx context.Context, input *pb.SyncContactsIn
 			Uuid:        user.UUID.String(),
 			Phone:       user.PhoneNumber,
 		})
+	}
+
+	if u.BroadcastArrival {
+		u.BroadcastArrival = false
+		if _, err = u.Update(ctx, us.Db, boil.Infer()); err != nil {
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+
+		//userIdentifiers := []auth.UserIdentifier{}
+		//for _, user := range users {
+		//	if user.FirebaseUID.Valid {
+		//		userIdentifiers = append(userIdentifiers, auth.UIDIdentifier{UID: user.FirebaseUID.String})
+		//	}
+		//}
+		//
+		//fbUsers, err := us.FbAuth.GetUsers(ctx, userIdentifiers)
+		//if err != nil {
+		//	return nil, status.Error(codes.Internal, fmt.Sprintf("could not sync users with firebase: %+v", err))
+		//}
+		//if len(fbUsers.NotFound) > 0 {
+		//	for _, identifier := range fbUsers.NotFound {
+		//		log.Printf("could not find user '%s' in firebase", identifier.(auth.UIDIdentifier).UID)
+		//	}
+		//	return nil, status.Error(codes.Internal, "some users were not found in firebase")
+		//}
+
+		messages := []*messaging.Message{}
+		for _, user := range users {
+			if !user.FirebaseUID.Valid {
+				continue
+			}
+			messages = append(messages, &messaging.Message{
+				Topic: user.FirebaseUID.String,
+				Notification: &messaging.Notification{
+					Title: "Good news 🎙!",
+					Body:  fmt.Sprintf("%s has joined TalkieWalkie! ❤️", entities.UserDisplayName(user)),
+				},
+			})
+		}
+		res, err := us.FbMssg.SendAll(ctx, messages)
+		if err != nil {
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+		if res.FailureCount > 0 {
+			log.Printf("failed to deliver %d messages", res.FailureCount)
+		}
 	}
 
 	return &pb.SyncContactsOutput{Users: pbUsers}, nil

@@ -32,11 +32,12 @@ type User struct {
 	ProfilePicture     null.Int          `db:"profile_picture" boil:"profile_picture" json:"profile_picture,omitempty" toml:"profile_picture" yaml:"profile_picture,omitempty"`
 	CreatedAt          null.Time         `db:"created_at" boil:"created_at" json:"created_at,omitempty" toml:"created_at" yaml:"created_at,omitempty"`
 	UpdatedAt          null.Time         `db:"updated_at" boil:"updated_at" json:"updated_at,omitempty" toml:"updated_at" yaml:"updated_at,omitempty"`
-	Bio                null.String       `db:"bio" boil:"bio" json:"bio,omitempty" toml:"bio" yaml:"bio,omitempty"`
+	Status             null.String       `db:"status" boil:"status" json:"status,omitempty" toml:"status" yaml:"status,omitempty"`
 	PhoneNumber        string            `db:"phone_number" boil:"phone_number" json:"phone_number" toml:"phone_number" yaml:"phone_number"`
 	OnboardingFinished bool              `db:"onboarding_finished" boil:"onboarding_finished" json:"onboarding_finished" toml:"onboarding_finished" yaml:"onboarding_finished"`
 	DisplayName        null.String       `db:"display_name" boil:"display_name" json:"display_name,omitempty" toml:"display_name" yaml:"display_name,omitempty"`
 	Locales            types.StringArray `db:"locales" boil:"locales" json:"locales,omitempty" toml:"locales" yaml:"locales,omitempty"`
+	BroadcastArrival   bool              `db:"broadcast_arrival" boil:"broadcast_arrival" json:"broadcast_arrival" toml:"broadcast_arrival" yaml:"broadcast_arrival"`
 
 	R *userR `db:"-" boil:"-" json:"-" toml:"-" yaml:"-"`
 	L userL  `db:"-" boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -49,11 +50,12 @@ var UserColumns = struct {
 	ProfilePicture     string
 	CreatedAt          string
 	UpdatedAt          string
-	Bio                string
+	Status             string
 	PhoneNumber        string
 	OnboardingFinished string
 	DisplayName        string
 	Locales            string
+	BroadcastArrival   string
 }{
 	ID:                 "id",
 	UUID:               "uuid",
@@ -61,11 +63,12 @@ var UserColumns = struct {
 	ProfilePicture:     "profile_picture",
 	CreatedAt:          "created_at",
 	UpdatedAt:          "updated_at",
-	Bio:                "bio",
+	Status:             "status",
 	PhoneNumber:        "phone_number",
 	OnboardingFinished: "onboarding_finished",
 	DisplayName:        "display_name",
 	Locales:            "locales",
+	BroadcastArrival:   "broadcast_arrival",
 }
 
 var UserTableColumns = struct {
@@ -75,11 +78,12 @@ var UserTableColumns = struct {
 	ProfilePicture     string
 	CreatedAt          string
 	UpdatedAt          string
-	Bio                string
+	Status             string
 	PhoneNumber        string
 	OnboardingFinished string
 	DisplayName        string
 	Locales            string
+	BroadcastArrival   string
 }{
 	ID:                 "user.id",
 	UUID:               "user.uuid",
@@ -87,11 +91,12 @@ var UserTableColumns = struct {
 	ProfilePicture:     "user.profile_picture",
 	CreatedAt:          "user.created_at",
 	UpdatedAt:          "user.updated_at",
-	Bio:                "user.bio",
+	Status:             "user.status",
 	PhoneNumber:        "user.phone_number",
 	OnboardingFinished: "user.onboarding_finished",
 	DisplayName:        "user.display_name",
 	Locales:            "user.locales",
+	BroadcastArrival:   "user.broadcast_arrival",
 }
 
 // Generated where
@@ -160,11 +165,12 @@ var UserWhere = struct {
 	ProfilePicture     whereHelpernull_Int
 	CreatedAt          whereHelpernull_Time
 	UpdatedAt          whereHelpernull_Time
-	Bio                whereHelpernull_String
+	Status             whereHelpernull_String
 	PhoneNumber        whereHelperstring
 	OnboardingFinished whereHelperbool
 	DisplayName        whereHelpernull_String
 	Locales            whereHelpertypes_StringArray
+	BroadcastArrival   whereHelperbool
 }{
 	ID:                 whereHelperint{field: "\"user\".\"id\""},
 	UUID:               whereHelperuuid_UUID{field: "\"user\".\"uuid\""},
@@ -172,11 +178,12 @@ var UserWhere = struct {
 	ProfilePicture:     whereHelpernull_Int{field: "\"user\".\"profile_picture\""},
 	CreatedAt:          whereHelpernull_Time{field: "\"user\".\"created_at\""},
 	UpdatedAt:          whereHelpernull_Time{field: "\"user\".\"updated_at\""},
-	Bio:                whereHelpernull_String{field: "\"user\".\"bio\""},
+	Status:             whereHelpernull_String{field: "\"user\".\"status\""},
 	PhoneNumber:        whereHelperstring{field: "\"user\".\"phone_number\""},
 	OnboardingFinished: whereHelperbool{field: "\"user\".\"onboarding_finished\""},
 	DisplayName:        whereHelpernull_String{field: "\"user\".\"display_name\""},
 	Locales:            whereHelpertypes_StringArray{field: "\"user\".\"locales\""},
+	BroadcastArrival:   whereHelperbool{field: "\"user\".\"broadcast_arrival\""},
 }
 
 // UserRels is where relationship names are stored.
@@ -206,9 +213,9 @@ func (*userR) NewStruct() *userR {
 type userL struct{}
 
 var (
-	userAllColumns            = []string{"id", "uuid", "firebase_uid", "profile_picture", "created_at", "updated_at", "bio", "phone_number", "onboarding_finished", "display_name", "locales"}
-	userColumnsWithoutDefault = []string{"firebase_uid", "profile_picture", "bio", "phone_number", "display_name", "locales"}
-	userColumnsWithDefault    = []string{"id", "uuid", "created_at", "updated_at", "onboarding_finished"}
+	userAllColumns            = []string{"id", "uuid", "firebase_uid", "profile_picture", "created_at", "updated_at", "status", "phone_number", "onboarding_finished", "display_name", "locales", "broadcast_arrival"}
+	userColumnsWithoutDefault = []string{"firebase_uid", "profile_picture", "status", "phone_number", "display_name", "locales"}
+	userColumnsWithDefault    = []string{"id", "uuid", "created_at", "updated_at", "onboarding_finished", "broadcast_arrival"}
 	userPrimaryKeyColumns     = []string{"id"}
 )
 

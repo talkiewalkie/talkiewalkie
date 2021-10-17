@@ -29,11 +29,16 @@ struct ContactListView: View {
                         Text("You already have \(talkiewalkieContacts.count) friends")
                     }
                     Text("Invite your close ones!")
+                        .padding()
+                        .background(Color.white)
+                        .foregroundColor(.yellow)
+                        .rotationEffect(Angle(degrees: 15))
+                        
                     ScrollView {
                         LazyVStack(spacing: 40) {
                             ForEach(nonTalkieWalkieContacts) { contact in
                                 HStack(spacing: 20) {
-                                    AutomaticAvatar(String(contact.displayName.substring(with: .init(location: 0, length: 1))), color: generateColorFor(text: contact.phone))
+                                    AutomaticAvatar(String(contact.displayName.prefix(1)), color: generateColorFor(text: contact.phone))
                                     VStack(alignment: .leading, spacing: 10) {
                                         Text(contact.displayName).foregroundColor(.black)
                                         Text(contact.phone).foregroundColor(.gray).font(.caption)
