@@ -69,7 +69,7 @@ func main() {
 		friends := []*models.User{u}
 		for j := 0; j < rand.Intn(6)+1; j += 1 {
 			friend := &models.User{
-				DisplayName:        null.StringFrom(faker.Username()),
+				DisplayName:        null.StringFrom(faker.FirstName()),
 				FirebaseUID:        null.String{},
 				PhoneNumber:        faker.Phonenumber(),
 				OnboardingFinished: true,
