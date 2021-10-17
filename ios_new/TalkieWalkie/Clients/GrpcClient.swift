@@ -88,6 +88,12 @@ class AuthedGrpcApi {
         
         return userClient.onboarding(input).waitForOutput()
     }
+    
+    func syncContactList(phones: [String]) -> (App_SyncContactsOutput?, Error?) {
+        let input = App_SyncContactsInput.with { $0.phoneNumbers = phones }
+        
+        return userClient.syncContacts(input).waitForOutput()
+    }
 
     func listConvs() -> ([App_Conversation], Error?) {
         let input = App_ConversationListInput.with { $0.page = 0 }

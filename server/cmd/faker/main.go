@@ -57,6 +57,9 @@ func main() {
 			if err = u.Insert(ctx, components.Db, boil.Infer()); err != nil {
 				log.Panicf("could create user for email: %+v", err)
 			}
+			if err = common.CreateDefaultConversation(components, context.Background(), u); err != nil {
+				log.Panic(err)
+			}
 		} else {
 			log.Panicf("could not find user for email: %+v", err)
 		}

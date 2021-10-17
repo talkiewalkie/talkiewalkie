@@ -15,6 +15,7 @@ extension User {
         let localU = User.getByUuidOrCreate(u.uuid.uuidOrThrow(), context: context)
         localU.uuid = u.uuid.uuidOrThrow()
         localU.displayName = u.displayName
+        localU.phone = u.phone
         return localU
     }
 }

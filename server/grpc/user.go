@@ -51,9 +51,9 @@ func (us UserService) Get(ctx context.Context, input *pb.UserGetInput) (*pb.User
 	}
 
 	return &pb.User{
-		DisplayName:   entities.UserDisplayName(u),
-		Uuid:          u.UUID.String(),
-		Conversations: nil,
+		DisplayName: entities.UserDisplayName(u),
+		Uuid:        u.UUID.String(),
+		Phone:       u.PhoneNumber,
 	}, nil
 }
 
@@ -65,9 +65,9 @@ func (us UserService) List(input *pb.UserListInput, server pb.UserService_ListSe
 
 	for _, user := range users {
 		err = server.Send(&pb.User{
-			DisplayName:   entities.UserDisplayName(user),
-			Uuid:          user.UUID.String(),
-			Conversations: nil,
+			DisplayName: entities.UserDisplayName(user),
+			Uuid:        user.UUID.String(),
+			Phone:       user.PhoneNumber,
 		})
 		if err != nil {
 			return err
@@ -85,9 +85,9 @@ func (us UserService) Me(ctx context.Context, _ *pb.Empty) (*pb.MeUser, error) {
 
 	return &pb.MeUser{
 		User: &pb.User{
-			DisplayName:   entities.UserDisplayName(u),
-			Uuid:          u.UUID.String(),
-			Conversations: nil,
+			DisplayName: entities.UserDisplayName(u),
+			Uuid:        u.UUID.String(),
+			Phone:       u.PhoneNumber,
 		},
 		LanguageUsed: "",
 	}, nil
@@ -108,10 +108,29 @@ func (us UserService) Onboarding(ctx context.Context, input *pb.OnboardingInput)
 
 	return &pb.MeUser{
 		User: &pb.User{
-			DisplayName:   entities.UserDisplayName(u),
-			Uuid:          u.UUID.String(),
-			Conversations: nil,
+			DisplayName: entities.UserDisplayName(u),
+			Uuid:        u.UUID.String(),
+			Phone:       u.PhoneNumber,
 		},
 		LanguageUsed: "",
 	}, nil
+}
+
+func (us UserService) SyncContacts(ctx context.Context, input *pb.SyncContactsInput) (*pb.SyncContactsOutput, error) {
+	_, err := common.GetUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	users, err := models.Users(models.UserWhere.PhoneNumber.IN(input.PhoneNumbers)).All(ctx, us.Db)
+	pbUsers := []*pb.User{}
+	for _, user := range users {
+		pbUsers = append(pbUsers, &pb.User{
+			DisplayName: entities.UserDisplayName(user),
+			Uuid:        user.UUID.String(),
+			Phone:       user.PhoneNumber,
+		})
+	}
+
+	return &pb.SyncContactsOutput{Users: pbUsers}, nil
 }

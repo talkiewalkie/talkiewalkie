@@ -17,6 +17,7 @@ message User {
   string displayName = 1;
   string uuid = 2;
   repeated Conversation conversations = 3;
+  string phone = 4;
 }
 
 message MeUser {
@@ -40,7 +41,16 @@ message OnboardingInput {
   repeated string locales = 2;
 }
 
+message SyncContactsInput {
+  repeated string phoneNumbers = 1;
+}
+
+message SyncContactsOutput {
+  repeated User users = 1;
+}
+
 service UserService {
+  rpc SyncContacts(SyncContactsInput) returns (SyncContactsOutput) {}
   rpc Onboarding(OnboardingInput) returns (MeUser) {}
   rpc Me(Empty)  returns (MeUser) {}
   rpc Get(UserGetInput)  returns (User) {}

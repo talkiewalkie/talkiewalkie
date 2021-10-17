@@ -106,6 +106,9 @@
 		E4CC791C271B3310003C359A /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = E4CC791B271B3310003C359A /* FirebaseAuth */; };
 		E4CC791E271B3310003C359A /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = E4CC791D271B3310003C359A /* FirebaseCrashlytics */; };
 		E4CC7920271B3310003C359A /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = E4CC791F271B3310003C359A /* FirebaseMessaging */; };
+		E4CC7922271B3C28003C359A /* ContactListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4CC7921271B3C28003C359A /* ContactListView.swift */; };
+		E4CC7924271C1149003C359A /* CNContactStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4CC7923271C1149003C359A /* CNContactStore.swift */; };
+		E4CC7926271C136D003C359A /* AutomaticAvatar.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4CC7925271C136D003C359A /* AutomaticAvatar.swift */; };
 		E4D9BD7827157530005CD3A0 /* LocalModels.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = E4D9BD762715752F005CD3A0 /* LocalModels.xcdatamodeld */; };
 		E4D9BD7B271577C4005CD3A0 /* GrpcClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4D9BD7A271577C4005CD3A0 /* GrpcClient.swift */; };
 		E4D9BD7E27157A26005CD3A0 /* SwiftProtobuf in Frameworks */ = {isa = PBXBuildFile; productRef = E4D9BD7D27157A26005CD3A0 /* SwiftProtobuf */; };
@@ -220,6 +223,9 @@
 		73B63B4C2710879A00994B92 /* mic-off.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = "mic-off.json"; sourceTree = "<group>"; };
 		E482102D271AD91E00A84A2C /* InboxViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InboxViewModel.swift; sourceTree = "<group>"; };
 		E482102F271B0CF500A84A2C /* ConversationViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationViewModel.swift; sourceTree = "<group>"; };
+		E4CC7921271B3C28003C359A /* ContactListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactListView.swift; sourceTree = "<group>"; };
+		E4CC7923271C1149003C359A /* CNContactStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CNContactStore.swift; sourceTree = "<group>"; };
+		E4CC7925271C136D003C359A /* AutomaticAvatar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutomaticAvatar.swift; sourceTree = "<group>"; };
 		E4D9BD7727157530005CD3A0 /* LocalModels.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = LocalModels.xcdatamodel; sourceTree = "<group>"; };
 		E4D9BD7A271577C4005CD3A0 /* GrpcClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrpcClient.swift; sourceTree = "<group>"; };
 		E4D9BD8A27157D39005CD3A0 /* app.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = app.pb.swift; sourceTree = "<group>"; };
@@ -398,6 +404,7 @@
 				73853D70270C519C00B0B4BF /* TooltipShape.swift */,
 				73853D72270C51AE00B0B4BF /* WebURLView.swift */,
 				73853D74270C51C000B0B4BF /* WrapStack.swift */,
+				E4CC7925271C136D003C359A /* AutomaticAvatar.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -480,6 +487,7 @@
 				E4D9BD9827157E01005CD3A0 /* String.swift */,
 				E4D9BD9C27157F70005CD3A0 /* CoreData.swift */,
 				E4D9BDA02716019A005CD3A0 /* OSLog.swift */,
+				E4CC7923271C1149003C359A /* CNContactStore.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -532,6 +540,7 @@
 			isa = PBXGroup;
 			children = (
 				730B7CEC270C81F3007191FF /* OnboardingView.swift */,
+				E4CC7921271B3C28003C359A /* ContactListView.swift */,
 			);
 			path = Onboarding;
 			sourceTree = "<group>";
@@ -727,6 +736,8 @@
 				73519D3C270B60FE009BA6FF /* CirclesBackground.swift in Sources */,
 				7368C2BF270F465200B73DB7 /* AudiogramView.swift in Sources */,
 				73853D61270C50CA00B0B4BF /* EmojiChooser.swift in Sources */,
+				E4CC7924271C1149003C359A /* CNContactStore.swift in Sources */,
+				E4CC7922271B3C28003C359A /* ContactListView.swift in Sources */,
 				E4D9BD9F2715E972005CD3A0 /* AuthedView.swift in Sources */,
 				73853DA8270C579F00B0B4BF /* Bundle+AppInfo.swift in Sources */,
 				73853D5B270C508100B0B4BF /* MemeFont.swift in Sources */,
@@ -748,6 +759,7 @@
 				E4D9BD8C27157D39005CD3A0 /* app.pb.swift in Sources */,
 				73853D5F270C50AB00B0B4BF /* AnimatedEllipsis.swift in Sources */,
 				E4D9BD7827157530005CD3A0 /* LocalModels.xcdatamodeld in Sources */,
+				E4CC7926271C136D003C359A /* AutomaticAvatar.swift in Sources */,
 				737660B2270DD519001BA79F /* ReversedScrollView.swift in Sources */,
 				73853DAA270C57A800B0B4BF /* Date+Format.swift in Sources */,
 				734BF829270C9E33008438D9 /* TWButton.swift in Sources */,

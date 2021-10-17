@@ -74,7 +74,7 @@ struct Onboarding: View {
                 case 4: PhoneNumberSuccessView()
                 case 5: TurnOnNotificationsView()
                 case 6: MicrophoneAuthorizationView()
-                case 7: PickFriendsIntroView()
+                case 7: ContactListView()
                 case 8: AddTalkieWalkieContactsView()
                 case 9: AddOtherContactsView()
                 case 10: FinalSuccessView(onboardingDone: onboardingDone)
@@ -127,7 +127,7 @@ struct OnboardingNavControls: View {
                 }
             }
         }
-        .frame(maxHeight: .infinity, alignment: .bottom)
+        .frame(alignment: .bottom)
         .padding()
     }
 }
@@ -354,10 +354,9 @@ struct TypePhoneNumberView: View {
 
         showSendingSMSAlert = true
 
-        
         os_log("verif id: '\(model.verificationID)'")
         os_log("verif code: '\(model.verificationCode)'")
-        
+
         PhoneAuthProvider.provider()
             .verifyPhoneNumber(model.fullPhoneNumber, uiDelegate: nil) { verificationID, error in
                 if let error = error {
@@ -587,21 +586,6 @@ struct MicrophoneAuthorizationView: View {
                 }
             }
         }
-    }
-}
-
-// MARK: Access contacts
-
-struct PickFriendsIntroView: View {
-    @EnvironmentObject var model: OnboardingViewModel
-
-    var body: some View {
-        ZStack {
-            Text("Text.")
-
-            OnboardingNavControls(page: $model.page)
-        }
-        .padding()
     }
 }
 

@@ -27,10 +27,14 @@ func MessageToPb(m *models.Message) (*pb.Message, error) {
 	}
 
 	return &pb.Message{
-		Uuid:      m.UUID.String(),
-		ConvUuid:  m.R.Conversation.UUID.String(),
-		Content:   content,
-		Author:    &pb.User{Uuid: m.R.Author.UUID.String(), DisplayName: UserDisplayName(m.R.Author)},
+		Uuid:     m.UUID.String(),
+		ConvUuid: m.R.Conversation.UUID.String(),
+		Content:  content,
+		Author: &pb.User{
+			Uuid:        m.R.Author.UUID.String(),
+			DisplayName: UserDisplayName(m.R.Author),
+			Phone:       m.R.Author.PhoneNumber,
+		},
 		CreatedAt: timestamppb.New(m.CreatedAt),
 	}, nil
 }

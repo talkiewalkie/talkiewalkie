@@ -69,6 +69,7 @@ func (ms MessageService) Incoming(_ *pb.Empty, server pb.MessageService_Incoming
 				break
 			}
 
+			// TODO: just fetch the payload from db here, rather than sending a payload through pubsub
 			err = server.Send(&pb.Message{
 				ConvUuid:  msg.ConversationUuid,
 				Content:   &pb.Message_TextMessage{TextMessage: &pb.TextMessage{Content: msg.Text}},

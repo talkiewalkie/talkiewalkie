@@ -15,13 +15,25 @@ class MessageViewModel: ObservableObject {
     @Published var showDetailView: Bool = false
 }
 
+import Combine
+
+private var cancellables = [String: AnyCancellable]()
+
+extension Published {
+    init(wrappedValue defaultValue: Value, key: String) {
+        let value = UserDefaults.standard.object(forKey: key) as? Value ?? defaultValue
+        self.init(initialValue: value)
+        cancellables[key] = projectedValue.sink { val in
+            UserDefaults.standard.set(val, forKey: key)
+        }
+    }
+}
+
 class HomeViewModel: ObservableObject {
     private var auth = Auth.auth()
     private var coredataCtx: NSManagedObjectContext
 
-    @AppStorage("showOnboarding") var showOnboarding: Bool = false {
-        willSet { objectWillChange.send() }
-    }
+    @Published(key: "showOnboarding") var showOnboarding: Bool = false
 
     @Published var user: FirebaseAuth.User?
     @Published var authed: AuthenticatedState?
@@ -29,6 +41,11 @@ class HomeViewModel: ObservableObject {
     init(_ ctx: NSManagedObjectContext, config: Config) {
         coredataCtx = ctx
         user = auth.currentUser
+        if let user = user, self.showOnboarding {
+            AuthenticatedState.build(config, fbU: user, context: coredataCtx) { s in
+                self.authed = s
+            }
+        }
 
         auth.addStateDidChangeListener { _, user in
             self.user = user
@@ -115,11 +132,12 @@ struct HomeView: View {
                 AuthedView()
                     .environmentObject(authState)
             } else {
-                ProgressView()
-                    .onAppear {
-                        sleep(1)
-                        homeViewModel.showOnboarding = true
-                    }
+                // TODO: better model state flow so that we don't need to have this case.
+                // fatalError("this should be an unreachable state - please fix underlying bugs rather than display something here.")
+                ProgressView().onAppear {
+                    sleep(1)
+//                    self.homeViewModel.showOnboarding = true
+                }
             }
         }
         .environmentObject(messageViewModel)

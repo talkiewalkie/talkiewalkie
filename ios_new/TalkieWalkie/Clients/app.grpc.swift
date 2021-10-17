@@ -93,6 +93,11 @@ public protocol App_UserServiceClientProtocol: GRPCClient {
   var serviceName: String { get }
   var interceptors: App_UserServiceClientInterceptorFactoryProtocol? { get }
 
+  func syncContacts(
+    _ request: App_SyncContactsInput,
+    callOptions: CallOptions?
+  ) -> UnaryCall<App_SyncContactsInput, App_SyncContactsOutput>
+
   func onboarding(
     _ request: App_OnboardingInput,
     callOptions: CallOptions?
@@ -118,6 +123,24 @@ public protocol App_UserServiceClientProtocol: GRPCClient {
 extension App_UserServiceClientProtocol {
   public var serviceName: String {
     return "app.UserService"
+  }
+
+  /// Unary call to SyncContacts
+  ///
+  /// - Parameters:
+  ///   - request: Request to send to SyncContacts.
+  ///   - callOptions: Call options.
+  /// - Returns: A `UnaryCall` with futures for the metadata, status and response.
+  public func syncContacts(
+    _ request: App_SyncContactsInput,
+    callOptions: CallOptions? = nil
+  ) -> UnaryCall<App_SyncContactsInput, App_SyncContactsOutput> {
+    return self.makeUnaryCall(
+      path: "/app.UserService/SyncContacts",
+      request: request,
+      callOptions: callOptions ?? self.defaultCallOptions,
+      interceptors: self.interceptors?.makeSyncContactsInterceptors() ?? []
+    )
   }
 
   /// Unary call to Onboarding
@@ -197,6 +220,9 @@ extension App_UserServiceClientProtocol {
 }
 
 public protocol App_UserServiceClientInterceptorFactoryProtocol {
+
+  /// - Returns: Interceptors to use when invoking 'syncContacts'.
+  func makeSyncContactsInterceptors() -> [ClientInterceptor<App_SyncContactsInput, App_SyncContactsOutput>]
 
   /// - Returns: Interceptors to use when invoking 'onboarding'.
   func makeOnboardingInterceptors() -> [ClientInterceptor<App_OnboardingInput, App_MeUser>]
@@ -461,6 +487,8 @@ public protocol App_UtilsServerInterceptorFactoryProtocol {
 public protocol App_UserServiceProvider: CallHandlerProvider {
   var interceptors: App_UserServiceServerInterceptorFactoryProtocol? { get }
 
+  func syncContacts(request: App_SyncContactsInput, context: StatusOnlyCallContext) -> EventLoopFuture<App_SyncContactsOutput>
+
   func onboarding(request: App_OnboardingInput, context: StatusOnlyCallContext) -> EventLoopFuture<App_MeUser>
 
   func me(request: App_Empty, context: StatusOnlyCallContext) -> EventLoopFuture<App_MeUser>
@@ -480,6 +508,15 @@ extension App_UserServiceProvider {
     context: CallHandlerContext
   ) -> GRPCServerHandlerProtocol? {
     switch name {
+    case "SyncContacts":
+      return UnaryServerHandler(
+        context: context,
+        requestDeserializer: ProtobufDeserializer<App_SyncContactsInput>(),
+        responseSerializer: ProtobufSerializer<App_SyncContactsOutput>(),
+        interceptors: self.interceptors?.makeSyncContactsInterceptors() ?? [],
+        userFunction: self.syncContacts(request:context:)
+      )
+
     case "Onboarding":
       return UnaryServerHandler(
         context: context,
@@ -523,6 +560,10 @@ extension App_UserServiceProvider {
 }
 
 public protocol App_UserServiceServerInterceptorFactoryProtocol {
+
+  /// - Returns: Interceptors to use when handling 'syncContacts'.
+  ///   Defaults to calling `self.makeInterceptors()`.
+  func makeSyncContactsInterceptors() -> [ServerInterceptor<App_SyncContactsInput, App_SyncContactsOutput>]
 
   /// - Returns: Interceptors to use when handling 'onboarding'.
   ///   Defaults to calling `self.makeInterceptors()`.

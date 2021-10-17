@@ -41,6 +41,8 @@ public struct App_User {
 
   public var conversations: [App_Conversation] = []
 
+  public var phone: String = String()
+
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
   public init() {}
@@ -141,6 +143,30 @@ public struct App_OnboardingInput {
   public var displayName: String = String()
 
   public var locales: [String] = []
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+}
+
+public struct App_SyncContactsInput {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  public var phoneNumbers: [String] = []
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+}
+
+public struct App_SyncContactsOutput {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  public var users: [App_User] = []
 
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -429,6 +455,7 @@ extension App_User: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationB
     1: .same(proto: "displayName"),
     2: .same(proto: "uuid"),
     3: .same(proto: "conversations"),
+    4: .same(proto: "phone"),
   ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -440,6 +467,7 @@ extension App_User: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationB
       case 1: try { try decoder.decodeSingularStringField(value: &self.displayName) }()
       case 2: try { try decoder.decodeSingularStringField(value: &self.uuid) }()
       case 3: try { try decoder.decodeRepeatedMessageField(value: &self.conversations) }()
+      case 4: try { try decoder.decodeSingularStringField(value: &self.phone) }()
       default: break
       }
     }
@@ -455,6 +483,9 @@ extension App_User: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationB
     if !self.conversations.isEmpty {
       try visitor.visitRepeatedMessageField(value: self.conversations, fieldNumber: 3)
     }
+    if !self.phone.isEmpty {
+      try visitor.visitSingularStringField(value: self.phone, fieldNumber: 4)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -462,6 +493,7 @@ extension App_User: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationB
     if lhs.displayName != rhs.displayName {return false}
     if lhs.uuid != rhs.uuid {return false}
     if lhs.conversations != rhs.conversations {return false}
+    if lhs.phone != rhs.phone {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
@@ -634,6 +666,70 @@ extension App_OnboardingInput: SwiftProtobuf.Message, SwiftProtobuf._MessageImpl
   public static func ==(lhs: App_OnboardingInput, rhs: App_OnboardingInput) -> Bool {
     if lhs.displayName != rhs.displayName {return false}
     if lhs.locales != rhs.locales {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension App_SyncContactsInput: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".SyncContactsInput"
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "phoneNumbers"),
+  ]
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeRepeatedStringField(value: &self.phoneNumbers) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if !self.phoneNumbers.isEmpty {
+      try visitor.visitRepeatedStringField(value: self.phoneNumbers, fieldNumber: 1)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: App_SyncContactsInput, rhs: App_SyncContactsInput) -> Bool {
+    if lhs.phoneNumbers != rhs.phoneNumbers {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension App_SyncContactsOutput: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".SyncContactsOutput"
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "users"),
+  ]
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeRepeatedMessageField(value: &self.users) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if !self.users.isEmpty {
+      try visitor.visitRepeatedMessageField(value: self.users, fieldNumber: 1)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: App_SyncContactsOutput, rhs: App_SyncContactsOutput) -> Bool {
+    if lhs.users != rhs.users {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

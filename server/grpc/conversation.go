@@ -78,6 +78,10 @@ func (c ConversationService) List(input *pb.ConversationListInput, server pb.Con
 		convIds = append(convIds, strconv.Itoa(conv.ConversationID))
 	}
 
+	if len(convIds) == 0 {
+		return nil
+	}
+
 	type lastMessage struct {
 		Discard1       int `boil:"discard_1"`
 		Discard2       int `boil:"discard_2"`
@@ -108,6 +112,7 @@ WHERE "conversation_id" in (%s);
 			participants = append(participants, &pb.User{
 				DisplayName: entities.UserDisplayName(user),
 				Uuid:        user.UUID.String(),
+				Phone:       user.PhoneNumber,
 			})
 			id2p[user.ID] = user
 		}
@@ -128,6 +133,7 @@ WHERE "conversation_id" in (%s);
 						author = &pb.User{
 							DisplayName: entities.UserDisplayName(tt),
 							Uuid:        tt.UUID.String(),
+							Phone:       tt.PhoneNumber,
 						}
 					}
 				}
