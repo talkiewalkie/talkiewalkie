@@ -109,11 +109,11 @@ struct ContactListView: View {
                             if let twCL = twCL {
                                 talkiewalkieContacts = contactList.filter { twCL.users.map { u in u.phone }.contains($0.phone) }
                                 nonTalkieWalkieContacts = contactList.filter { !twCL.users.map { u in u.phone }.contains($0.phone) }
-                                twCL.users.forEach { u in
-                                    _ = User.upsert(u, context: persistentContainer.viewContext)
-                                }
                                 persistentContainer.viewContext.saveOrLogError()
                             }
+                            // disabling polling since it crashes once passed onboarding, likely due to conflicting core data instances
+                            // necessary for tomorrow though
+                            // DispatchQueue.main.asyncAfter(deadline: .now() + 1) { pollContactList(st: st, contactList: contactList, phoneNumberKit: self.phoneNumberKit)}
                         }
                     } else {
                         fatalError("unreachable state")
@@ -124,6 +124,17 @@ struct ContactListView: View {
             }
         }
     }
+}
+
+private func pollContactList(st: AuthenticatedState, contactList: [ContactItem], phoneNumberKit: PhoneNumberKit) {
+    st.gApi.syncContactList(phones: contactList.map {
+        guard let phoneNumber = try? phoneNumberKit.parse(
+            $0.phone,
+            withRegion: PhoneNumberKit.defaultRegionCode()
+        ) else { return "" }
+        return phoneNumberKit.format(phoneNumber, toType: .e164)
+    })
+    DispatchQueue.main.asyncAfter(deadline: .now() + 2) { pollContactList(st: st, contactList: contactList, phoneNumberKit: phoneNumberKit) }
 }
 
 struct ContactListView_Previews: PreviewProvider {

@@ -32,6 +32,7 @@ func main() {
 
 	res, err := components.FbMssg.Send(ctx, &messaging.Message{
 		Topic: *fbUid,
+		Data:  map[string]string{"uuid": "this is not a uuid haha you fell in my trap"},
 		Notification: &messaging.Notification{
 			Body:  "hey",
 			Title: "theo",

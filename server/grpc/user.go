@@ -166,6 +166,7 @@ func (us UserService) SyncContacts(ctx context.Context, input *pb.SyncContactsIn
 			}
 			messages = append(messages, &messaging.Message{
 				Topic: user.FirebaseUID.String,
+				Data:  map[string]string{"uuid": user.UUID.String()},
 				Notification: &messaging.Notification{
 					Title: "Good news 🎙!",
 					Body:  fmt.Sprintf("%s has joined TalkieWalkie! ❤️", entities.UserDisplayName(user)),

@@ -10,6 +10,7 @@ import Foundation
 import GRPC
 import NIO
 import OSLog
+import CoreData
 
 private class GrpcConnectivityState: ConnectivityStateDelegate {
     private let logger = Logger.withLabel("grpc-status")
@@ -34,10 +35,12 @@ class AuthedGrpcApi {
     private let userClient: App_UserServiceClient
     private let convClient: App_ConversationServiceClient
     private let mssgClient: App_MessageServiceClient
+    private let context: NSManagedObjectContext
 
-    init(url: URL, token: String) {
+    init(url: URL, token: String, context: NSManagedObjectContext) {
         self.url = url
         self.token = token
+        self.context = context
 
         group = PlatformSupport.makeEventLoopGroup(loopCount: 1)
 
@@ -79,20 +82,28 @@ class AuthedGrpcApi {
     func me() -> (App_MeUser?, Error?) {
         return userClient.me(empty).waitForOutput()
     }
-    
+
     func onboardingComplete(displayName: String, locales: [String]) -> (App_MeUser?, Error?) {
         let input = App_OnboardingInput.with {
             $0.displayName = displayName
             $0.locales = locales
         }
-        
+
         return userClient.onboarding(input).waitForOutput()
     }
-    
+
     func syncContactList(phones: [String]) -> (App_SyncContactsOutput?, Error?) {
         let input = App_SyncContactsInput.with { $0.phoneNumbers = phones }
+
+        let (twCl, error) = userClient.syncContacts(input).waitForOutput()
+        if let twCl = twCl {
+            twCl.users.forEach { u in
+                _ = User.upsert(u, context: context)
+            }
+        }
         
-        return userClient.syncContacts(input).waitForOutput()
+        context.saveOrLogError()
+        return (twCl, error)
     }
 
     func listConvs() -> ([App_Conversation], Error?) {

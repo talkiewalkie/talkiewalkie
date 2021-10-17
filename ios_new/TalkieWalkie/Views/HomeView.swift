@@ -77,7 +77,7 @@ class AuthenticatedState: ObservableObject {
     static func build(_ config: Config, fbU: FirebaseAuth.User, context: NSManagedObjectContext, completion: @escaping (AuthenticatedState) -> Void) {
         fbU.getIDTokenResult { res, error in
             if let token = res {
-                let gApi = AuthedGrpcApi(url: config.apiUrl, token: token.token)
+                let gApi = AuthedGrpcApi(url: config.apiUrl, token: token.token, context: context)
 
                 if let me = Me.fromCache(context: context) {
                     // TODO: even in this case we should query the server to update
@@ -140,9 +140,11 @@ struct HomeView: View {
             } else {
                 // TODO: better model state flow so that we don't need to have this case.
                 // fatalError("this should be an unreachable state - please fix underlying bugs rather than display something here.")
-                ProgressView().onAppear {
-                    sleep(1)
-//                    self.homeViewModel.showOnboarding = true
+                VStack {
+                    ProgressView().onAppear {
+                        sleep(1)
+                        self.homeViewModel.showOnboarding = true
+                    }
                 }
             }
         }

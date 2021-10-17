@@ -72,7 +72,13 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
                                 withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions)
                                     -> Void)
     {
+        // TODO: on new user arrived on platform, we should send in the notif their db uuid and do a fetch here so as to update core data!
+        // TODO: --- THIS IS NECESSARY FOR THE DEMO ----
+        // TODO: that also means we need to somehow access a logged in api client from here, and this is not easy to do today...
         let userInfo = notification.request.content.userInfo
+            
+//        let data = notification.request.
+//        os_log("received \(data)")
 
         #if DEBUG
             os_log("notification center received notif with \(userInfo)")
