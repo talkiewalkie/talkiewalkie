@@ -8,6 +8,7 @@
 import Contacts
 import CoreData
 import FirebaseAuth
+import PhoneNumberKit
 import SwiftUI
 
 struct ContactListView: View {
@@ -16,6 +17,8 @@ struct ContactListView: View {
     @State private var nonTalkieWalkieContacts: [ContactItem] = []
     @State private var talkiewalkieContacts: [ContactItem] = []
     @State var loading = false
+
+    @State var phoneNumberKit = PhoneNumberKit()
 
     @AppStorage("hasRefusedSharingContactList") var hasRefusedSharingContactList: Bool = false
 
@@ -33,7 +36,7 @@ struct ContactListView: View {
                         .background(Color.white)
                         .foregroundColor(.yellow)
                         .rotationEffect(Angle(degrees: 15))
-                        
+
                     ScrollView {
                         LazyVStack(spacing: 40) {
                             ForEach(nonTalkieWalkieContacts) { contact in
@@ -95,7 +98,13 @@ struct ContactListView: View {
                         }
 
                         AuthenticatedState.build(Config.load(version: "dev"), fbU: fbU, context: persistentContainer.viewContext) { st in
-                            let (twCL, _) = st.gApi.syncContactList(phones: contactList.map { $0.phone })
+                            let (twCL, _) = st.gApi.syncContactList(phones: contactList.map {
+                                guard let phoneNumber = try? phoneNumberKit.parse(
+                                    $0.phone,
+                                    withRegion: PhoneNumberKit.defaultRegionCode()
+                                ) else { return "" }
+                                return self.phoneNumberKit.format(phoneNumber, toType: .e164)
+                            })
                             loading = false
                             if let twCL = twCL {
                                 talkiewalkieContacts = contactList.filter { twCL.users.map { u in u.phone }.contains($0.phone) }
