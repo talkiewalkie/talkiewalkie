@@ -21,7 +21,7 @@ spec:
             secretName: backend-service-account
 
       containers:
-        - image: gcr.io/talkiewalkie-305117/backend:0d4d9a6b2ec90229b239c719c35b5245e5d6ac71
+        - image: gcr.io/talkiewalkie-305117/backend:f1add0d75f3828a8eb70bf1c54cb00824316ea20
           imagePullPolicy: Always
           name: back
           ports:
@@ -65,6 +65,7 @@ metadata:
   name: back
   annotations:
     cloud.google.com/app-protocols: '{"main":"HTTP2"}'
+    cloud.google.com/backend-config: '{"ports": {"back": "back-lb-rules"}}'
 spec:
   type: ClusterIP
   selector:
