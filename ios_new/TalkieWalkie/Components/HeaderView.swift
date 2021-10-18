@@ -10,7 +10,7 @@ import SwiftUI
 struct HeaderSettingsView: View {
     @State var showSettings: Bool = false
 
-    @EnvironmentObject var userStore: UserStore
+    @EnvironmentObject var authState: AuthState
     @Environment(\.colorScheme) var colorScheme
 
     var body: some View {
@@ -24,7 +24,7 @@ struct HeaderSettingsView: View {
         .sheetWithThemeEnvironment(colorScheme: colorScheme, isPresented: $showSettings) {
             SettingsView(show: $showSettings)
                 .font(.body)
-                .environmentObject(userStore)
+                .environmentObject(authState)
         }
     }
 }

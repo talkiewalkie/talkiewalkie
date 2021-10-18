@@ -5,10 +5,8 @@
 //  Created by Alexandre Carlier on 05.10.21.
 //
 
+import OSLog
 import SwiftUI
-
-import SwiftUI
-// import Intercom
 
 struct LanguageChoice: Identifiable {
     var id: String
@@ -54,11 +52,11 @@ enum SocialMediaType {
 
 struct SettingsView: View {
     @Binding var show: Bool
-    @EnvironmentObject var userStore: UserStore
+    @EnvironmentObject var authState: AuthState
 
     var languageSelection: Int {
         guard let index = availableLanguages.firstIndex(where: { lang in
-            lang.id == UserStore.languageCode
+            lang.id == authState.me?.locale
         }) else { return 0 }
 
         return index
@@ -92,7 +90,11 @@ struct SettingsView: View {
                         }
                     #endif
 
-                    Button(action: UserStore.openSettings) {
+                    Button(action: {
+                        if let appSettings = URL(string: UIApplication.openSettingsURLString) {
+                            UIApplication.shared.open(appSettings)
+                        }
+                    }) {
                         Picker(selection: languageBinding, label: Text(LocalizedStringKey("Language"))) {
                             ForEach(availableLanguages.indices) { index in
                                 Text(availableLanguages[index].name).tag(index)
@@ -165,10 +167,14 @@ struct SettingsView: View {
                     Link(LocalizedStringKey("Privacy policy"), destination: URL(string: "https://talkiewalkie.app/privacy")!)
                     Link(LocalizedStringKey("Terms of use"), destination: URL(string: "https://talkiewalkie.app/terms")!)
                 }
-                
+
                 Section {
                     Button("Log out") {
-                        userStore.logout()
+                        os_log("logging out")
+                        show = false
+                        DispatchQueue.main.async {
+                            authState.logout()
+                        }
                     }
                 }
             }
@@ -180,7 +186,7 @@ struct SettingsView: View {
 }
 
 struct GeneralSettingsView: View {
-    @EnvironmentObject var userStore: UserStore
+    @EnvironmentObject var authState: AuthState
     @Environment(\.colorScheme) var colorScheme
 
     @AppStorage("addWatermark") var addWatermark: Bool = true
@@ -220,7 +226,7 @@ struct GeneralSettingsView: View {
 }
 
 struct DebugSettingsInfoView: View {
-    @EnvironmentObject var userStore: UserStore
+    @EnvironmentObject var authState: AuthState
 
     var body: some View {
         List {

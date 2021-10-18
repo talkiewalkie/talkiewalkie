@@ -51,6 +51,7 @@ class AuthState: ObservableObject {
     var firebaseUser: FirebaseAuth.User? { Auth.auth().currentUser }
 
     func connect(with user: FirebaseAuth.User) {
+        setConnecting()
         user.getIDTokenResult { res, err in
             guard let res = res else {
                 guard let err = err else { return }
@@ -65,7 +66,7 @@ class AuthState: ObservableObject {
                 self.state = AuthenticationState.Connected(api, me)
             }
 
-            DispatchQueue.global().async {
+            DispatchQueue.main.async {
                 let (res, _) = api.me()
                 if let res = res {
                     let uuid = UUID(uuidString: res.user.uuid)!
@@ -83,8 +84,25 @@ class AuthState: ObservableObject {
         }
     }
 
-    func setDisconnect() {
+    func logout() {
         state = AuthenticationState.Disconnected
+        
+        do { try Auth.auth().signOut() }
+        catch {
+            os_log(.error, "failed to signout!")
+            return
+        }
+        
+        // Clear coredata on logout
+        // No strong candidate to do this better: https://stackoverflow.com/questions/1077810
+        moc.executeOrLogError(NSBatchDeleteRequest(fetchRequest: NSFetchRequest(entityName: User.entity().name!)))
+        moc.executeOrLogError(NSBatchDeleteRequest(fetchRequest: NSFetchRequest(entityName: Me.entity().name!)))
+        moc.executeOrLogError(NSBatchDeleteRequest(fetchRequest: NSFetchRequest(entityName: Conversation.entity().name!)))
+        moc.executeOrLogError(NSBatchDeleteRequest(fetchRequest: NSFetchRequest(entityName: Message.entity().name!)))
+        moc.executeOrLogError(NSBatchDeleteRequest(fetchRequest: NSFetchRequest(entityName: MessageContent.entity().name!)))
+        moc.executeOrLogError(NSBatchDeleteRequest(fetchRequest: NSFetchRequest(entityName: TextMessage.entity().name!)))
+        moc.executeOrLogError(NSBatchDeleteRequest(fetchRequest: NSFetchRequest(entityName: VoiceMessage.entity().name!)))
+        moc.saveOrLogError()
     }
 
     func setConnecting() {

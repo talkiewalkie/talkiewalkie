@@ -32,7 +32,7 @@ class InboxViewModel: ObservableObject {
     }
 
     func syncConversations() {
-        DispatchQueue.global().async {
+        DispatchQueue.main.async {
             if case .Connected(let api, _) = self.authed.state {
                 self.loading = true
                 let (convs, _) = api.listConvs()

@@ -70,18 +70,3 @@ struct MessageDetailView: View {
         )
     }
 }
-
-struct MessageDetailView_Previews: PreviewProvider {
-    static var previews: some View {
-        TestView()
-    }
-
-    struct TestView: View {
-        @Namespace var namespace
-
-        var body: some View {
-            MessageDetailView(namespace: namespace)
-                .withDummyVariables()
-        }
-    }
-}

@@ -11,6 +11,7 @@ import Foundation
 import FirebaseAuth
 
 extension User {
+    @discardableResult
     static func upsert(_ u: App_User, context: NSManagedObjectContext) -> User {
         let localU = User.getByUuidOrCreate(u.uuid.uuidOrThrow(), context: context)
         localU.uuid = u.uuid.uuidOrThrow()

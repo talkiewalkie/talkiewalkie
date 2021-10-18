@@ -30,7 +30,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 // TODO: unsubscribe, but we need to get the current user before the new one is nil from that thread
                 // TODO: to do so, which I don't know how to do just yet.
                 // Messaging.messaging().unsubscribe(fromTopic: existingUser.uid)
-                auth.setDisconnect()
+                auth.logout()
             }
         }
 
@@ -115,6 +115,14 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
         // TODO: that also means we need to somehow access a logged in api client from here, and this is not easy to do today...
         let userInfo = notification.request.content.userInfo
 
+        if case .Connected(let api, _) = self.auth.state {
+            if let uuidString = (notification.request.value(forKey: "uuid") as? String), let uuid = UUID(uuidString: uuidString) {
+                let (user, _) = api.userByUuid(uuid)
+                if let user = user {
+                    User.upsert(user, context: self.auth.moc)
+                }
+            }
+        }
 //        let data = notification.request.
 //        os_log("received \(data)")
 
@@ -122,6 +130,12 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
             os_log("got '\(msg)'")
         }
 
+        
+        if let msg = notification.request.value(forKey: "uuid") as? String {
+            os_log("got '\(msg)'")
+        }
+
+        
         #if DEBUG
             os_log("notification center received notif with \(userInfo)")
         #endif
