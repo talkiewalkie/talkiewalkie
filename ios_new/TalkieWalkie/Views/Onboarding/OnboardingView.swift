@@ -279,7 +279,6 @@ struct TypePhoneNumberView: View {
 
     @State var showInvalidPhoneNumberAlert: Bool = false
     @State var showSendingSMSAlert: Bool = false
-
     @State var phoneNumberKit = PhoneNumberKit()
 
     @AppStorage("phoneCountryCode") var storedPhoneCountryCode: Int = 33
@@ -367,8 +366,7 @@ struct TypePhoneNumberView: View {
                     return
                 }
 
-                guard let verificationID = verificationID else { return }
-
+                guard let verificationID = verificationID, verificationID != "" else { return }
                 model.verificationID = verificationID
             }
     }
@@ -378,7 +376,6 @@ struct VerifyPhoneNumberView: View {
     @EnvironmentObject var model: OnboardingViewModel
 
     @State var showInvalidVerificationCodeAlert: Bool = false
-
     @State var loading: Bool = false
 
     var body: some View {

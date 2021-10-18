@@ -13,6 +13,7 @@ import SwiftUI
 
 struct ContactListView: View {
     @EnvironmentObject var model: OnboardingViewModel
+    @EnvironmentObject var authState: AuthState
 
     @State private var nonTalkieWalkieContacts: [ContactItem] = []
     @State private var talkiewalkieContacts: [ContactItem] = []
@@ -84,39 +85,22 @@ struct ContactListView: View {
                     hasRefusedSharingContactList = false
                     let contactStore = CNContactStore()
                     let contactList = contactStore.allLocalPhoneNumbers()
-                    // TODO: we really shouldn't start a new connection to the server here.
-                    if let fbU = Auth.auth().currentUser {
+                    if case .Connected(let api, _) = authState.state {
                         loading = true
-                        let persistentContainer = NSPersistentContainer(name: "LocalModels")
-
-                        persistentContainer.loadPersistentStores { _, error in
-                            persistentContainer.viewContext.automaticallyMergesChangesFromParent = true
-
-                            if let error = error {
-                                fatalError("Unable to load persistent stores: \(error)")
-                            }
+                        let (twCL, _) = api.syncContactList(phones: contactList.map {
+                            guard let phoneNumber = try? phoneNumberKit.parse(
+                                $0.phone,
+                                withRegion: PhoneNumberKit.defaultRegionCode()
+                            ) else { return "" }
+                            return self.phoneNumberKit.format(phoneNumber, toType: .e164)
+                        })
+                        
+                        loading = false
+                        if let twCL = twCL {
+                            talkiewalkieContacts = contactList.filter { twCL.users.map { u in u.phone }.contains($0.phone) }
+                            nonTalkieWalkieContacts = contactList.filter { !twCL.users.map { u in u.phone }.contains($0.phone) }
+                            authState.moc.saveOrLogError()
                         }
-
-                        AuthenticatedState.build(Config.load(version: "dev"), fbU: fbU, context: persistentContainer.viewContext) { st in
-                            let (twCL, _) = st.gApi.syncContactList(phones: contactList.map {
-                                guard let phoneNumber = try? phoneNumberKit.parse(
-                                    $0.phone,
-                                    withRegion: PhoneNumberKit.defaultRegionCode()
-                                ) else { return "" }
-                                return self.phoneNumberKit.format(phoneNumber, toType: .e164)
-                            })
-                            loading = false
-                            if let twCL = twCL {
-                                talkiewalkieContacts = contactList.filter { twCL.users.map { u in u.phone }.contains($0.phone) }
-                                nonTalkieWalkieContacts = contactList.filter { !twCL.users.map { u in u.phone }.contains($0.phone) }
-                                persistentContainer.viewContext.saveOrLogError()
-                            }
-                            // disabling polling since it crashes once passed onboarding, likely due to conflicting core data instances
-                            // necessary for tomorrow though
-                            // DispatchQueue.main.asyncAfter(deadline: .now() + 1) { pollContactList(st: st, contactList: contactList, phoneNumberKit: self.phoneNumberKit)}
-                        }
-                    } else {
-                        fatalError("unreachable state")
                     }
                 } else {
                     hasRefusedSharingContactList = true
@@ -124,17 +108,6 @@ struct ContactListView: View {
             }
         }
     }
-}
-
-private func pollContactList(st: AuthenticatedState, contactList: [ContactItem], phoneNumberKit: PhoneNumberKit) {
-    st.gApi.syncContactList(phones: contactList.map {
-        guard let phoneNumber = try? phoneNumberKit.parse(
-            $0.phone,
-            withRegion: PhoneNumberKit.defaultRegionCode()
-        ) else { return "" }
-        return phoneNumberKit.format(phoneNumber, toType: .e164)
-    })
-    DispatchQueue.main.asyncAfter(deadline: .now() + 2) { pollContactList(st: st, contactList: contactList, phoneNumberKit: phoneNumberKit) }
 }
 
 struct ContactListView_Previews: PreviewProvider {

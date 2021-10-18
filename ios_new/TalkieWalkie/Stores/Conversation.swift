@@ -37,9 +37,9 @@ extension Conversation {
         (self.messages?.array as? [Message] ?? []).last?.createdAt
     }
 
-    func firstParticipant(thatIsNot user: User) -> User? {
+    func firstParticipant(thatIsNot user: User?) -> User? {
         let allUsers: Set<User> = (self.users as? Set<User>) ?? Set()
-        let others: [User] = allUsers.filter { $0.uuid != user.uuid }
+        let others: [User] = allUsers.filter { $0.uuid != user?.uuid }
         return others.sorted(by: { $0.uuid?.uuidString ?? "a" < $1.uuid?.uuidString ?? "b" }).first
     }
 }

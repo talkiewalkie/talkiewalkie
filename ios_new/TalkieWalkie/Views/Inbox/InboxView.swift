@@ -10,9 +10,12 @@ import OSLog
 import SwiftUI
 
 struct InboxView: View {
-    var namespace: Namespace.ID
+    @Namespace var namespace
     @ObservedObject var model: InboxViewModel
-    @EnvironmentObject var authed: AuthenticatedState
+    @EnvironmentObject var authed: AuthState
+    
+    @State var guideState = false
+    @State var isRecording = false
 
     @FetchRequest(
         entity: Conversation.entity(),
@@ -21,16 +24,33 @@ struct InboxView: View {
 
     var body: some View {
         NavigationView {
-            VStack {
-                if model.loading { ProgressView("syncing...") }
-                List(conversations) { conversation in
-                    NavigationLink(
-                        destination: ConversationView(conversation: conversation, namespace: namespace, model: ConversationViewModel(authed, conversation: conversation))
-                    ) {
-                        ConversationListItemView(conversation: conversation)
+            ZStack {
+                VStack {
+                    if model.loading { ProgressView("syncing...") }
+                    List(conversations) { conversation in
+                        NavigationLink(
+                            destination: ConversationView(conversation: conversation, namespace: namespace, model: ConversationViewModel(authed, conversation: conversation))
+                        ) {
+                            ConversationListItemView(conversation: conversation)
+                        }
                     }
+                    .listStyle(.plain)
                 }
-                .listStyle(.plain)
+
+                VStack {
+                    Spacer()
+
+                    RecordButton(isRecording: $isRecording)
+//                        .tooltip(selectionState: guideState,
+//                                 options: .init(orientation: .bottom,
+//                                                padding: 0,
+//                                                floating: true), content: {
+//                                     Text("Record a first voice message!")
+//                                 }, onDismiss: {
+//                                     onboardGuideShown = true
+//                                 })
+                        .padding()
+                }
             }
             .navigationTitle("Chats")
             .navigationBarItems(leading: HeaderSettingsView())
@@ -46,7 +66,7 @@ struct InboxView: View {
 
 struct ConversationAvatar: View {
     var conversation: Conversation
-    @EnvironmentObject var authed: AuthenticatedState
+    @EnvironmentObject var authed: AuthState
 
     var body: some View {
         Group {

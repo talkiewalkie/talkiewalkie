@@ -9,32 +9,37 @@ import Foundation
 import OSLog
 
 class InboxViewModel: ObservableObject {
-    private let authed: AuthenticatedState
+    private let authed: AuthState
 
     @Published var loading = true
 
-    init(_ authed: AuthenticatedState) {
+    init(_ authed: AuthState) {
         self.authed = authed
-        self.authed.gApi.subscribeIncomingMessages { msg in
-            let savedMsg = Message.upsert(msg, context: authed.context)
-            let conversation = Conversation.getByUuidOrCreate(msg.convUuid.uuidOrThrow(), context: authed.context)
 
-            conversation.addToMessages(savedMsg)
+        if case .Connected(let api, _) = authed.state {
+            api.subscribeIncomingMessages { msg in
+                let savedMsg = Message.upsert(msg, context: authed.moc)
+                let conversation = Conversation.getByUuidOrCreate(msg.convUuid.uuidOrThrow(), context: authed.moc)
 
-            savedMsg.objectWillChange.send()
-            conversation.objectWillChange.send()
+                conversation.addToMessages(savedMsg)
 
-            authed.context.saveOrLogError()
+                savedMsg.objectWillChange.send()
+                conversation.objectWillChange.send()
+
+                authed.moc.saveOrLogError()
+            }
         }
     }
 
     func syncConversations() {
-        DispatchQueue.main.async {
-            self.loading = true
-            let (convs, _) = self.authed.gApi.listConvs()
-            self.loading = false
-            os_log(.debug, "loading = false")
-            Conversation.dumpFromRemote(convs, context: self.authed.context)
+        DispatchQueue.global().async {
+            if case .Connected(let api, _) = self.authed.state {
+                self.loading = true
+                let (convs, _) = api.listConvs()
+                self.loading = false
+                os_log(.debug, "loading = false")
+                Conversation.dumpFromRemote(convs, context: self.authed.moc)
+            }
         }
     }
 }

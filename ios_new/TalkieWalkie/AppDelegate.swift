@@ -12,11 +12,32 @@ import UIKit
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Firebase
+    var auth: AuthState
+
+    override init() {
         FirebaseConfiguration.shared.setLoggerLevel(.min)
         FirebaseApp.configure()
 
+        let auth = AuthState()
+        self.auth = auth
+
+        Auth.auth().addStateDidChangeListener { _, newUser in
+            if let newUser = newUser {
+                Messaging.messaging().subscribe(toTopic: newUser.uid)
+                os_log(.debug, "subscribed to '\(newUser.uid)'")
+                auth.connect(with: newUser)
+            } else {
+                // TODO: unsubscribe, but we need to get the current user before the new one is nil from that thread
+                // TODO: to do so, which I don't know how to do just yet.
+                // Messaging.messaging().unsubscribe(fromTopic: existingUser.uid)
+                auth.setDisconnect()
+            }
+        }
+
+        super.init()
+    }
+
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         Messaging.messaging().delegate = self
         Messaging.messaging().subscribe(toTopic: "all")
         if let fbu = Auth.auth().currentUser {
@@ -39,7 +60,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return true
     }
 
-    // MARK: UISceneSession Lifecycle
+    // MARK: - Phone auth requirements
+
+    // https://firebase.google.com/docs/auth/ios/phone-auth#appendix:-using-phone-sign-in-without-swizzling
+    func application(_: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        #if DEBUG
+            Auth.auth().setAPNSToken(deviceToken, type: .prod)
+        #else
+            Auth.auth().setAPNSToken(deviceToken, type: .prod)
+        #endif
+    }
+
+    // MARK: - UISceneSession Lifecycle
 
     func application(_: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options _: UIScene.ConnectionOptions) -> UISceneConfiguration {
         // Called when a new scene session is being created.
@@ -54,12 +86,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func application(_: UIApplication,
-                     didReceiveRemoteNotification userInfo: [AnyHashable: Any],
+                     didReceiveRemoteNotification notification: [AnyHashable: Any],
                      fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult)
                          -> Void)
     {
+        // https://firebase.google.com/docs/auth/ios/phone-auth#appendix:-using-phone-sign-in-without-swizzling
+        if Auth.auth().canHandleNotification(notification) {
+            completionHandler(.noData)
+            return
+        }
+
         #if DEBUG
-            os_log("notification received with \(userInfo)")
+            os_log("background notification received with \(notification)")
         #endif
 
         completionHandler(UIBackgroundFetchResult.newData)
@@ -76,9 +114,13 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
         // TODO: --- THIS IS NECESSARY FOR THE DEMO ----
         // TODO: that also means we need to somehow access a logged in api client from here, and this is not easy to do today...
         let userInfo = notification.request.content.userInfo
-            
+
 //        let data = notification.request.
 //        os_log("received \(data)")
+
+        if let msg = userInfo["uuid"] as? String {
+            os_log("got '\(msg)'")
+        }
 
         #if DEBUG
             os_log("notification center received notif with \(userInfo)")

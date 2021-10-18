@@ -11,20 +11,20 @@ import OSLog
 class ConversationViewModel: ObservableObject {
     @Published var loading = false
 
-    let authed: AuthenticatedState
+    let authed: AuthState
     let conversation: Conversation
-    init(_ authed: AuthenticatedState, conversation: Conversation) {
+    init(_ authed: AuthState, conversation: Conversation) {
         self.authed = authed
         self.conversation = conversation
     }
 
     func loadMessages() {
-        DispatchQueue.main.async {
-            if let uuid = self.conversation.uuid {
+        DispatchQueue.global().async {
+            if case .Connected(let api, _) = self.authed.state, let uuid = self.conversation.uuid {
                 self.loading = true
-                let (remoteConv, _) = self.authed.gApi.convByUuid(uuid)
+                let (remoteConv, _) = api.convByUuid(uuid)
                 self.loading = false
-                if let remoteConv = remoteConv { Conversation.dumpFromRemote([remoteConv], context: self.authed.context) }
+                if let remoteConv = remoteConv { Conversation.dumpFromRemote([remoteConv], context: self.authed.moc) }
             } else {
                 os_log(.error, "conv without uuid!!!")
             }
