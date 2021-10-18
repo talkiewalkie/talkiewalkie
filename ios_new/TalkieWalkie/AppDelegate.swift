@@ -12,32 +12,25 @@ import UIKit
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
-    var auth: AuthState
+    let auth = AuthState()
 
-    override init() {
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         FirebaseConfiguration.shared.setLoggerLevel(.min)
         FirebaseApp.configure()
-
-        let auth = AuthState()
-        self.auth = auth
-
+        
         Auth.auth().addStateDidChangeListener { _, newUser in
             if let newUser = newUser {
                 Messaging.messaging().subscribe(toTopic: newUser.uid)
                 os_log(.debug, "subscribed to '\(newUser.uid)'")
-                auth.connect(with: newUser)
+                self.auth.connect(with: newUser)
             } else {
                 // TODO: unsubscribe, but we need to get the current user before the new one is nil from that thread
                 // TODO: to do so, which I don't know how to do just yet.
                 // Messaging.messaging().unsubscribe(fromTopic: existingUser.uid)
-                auth.logout()
+                self.auth.logout()
             }
         }
-
-        super.init()
-    }
-
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        
         Messaging.messaging().delegate = self
         Messaging.messaging().subscribe(toTopic: "all")
         if let fbu = Auth.auth().currentUser {
@@ -60,17 +53,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return true
     }
 
-    // MARK: - Phone auth requirements
-
-    // https://firebase.google.com/docs/auth/ios/phone-auth#appendix:-using-phone-sign-in-without-swizzling
-    func application(_: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
-        #if DEBUG
-            Auth.auth().setAPNSToken(deviceToken, type: .prod)
-        #else
-            Auth.auth().setAPNSToken(deviceToken, type: .prod)
-        #endif
-    }
-
+    
     // MARK: - UISceneSession Lifecycle
 
     func application(_: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options _: UIScene.ConnectionOptions) -> UISceneConfiguration {
@@ -90,12 +73,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                      fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult)
                          -> Void)
     {
-        // https://firebase.google.com/docs/auth/ios/phone-auth#appendix:-using-phone-sign-in-without-swizzling
-        if Auth.auth().canHandleNotification(notification) {
-            completionHandler(.noData)
-            return
-        }
-
         #if DEBUG
             os_log("background notification received with \(notification)")
         #endif
@@ -116,26 +93,14 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
         let userInfo = notification.request.content.userInfo
 
         if case .Connected(let api, _) = self.auth.state {
-            if let uuidString = (notification.request.value(forKey: "uuid") as? String), let uuid = UUID(uuidString: uuidString) {
+            if let uuidString = (userInfo["uuid"] as? String), let uuid = UUID(uuidString: uuidString) {
                 let (user, _) = api.userByUuid(uuid)
                 if let user = user {
                     User.upsert(user, context: self.auth.moc)
                 }
             }
         }
-//        let data = notification.request.
-//        os_log("received \(data)")
 
-        if let msg = userInfo["uuid"] as? String {
-            os_log("got '\(msg)'")
-        }
-
-        
-        if let msg = notification.request.value(forKey: "uuid") as? String {
-            os_log("got '\(msg)'")
-        }
-
-        
         #if DEBUG
             os_log("notification center received notif with \(userInfo)")
         #endif
