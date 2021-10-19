@@ -11,6 +11,7 @@ import (
 	grpc_ctxtags "github.com/grpc-ecosystem/go-grpc-middleware/tags"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
+	"github.com/talkiewalkie/talkiewalkie/common"
 	coco "github.com/talkiewalkie/talkiewalkie/grpc"
 	"github.com/talkiewalkie/talkiewalkie/pb"
 	"github.com/volatiletech/sqlboiler/v4/boil"
@@ -23,8 +24,6 @@ import (
 	"net/http"
 	"os"
 	"strings"
-
-	"github.com/talkiewalkie/talkiewalkie/common"
 )
 
 var (
@@ -69,6 +68,7 @@ func main() {
 	boil.DebugMode = true
 
 	server := grpc.NewServer(
+		//grpc.KeepaliveParams(keepalive.ServerParameters{Timeout: time.Hour}),
 		grpc.StreamInterceptor(grpc_middleware.ChainStreamServer(
 			grpc_recovery.StreamServerInterceptor(),
 			grpc_ctxtags.StreamServerInterceptor(),

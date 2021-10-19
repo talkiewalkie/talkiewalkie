@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
+	uuid2 "github.com/satori/go.uuid"
 	"log"
 	"time"
 )
@@ -16,9 +17,15 @@ type PgPubSub struct {
 	maxReconnectInterval time.Duration
 }
 
+type PubSubEventType int
+
+const (
+	PubSubEventTypeNewMessage PubSubEventType = iota // 0
+)
+
 type PubSubEvent struct {
-	Timestamp time.Time `json:"timestamp"`
-	Type      string    `json:"type"`
+	Timestamp time.Time       `json:"timestamp"`
+	Type      PubSubEventType `json:"type"`
 }
 
 type IPubSubEvent interface {
@@ -31,10 +38,7 @@ func (p PubSubEvent) Str() string {
 
 type NewMessageEvent struct {
 	PubSubEvent
-	Text             string `json:"text"`
-	AuthorUuid       string `json:"authorUuid"`
-	AuthorHandle     string `json:"authorHandle"`
-	ConversationUuid string `json:"conversationUuid"`
+	MessageUuid uuid2.UUID `json:"message_uuid"`
 }
 
 func (ps PgPubSub) Subscribe(topic string) (*pq.Listener, func() error, error) {
@@ -76,11 +80,15 @@ func (ps PgPubSub) Subscribe(topic string) (*pq.Listener, func() error, error) {
 func (ps PgPubSub) Publish(topic string, event IPubSubEvent) error {
 	payload, err := json.Marshal(event)
 	if err != nil {
-		return err
+		return fmt.Errorf("could not serialize event: %+v", err)
 	}
 	log.Printf("publishing to '%s': %+v", topic, event)
 	_, err = ps.db.Exec(fmt.Sprintf("NOTIFY %s, '%s'", topic, string(payload)))
-	return err
+	if err != nil {
+		return fmt.Errorf("could not notify of event in topic '%s': %+v", topic, err)
+	} else {
+		return err
+	}
 }
 
 func NewPgPubSub(db *sqlx.DB, connInfo string) PgPubSub {

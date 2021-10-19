@@ -1,9 +1,11 @@
 package coco
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/golang/protobuf/proto"
 	uuid2 "github.com/satori/go.uuid"
 	"github.com/talkiewalkie/talkiewalkie/common"
 	"github.com/talkiewalkie/talkiewalkie/entities"
@@ -14,7 +16,6 @@ import (
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"google.golang.org/protobuf/types/known/timestamppb"
 	"log"
 	"reflect"
 	"sort"
@@ -61,29 +62,38 @@ func (ms MessageService) Incoming(_ *pb.Empty, server pb.MessageService_Incoming
 		}
 
 		switch payload.Type {
-
-		case "newmessage":
+		case common.PubSubEventTypeNewMessage:
 			var msg common.NewMessageEvent
 			if err = json.Unmarshal([]byte(psEvent.Extra), &msg); err != nil {
 				log.Printf("failed to unmarshal pubsub event: %+v", err)
 				break
 			}
 
-			// TODO: just fetch the payload from db here, rather than sending a payload through pubsub
-			err = server.Send(&pb.Message{
-				ConvUuid:  msg.ConversationUuid,
-				Content:   &pb.Message_TextMessage{TextMessage: &pb.TextMessage{Content: msg.Text}},
-				Author:    &pb.User{Uuid: msg.AuthorUuid, DisplayName: msg.AuthorHandle},
-				CreatedAt: timestamppb.New(msg.Timestamp),
-			})
+			newMsg, err := models.Messages(
+				models.MessageWhere.UUID.EQ(msg.MessageUuid),
+				qm.Load(models.MessageRels.Conversation),
+				qm.Load(models.MessageRels.Author),
+				qm.Load(models.MessageRels.RawAudio),
+			).One(server.Context(), ms.Db)
+			if err != nil {
+				return status.Errorf(codes.Internal, "could not fetch message from db: %+v", err)
+			}
+
+			pbMsg, err := entities.MessageToPb(newMsg, ms.Components)
+			if err != nil {
+				return status.Errorf(codes.Internal, "could not transform message to protobuf: %+v", err)
+			}
+
+			err = server.Send(pbMsg)
 			if err != nil {
 				log.Printf("failed to send message in server stream: %+v", err)
 				break
+			} else {
+				log.Printf("recovered message from pubsub[%s] and forwarded it with success", topic)
 			}
 
 		default:
 			log.Printf("received unknown pubsub message on topic '%s': (%T) %+v", topic, payload, payload)
-
 		}
 	}
 }
@@ -103,9 +113,12 @@ func (ms MessageService) Send(ctx context.Context, input *pb.MessageSendInput) (
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 
-		conv, err = models.Conversations(models.ConversationWhere.UUID.EQ(uid)).One(ctx, ms.Db)
+		conv, err = models.Conversations(
+			models.ConversationWhere.UUID.EQ(uid),
+			qm.Load(qm.Rels(models.ConversationRels.UserConversations, models.UserConversationRels.User)),
+		).One(ctx, ms.Db)
 		if err != nil {
-			return nil, status.Error(codes.Internal, err.Error())
+			return nil, status.Errorf(codes.Internal, "could not fetch conversation: %+v", err)
 		}
 
 	case *pb.MessageSendInput_RecipientUuids:
@@ -223,36 +236,69 @@ func (ms MessageService) Send(ctx context.Context, input *pb.MessageSendInput) (
 		}
 	}
 
-	var text string
+	var msg *models.Message
 	switch input.Content.(type) {
 	case *pb.MessageSendInput_TextMessage:
-		text = input.GetTextMessage().Content
+		text := input.GetTextMessage().Content
+		msg = &models.Message{
+			Type:           models.MessageTypeText,
+			Text:           null.StringFrom(text),
+			AuthorID:       null.IntFrom(u.ID),
+			ConversationID: conv.ID,
+			CreatedAt:      time.Now(),
+		}
+	case *pb.MessageSendInput_VoiceMessage:
+		vm := input.GetVoiceMessage()
+
+		pbTranscript, err := proto.Marshal(vm.SiriTranscript)
+		if err != nil {
+			return nil, status.Error(codes.InvalidArgument, "could not serialize transcript")
+		}
+
+		blobUuid, err := ms.Storage.Upload(ctx, bytes.NewReader(vm.RawContent))
+		if err != nil {
+			return nil, status.Error(codes.Internal, fmt.Sprintf("could not upload voice message content: %+v", err))
+		}
+
+		asset := &models.Asset{
+			// TODO: filename schema, possibly [authorUuid]-[convUuid]-[timestamp].ogg ?
+			FileName: "",
+			// TODO: normalize audio with audio service
+			MimeType: "audio/*",
+			Bucket:   null.StringFrom(ms.Storage.DefaultBucket()),
+			BlobName: null.StringFrom(blobUuid.String()),
+		}
+		if err = asset.Insert(ctx, ms.Db, boil.Infer()); err != nil {
+			return nil, status.Errorf(codes.Internal, "could not register asset in db: %+v", err)
+		}
+
+		msg = &models.Message{
+			Type:           models.MessageTypeVoice,
+			SiriTranscript: null.BytesFrom(pbTranscript),
+			RawAudioID:     null.IntFrom(asset.ID),
+
+			AuthorID:       null.IntFrom(u.ID),
+			ConversationID: conv.ID,
+			CreatedAt:      time.Now(),
+		}
 	default:
 		return nil, status.Error(codes.Internal, "unknown content type!")
 	}
 
-	msg := &models.Message{
-		Type:           models.MessageTypeText,
-		Text:           null.StringFrom(text),
-		AuthorID:       null.IntFrom(u.ID),
-		ConversationID: conv.ID,
-		CreatedAt:      time.Now(),
-	}
 	if err = msg.Insert(ctx, ms.Db, boil.Infer()); err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
+		return nil, status.Errorf(codes.Internal, "could not insert message: %+v", err)
 	}
 
 	for _, uc := range conv.R.UserConversations {
-		err = ms.PgPubSub.Publish(entities.UserPubSubTopic(uc.R.User), common.NewMessageEvent{
-			PubSubEvent: common.PubSubEvent{Type: "newmessage", Timestamp: time.Now()},
-			// TODO: notif of voice message is not handled properly here... maybe just send uuid and listeners will retrieve in the db
-			Text:             msg.Text.String,
-			AuthorUuid:       u.UUID.String(),
-			AuthorHandle:     entities.UserDisplayName(u),
-			ConversationUuid: conv.UUID.String(),
+		topic := entities.UserPubSubTopic(uc.R.User)
+		err = ms.PgPubSub.Publish(topic, common.NewMessageEvent{
+			PubSubEvent: common.PubSubEvent{Type: common.PubSubEventTypeNewMessage, Timestamp: time.Now()},
+			MessageUuid: msg.UUID,
 		})
 		if err != nil {
 			log.Printf("failed to notify user channel: %+v", err)
+		} else {
+			log.Printf("sent message on pubsub[%s]!", topic)
 		}
 	}
 

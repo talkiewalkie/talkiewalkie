@@ -267,7 +267,50 @@ public struct App_VoiceMessage {
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  public var url: String = String()
+  public var rawContent: Data = Data()
+
+  public var siriTranscript: App_AlignedTranscript {
+    get {return _siriTranscript ?? App_AlignedTranscript()}
+    set {_siriTranscript = newValue}
+  }
+  /// Returns true if `siriTranscript` has been explicitly set.
+  public var hasSiriTranscript: Bool {return self._siriTranscript != nil}
+  /// Clears the value of `siriTranscript`. Subsequent reads from it will return its default value.
+  public mutating func clearSiriTranscript() {self._siriTranscript = nil}
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+
+  fileprivate var _siriTranscript: App_AlignedTranscript? = nil
+}
+
+public struct App_AlignedTranscript {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  public var items: [App_TranscriptItem] = []
+
+  public var rendered: String = String()
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+}
+
+public struct App_TranscriptItem {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  public var word: String = String()
+
+  public var offsetMs: Float = 0
+
+  public var durationMs: Float = 0
+
+  public var substringOffset: Int32 = 0
 
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -321,6 +364,14 @@ public struct App_MessageSendInput {
     set {content = .textMessage(newValue)}
   }
 
+  public var voiceMessage: App_VoiceMessage {
+    get {
+      if case .voiceMessage(let v)? = content {return v}
+      return App_VoiceMessage()
+    }
+    set {content = .voiceMessage(newValue)}
+  }
+
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
   public enum OneOf_Recipients: Equatable {
@@ -349,6 +400,7 @@ public struct App_MessageSendInput {
 
   public enum OneOf_Content: Equatable {
     case textMessage(App_TextMessage)
+    case voiceMessage(App_VoiceMessage)
 
   #if !swift(>=4.1)
     public static func ==(lhs: App_MessageSendInput.OneOf_Content, rhs: App_MessageSendInput.OneOf_Content) -> Bool {
@@ -360,6 +412,11 @@ public struct App_MessageSendInput {
         guard case .textMessage(let l) = lhs, case .textMessage(let r) = rhs else { preconditionFailure() }
         return l == r
       }()
+      case (.voiceMessage, .voiceMessage): return {
+        guard case .voiceMessage(let l) = lhs, case .voiceMessage(let r) = rhs else { preconditionFailure() }
+        return l == r
+      }()
+      default: return false
       }
     }
   #endif
@@ -864,7 +921,8 @@ extension App_TextMessage: SwiftProtobuf.Message, SwiftProtobuf._MessageImplemen
 extension App_VoiceMessage: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".VoiceMessage"
   public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "url"),
+    1: .same(proto: "rawContent"),
+    2: .same(proto: "siriTranscript"),
   ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -873,21 +931,118 @@ extension App_VoiceMessage: SwiftProtobuf.Message, SwiftProtobuf._MessageImpleme
       // allocates stack space for every case branch when no optimizations are
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
-      case 1: try { try decoder.decodeSingularStringField(value: &self.url) }()
+      case 1: try { try decoder.decodeSingularBytesField(value: &self.rawContent) }()
+      case 2: try { try decoder.decodeSingularMessageField(value: &self._siriTranscript) }()
       default: break
       }
     }
   }
 
   public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    if !self.url.isEmpty {
-      try visitor.visitSingularStringField(value: self.url, fieldNumber: 1)
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    if !self.rawContent.isEmpty {
+      try visitor.visitSingularBytesField(value: self.rawContent, fieldNumber: 1)
     }
+    try { if let v = self._siriTranscript {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
+    } }()
     try unknownFields.traverse(visitor: &visitor)
   }
 
   public static func ==(lhs: App_VoiceMessage, rhs: App_VoiceMessage) -> Bool {
-    if lhs.url != rhs.url {return false}
+    if lhs.rawContent != rhs.rawContent {return false}
+    if lhs._siriTranscript != rhs._siriTranscript {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension App_AlignedTranscript: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".AlignedTranscript"
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "items"),
+    2: .same(proto: "rendered"),
+  ]
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeRepeatedMessageField(value: &self.items) }()
+      case 2: try { try decoder.decodeSingularStringField(value: &self.rendered) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if !self.items.isEmpty {
+      try visitor.visitRepeatedMessageField(value: self.items, fieldNumber: 1)
+    }
+    if !self.rendered.isEmpty {
+      try visitor.visitSingularStringField(value: self.rendered, fieldNumber: 2)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: App_AlignedTranscript, rhs: App_AlignedTranscript) -> Bool {
+    if lhs.items != rhs.items {return false}
+    if lhs.rendered != rhs.rendered {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension App_TranscriptItem: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".TranscriptItem"
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "word"),
+    2: .same(proto: "offsetMs"),
+    3: .same(proto: "durationMs"),
+    4: .same(proto: "substringOffset"),
+  ]
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularStringField(value: &self.word) }()
+      case 2: try { try decoder.decodeSingularFloatField(value: &self.offsetMs) }()
+      case 3: try { try decoder.decodeSingularFloatField(value: &self.durationMs) }()
+      case 4: try { try decoder.decodeSingularInt32Field(value: &self.substringOffset) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if !self.word.isEmpty {
+      try visitor.visitSingularStringField(value: self.word, fieldNumber: 1)
+    }
+    if self.offsetMs != 0 {
+      try visitor.visitSingularFloatField(value: self.offsetMs, fieldNumber: 2)
+    }
+    if self.durationMs != 0 {
+      try visitor.visitSingularFloatField(value: self.durationMs, fieldNumber: 3)
+    }
+    if self.substringOffset != 0 {
+      try visitor.visitSingularInt32Field(value: self.substringOffset, fieldNumber: 4)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: App_TranscriptItem, rhs: App_TranscriptItem) -> Bool {
+    if lhs.word != rhs.word {return false}
+    if lhs.offsetMs != rhs.offsetMs {return false}
+    if lhs.durationMs != rhs.durationMs {return false}
+    if lhs.substringOffset != rhs.substringOffset {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
@@ -937,6 +1092,7 @@ extension App_MessageSendInput: SwiftProtobuf.Message, SwiftProtobuf._MessageImp
     1: .same(proto: "convUuid"),
     2: .same(proto: "recipientUuids"),
     3: .same(proto: "textMessage"),
+    4: .same(proto: "voiceMessage"),
   ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -979,6 +1135,19 @@ extension App_MessageSendInput: SwiftProtobuf.Message, SwiftProtobuf._MessageImp
           self.content = .textMessage(v)
         }
       }()
+      case 4: try {
+        var v: App_VoiceMessage?
+        var hadOneofValue = false
+        if let current = self.content {
+          hadOneofValue = true
+          if case .voiceMessage(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.content = .voiceMessage(v)
+        }
+      }()
       default: break
       }
     }
@@ -1000,9 +1169,17 @@ extension App_MessageSendInput: SwiftProtobuf.Message, SwiftProtobuf._MessageImp
     }()
     case nil: break
     }
-    try { if case .textMessage(let v)? = self.content {
+    switch self.content {
+    case .textMessage?: try {
+      guard case .textMessage(let v)? = self.content else { preconditionFailure() }
       try visitor.visitSingularMessageField(value: v, fieldNumber: 3)
-    } }()
+    }()
+    case .voiceMessage?: try {
+      guard case .voiceMessage(let v)? = self.content else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 4)
+    }()
+    case nil: break
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 

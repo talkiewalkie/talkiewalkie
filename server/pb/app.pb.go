@@ -630,7 +630,8 @@ type VoiceMessage struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Url string `protobuf:"bytes,1,opt,name=url,proto3" json:"url,omitempty"`
+	RawContent     []byte             `protobuf:"bytes,1,opt,name=rawContent,proto3" json:"rawContent,omitempty"`
+	SiriTranscript *AlignedTranscript `protobuf:"bytes,2,opt,name=siriTranscript,proto3" json:"siriTranscript,omitempty"`
 }
 
 func (x *VoiceMessage) Reset() {
@@ -665,11 +666,144 @@ func (*VoiceMessage) Descriptor() ([]byte, []int) {
 	return file_app_proto_rawDescGZIP(), []int{10}
 }
 
-func (x *VoiceMessage) GetUrl() string {
+func (x *VoiceMessage) GetRawContent() []byte {
 	if x != nil {
-		return x.Url
+		return x.RawContent
+	}
+	return nil
+}
+
+func (x *VoiceMessage) GetSiriTranscript() *AlignedTranscript {
+	if x != nil {
+		return x.SiriTranscript
+	}
+	return nil
+}
+
+type AlignedTranscript struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Items    []*TranscriptItem `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`
+	Rendered string            `protobuf:"bytes,2,opt,name=rendered,proto3" json:"rendered,omitempty"`
+}
+
+func (x *AlignedTranscript) Reset() {
+	*x = AlignedTranscript{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_app_proto_msgTypes[11]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *AlignedTranscript) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AlignedTranscript) ProtoMessage() {}
+
+func (x *AlignedTranscript) ProtoReflect() protoreflect.Message {
+	mi := &file_app_proto_msgTypes[11]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AlignedTranscript.ProtoReflect.Descriptor instead.
+func (*AlignedTranscript) Descriptor() ([]byte, []int) {
+	return file_app_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *AlignedTranscript) GetItems() []*TranscriptItem {
+	if x != nil {
+		return x.Items
+	}
+	return nil
+}
+
+func (x *AlignedTranscript) GetRendered() string {
+	if x != nil {
+		return x.Rendered
 	}
 	return ""
+}
+
+type TranscriptItem struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Word            string  `protobuf:"bytes,1,opt,name=word,proto3" json:"word,omitempty"`
+	OffsetMs        float32 `protobuf:"fixed32,2,opt,name=offsetMs,proto3" json:"offsetMs,omitempty"`
+	DurationMs      float32 `protobuf:"fixed32,3,opt,name=durationMs,proto3" json:"durationMs,omitempty"`
+	SubstringOffset int32   `protobuf:"varint,4,opt,name=substringOffset,proto3" json:"substringOffset,omitempty"`
+}
+
+func (x *TranscriptItem) Reset() {
+	*x = TranscriptItem{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_app_proto_msgTypes[12]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *TranscriptItem) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TranscriptItem) ProtoMessage() {}
+
+func (x *TranscriptItem) ProtoReflect() protoreflect.Message {
+	mi := &file_app_proto_msgTypes[12]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TranscriptItem.ProtoReflect.Descriptor instead.
+func (*TranscriptItem) Descriptor() ([]byte, []int) {
+	return file_app_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *TranscriptItem) GetWord() string {
+	if x != nil {
+		return x.Word
+	}
+	return ""
+}
+
+func (x *TranscriptItem) GetOffsetMs() float32 {
+	if x != nil {
+		return x.OffsetMs
+	}
+	return 0
+}
+
+func (x *TranscriptItem) GetDurationMs() float32 {
+	if x != nil {
+		return x.DurationMs
+	}
+	return 0
+}
+
+func (x *TranscriptItem) GetSubstringOffset() int32 {
+	if x != nil {
+		return x.SubstringOffset
+	}
+	return 0
 }
 
 type MessageSendInputRecipientUuids struct {
@@ -684,7 +818,7 @@ type MessageSendInputRecipientUuids struct {
 func (x *MessageSendInputRecipientUuids) Reset() {
 	*x = MessageSendInputRecipientUuids{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_app_proto_msgTypes[11]
+		mi := &file_app_proto_msgTypes[13]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -697,7 +831,7 @@ func (x *MessageSendInputRecipientUuids) String() string {
 func (*MessageSendInputRecipientUuids) ProtoMessage() {}
 
 func (x *MessageSendInputRecipientUuids) ProtoReflect() protoreflect.Message {
-	mi := &file_app_proto_msgTypes[11]
+	mi := &file_app_proto_msgTypes[13]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -710,7 +844,7 @@ func (x *MessageSendInputRecipientUuids) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MessageSendInputRecipientUuids.ProtoReflect.Descriptor instead.
 func (*MessageSendInputRecipientUuids) Descriptor() ([]byte, []int) {
-	return file_app_proto_rawDescGZIP(), []int{11}
+	return file_app_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *MessageSendInputRecipientUuids) GetUuids() []string {
@@ -738,13 +872,14 @@ type MessageSendInput struct {
 	Recipients isMessageSendInput_Recipients `protobuf_oneof:"recipients"`
 	// Types that are assignable to Content:
 	//	*MessageSendInput_TextMessage
+	//	*MessageSendInput_VoiceMessage
 	Content isMessageSendInput_Content `protobuf_oneof:"content"`
 }
 
 func (x *MessageSendInput) Reset() {
 	*x = MessageSendInput{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_app_proto_msgTypes[12]
+		mi := &file_app_proto_msgTypes[14]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -757,7 +892,7 @@ func (x *MessageSendInput) String() string {
 func (*MessageSendInput) ProtoMessage() {}
 
 func (x *MessageSendInput) ProtoReflect() protoreflect.Message {
-	mi := &file_app_proto_msgTypes[12]
+	mi := &file_app_proto_msgTypes[14]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -770,7 +905,7 @@ func (x *MessageSendInput) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MessageSendInput.ProtoReflect.Descriptor instead.
 func (*MessageSendInput) Descriptor() ([]byte, []int) {
-	return file_app_proto_rawDescGZIP(), []int{12}
+	return file_app_proto_rawDescGZIP(), []int{14}
 }
 
 func (m *MessageSendInput) GetRecipients() isMessageSendInput_Recipients {
@@ -808,6 +943,13 @@ func (x *MessageSendInput) GetTextMessage() *TextMessage {
 	return nil
 }
 
+func (x *MessageSendInput) GetVoiceMessage() *VoiceMessage {
+	if x, ok := x.GetContent().(*MessageSendInput_VoiceMessage); ok {
+		return x.VoiceMessage
+	}
+	return nil
+}
+
 type isMessageSendInput_Recipients interface {
 	isMessageSendInput_Recipients()
 }
@@ -832,7 +974,13 @@ type MessageSendInput_TextMessage struct {
 	TextMessage *TextMessage `protobuf:"bytes,3,opt,name=textMessage,proto3,oneof"`
 }
 
+type MessageSendInput_VoiceMessage struct {
+	VoiceMessage *VoiceMessage `protobuf:"bytes,4,opt,name=voiceMessage,proto3,oneof"`
+}
+
 func (*MessageSendInput_TextMessage) isMessageSendInput_Content() {}
+
+func (*MessageSendInput_VoiceMessage) isMessageSendInput_Content() {}
 
 type Conversation struct {
 	state         protoimpl.MessageState
@@ -848,7 +996,7 @@ type Conversation struct {
 func (x *Conversation) Reset() {
 	*x = Conversation{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_app_proto_msgTypes[13]
+		mi := &file_app_proto_msgTypes[15]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -861,7 +1009,7 @@ func (x *Conversation) String() string {
 func (*Conversation) ProtoMessage() {}
 
 func (x *Conversation) ProtoReflect() protoreflect.Message {
-	mi := &file_app_proto_msgTypes[13]
+	mi := &file_app_proto_msgTypes[15]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -874,7 +1022,7 @@ func (x *Conversation) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Conversation.ProtoReflect.Descriptor instead.
 func (*Conversation) Descriptor() ([]byte, []int) {
-	return file_app_proto_rawDescGZIP(), []int{13}
+	return file_app_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *Conversation) GetUuid() string {
@@ -916,7 +1064,7 @@ type ConversationGetInput struct {
 func (x *ConversationGetInput) Reset() {
 	*x = ConversationGetInput{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_app_proto_msgTypes[14]
+		mi := &file_app_proto_msgTypes[16]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -929,7 +1077,7 @@ func (x *ConversationGetInput) String() string {
 func (*ConversationGetInput) ProtoMessage() {}
 
 func (x *ConversationGetInput) ProtoReflect() protoreflect.Message {
-	mi := &file_app_proto_msgTypes[14]
+	mi := &file_app_proto_msgTypes[16]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -942,7 +1090,7 @@ func (x *ConversationGetInput) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ConversationGetInput.ProtoReflect.Descriptor instead.
 func (*ConversationGetInput) Descriptor() ([]byte, []int) {
-	return file_app_proto_rawDescGZIP(), []int{14}
+	return file_app_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *ConversationGetInput) GetUuid() string {
@@ -963,7 +1111,7 @@ type ConversationListInput struct {
 func (x *ConversationListInput) Reset() {
 	*x = ConversationListInput{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_app_proto_msgTypes[15]
+		mi := &file_app_proto_msgTypes[17]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -976,7 +1124,7 @@ func (x *ConversationListInput) String() string {
 func (*ConversationListInput) ProtoMessage() {}
 
 func (x *ConversationListInput) ProtoReflect() protoreflect.Message {
-	mi := &file_app_proto_msgTypes[15]
+	mi := &file_app_proto_msgTypes[17]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -989,7 +1137,7 @@ func (x *ConversationListInput) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ConversationListInput.ProtoReflect.Descriptor instead.
 func (*ConversationListInput) Descriptor() ([]byte, []int) {
-	return file_app_proto_rawDescGZIP(), []int{15}
+	return file_app_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *ConversationListInput) GetPage() int32 {
@@ -1012,7 +1160,7 @@ type ConversationListOutput struct {
 func (x *ConversationListOutput) Reset() {
 	*x = ConversationListOutput{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_app_proto_msgTypes[16]
+		mi := &file_app_proto_msgTypes[18]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1025,7 +1173,7 @@ func (x *ConversationListOutput) String() string {
 func (*ConversationListOutput) ProtoMessage() {}
 
 func (x *ConversationListOutput) ProtoReflect() protoreflect.Message {
-	mi := &file_app_proto_msgTypes[16]
+	mi := &file_app_proto_msgTypes[18]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1038,7 +1186,7 @@ func (x *ConversationListOutput) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ConversationListOutput.ProtoReflect.Descriptor instead.
 func (*ConversationListOutput) Descriptor() ([]byte, []int) {
-	return file_app_proto_rawDescGZIP(), []int{16}
+	return file_app_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *ConversationListOutput) GetConvs() []*Conversation {
@@ -1120,25 +1268,48 @@ var file_app_proto_rawDesc = []byte{
 	0x65, 0x61, 0x74, 0x65, 0x64, 0x41, 0x74, 0x42, 0x09, 0x0a, 0x07, 0x63, 0x6f, 0x6e, 0x74, 0x65,
 	0x6e, 0x74, 0x22, 0x27, 0x0a, 0x0b, 0x54, 0x65, 0x78, 0x74, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67,
 	0x65, 0x12, 0x18, 0x0a, 0x07, 0x63, 0x6f, 0x6e, 0x74, 0x65, 0x6e, 0x74, 0x18, 0x01, 0x20, 0x01,
-	0x28, 0x09, 0x52, 0x07, 0x63, 0x6f, 0x6e, 0x74, 0x65, 0x6e, 0x74, 0x22, 0x20, 0x0a, 0x0c, 0x56,
-	0x6f, 0x69, 0x63, 0x65, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x12, 0x10, 0x0a, 0x03, 0x75,
-	0x72, 0x6c, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x75, 0x72, 0x6c, 0x22, 0x4c, 0x0a,
-	0x1e, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x53, 0x65, 0x6e, 0x64, 0x49, 0x6e, 0x70, 0x75,
-	0x74, 0x52, 0x65, 0x63, 0x69, 0x70, 0x69, 0x65, 0x6e, 0x74, 0x55, 0x75, 0x69, 0x64, 0x73, 0x12,
-	0x14, 0x0a, 0x05, 0x75, 0x75, 0x69, 0x64, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x09, 0x52, 0x05,
-	0x75, 0x75, 0x69, 0x64, 0x73, 0x12, 0x14, 0x0a, 0x05, 0x74, 0x69, 0x74, 0x6c, 0x65, 0x18, 0x02,
-	0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x74, 0x69, 0x74, 0x6c, 0x65, 0x22, 0xce, 0x01, 0x0a, 0x10,
-	0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x53, 0x65, 0x6e, 0x64, 0x49, 0x6e, 0x70, 0x75, 0x74,
-	0x12, 0x1c, 0x0a, 0x08, 0x63, 0x6f, 0x6e, 0x76, 0x55, 0x75, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01,
-	0x28, 0x09, 0x48, 0x00, 0x52, 0x08, 0x63, 0x6f, 0x6e, 0x76, 0x55, 0x75, 0x69, 0x64, 0x12, 0x4d,
-	0x0a, 0x0e, 0x72, 0x65, 0x63, 0x69, 0x70, 0x69, 0x65, 0x6e, 0x74, 0x55, 0x75, 0x69, 0x64, 0x73,
-	0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x23, 0x2e, 0x61, 0x70, 0x70, 0x2e, 0x4d, 0x65, 0x73,
-	0x73, 0x61, 0x67, 0x65, 0x53, 0x65, 0x6e, 0x64, 0x49, 0x6e, 0x70, 0x75, 0x74, 0x52, 0x65, 0x63,
-	0x69, 0x70, 0x69, 0x65, 0x6e, 0x74, 0x55, 0x75, 0x69, 0x64, 0x73, 0x48, 0x00, 0x52, 0x0e, 0x72,
-	0x65, 0x63, 0x69, 0x70, 0x69, 0x65, 0x6e, 0x74, 0x55, 0x75, 0x69, 0x64, 0x73, 0x12, 0x34, 0x0a,
-	0x0b, 0x74, 0x65, 0x78, 0x74, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x18, 0x03, 0x20, 0x01,
-	0x28, 0x0b, 0x32, 0x10, 0x2e, 0x61, 0x70, 0x70, 0x2e, 0x54, 0x65, 0x78, 0x74, 0x4d, 0x65, 0x73,
-	0x73, 0x61, 0x67, 0x65, 0x48, 0x01, 0x52, 0x0b, 0x74, 0x65, 0x78, 0x74, 0x4d, 0x65, 0x73, 0x73,
+	0x28, 0x09, 0x52, 0x07, 0x63, 0x6f, 0x6e, 0x74, 0x65, 0x6e, 0x74, 0x22, 0x6e, 0x0a, 0x0c, 0x56,
+	0x6f, 0x69, 0x63, 0x65, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x12, 0x1e, 0x0a, 0x0a, 0x72,
+	0x61, 0x77, 0x43, 0x6f, 0x6e, 0x74, 0x65, 0x6e, 0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0c, 0x52,
+	0x0a, 0x72, 0x61, 0x77, 0x43, 0x6f, 0x6e, 0x74, 0x65, 0x6e, 0x74, 0x12, 0x3e, 0x0a, 0x0e, 0x73,
+	0x69, 0x72, 0x69, 0x54, 0x72, 0x61, 0x6e, 0x73, 0x63, 0x72, 0x69, 0x70, 0x74, 0x18, 0x02, 0x20,
+	0x01, 0x28, 0x0b, 0x32, 0x16, 0x2e, 0x61, 0x70, 0x70, 0x2e, 0x41, 0x6c, 0x69, 0x67, 0x6e, 0x65,
+	0x64, 0x54, 0x72, 0x61, 0x6e, 0x73, 0x63, 0x72, 0x69, 0x70, 0x74, 0x52, 0x0e, 0x73, 0x69, 0x72,
+	0x69, 0x54, 0x72, 0x61, 0x6e, 0x73, 0x63, 0x72, 0x69, 0x70, 0x74, 0x22, 0x5a, 0x0a, 0x11, 0x41,
+	0x6c, 0x69, 0x67, 0x6e, 0x65, 0x64, 0x54, 0x72, 0x61, 0x6e, 0x73, 0x63, 0x72, 0x69, 0x70, 0x74,
+	0x12, 0x29, 0x0a, 0x05, 0x69, 0x74, 0x65, 0x6d, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32,
+	0x13, 0x2e, 0x61, 0x70, 0x70, 0x2e, 0x54, 0x72, 0x61, 0x6e, 0x73, 0x63, 0x72, 0x69, 0x70, 0x74,
+	0x49, 0x74, 0x65, 0x6d, 0x52, 0x05, 0x69, 0x74, 0x65, 0x6d, 0x73, 0x12, 0x1a, 0x0a, 0x08, 0x72,
+	0x65, 0x6e, 0x64, 0x65, 0x72, 0x65, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x72,
+	0x65, 0x6e, 0x64, 0x65, 0x72, 0x65, 0x64, 0x22, 0x8a, 0x01, 0x0a, 0x0e, 0x54, 0x72, 0x61, 0x6e,
+	0x73, 0x63, 0x72, 0x69, 0x70, 0x74, 0x49, 0x74, 0x65, 0x6d, 0x12, 0x12, 0x0a, 0x04, 0x77, 0x6f,
+	0x72, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x77, 0x6f, 0x72, 0x64, 0x12, 0x1a,
+	0x0a, 0x08, 0x6f, 0x66, 0x66, 0x73, 0x65, 0x74, 0x4d, 0x73, 0x18, 0x02, 0x20, 0x01, 0x28, 0x02,
+	0x52, 0x08, 0x6f, 0x66, 0x66, 0x73, 0x65, 0x74, 0x4d, 0x73, 0x12, 0x1e, 0x0a, 0x0a, 0x64, 0x75,
+	0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x4d, 0x73, 0x18, 0x03, 0x20, 0x01, 0x28, 0x02, 0x52, 0x0a,
+	0x64, 0x75, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x4d, 0x73, 0x12, 0x28, 0x0a, 0x0f, 0x73, 0x75,
+	0x62, 0x73, 0x74, 0x72, 0x69, 0x6e, 0x67, 0x4f, 0x66, 0x66, 0x73, 0x65, 0x74, 0x18, 0x04, 0x20,
+	0x01, 0x28, 0x05, 0x52, 0x0f, 0x73, 0x75, 0x62, 0x73, 0x74, 0x72, 0x69, 0x6e, 0x67, 0x4f, 0x66,
+	0x66, 0x73, 0x65, 0x74, 0x22, 0x4c, 0x0a, 0x1e, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x53,
+	0x65, 0x6e, 0x64, 0x49, 0x6e, 0x70, 0x75, 0x74, 0x52, 0x65, 0x63, 0x69, 0x70, 0x69, 0x65, 0x6e,
+	0x74, 0x55, 0x75, 0x69, 0x64, 0x73, 0x12, 0x14, 0x0a, 0x05, 0x75, 0x75, 0x69, 0x64, 0x73, 0x18,
+	0x01, 0x20, 0x03, 0x28, 0x09, 0x52, 0x05, 0x75, 0x75, 0x69, 0x64, 0x73, 0x12, 0x14, 0x0a, 0x05,
+	0x74, 0x69, 0x74, 0x6c, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x74, 0x69, 0x74,
+	0x6c, 0x65, 0x22, 0x87, 0x02, 0x0a, 0x10, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x53, 0x65,
+	0x6e, 0x64, 0x49, 0x6e, 0x70, 0x75, 0x74, 0x12, 0x1c, 0x0a, 0x08, 0x63, 0x6f, 0x6e, 0x76, 0x55,
+	0x75, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x48, 0x00, 0x52, 0x08, 0x63, 0x6f, 0x6e,
+	0x76, 0x55, 0x75, 0x69, 0x64, 0x12, 0x4d, 0x0a, 0x0e, 0x72, 0x65, 0x63, 0x69, 0x70, 0x69, 0x65,
+	0x6e, 0x74, 0x55, 0x75, 0x69, 0x64, 0x73, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x23, 0x2e,
+	0x61, 0x70, 0x70, 0x2e, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x53, 0x65, 0x6e, 0x64, 0x49,
+	0x6e, 0x70, 0x75, 0x74, 0x52, 0x65, 0x63, 0x69, 0x70, 0x69, 0x65, 0x6e, 0x74, 0x55, 0x75, 0x69,
+	0x64, 0x73, 0x48, 0x00, 0x52, 0x0e, 0x72, 0x65, 0x63, 0x69, 0x70, 0x69, 0x65, 0x6e, 0x74, 0x55,
+	0x75, 0x69, 0x64, 0x73, 0x12, 0x34, 0x0a, 0x0b, 0x74, 0x65, 0x78, 0x74, 0x4d, 0x65, 0x73, 0x73,
+	0x61, 0x67, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x10, 0x2e, 0x61, 0x70, 0x70, 0x2e,
+	0x54, 0x65, 0x78, 0x74, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x48, 0x01, 0x52, 0x0b, 0x74,
+	0x65, 0x78, 0x74, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x12, 0x37, 0x0a, 0x0c, 0x76, 0x6f,
+	0x69, 0x63, 0x65, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x18, 0x04, 0x20, 0x01, 0x28, 0x0b,
+	0x32, 0x11, 0x2e, 0x61, 0x70, 0x70, 0x2e, 0x56, 0x6f, 0x69, 0x63, 0x65, 0x4d, 0x65, 0x73, 0x73,
+	0x61, 0x67, 0x65, 0x48, 0x01, 0x52, 0x0c, 0x76, 0x6f, 0x69, 0x63, 0x65, 0x4d, 0x65, 0x73, 0x73,
 	0x61, 0x67, 0x65, 0x42, 0x0c, 0x0a, 0x0a, 0x72, 0x65, 0x63, 0x69, 0x70, 0x69, 0x65, 0x6e, 0x74,
 	0x73, 0x42, 0x09, 0x0a, 0x07, 0x63, 0x6f, 0x6e, 0x74, 0x65, 0x6e, 0x74, 0x22, 0x91, 0x01, 0x0a,
 	0x0c, 0x43, 0x6f, 0x6e, 0x76, 0x65, 0x72, 0x73, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x12, 0x0a,
@@ -1215,7 +1386,7 @@ func file_app_proto_rawDescGZIP() []byte {
 	return file_app_proto_rawDescData
 }
 
-var file_app_proto_msgTypes = make([]protoimpl.MessageInfo, 17)
+var file_app_proto_msgTypes = make([]protoimpl.MessageInfo, 19)
 var file_app_proto_goTypes = []interface{}{
 	(*Empty)(nil),                          // 0: app.Empty
 	(*User)(nil),                           // 1: app.User
@@ -1228,52 +1399,57 @@ var file_app_proto_goTypes = []interface{}{
 	(*Message)(nil),                        // 8: app.Message
 	(*TextMessage)(nil),                    // 9: app.TextMessage
 	(*VoiceMessage)(nil),                   // 10: app.VoiceMessage
-	(*MessageSendInputRecipientUuids)(nil), // 11: app.MessageSendInputRecipientUuids
-	(*MessageSendInput)(nil),               // 12: app.MessageSendInput
-	(*Conversation)(nil),                   // 13: app.Conversation
-	(*ConversationGetInput)(nil),           // 14: app.ConversationGetInput
-	(*ConversationListInput)(nil),          // 15: app.ConversationListInput
-	(*ConversationListOutput)(nil),         // 16: app.ConversationListOutput
-	(*timestamppb.Timestamp)(nil),          // 17: google.protobuf.Timestamp
+	(*AlignedTranscript)(nil),              // 11: app.AlignedTranscript
+	(*TranscriptItem)(nil),                 // 12: app.TranscriptItem
+	(*MessageSendInputRecipientUuids)(nil), // 13: app.MessageSendInputRecipientUuids
+	(*MessageSendInput)(nil),               // 14: app.MessageSendInput
+	(*Conversation)(nil),                   // 15: app.Conversation
+	(*ConversationGetInput)(nil),           // 16: app.ConversationGetInput
+	(*ConversationListInput)(nil),          // 17: app.ConversationListInput
+	(*ConversationListOutput)(nil),         // 18: app.ConversationListOutput
+	(*timestamppb.Timestamp)(nil),          // 19: google.protobuf.Timestamp
 }
 var file_app_proto_depIdxs = []int32{
-	13, // 0: app.User.conversations:type_name -> app.Conversation
+	15, // 0: app.User.conversations:type_name -> app.Conversation
 	1,  // 1: app.MeUser.user:type_name -> app.User
 	1,  // 2: app.SyncContactsOutput.users:type_name -> app.User
 	9,  // 3: app.Message.textMessage:type_name -> app.TextMessage
 	10, // 4: app.Message.voiceMessage:type_name -> app.VoiceMessage
 	1,  // 5: app.Message.author:type_name -> app.User
-	17, // 6: app.Message.createdAt:type_name -> google.protobuf.Timestamp
-	11, // 7: app.MessageSendInput.recipientUuids:type_name -> app.MessageSendInputRecipientUuids
-	9,  // 8: app.MessageSendInput.textMessage:type_name -> app.TextMessage
-	8,  // 9: app.Conversation.messages:type_name -> app.Message
-	1,  // 10: app.Conversation.participants:type_name -> app.User
-	13, // 11: app.ConversationListOutput.convs:type_name -> app.Conversation
-	0,  // 12: app.Utils.HealthCheck:input_type -> app.Empty
-	6,  // 13: app.UserService.SyncContacts:input_type -> app.SyncContactsInput
-	5,  // 14: app.UserService.Onboarding:input_type -> app.OnboardingInput
-	0,  // 15: app.UserService.Me:input_type -> app.Empty
-	3,  // 16: app.UserService.Get:input_type -> app.UserGetInput
-	4,  // 17: app.UserService.List:input_type -> app.UserListInput
-	12, // 18: app.MessageService.Send:input_type -> app.MessageSendInput
-	0,  // 19: app.MessageService.Incoming:input_type -> app.Empty
-	14, // 20: app.ConversationService.Get:input_type -> app.ConversationGetInput
-	15, // 21: app.ConversationService.List:input_type -> app.ConversationListInput
-	0,  // 22: app.Utils.HealthCheck:output_type -> app.Empty
-	7,  // 23: app.UserService.SyncContacts:output_type -> app.SyncContactsOutput
-	2,  // 24: app.UserService.Onboarding:output_type -> app.MeUser
-	2,  // 25: app.UserService.Me:output_type -> app.MeUser
-	1,  // 26: app.UserService.Get:output_type -> app.User
-	1,  // 27: app.UserService.List:output_type -> app.User
-	0,  // 28: app.MessageService.Send:output_type -> app.Empty
-	8,  // 29: app.MessageService.Incoming:output_type -> app.Message
-	13, // 30: app.ConversationService.Get:output_type -> app.Conversation
-	13, // 31: app.ConversationService.List:output_type -> app.Conversation
-	22, // [22:32] is the sub-list for method output_type
-	12, // [12:22] is the sub-list for method input_type
-	12, // [12:12] is the sub-list for extension type_name
-	12, // [12:12] is the sub-list for extension extendee
-	0,  // [0:12] is the sub-list for field type_name
+	19, // 6: app.Message.createdAt:type_name -> google.protobuf.Timestamp
+	11, // 7: app.VoiceMessage.siriTranscript:type_name -> app.AlignedTranscript
+	12, // 8: app.AlignedTranscript.items:type_name -> app.TranscriptItem
+	13, // 9: app.MessageSendInput.recipientUuids:type_name -> app.MessageSendInputRecipientUuids
+	9,  // 10: app.MessageSendInput.textMessage:type_name -> app.TextMessage
+	10, // 11: app.MessageSendInput.voiceMessage:type_name -> app.VoiceMessage
+	8,  // 12: app.Conversation.messages:type_name -> app.Message
+	1,  // 13: app.Conversation.participants:type_name -> app.User
+	15, // 14: app.ConversationListOutput.convs:type_name -> app.Conversation
+	0,  // 15: app.Utils.HealthCheck:input_type -> app.Empty
+	6,  // 16: app.UserService.SyncContacts:input_type -> app.SyncContactsInput
+	5,  // 17: app.UserService.Onboarding:input_type -> app.OnboardingInput
+	0,  // 18: app.UserService.Me:input_type -> app.Empty
+	3,  // 19: app.UserService.Get:input_type -> app.UserGetInput
+	4,  // 20: app.UserService.List:input_type -> app.UserListInput
+	14, // 21: app.MessageService.Send:input_type -> app.MessageSendInput
+	0,  // 22: app.MessageService.Incoming:input_type -> app.Empty
+	16, // 23: app.ConversationService.Get:input_type -> app.ConversationGetInput
+	17, // 24: app.ConversationService.List:input_type -> app.ConversationListInput
+	0,  // 25: app.Utils.HealthCheck:output_type -> app.Empty
+	7,  // 26: app.UserService.SyncContacts:output_type -> app.SyncContactsOutput
+	2,  // 27: app.UserService.Onboarding:output_type -> app.MeUser
+	2,  // 28: app.UserService.Me:output_type -> app.MeUser
+	1,  // 29: app.UserService.Get:output_type -> app.User
+	1,  // 30: app.UserService.List:output_type -> app.User
+	0,  // 31: app.MessageService.Send:output_type -> app.Empty
+	8,  // 32: app.MessageService.Incoming:output_type -> app.Message
+	15, // 33: app.ConversationService.Get:output_type -> app.Conversation
+	15, // 34: app.ConversationService.List:output_type -> app.Conversation
+	25, // [25:35] is the sub-list for method output_type
+	15, // [15:25] is the sub-list for method input_type
+	15, // [15:15] is the sub-list for extension type_name
+	15, // [15:15] is the sub-list for extension extendee
+	0,  // [0:15] is the sub-list for field type_name
 }
 
 func init() { file_app_proto_init() }
@@ -1415,7 +1591,7 @@ func file_app_proto_init() {
 			}
 		}
 		file_app_proto_msgTypes[11].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*MessageSendInputRecipientUuids); i {
+			switch v := v.(*AlignedTranscript); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1427,7 +1603,7 @@ func file_app_proto_init() {
 			}
 		}
 		file_app_proto_msgTypes[12].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*MessageSendInput); i {
+			switch v := v.(*TranscriptItem); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1439,7 +1615,7 @@ func file_app_proto_init() {
 			}
 		}
 		file_app_proto_msgTypes[13].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Conversation); i {
+			switch v := v.(*MessageSendInputRecipientUuids); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1451,7 +1627,7 @@ func file_app_proto_init() {
 			}
 		}
 		file_app_proto_msgTypes[14].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ConversationGetInput); i {
+			switch v := v.(*MessageSendInput); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1463,7 +1639,7 @@ func file_app_proto_init() {
 			}
 		}
 		file_app_proto_msgTypes[15].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ConversationListInput); i {
+			switch v := v.(*Conversation); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1475,6 +1651,30 @@ func file_app_proto_init() {
 			}
 		}
 		file_app_proto_msgTypes[16].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ConversationGetInput); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_app_proto_msgTypes[17].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ConversationListInput); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_app_proto_msgTypes[18].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*ConversationListOutput); i {
 			case 0:
 				return &v.state
@@ -1495,10 +1695,11 @@ func file_app_proto_init() {
 		(*Message_TextMessage)(nil),
 		(*Message_VoiceMessage)(nil),
 	}
-	file_app_proto_msgTypes[12].OneofWrappers = []interface{}{
+	file_app_proto_msgTypes[14].OneofWrappers = []interface{}{
 		(*MessageSendInput_ConvUuid)(nil),
 		(*MessageSendInput_RecipientUuids)(nil),
 		(*MessageSendInput_TextMessage)(nil),
+		(*MessageSendInput_VoiceMessage)(nil),
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -1506,7 +1707,7 @@ func file_app_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_app_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   17,
+			NumMessages:   19,
 			NumExtensions: 0,
 			NumServices:   4,
 		},

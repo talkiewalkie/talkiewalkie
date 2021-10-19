@@ -17,7 +17,9 @@ class InboxViewModel: ObservableObject {
         self.authed = authed
 
         if case .Connected(let api, _) = authed.state {
+            os_log(.debug, "subscribing...")
             api.subscribeIncomingMessages { msg in
+                os_log("hello i received a new message")
                 let savedMsg = Message.upsert(msg, context: authed.moc)
                 let conversation = Conversation.getByUuidOrCreate(msg.convUuid.uuidOrThrow(), context: authed.moc)
 
@@ -32,14 +34,15 @@ class InboxViewModel: ObservableObject {
     }
 
     func syncConversations() {
-        DispatchQueue.main.async {
+        self.loading = true
+        DispatchQueue.global(qos: .background).async {
             if case .Connected(let api, _) = self.authed.state {
-                self.loading = true
                 let (convs, _) = api.listConvs()
-                self.loading = false
-                os_log(.debug, "loading = false")
-                Conversation.dumpFromRemote(convs, context: self.authed.moc)
+                self.authed.persistentContainer.performBackgroundTask { context in
+                    Conversation.dumpFromRemote(convs, context: context)
+                }
             }
+            DispatchQueue.main.async { self.loading = false }
         }
     }
 }

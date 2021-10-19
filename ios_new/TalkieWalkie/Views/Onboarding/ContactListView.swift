@@ -87,20 +87,20 @@ struct ContactListView: View {
                     let contactList = contactStore.allLocalPhoneNumbers()
                     if case .Connected(let api, _) = authState.state {
                         loading = true
-                        let (twCL, _) = api.syncContactList(phones: contactList.map {
-                            guard let phoneNumber = try? phoneNumberKit.parse(
-                                $0.phone,
-                                withRegion: PhoneNumberKit.defaultRegionCode()
-                            ) else { return "" }
-                            return self.phoneNumberKit.format(phoneNumber, toType: .e164)
-                        })
-                        
-                        loading = false
-                        if let twCL = twCL {
-                            talkiewalkieContacts = contactList.filter { twCL.users.map { u in u.phone }.contains($0.phone) }
-                            nonTalkieWalkieContacts = contactList.filter { !twCL.users.map { u in u.phone }.contains($0.phone) }
-                            authState.moc.saveOrLogError()
+                        DispatchQueue.global(qos: .background).async {
+                            let (twCL, _) = api.syncContactList(phones: contactList.map {
+                                guard let phoneNumber = try? phoneNumberKit.parse(
+                                    $0.phone,
+                                    withRegion: PhoneNumberKit.defaultRegionCode()
+                                ) else { return "" }
+                                return self.phoneNumberKit.format(phoneNumber, toType: .e164)
+                            })
+                            if let twCL = twCL {
+                                talkiewalkieContacts = contactList.filter { twCL.users.map { u in u.phone }.contains($0.phone) }
+                                nonTalkieWalkieContacts = contactList.filter { !twCL.users.map { u in u.phone }.contains($0.phone) }
+                            }
                         }
+                        loading = false
                     }
                 } else {
                     hasRefusedSharingContactList = true

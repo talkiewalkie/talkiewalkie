@@ -75,7 +75,20 @@ message TextMessage {
 }
 
 message VoiceMessage {
-  string url = 1;
+  bytes rawContent = 1;
+  AlignedTranscript siriTranscript = 2;
+}
+
+message AlignedTranscript {
+  repeated TranscriptItem items = 1;
+  string rendered = 2;
+}
+
+message TranscriptItem {
+  string word = 1;
+  float offsetMs = 2;
+  float durationMs = 3;
+  int32 substringOffset = 4;
 }
 
 message MessageSendInputRecipientUuids {
@@ -90,6 +103,7 @@ message MessageSendInput {
   }
   oneof content {
     TextMessage textMessage = 3;
+    VoiceMessage voiceMessage = 4;
   }
 }
 

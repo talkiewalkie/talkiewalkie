@@ -17,7 +17,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         FirebaseConfiguration.shared.setLoggerLevel(.min)
         FirebaseApp.configure()
-        
+
         Auth.auth().addStateDidChangeListener { _, newUser in
             if let newUser = newUser {
                 Messaging.messaging().subscribe(toTopic: newUser.uid)
@@ -30,7 +30,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 self.auth.logout()
             }
         }
-        
+
         Messaging.messaging().delegate = self
         Messaging.messaging().subscribe(toTopic: "all")
         if let fbu = Auth.auth().currentUser {
@@ -53,7 +53,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return true
     }
 
-    
     // MARK: - UISceneSession Lifecycle
 
     func application(_: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options _: UIScene.ConnectionOptions) -> UISceneConfiguration {
@@ -87,9 +86,6 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
                                 withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions)
                                     -> Void)
     {
-        // TODO: on new user arrived on platform, we should send in the notif their db uuid and do a fetch here so as to update core data!
-        // TODO: --- THIS IS NECESSARY FOR THE DEMO ----
-        // TODO: that also means we need to somehow access a logged in api client from here, and this is not easy to do today...
         let userInfo = notification.request.content.userInfo
 
         if case .Connected(let api, _) = self.auth.state {

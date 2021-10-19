@@ -3,6 +3,7 @@ package coco
 import (
 	"context"
 	"fmt"
+	"github.com/golang/protobuf/proto"
 	uuid2 "github.com/satori/go.uuid"
 	"github.com/talkiewalkie/talkiewalkie/common"
 	"github.com/talkiewalkie/talkiewalkie/entities"
@@ -35,17 +36,28 @@ func (c ConversationService) Get(ctx context.Context, input *pb.ConversationGetI
 
 	conv, err := models.Conversations(
 		models.ConversationWhere.UUID.EQ(uid),
-		qm.Load(
-			qm.Rels(models.ConversationRels.Messages, models.MessageRels.Author),
-			qm.Limit(50), qm.OrderBy(fmt.Sprintf("%s DESC", models.ConversationColumns.CreatedAt))),
+		qm.Load(qm.Rels(models.ConversationRels.UserConversations, models.UserConversationRels.User)),
 	).One(ctx, c.Db)
 	if err != nil {
 		return nil, status.Error(codes.Internal, fmt.Sprintf("could not get conversation: %+v", err))
 	}
 
+	messages, err := models.Messages(
+		models.MessageWhere.ConversationID.EQ(conv.ID),
+		qm.Load(models.MessageRels.RawAudio),
+		qm.Load(models.MessageRels.Author),
+		qm.Limit(20),
+		qm.OrderBy(fmt.Sprintf("%s DESC", models.MessageColumns.CreatedAt)),
+	).All(ctx, c.Db)
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "could not get conv's messages: %+v", err)
+	}
+
 	msgs := []*pb.Message{}
-	for _, message := range conv.R.Messages {
-		pbm, err := entities.MessageToPb(message)
+	for _, message := range messages {
+		message.R.Conversation = conv
+		pbm, err := entities.MessageToPb(message, c.Components)
 		if err != nil {
 			return nil, status.Error(codes.Internal, err.Error())
 		}
@@ -53,9 +65,14 @@ func (c ConversationService) Get(ctx context.Context, input *pb.ConversationGetI
 		msgs = append(msgs, pbm)
 	}
 
+	title, err := entities.ConversationDisplay(conv)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "could not compute conversation title: %+v", err)
+	}
+
 	return &pb.Conversation{
 		Uuid:         conv.UUID.String(),
-		Title:        entities.ConversationDisplay(conv),
+		Title:        title,
 		Messages:     msgs,
 		Participants: nil, // TODO
 	}, nil
@@ -103,7 +120,10 @@ WHERE "conversation_id" in (%s);
 
 	for _, uc := range myConvs {
 		conv := uc.R.Conversation
-		title := entities.ConversationDisplay(conv)
+		title, err := entities.ConversationDisplay(conv)
+		if err != nil {
+			return status.Errorf(codes.Internal, "could not display conversation title: %+v", err)
+		}
 
 		participants := []*pb.User{}
 		id2p := map[int]*models.User{}
@@ -125,7 +145,11 @@ WHERE "conversation_id" in (%s);
 				case models.MessageTypeText:
 					content = &pb.Message_TextMessage{TextMessage: &pb.TextMessage{Content: m.Text.String}}
 				case models.MessageTypeVoice:
-					content = &pb.Message_VoiceMessage{VoiceMessage: &pb.VoiceMessage{Url: "todo"}}
+					var pbTranscript *pb.AlignedTranscript
+					if err := proto.Unmarshal(m.SiriTranscript.Bytes, pbTranscript); err != nil {
+						return status.Errorf(codes.Internal, "could not build protobuf from stored bytearray: %+v", err)
+					}
+					content = &pb.Message_VoiceMessage{VoiceMessage: &pb.VoiceMessage{SiriTranscript: pbTranscript}}
 				}
 				var author *pb.User
 				if m.AuthorID.Valid {

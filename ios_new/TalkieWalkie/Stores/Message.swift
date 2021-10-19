@@ -7,6 +7,8 @@
 
 import CoreData
 import Foundation
+import GRPC
+import OSLog
 
 extension Message {
     static func upsert(_ msg: App_Message, context: NSManagedObjectContext) -> Message {
@@ -24,8 +26,11 @@ extension Message {
             localM.content = tm
         case let .voiceMessage(voice):
             let vm = VoiceMessage(context: context)
-            // TODO: download from bucket now if we don't ship the audio direclty through gRPC
-            vm.rawAudio = voice.url.data(using: .utf8)
+            vm.rawAudio = voice.rawContent
+            // TODO: change core data model to be transformable and have setter and getters handle things. ref article:
+            // TODO: https://medium.com/@rohanbhale/hazards-of-using-mutable-types-as-transformable-attributes-in-core-data-2c95cdc27088
+            do { vm.siriTranscript = try voice.siriTranscript.serializedData() }
+            catch { os_log(.error, "failed to serialize transcript pb message: \(error.localizedDescription)") }
 
             localM.content = vm
         default:

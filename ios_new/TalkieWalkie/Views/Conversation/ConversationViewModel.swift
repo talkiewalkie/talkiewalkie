@@ -24,7 +24,11 @@ class ConversationViewModel: ObservableObject {
                 self.loading = true
                 let (remoteConv, _) = api.convByUuid(uuid)
                 self.loading = false
-                if let remoteConv = remoteConv { Conversation.dumpFromRemote([remoteConv], context: self.authed.moc) }
+                if let remoteConv = remoteConv {
+                    self.authed.persistentContainer.performBackgroundTask { context in
+                        Conversation.dumpFromRemote([remoteConv], context: context)
+                    }
+                }
             } else {
                 os_log(.error, "conv without uuid!!!")
             }

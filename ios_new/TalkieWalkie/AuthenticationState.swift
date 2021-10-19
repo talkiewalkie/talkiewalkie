@@ -23,7 +23,8 @@ enum AuthenticationState {
 }
 
 class AuthState: ObservableObject {
-    let moc: NSManagedObjectContext
+    let persistentContainer: NSPersistentContainer
+    var moc: NSManagedObjectContext { persistentContainer.viewContext }
     var me: Me? { Me.fromCache(context: moc) }
 
     private var logger = Logger.withLabel("AuthState")
@@ -34,16 +35,16 @@ class AuthState: ObservableObject {
     init() {
         logger.debug("loading Core Data store")
 
-        let container = NSPersistentContainer(name: "LocalModels")
+        let persistentContainer = NSPersistentContainer(name: "LocalModels")
 
-        container.loadPersistentStores { _, error in
-            container.viewContext.automaticallyMergesChangesFromParent = true
+        persistentContainer.loadPersistentStores { _, error in
+            persistentContainer.viewContext.automaticallyMergesChangesFromParent = true
 
             if let error = error {
                 fatalError("Unable to load persistent stores: \(error)")
             }
         }
-        self.moc = container.viewContext
+        self.persistentContainer = persistentContainer
     }
 
     // MARK: - Utils
@@ -59,26 +60,28 @@ class AuthState: ObservableObject {
                 return
             }
 
-            let api = AuthedGrpcApi(url: self.config.apiUrl, token: res.token, context: self.moc)
+            self.logger.debug("token: '\(res.token)'")
+            let api = AuthedGrpcApi(url: self.config.apiUrl, token: res.token, persistentContainer: self.persistentContainer)
 
             if let me = Me.fromCache(context: self.moc) {
                 self.logger.debug("loaded user info from cache: \(me)")
                 self.state = AuthenticationState.Connected(api, me)
             }
 
-            DispatchQueue.main.async {
+            DispatchQueue.global(qos: .background).async {
                 let (res, _) = api.me()
                 if let res = res {
                     let uuid = UUID(uuidString: res.user.uuid)!
-                    let me = Me.getByUuidOrCreate(uuid, context: self.moc)
-                    me.uuid = uuid
-                    me.displayName = res.user.displayName
-                    me.firebaseUid = self.firebaseUser?.uid
+                    self.persistentContainer.performBackgroundTask { context in
+                        let me = Me.getByUuidOrCreate(uuid, context: self.moc)
+                        me.uuid = uuid
+                        me.displayName = res.user.displayName
+                        me.firebaseUid = self.firebaseUser?.uid
 
-                    me.objectWillChange.send()
-                    self.moc.saveOrLogError()
-
-                    self.state = AuthenticationState.Connected(api, me)
+                        me.objectWillChange.send()
+                        context.saveOrLogError()
+                        DispatchQueue.main.async { self.state = AuthenticationState.Connected(api, me) }
+                    }
                 }
             }
         }
@@ -86,13 +89,13 @@ class AuthState: ObservableObject {
 
     func logout() {
         state = AuthenticationState.Disconnected
-        
+
         do { try Auth.auth().signOut() }
         catch {
             os_log(.error, "failed to signout!")
             return
         }
-        
+
         // Clear coredata on logout
         // No strong candidate to do this better: https://stackoverflow.com/questions/1077810
         moc.executeOrLogError(NSBatchDeleteRequest(fetchRequest: NSFetchRequest(entityName: User.entity().name!)))

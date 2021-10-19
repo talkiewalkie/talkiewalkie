@@ -39,6 +39,8 @@ type GoogleStorage struct {
 }
 
 func (g GoogleStorage) AssetUrl(asset *models.Asset) (string, error) {
+	// TODO: coming back to this, it feels like superfluous complexity, should always precise the bucket name and not
+	// 		 rely on inference when nil.
 	if asset.Bucket.Valid {
 		return g.SignedUrl(asset.Bucket.String, asset.BlobName.String)
 	} else {
@@ -58,6 +60,8 @@ func initStorageClient(ctx context.Context) (StorageClient, error) {
 		log.Fatalf("could not read service account file: %+v", err)
 	}
 
+	// TODO: this shouldn't be needed any more as per
+	// 		 https://github.com/googleapis/google-cloud-go/issues/1130
 	cfg, err := google.JWTConfigFromJSON(saKey)
 	if err != nil {
 		log.Fatalf("could not build jwt config from service account file: %+v", err)

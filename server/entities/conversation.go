@@ -6,10 +6,16 @@ import (
 	"strings"
 )
 
-func ConversationDisplay(c *models.Conversation) string {
+func ConversationDisplay(c *models.Conversation) (string, error) {
+	if c.R.UserConversations == nil {
+		return "", errors.New("need to load user conversations")
+	} else if len(c.R.UserConversations) > 0 && c.R.UserConversations[0].R.User == nil {
+		return "", errors.New("need to load user conversations users")
+	}
+
 	display := c.Name.String
 	if c.Name.Valid {
-		return display
+		return display, nil
 	}
 
 	handles := []string{}
@@ -26,7 +32,7 @@ func ConversationDisplay(c *models.Conversation) string {
 		}
 	}
 
-	return strings.Join(handles, ", ")
+	return strings.Join(handles, ", "), nil
 }
 
 func CanAccessConversation(c *models.Conversation, u *models.User) (bool, error) {

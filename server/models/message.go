@@ -33,6 +33,7 @@ type Message struct {
 	UUID           uuid.UUID   `db:"uuid" boil:"uuid" json:"uuid" toml:"uuid" yaml:"uuid"`
 	Type           string      `db:"type" boil:"type" json:"type" toml:"type" yaml:"type"`
 	RawAudioID     null.Int    `db:"raw_audio_id" boil:"raw_audio_id" json:"raw_audio_id,omitempty" toml:"raw_audio_id" yaml:"raw_audio_id,omitempty"`
+	SiriTranscript null.Bytes  `db:"siri_transcript" boil:"siri_transcript" json:"siri_transcript,omitempty" toml:"siri_transcript" yaml:"siri_transcript,omitempty"`
 
 	R *messageR `db:"-" boil:"-" json:"-" toml:"-" yaml:"-"`
 	L messageL  `db:"-" boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -47,6 +48,7 @@ var MessageColumns = struct {
 	UUID           string
 	Type           string
 	RawAudioID     string
+	SiriTranscript string
 }{
 	ID:             "id",
 	Text:           "text",
@@ -56,6 +58,7 @@ var MessageColumns = struct {
 	UUID:           "uuid",
 	Type:           "type",
 	RawAudioID:     "raw_audio_id",
+	SiriTranscript: "siri_transcript",
 }
 
 var MessageTableColumns = struct {
@@ -67,6 +70,7 @@ var MessageTableColumns = struct {
 	UUID           string
 	Type           string
 	RawAudioID     string
+	SiriTranscript string
 }{
 	ID:             "message.id",
 	Text:           "message.text",
@@ -76,6 +80,7 @@ var MessageTableColumns = struct {
 	UUID:           "message.uuid",
 	Type:           "message.type",
 	RawAudioID:     "message.raw_audio_id",
+	SiriTranscript: "message.siri_transcript",
 }
 
 // Generated where
@@ -103,6 +108,29 @@ func (w whereHelpernull_Int) GTE(x null.Int) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.GTE, x)
 }
 
+type whereHelpernull_Bytes struct{ field string }
+
+func (w whereHelpernull_Bytes) EQ(x null.Bytes) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, false, x)
+}
+func (w whereHelpernull_Bytes) NEQ(x null.Bytes) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, true, x)
+}
+func (w whereHelpernull_Bytes) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
+func (w whereHelpernull_Bytes) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
+func (w whereHelpernull_Bytes) LT(x null.Bytes) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelpernull_Bytes) LTE(x null.Bytes) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelpernull_Bytes) GT(x null.Bytes) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelpernull_Bytes) GTE(x null.Bytes) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
+
 var MessageWhere = struct {
 	ID             whereHelperint
 	Text           whereHelpernull_String
@@ -112,6 +140,7 @@ var MessageWhere = struct {
 	UUID           whereHelperuuid_UUID
 	Type           whereHelperstring
 	RawAudioID     whereHelpernull_Int
+	SiriTranscript whereHelpernull_Bytes
 }{
 	ID:             whereHelperint{field: "\"message\".\"id\""},
 	Text:           whereHelpernull_String{field: "\"message\".\"text\""},
@@ -121,6 +150,7 @@ var MessageWhere = struct {
 	UUID:           whereHelperuuid_UUID{field: "\"message\".\"uuid\""},
 	Type:           whereHelperstring{field: "\"message\".\"type\""},
 	RawAudioID:     whereHelpernull_Int{field: "\"message\".\"raw_audio_id\""},
+	SiriTranscript: whereHelpernull_Bytes{field: "\"message\".\"siri_transcript\""},
 }
 
 // MessageRels is where relationship names are stored.
@@ -150,8 +180,8 @@ func (*messageR) NewStruct() *messageR {
 type messageL struct{}
 
 var (
-	messageAllColumns            = []string{"id", "text", "author_id", "conversation_id", "created_at", "uuid", "type", "raw_audio_id"}
-	messageColumnsWithoutDefault = []string{"text", "author_id", "conversation_id", "type", "raw_audio_id"}
+	messageAllColumns            = []string{"id", "text", "author_id", "conversation_id", "created_at", "uuid", "type", "raw_audio_id", "siri_transcript"}
+	messageColumnsWithoutDefault = []string{"text", "author_id", "conversation_id", "type", "raw_audio_id", "siri_transcript"}
 	messageColumnsWithDefault    = []string{"id", "created_at", "uuid"}
 	messagePrimaryKeyColumns     = []string{"id"}
 )

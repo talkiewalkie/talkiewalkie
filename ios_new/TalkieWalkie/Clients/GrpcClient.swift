@@ -6,11 +6,11 @@
 //
 
 import Combine
+import CoreData
 import Foundation
 import GRPC
 import NIO
 import OSLog
-import CoreData
 
 private class GrpcConnectivityState: ConnectivityStateDelegate {
     private let logger = Logger.withLabel("grpc-status")
@@ -19,6 +19,16 @@ private class GrpcConnectivityState: ConnectivityStateDelegate {
         else if oldState == .ready, newState != .ready { logger.debug("got disconnected") }
         if newState == .connecting { logger.debug("connecting") }
         if newState == .transientFailure { logger.debug("error (transient failure)") }
+    }
+}
+
+private extension String {
+    func toCallOption() -> CallOptions {
+        return CallOptions(customMetadata: ["Authorization": "Bearer \(self)"], timeLimit: .timeout(.seconds(3)))
+    }
+
+    func toStreamingCallOption(_ timeout: TimeAmount) -> CallOptions {
+        return CallOptions(customMetadata: ["Authorization": "Bearer \(self)"], timeLimit: .timeout(timeout))
     }
 }
 
@@ -35,12 +45,12 @@ class AuthedGrpcApi {
     private let userClient: App_UserServiceClient
     private let convClient: App_ConversationServiceClient
     private let mssgClient: App_MessageServiceClient
-    private let context: NSManagedObjectContext
+    private let persistentContainer: NSPersistentContainer
 
-    init(url: URL, token: String, context: NSManagedObjectContext) {
+    init(url: URL, token: String, persistentContainer: NSPersistentContainer) {
         self.url = url
         self.token = token
-        self.context = context
+        self.persistentContainer = persistentContainer
 
         group = PlatformSupport.makeEventLoopGroup(loopCount: 1)
 
@@ -49,21 +59,19 @@ class AuthedGrpcApi {
         #else
         let channelBuilder = ClientConnection.usingPlatformAppropriateTLS(for: group)
         #endif
-        channel = channelBuilder.withKeepalive(ClientConnectionKeepalive(interval: TimeAmount.seconds(10), timeout: TimeAmount.seconds(5)))
+        channel = channelBuilder
             .withConnectionReestablishment(enabled: true)
             .withConnectivityStateDelegate(stateDelegate, executingOn: DispatchQueue.main)
             .connect(host: url.host!, port: url.port!)
 
-        let authedOption = CallOptions(customMetadata: ["Authorization": "Bearer \(token)"])
-
         userClient = App_UserServiceClient(channel: channel)
-        userClient.defaultCallOptions = authedOption
+        userClient.defaultCallOptions = token.toCallOption()
 
         convClient = App_ConversationServiceClient(channel: channel)
-        convClient.defaultCallOptions = authedOption
+        convClient.defaultCallOptions = token.toCallOption()
 
         mssgClient = App_MessageServiceClient(channel: channel)
-        mssgClient.defaultCallOptions = authedOption
+        mssgClient.defaultCallOptions = token.toCallOption()
     }
 
     deinit {
@@ -97,12 +105,12 @@ class AuthedGrpcApi {
 
         let (twCl, error) = userClient.syncContacts(input).waitForOutput()
         if let twCl = twCl {
-            twCl.users.forEach { u in
-                _ = User.upsert(u, context: context)
+            persistentContainer.performBackgroundTask { context in
+                twCl.users.forEach { u in User.upsert(u, context: context) }
+                context.saveOrLogError()
             }
         }
-        
-        context.saveOrLogError()
+
         return (twCl, error)
     }
 
@@ -130,11 +138,14 @@ class AuthedGrpcApi {
     }
 
     func subscribeIncomingMessages(completion: @escaping (App_Message) -> Void) {
-        let call = mssgClient.incoming(empty, handler: completion)
+        let call = mssgClient.incoming(empty, callOptions: token.toStreamingCallOption(.hours(1)), handler: completion)
         _ = call.status.recover { err in
             self.logger.error("received error from incoming messages stream: \(err.localizedDescription)")
 
             return .processingError
+        }
+        call.status.whenFailure { err in
+            self.logger.error("another callback to notify of failure: \(err.localizedDescription)")
         }
     }
 }
@@ -144,13 +155,19 @@ extension UnaryCall {
     func waitForOutput() -> (ResponsePayload?, Error?) {
         os_log(.debug, "[grpc] \(path) waiting")
 
-        let res: ResponsePayload?
         do {
-            res = try response.wait()
+            let st = try status.wait()
+            let msg = "\(st.code) - \(st.message)"
+            os_log(.debug, "\(msg)")
+        } catch {
+            os_log(.error, "\(error.localizedDescription)")
+        }
+        do {
+            let res = try response.wait()
             os_log(.debug, "[grpc] \(path) returned")
             return (res, nil)
         } catch {
-            os_log(.debug, "[grpc] \(path) failed with: \(error.localizedDescription)")
+            os_log(.error, "[grpc] \(path) failed with: \(error.localizedDescription)")
             return (nil, error)
         }
     }
