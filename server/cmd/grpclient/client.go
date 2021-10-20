@@ -2,24 +2,47 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
 	"flag"
 	"fmt"
 	"github.com/talkiewalkie/talkiewalkie/pb"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/metadata"
 	"io/ioutil"
 	"log"
+	"strings"
 )
 
 var (
 	convUuid = flag.String("convUuid", "", "")
 	audio    = flag.String("audio", "", "")
 	token    = flag.String("token", "", "")
+	host     = flag.String("host", "localhost:8080", "")
 )
 
 func main() {
+	log.SetFlags(log.Lshortfile)
 	flag.Parse()
-	conn, err := grpc.Dial("localhost:8080", grpc.WithInsecure())
+
+	var secOpt grpc.DialOption
+	if strings.HasPrefix(*host, "localhost") {
+		secOpt = grpc.WithInsecure()
+	} else {
+		conn, err := tls.Dial("tcp", *host, &tls.Config{InsecureSkipVerify: true})
+		if err != nil {
+			panic(err)
+		}
+
+		certs := conn.ConnectionState().PeerCertificates
+		_ = conn.Close()
+
+		secOpt = grpc.WithTransportCredentials(credentials.NewServerTLSFromCert(&tls.Certificate{
+			Certificate: [][]byte{certs[0].Raw},
+		}))
+	}
+
+	conn, err := grpc.Dial(*host, secOpt)
 	if err != nil {
 		log.Panic(err)
 	}
