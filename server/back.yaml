@@ -65,7 +65,8 @@ metadata:
   name: back
   annotations:
     cloud.google.com/app-protocols: '{"main":"HTTP2"}'
-    cloud.google.com/backend-config: '{"ports": {"back": "back-lb-rules"}}'
+    # cloud.google.com/backend-config: '{"ports": {"health": "back-lb-rules"}}'
+    cloud.google.com/backend-config: '{"default": "back-lb-rules"}'
 spec:
   type: ClusterIP
   selector:

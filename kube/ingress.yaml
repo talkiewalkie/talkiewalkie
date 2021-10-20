@@ -19,7 +19,7 @@ spec:
               service:
                 name: back
                 port:
-                  number: 8080
+                  name: main
 
     - host: web.talkiewalkie.app
       http:

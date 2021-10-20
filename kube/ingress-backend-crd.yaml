@@ -7,9 +7,9 @@ spec:
   timeoutSec: 300
   healthCheck:
     checkIntervalSec: 30
-    timeoutSec: 2
+    timeoutSec: 10
     healthyThreshold: 1
     unhealthyThreshold: 2
-    type: http
+    type: HTTP
     requestPath: /
     port: 8081
