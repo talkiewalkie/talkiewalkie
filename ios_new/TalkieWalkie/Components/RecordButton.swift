@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Lottie
 
 struct RecordButton: View {
     @Binding var isRecording: Bool
@@ -32,18 +33,16 @@ struct RecordButton: View {
                 .scaleEffect(isRecording ? 1.3 : 1.0)
                 .animation(.easeInOut(duration: 0.3), value: isRecording)
         }
-        .onTapGesture {
-//            let currentClipLength = recordViewModel.sequenceRecorder.currentClipLength
-//
-//            if isRecording && currentClipLength < 0.25 {
-//                DispatchQueue.main.asyncAfter(deadline: .now() + 0.25 - currentClipLength) {
-//                    isRecording.toggle()
-//                }
-//                return
-//            }
-
+        // .contentShape(Rectangle())
+        .onLongPressGesture(minimumDuration: 10000, maximumDistance: 1000, perform: { }, onPressingChanged: { pressing in
             isRecording.toggle()
-        }
+        })
+        .simultaneousGesture(
+            TapGesture()
+                .onEnded { _ in
+                    isRecording.toggle()
+                }
+        )
         .onChange(of: isRecording) { _ in
             timer?.invalidate()
 
@@ -56,6 +55,11 @@ struct RecordButton: View {
                 }
             }
         }
+        
+        // .padding()
+        .frame()
+        .contentShape(Rectangle())
+        .overlay(Rectangle().foregroundColor(.yellow).opacity(0.2))
     }
 }
 
