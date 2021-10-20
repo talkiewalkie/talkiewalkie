@@ -37,6 +37,7 @@ var (
 
 func main() {
 	log.SetFlags(log.Ldate | log.Ltime | log.Lmicroseconds | log.Llongfile)
+	log.SetOutput(os.Stdout)
 	flag.Parse()
 
 	var host string
