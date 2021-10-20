@@ -35,7 +35,7 @@
     <entity name="VoiceMessage" representedClassName=".VoiceMessage" parentEntity="MessageContent" syncable="YES" codeGenerationType="class">
         <attribute name="processedAudio" optional="YES" attributeType="Binary"/>
         <attribute name="rawAudio" optional="YES" attributeType="Binary"/>
-        <attribute name="transcriptSiriJson" optional="YES" attributeType="String"/>
+        <attribute name="siriTranscript" optional="YES" attributeType="Binary"/>
     </entity>
     <elements>
         <element name="Conversation" positionX="18" positionY="63" width="128" height="119"/>
