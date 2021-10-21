@@ -43,7 +43,6 @@ struct RecordSheetView: View {
                         .edgesIgnoringSafeArea(.vertical)
                 )
                 .shadow(color: .black.opacity(0.2), radius: 30, y: 0)
-                .contentShape(Rectangle())
                 .offset(y: max(offset, 0))
                 .gesture(
                     DragGesture(coordinateSpace: .global)

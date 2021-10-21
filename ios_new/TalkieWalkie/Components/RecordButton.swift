@@ -40,6 +40,8 @@ struct RecordButton: View {
                 .scaleEffect(isRecording ? 1.3 : 1.0)
                 .animation(.easeInOut(duration: 0.3), value: isRecording)
         }
+        .padding(5)
+        .contentShape(Circle().scale(DrawingConstraints.tapAreaScale))
         .onLongPressGesture(minimumDuration: 10000, maximumDistance: 1000, perform: { }, onPressingChanged: { pressing in
             toggleRecording()
         })
@@ -61,7 +63,10 @@ struct RecordButton: View {
                 }
             }
         }
-        .contentShape(Rectangle())
+    }
+    
+    struct DrawingConstraints {
+        static let tapAreaScale: CGFloat = 1.75
     }
 }
 
