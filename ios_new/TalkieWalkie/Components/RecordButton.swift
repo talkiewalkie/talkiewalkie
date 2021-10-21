@@ -6,14 +6,21 @@
 //
 
 import SwiftUI
-import Lottie
 
 struct RecordButton: View {
     @Binding var isRecording: Bool
 
     @State var isOuterCircleThin = true
     @State var timer: Timer?
-
+    
+    var animation: Animation?
+    
+    func toggleRecording() {
+        withAnimation(self.animation) {
+            isRecording.toggle()
+        }
+    }
+    
     var body: some View {
         ZStack {
             Rectangle()
@@ -33,14 +40,13 @@ struct RecordButton: View {
                 .scaleEffect(isRecording ? 1.3 : 1.0)
                 .animation(.easeInOut(duration: 0.3), value: isRecording)
         }
-        // .contentShape(Rectangle())
         .onLongPressGesture(minimumDuration: 10000, maximumDistance: 1000, perform: { }, onPressingChanged: { pressing in
-            isRecording.toggle()
+            toggleRecording()
         })
         .simultaneousGesture(
             TapGesture()
                 .onEnded { _ in
-                    isRecording.toggle()
+                    toggleRecording()
                 }
         )
         .onChange(of: isRecording) { _ in
@@ -55,11 +61,7 @@ struct RecordButton: View {
                 }
             }
         }
-        
-        // .padding()
-        .frame()
         .contentShape(Rectangle())
-        .overlay(Rectangle().foregroundColor(.yellow).opacity(0.2))
     }
 }
 

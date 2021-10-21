@@ -40,16 +40,7 @@ struct InboxView: View {
                 VStack {
                     Spacer()
 
-                    RecordButton(isRecording: $isRecording)
-//                        .tooltip(selectionState: guideState,
-//                                 options: .init(orientation: .bottom,
-//                                                padding: 0,
-//                                                floating: true), content: {
-//                                     Text("Record a first voice message!")
-//                                 }, onDismiss: {
-//                                     onboardGuideShown = true
-//                                 })
-                        .padding()
+                    RecordSheetView()
                 }
             }
             .navigationTitle("Chats")

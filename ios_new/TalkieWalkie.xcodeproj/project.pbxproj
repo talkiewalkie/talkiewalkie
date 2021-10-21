@@ -90,6 +90,14 @@
 		73853DC3270C58BF00B0B4BF /* BlurEffectView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73853DBD270C58BF00B0B4BF /* BlurEffectView.swift */; };
 		73853DC4270C58BF00B0B4BF /* PartialSheetViewModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73853DBE270C58BF00B0B4BF /* PartialSheetViewModifier.swift */; };
 		73853DC5270C58BF00B0B4BF /* View+PartialSheetModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73853DBF270C58BF00B0B4BF /* View+PartialSheetModifier.swift */; };
+		73AB53C327204B0200AA6033 /* AudioMessageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73AB53C227204B0200AA6033 /* AudioMessageView.swift */; };
+		73AB53C527204B1200AA6033 /* TextMessageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73AB53C427204B1200AA6033 /* TextMessageView.swift */; };
+		73AB53C927204B3000AA6033 /* MessageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73AB53C827204B3000AA6033 /* MessageView.swift */; };
+		73AB53CD27204CF200AA6033 /* _FlexibleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73AB53CC27204CF200AA6033 /* _FlexibleView.swift */; };
+		73AB53CF27204D0200AA6033 /* SizeReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73AB53CE27204D0200AA6033 /* SizeReader.swift */; };
+		73AB53D127204D0D00AA6033 /* FlexibleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73AB53D027204D0D00AA6033 /* FlexibleView.swift */; };
+		73AB53D32720712D00AA6033 /* RecordSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73AB53D22720712D00AA6033 /* RecordSheetView.swift */; };
+		73AB53D52720802100AA6033 /* VisualEffectView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73AB53D42720802100AA6033 /* VisualEffectView.swift */; };
 		73B14AE5271046DE003542D6 /* PhoneNumberKit in Frameworks */ = {isa = PBXBuildFile; productRef = 73B14AE4271046DE003542D6 /* PhoneNumberKit */; };
 		73B63B3F271079B100994B92 /* bell-notification.json in Resources */ = {isa = PBXBuildFile; fileRef = 73B63B3E271079B100994B92 /* bell-notification.json */; };
 		73B63B4127107BF900994B92 /* notification-bell.json in Resources */ = {isa = PBXBuildFile; fileRef = 73B63B4027107BF900994B92 /* notification-bell.json */; };
@@ -211,6 +219,14 @@
 		73853DBD270C58BF00B0B4BF /* BlurEffectView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BlurEffectView.swift; sourceTree = "<group>"; };
 		73853DBE270C58BF00B0B4BF /* PartialSheetViewModifier.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PartialSheetViewModifier.swift; sourceTree = "<group>"; };
 		73853DBF270C58BF00B0B4BF /* View+PartialSheetModifier.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "View+PartialSheetModifier.swift"; sourceTree = "<group>"; };
+		73AB53C227204B0200AA6033 /* AudioMessageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioMessageView.swift; sourceTree = "<group>"; };
+		73AB53C427204B1200AA6033 /* TextMessageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextMessageView.swift; sourceTree = "<group>"; };
+		73AB53C827204B3000AA6033 /* MessageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageView.swift; sourceTree = "<group>"; };
+		73AB53CC27204CF200AA6033 /* _FlexibleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = _FlexibleView.swift; sourceTree = "<group>"; };
+		73AB53CE27204D0200AA6033 /* SizeReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SizeReader.swift; sourceTree = "<group>"; };
+		73AB53D027204D0D00AA6033 /* FlexibleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlexibleView.swift; sourceTree = "<group>"; };
+		73AB53D22720712D00AA6033 /* RecordSheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordSheetView.swift; sourceTree = "<group>"; };
+		73AB53D42720802100AA6033 /* VisualEffectView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisualEffectView.swift; sourceTree = "<group>"; };
 		73B63B3E271079B100994B92 /* bell-notification.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = "bell-notification.json"; sourceTree = "<group>"; };
 		73B63B4027107BF900994B92 /* notification-bell.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = "notification-bell.json"; sourceTree = "<group>"; };
 		73B63B4227107C4500994B92 /* notification.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = notification.json; sourceTree = "<group>"; };
@@ -372,6 +388,7 @@
 		73853D53270C4FEB00B0B4BF /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				73AB53CB27204C9200AA6033 /* Flexible */,
 				734BF828270C9E33008438D9 /* TWButton.swift */,
 				E482102C271AD6F600A84A2C /* Audiogram */,
 				737660B3270DDFB9001BA79F /* MessageDetailView.swift */,
@@ -394,6 +411,7 @@
 				73853D72270C51AE00B0B4BF /* WebURLView.swift */,
 				73853D74270C51C000B0B4BF /* WrapStack.swift */,
 				E4CC7925271C136D003C359A /* AutomaticAvatar.swift */,
+				73AB53D42720802100AA6033 /* VisualEffectView.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -495,6 +513,26 @@
 			path = PartialSheet;
 			sourceTree = "<group>";
 		};
+		73AB53B927204AA500AA6033 /* MessageView */ = {
+			isa = PBXGroup;
+			children = (
+				73AB53C827204B3000AA6033 /* MessageView.swift */,
+				73AB53C227204B0200AA6033 /* AudioMessageView.swift */,
+				73AB53C427204B1200AA6033 /* TextMessageView.swift */,
+			);
+			path = MessageView;
+			sourceTree = "<group>";
+		};
+		73AB53CB27204C9200AA6033 /* Flexible */ = {
+			isa = PBXGroup;
+			children = (
+				73AB53CC27204CF200AA6033 /* _FlexibleView.swift */,
+				73AB53CE27204D0200AA6033 /* SizeReader.swift */,
+				73AB53D027204D0D00AA6033 /* FlexibleView.swift */,
+			);
+			path = Flexible;
+			sourceTree = "<group>";
+		};
 		E4821027271AD64400A84A2C /* Views */ = {
 			isa = PBXGroup;
 			children = (
@@ -512,6 +550,7 @@
 			children = (
 				734BF82C270CAF7C008438D9 /* InboxView.swift */,
 				E482102D271AD91E00A84A2C /* InboxViewModel.swift */,
+				73AB53D22720712D00AA6033 /* RecordSheetView.swift */,
 			);
 			path = Inbox;
 			sourceTree = "<group>";
@@ -519,6 +558,7 @@
 		E4821029271AD65500A84A2C /* Conversation */ = {
 			isa = PBXGroup;
 			children = (
+				73AB53B927204AA500AA6033 /* MessageView */,
 				73853D4A270C458500B0B4BF /* ConversationView.swift */,
 				E482102F271B0CF500A84A2C /* ConversationViewModel.swift */,
 			);
@@ -714,6 +754,7 @@
 				73853D59270C506900B0B4BF /* ErrorPopup.swift in Sources */,
 				73853D49270C3D3F00B0B4BF /* SplashScreen.swift in Sources */,
 				73853DB0270C57E200B0B4BF /* TimeInterval.swift in Sources */,
+				73AB53CF27204D0200AA6033 /* SizeReader.swift in Sources */,
 				E4D9BD9527157DC3005CD3A0 /* User.swift in Sources */,
 				E4D9BD8D27157D39005CD3A0 /* app.grpc.swift in Sources */,
 				734BF82D270CAF7C008438D9 /* InboxView.swift in Sources */,
@@ -734,6 +775,7 @@
 				73853D5D270C509700B0B4BF /* HoledMask.swift in Sources */,
 				73853DA3270C549000B0B4BF /* RectReader.swift in Sources */,
 				73853DC2270C58BF00B0B4BF /* PartialSheetStyle.swift in Sources */,
+				73AB53C527204B1200AA6033 /* TextMessageView.swift in Sources */,
 				73853D67270C512C00B0B4BF /* OnboardingTourView.swift in Sources */,
 				73853D75270C51C000B0B4BF /* WrapStack.swift in Sources */,
 				73853DC0270C58BF00B0B4BF /* PartialSheetManager.swift in Sources */,
@@ -753,20 +795,25 @@
 				73853DAA270C57A800B0B4BF /* Date+Format.swift in Sources */,
 				734BF829270C9E33008438D9 /* TWButton.swift in Sources */,
 				73853DAC270C57B200B0B4BF /* View+RoundedCorner.swift in Sources */,
+				73AB53D52720802100AA6033 /* VisualEffectView.swift in Sources */,
 				73853D4D270C4E1000B0B4BF /* HeaderView.swift in Sources */,
+				73AB53C927204B3000AA6033 /* MessageView.swift in Sources */,
 				73853D71270C519C00B0B4BF /* TooltipShape.swift in Sources */,
 				E4D9BD9427157DC3005CD3A0 /* Conversation.swift in Sources */,
+				73AB53D32720712D00AA6033 /* RecordSheetView.swift in Sources */,
 				73853D73270C51AE00B0B4BF /* WebURLView.swift in Sources */,
 				73853DA6270C579300B0B4BF /* AnyShape.swift in Sources */,
 				737660B6270DFED3001BA79F /* AudioRecorderView.swift in Sources */,
 				73853DC4270C58BF00B0B4BF /* PartialSheetViewModifier.swift in Sources */,
 				E4CC792A271D4F86003C359A /* Published.swift in Sources */,
 				73853DAE270C57D000B0B4BF /* View+rotated.swift in Sources */,
+				73AB53D127204D0D00AA6033 /* FlexibleView.swift in Sources */,
 				73853D55270C503200B0B4BF /* LottieView.swift in Sources */,
 				73519D3A270B5AB2009BA6FF /* Audiogram2.swift in Sources */,
 				E4D9BD9D27157F70005CD3A0 /* CoreData.swift in Sources */,
 				7368C2C1270F4A4E00B73DB7 /* String+NSRange.swift in Sources */,
 				73853D65270C511000B0B4BF /* MarqueeText.swift in Sources */,
+				73AB53C327204B0200AA6033 /* AudioMessageView.swift in Sources */,
 				73853DB6270C580300B0B4BF /* AVCaptureDevice+authorization.swift in Sources */,
 				E4D9BDA12716019A005CD3A0 /* OSLog.swift in Sources */,
 				734BF82F270CB139008438D9 /* HashColor.swift in Sources */,
@@ -777,6 +824,7 @@
 				7376608F270DA305001BA79F /* SceneDelegate.swift in Sources */,
 				73853DC5270C58BF00B0B4BF /* View+PartialSheetModifier.swift in Sources */,
 				73853DB4270C57FB00B0B4BF /* Photos+authorization.swift in Sources */,
+				73AB53CD27204CF200AA6033 /* _FlexibleView.swift in Sources */,
 				73853D4F270C4ED900B0B4BF /* SettingsView.swift in Sources */,
 				737660B4270DDFB9001BA79F /* MessageDetailView.swift in Sources */,
 				E4821030271B0CF600A84A2C /* ConversationViewModel.swift in Sources */,
