@@ -26,7 +26,6 @@ struct InboxView: View {
         NavigationView {
             ZStack {
                 VStack {
-                    if model.loading { ProgressView("syncing...") }
                     List(conversations) { conversation in
                         NavigationLink(
                             destination: ConversationView(conversation: conversation, namespace: namespace, model: ConversationViewModel(authed, conversation: conversation))
@@ -47,7 +46,7 @@ struct InboxView: View {
             .navigationBarItems(leading: HeaderSettingsView())
             .toolbar {
                 ToolbarItem(placement: .principal) {
-                    Text("TalkieWalkie")
+                    Text(model.loading ? "syncing..." : "connected")
                 }
             }
             .onAppear { model.syncConversations() }
