@@ -58,7 +58,7 @@ func InitComponents() (*Components, error) {
 		log.Printf("could not initiate the audio client: %+v", err)
 	}
 
-	dsName := DbUrl(
+	dsName := DbUri(
 		"talkiewalkie",
 		os.Getenv("POSTGRES_USER"), os.Getenv("POSTGRES_PASSWORD"),
 		os.Getenv("POSTGRES_HOST"), os.Getenv("POSTGRES_PORT"),

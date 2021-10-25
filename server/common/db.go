@@ -82,23 +82,25 @@ func (q QueryLogger) QueryRowContext(ctx context.Context, query string, args ...
 
 // ------- DB UTILS
 
-func DbUrl(dbName, user, password, host, port string, ssl bool) string {
-	sslStr := "enable"
-	if !ssl {
-		sslStr = "disable"
-	}
-
+func DbUri(dbName, user, password, host, port string, isProd bool) string {
 	// postgres url fails if no password is set but colon is added
 	if password != "" {
 		password = fmt.Sprintf(":%s", password)
 	}
 
+	addr := fmt.Sprintf("%s:%s", host, port)
+	opts := "sslmode=disable"
+	if isProd {
+		addr = fmt.Sprintf("unix(/cloudsql/%s)", host)
+		opts = "sslmode=enable&parseTime=true"
+	}
+
 	return fmt.Sprintf(
-		"postgres://%s%s@%s:%s/%s?sslmode=%s",
+		"postgres://%s%s@%s/%s?%s",
 		user, password,
-		host, port,
+		addr,
 		dbName,
-		sslStr,
+		opts,
 	)
 }
 

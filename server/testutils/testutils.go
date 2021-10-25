@@ -24,7 +24,7 @@ import (
 )
 
 func testDbUrl() string {
-	return common.DbUrl("talkiewalkie-test", "theo", os.Getenv("TEST_DB_PASSWORD"), "localhost", "5432", false)
+	return common.DbUri("talkiewalkie-test", "theo", os.Getenv("TEST_DB_PASSWORD"), "localhost", "5432", false)
 }
 
 func SetupDb() *sqlx.DB {
