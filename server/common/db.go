@@ -110,7 +110,7 @@ func SqlFmt(qs string) string {
 func RunMigrations(migrationsDir, dbUrl string) {
 	m, err := migrate.New(fmt.Sprintf("file://%s", migrationsDir), dbUrl)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("could not migrate on '%s': %+v", dbUrl, err)
 	}
 	defer m.Close()
 
