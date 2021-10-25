@@ -5,21 +5,15 @@ import (
 	"fmt"
 	"github.com/talkiewalkie/talkiewalkie/models"
 	"io"
-	"io/ioutil"
 	"log"
-	"net/http"
 	"os"
 	"time"
 
 	"cloud.google.com/go/storage"
-	"github.com/satori/go.uuid"
-	"golang.org/x/oauth2/google"
-	"golang.org/x/oauth2/jwt"
-	"google.golang.org/api/option"
-
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/satori/go.uuid"
 )
 
 type StorageClient interface {
@@ -34,7 +28,6 @@ var _ StorageClient = GoogleStorage{}
 
 type GoogleStorage struct {
 	*storage.Client
-	Cfg        *jwt.Config
 	BucketName string
 }
 
@@ -49,25 +42,12 @@ func (g GoogleStorage) AssetUrl(asset *models.Asset) (string, error) {
 }
 
 func initStorageClient(ctx context.Context) (StorageClient, error) {
-	serviceAccountFile := os.Getenv("GOOGLE_APPLICATION_CREDENTIALS")
-	client, err := storage.NewClient(ctx, option.WithCredentialsFile(serviceAccountFile))
+	client, err := storage.NewClient(ctx)
 	if err != nil {
 		log.Fatalf("could not init storage client: %+v", err)
 	}
 
-	saKey, err := ioutil.ReadFile(serviceAccountFile)
-	if err != nil {
-		log.Fatalf("could not read service account file: %+v", err)
-	}
-
-	// TODO: this shouldn't be needed any more as per
-	// 		 https://github.com/googleapis/google-cloud-go/issues/1130
-	cfg, err := google.JWTConfigFromJSON(saKey)
-	if err != nil {
-		log.Fatalf("could not build jwt config from service account file: %+v", err)
-	}
-
-	g := GoogleStorage{Client: client, Cfg: cfg, BucketName: os.Getenv("BUCKET_NAME")}
+	g := GoogleStorage{Client: client, BucketName: os.Getenv("BUCKET_NAME")}
 	if g.BucketName == "" {
 		return nil, fmt.Errorf("bad config: no bucket name")
 	}
@@ -88,14 +68,7 @@ func (g GoogleStorage) Upload(c context.Context, blob io.ReadSeeker) (*uuid.UUID
 }
 
 func (g GoogleStorage) SignedUrl(bucket, blobName string) (string, error) {
-	url, err := storage.SignedURL(bucket, blobName, &storage.SignedURLOptions{
-		GoogleAccessID: g.Cfg.Email,
-		// TODO: the only reason we keep loading explicit service account file is here, relevant issue:
-		// 	https://github.com/googleapis/google-cloud-go/issues/1130
-		PrivateKey: g.Cfg.PrivateKey,
-		Method:     http.MethodGet,
-		Expires:    time.Now().Add(3 * time.Hour),
-	})
+	url, err := storage.SignedURL(bucket, blobName, nil)
 	return url, err
 }
 
