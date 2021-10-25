@@ -58,12 +58,11 @@ func InitComponents() (*Components, error) {
 		log.Printf("could not initiate the audio client: %+v", err)
 	}
 
-	dsName := fmt.Sprintf(
-		"postgres://%s:%s@%s/talkiewalkie?sslmode=disable",
-		os.Getenv("POSTGRES_USER"),
-		os.Getenv("POSTGRES_PASSWORD"),
-		os.Getenv("POSTGRES_HOST"),
-	)
+	dsName := DbUrl(
+		"talkiewalkie",
+		os.Getenv("POSTGRES_USER"), os.Getenv("POSTGRES_PASSWORD"),
+		os.Getenv("POSTGRES_HOST"), os.Getenv("POSTGRES_PORT"),
+		false)
 	db, err := sqlx.Connect("postgres", dsName)
 	if err != nil {
 		return nil, err
