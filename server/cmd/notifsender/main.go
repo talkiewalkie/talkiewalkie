@@ -25,7 +25,7 @@ func main() {
 		log.Panicf("could not load env: %+v", err)
 	}
 
-	components, err := common.InitComponents()
+	components, err := common.InitComponents("dev")
 	if err != nil {
 		log.Panicf("could not initiate components: %+v", err)
 	}

@@ -30,7 +30,7 @@ type Components struct {
 	CompressImg func(string, int) (string, error)
 }
 
-func InitComponents() (*Components, error) {
+func InitComponents(env string) (*Components, error) {
 	tokenAuth := jwtauth.New("HS256", []byte(os.Getenv("JWT_SECRET")), nil)
 	emailClient := initEmailClient()
 
@@ -62,7 +62,7 @@ func InitComponents() (*Components, error) {
 		"talkiewalkie",
 		os.Getenv("POSTGRES_USER"), os.Getenv("POSTGRES_PASSWORD"),
 		os.Getenv("POSTGRES_HOST"), os.Getenv("POSTGRES_PORT"),
-		false)
+		env == "prod")
 	db, err := sqlx.Connect("postgres", dbUri)
 	if err != nil {
 		return nil, fmt.Errorf("could not connect to '%s': %+v", dbUri, err)

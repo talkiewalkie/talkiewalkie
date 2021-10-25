@@ -61,7 +61,7 @@ func main() {
 		*env == "prod")
 	common.RunMigrations("./migrations", dbUrl)
 
-	components, err := common.InitComponents()
+	components, err := common.InitComponents(*env)
 	if err != nil {
 		panic(err)
 	}
