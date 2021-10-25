@@ -54,11 +54,11 @@ func main() {
 		log.Panicf("bad env: %s", *env)
 	}
 
-	dbUrl := common.DbUrl(
+	dbUrl := common.DbUri(
 		"talkiewalkie",
 		os.Getenv("POSTGRES_USER"), os.Getenv("POSTGRES_PASSWORD"),
 		os.Getenv("POSTGRES_HOST"), os.Getenv("POSTGRES_PORT"),
-		false)
+		*env == "prod")
 	common.RunMigrations("./migrations", dbUrl)
 
 	components, err := common.InitComponents()
