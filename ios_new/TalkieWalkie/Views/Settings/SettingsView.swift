@@ -168,6 +168,7 @@ struct SettingsView: View {
                     Link(LocalizedStringKey("Terms of use"), destination: URL(string: "https://talkiewalkie.app/terms")!)
                 }
 
+                #if DEBUG
                 Section {
                     Button("Log out") {
                         os_log("logging out")
@@ -177,6 +178,7 @@ struct SettingsView: View {
                         }
                     }
                 }
+                #endif
             }
             .listStyle(InsetGroupedListStyle())
             .navigationBarTitle(LocalizedStringKey("Settings"), displayMode: .inline)

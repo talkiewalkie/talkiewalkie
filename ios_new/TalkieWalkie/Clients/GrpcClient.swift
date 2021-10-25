@@ -13,12 +13,17 @@ import NIO
 import OSLog
 
 private class GrpcConnectivityState: ConnectivityStateDelegate {
+    private let url: URL
     private let logger = Logger.withLabel("grpc-status")
+    init(_ url: URL) {
+        self.url = url
+    }
+
     func connectivityStateDidChange(from oldState: ConnectivityState, to newState: ConnectivityState) {
-        if oldState != .ready, newState == .ready { logger.debug("got connected") }
-        else if oldState == .ready, newState != .ready { logger.debug("got disconnected") }
-        if newState == .connecting { logger.debug("connecting") }
-        if newState == .transientFailure { logger.debug("error (transient failure)") }
+        if oldState != .ready, newState == .ready { logger.debug("got connected [\(self.url.absoluteString)]") }
+        else if oldState == .ready, newState != .ready { logger.debug("got disconnected [\(self.url.absoluteString)]") }
+        if newState == .connecting { logger.debug("connecting [\(self.url.absoluteString)]") }
+        if newState == .transientFailure { logger.debug("error (transient failure) [\(self.url.absoluteString)]") }
     }
 }
 
@@ -36,11 +41,11 @@ class AuthedGrpcApi {
     private let url: URL
 
     private let logger = Logger.withLabel("grpc-client")
-    private let stateDelegate = GrpcConnectivityState()
     private let empty = App_Empty()
 
     private let group: EventLoopGroup
     private let channel: ClientConnection
+    private let stateDelegate: GrpcConnectivityState
     private let token: String
     private let userClient: App_UserServiceClient
     private let convClient: App_ConversationServiceClient
@@ -51,6 +56,7 @@ class AuthedGrpcApi {
         self.url = url
         self.token = token
         self.persistentContainer = persistentContainer
+        stateDelegate = GrpcConnectivityState(url)
 
         group = PlatformSupport.makeEventLoopGroup(loopCount: 1)
 
