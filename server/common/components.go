@@ -58,17 +58,17 @@ func InitComponents() (*Components, error) {
 		log.Printf("could not initiate the audio client: %+v", err)
 	}
 
-	dsName := DbUri(
+	dbUri := DbUri(
 		"talkiewalkie",
 		os.Getenv("POSTGRES_USER"), os.Getenv("POSTGRES_PASSWORD"),
 		os.Getenv("POSTGRES_HOST"), os.Getenv("POSTGRES_PORT"),
 		false)
-	db, err := sqlx.Connect("postgres", dsName)
+	db, err := sqlx.Connect("postgres", dbUri)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("could not connect to '%s': %+v", dbUri, err)
 	}
 
-	pgPubSub := NewPgPubSub(db, dsName)
+	pgPubSub := NewPgPubSub(db, dbUri)
 
 	return &Components{
 		Db:          db,
