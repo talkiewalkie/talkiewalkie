@@ -47,7 +47,7 @@ func InitComponents() (*Components, error) {
 		log.Panicf("could not instantiate firebase messaging service: %+v", err)
 	}
 
-	storageClient, err := initStorageClient(context.Background())
+	storageClient, err := NewGoogleStorageClient(context.Background())
 	if err != nil {
 		log.Panicf("could not init the storage: %+v", err)
 	}

@@ -41,7 +41,7 @@ func (g GoogleStorage) AssetUrl(asset *models.Asset) (string, error) {
 	}
 }
 
-func initStorageClient(ctx context.Context) (StorageClient, error) {
+func NewGoogleStorageClient(ctx context.Context) (StorageClient, error) {
 	client, err := storage.NewClient(ctx)
 	if err != nil {
 		log.Fatalf("could not init storage client: %+v", err)
