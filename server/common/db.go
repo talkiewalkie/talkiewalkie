@@ -92,7 +92,7 @@ func DbUri(dbName, user, password, host, port string, isProd bool) string {
 	opts := "sslmode=disable"
 	if isProd {
 		addr = host
-		opts = "sslmode=disable&parseTime=true"
+		opts = "sslmode=disable"
 	}
 
 	return fmt.Sprintf(
