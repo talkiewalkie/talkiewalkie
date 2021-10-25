@@ -91,7 +91,7 @@ func DbUri(dbName, user, password, host, port string, isProd bool) string {
 	addr := fmt.Sprintf("%s:%s", host, port)
 	opts := "sslmode=disable"
 	if isProd {
-		addr = fmt.Sprintf("unix(/cloudsql/%s)", host)
+		addr = host
 		opts = "sslmode=enable&parseTime=true"
 	}
 
