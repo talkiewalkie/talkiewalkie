@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>apiHost</key>
-	<string>backend-hl3bly7uka-ew.a.run.app</string>
+	<string>grpc.talkiewalkie.app</string>
 	<key>apiPort</key>
 	<integer>443</integer>
 </dict>
