@@ -98,6 +98,8 @@
 		73AB53D127204D0D00AA6033 /* FlexibleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73AB53D027204D0D00AA6033 /* FlexibleView.swift */; };
 		73AB53D32720712D00AA6033 /* RecordSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73AB53D22720712D00AA6033 /* RecordSheetView.swift */; };
 		73AB53D52720802100AA6033 /* VisualEffectView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73AB53D42720802100AA6033 /* VisualEffectView.swift */; };
+		73ABB4A42727746B00592F38 /* AudioWaveView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73ABB4A32727746B00592F38 /* AudioWaveView.swift */; };
+		73ABB4A62727748000592F38 /* AudioRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73ABB4A52727748000592F38 /* AudioRecorder.swift */; };
 		73B14AE5271046DE003542D6 /* PhoneNumberKit in Frameworks */ = {isa = PBXBuildFile; productRef = 73B14AE4271046DE003542D6 /* PhoneNumberKit */; };
 		73B63B3F271079B100994B92 /* bell-notification.json in Resources */ = {isa = PBXBuildFile; fileRef = 73B63B3E271079B100994B92 /* bell-notification.json */; };
 		73B63B4127107BF900994B92 /* notification-bell.json in Resources */ = {isa = PBXBuildFile; fileRef = 73B63B4027107BF900994B92 /* notification-bell.json */; };
@@ -227,6 +229,8 @@
 		73AB53D027204D0D00AA6033 /* FlexibleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlexibleView.swift; sourceTree = "<group>"; };
 		73AB53D22720712D00AA6033 /* RecordSheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordSheetView.swift; sourceTree = "<group>"; };
 		73AB53D42720802100AA6033 /* VisualEffectView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisualEffectView.swift; sourceTree = "<group>"; };
+		73ABB4A32727746B00592F38 /* AudioWaveView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioWaveView.swift; sourceTree = "<group>"; };
+		73ABB4A52727748000592F38 /* AudioRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioRecorder.swift; sourceTree = "<group>"; };
 		73B63B3E271079B100994B92 /* bell-notification.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = "bell-notification.json"; sourceTree = "<group>"; };
 		73B63B4027107BF900994B92 /* notification-bell.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = "notification-bell.json"; sourceTree = "<group>"; };
 		73B63B4227107C4500994B92 /* notification.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = notification.json; sourceTree = "<group>"; };
@@ -345,6 +349,8 @@
 				7368C2B5270F2A4300B73DB7 /* SpeechRecognizer.swift */,
 				7368C2B7270F2ABB00B73DB7 /* AVPlayer+Ding.swift */,
 				7368C2BC270F43E200B73DB7 /* Transcript.swift */,
+				73ABB4A32727746B00592F38 /* AudioWaveView.swift */,
+				73ABB4A52727748000592F38 /* AudioRecorder.swift */,
 			);
 			path = AudioModels;
 			sourceTree = "<group>";
@@ -750,6 +756,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				73ABB4A62727748000592F38 /* AudioRecorder.swift in Sources */,
 				73853D69270C513D00B0B4BF /* PageCounter.swift in Sources */,
 				73853D59270C506900B0B4BF /* ErrorPopup.swift in Sources */,
 				73853D49270C3D3F00B0B4BF /* SplashScreen.swift in Sources */,
@@ -764,6 +771,7 @@
 				7368C2B8270F2ABB00B73DB7 /* AVPlayer+Ding.swift in Sources */,
 				73853D6F270C518900B0B4BF /* TooltipManager.swift in Sources */,
 				73519D3C270B60FE009BA6FF /* CirclesBackground.swift in Sources */,
+				73ABB4A42727746B00592F38 /* AudioWaveView.swift in Sources */,
 				7368C2BF270F465200B73DB7 /* AudiogramView.swift in Sources */,
 				73853D61270C50CA00B0B4BF /* EmojiChooser.swift in Sources */,
 				E4CC7924271C1149003C359A /* CNContactStore.swift in Sources */,

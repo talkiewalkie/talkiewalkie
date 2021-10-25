@@ -35,12 +35,6 @@ struct InboxView: View {
                     }
                     .listStyle(.plain)
                 }
-
-                VStack {
-                    Spacer()
-
-                    RecordSheetView()
-                }
             }
             .navigationTitle("Chats")
             .navigationBarItems(leading: HeaderSettingsView())

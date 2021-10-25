@@ -15,38 +15,44 @@ struct ConversationView: View {
     let model: ConversationViewModel
 
     var body: some View {
-        VStack {
-            if model.loading { ProgressView() } 
-            Rectangle().frame(height: 0)
+        ZStack(alignment: .top) {
+            Image("hex_pattern")
+                .resizable(resizingMode: .tile)
+                .brightness(-0.2)
+                .opacity(0.4)
+            
+            Color.gray.opacity(0.1).frame(height: 1)
+            
+            VStack {
+                if model.loading { ProgressView() }
 
-            ScrollViewReader { _ in
-                ReversedScrollView(.vertical, showsIndicators: false) {
-                    VStack {
-//                        ForEach(dummyChatMessages) { message in
-//                            ChatBubble(message: message, namespace: namespace)
-//                        }
-                        Text("\(conversation.messages?.count ?? 0) messages here")
-                        ForEach(conversation.messages!.array as! [Message]) { message in
-                            switch message.content! {
-                            case let tmee as TextMessage:
-                                Text(tmee.text ?? "no text")
-                            case let vm as VoiceMessage:
-                                Text(String(data: vm.rawAudio!, encoding: .utf8) ?? "no audio")
-                            default:
-                                Text("fatalerrrrrrror")
+                ScrollViewReader { _ in
+                    ReversedScrollView(.vertical, showsIndicators: false) {
+                        VStack {
+    //                        ForEach(dummyChatMessages) { message in
+    //                            ChatBubble(message: message, namespace: namespace)
+    //                        }
+                            Text("\(conversation.messages?.count ?? 0) messages here")
+                            ForEach(conversation.messages!.array as! [Message]) { message in
+                                switch message.content! {
+                                case let tmee as TextMessage:
+                                    Text(tmee.text ?? "no text")
+                                case let vm as VoiceMessage:
+                                    Text(String(data: vm.rawAudio!, encoding: .utf8) ?? "no audio")
+                                default:
+                                    Text("fatalerrrrrrror")
+                                }
                             }
                         }
+                        .frame(maxWidth: .infinity, alignment: .trailing)
+                        .padding(.horizontal)
+                        .padding(.bottom, 100)
                     }
-                    .frame(maxWidth: .infinity, alignment: .trailing)
-                    .padding(.vertical)
-                    .padding(.horizontal)
                 }
-                .background(Color(#colorLiteral(red: 0.9024571472, green: 0.9024571472, blue: 0.9024571472, alpha: 1)))
-
-                Rectangle()
-                    .foregroundColor(.clear)
-                    .frame(height: 50)
             }
+            
+            RecordSheetView()
+                .frame(maxHeight: .infinity, alignment: .bottom)
         }
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarItems(leading: ConversationBarView(conversation: conversation),

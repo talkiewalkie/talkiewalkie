@@ -14,6 +14,7 @@ struct RecordButton: View {
     @State var timer: Timer?
     
     var animation: Animation?
+    var buttonAnimation: Animation = .easeInOut(duration: 0.3)
     
     func toggleRecording() {
         withAnimation(self.animation) {
@@ -25,20 +26,20 @@ struct RecordButton: View {
         ZStack {
             Rectangle()
                 .fill(Color.red)
-                .cornerRadius(isRecording ? 10 : 30)
-                .frame(width: 60, height: 60)
-                .scaleEffect(isRecording ? 0.7 : 1.0)
-                .animation(.easeInOut(duration: 0.3), value: isRecording)
+                .cornerRadius(isRecording ? DrawingConstraints.innerCircleRadius : DrawingConstraints.innerCircleSize / 2)
+                .frame(width: DrawingConstraints.innerCircleSize, height: DrawingConstraints.innerCircleSize)
+                .scaleEffect(isRecording ? DrawingConstraints.innerCircleScale : 1.0)
+                .animation(buttonAnimation, value: isRecording)
 
             Circle()
-                .stroke(Color.red,
+                .strokeBorder(Color.red,
                         style: StrokeStyle(lineWidth: !isRecording ? 6 : isOuterCircleThin ? 4 : 7,
                                            lineCap: .round, lineJoin: .round))
-                .animation(.easeOut(duration: 0.45), value: isOuterCircleThin)
-                .opacity(0.7)
-                .frame(width: 70, height: 70)
-                .scaleEffect(isRecording ? 1.3 : 1.0)
-                .animation(.easeInOut(duration: 0.3), value: isRecording)
+                .animation(.easeOut(duration: 0.4), value: isOuterCircleThin)
+                .opacity(DrawingConstraints.outerCircleOpacity)
+                .frame(width: DrawingConstraints.outerCircleSize, height: DrawingConstraints.outerCircleSize)
+                .scaleEffect(isRecording ? DrawingConstraints.outerCircleScale : 1.0)
+                .animation(buttonAnimation, value: isRecording)
         }
         .padding(5)
         .contentShape(Circle().scale(DrawingConstraints.tapAreaScale))
@@ -58,7 +59,7 @@ struct RecordButton: View {
                 isOuterCircleThin = true
             } else {
                 isOuterCircleThin.toggle()
-                timer = Timer.scheduledTimer(withTimeInterval: 0.45, repeats: true) { _ in
+                timer = Timer.scheduledTimer(withTimeInterval: 0.4, repeats: true) { _ in
                     isOuterCircleThin.toggle()
                 }
             }
@@ -66,6 +67,14 @@ struct RecordButton: View {
     }
     
     struct DrawingConstraints {
+        static let innerCircleSize: CGFloat = 60
+        static let innerCircleRadius: CGFloat = 10
+        static let innerCircleScale: CGFloat = 0.7
+        
+        static let outerCircleOpacity: Double = 0.6
+        static let outerCircleSize: CGFloat = 75
+        static let outerCircleScale: CGFloat = 1.75
+        
         static let tapAreaScale: CGFloat = 1.75
     }
 }
