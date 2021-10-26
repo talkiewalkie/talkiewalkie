@@ -17,12 +17,27 @@ extension NSPredicate {
 extension NSManagedObjectContext {
     func saveOrLogError() {
         do { try save() }
-        catch { os_log("Failed to save coredata: \(error.localizedDescription)") }
+        catch { os_log(.error, "Failed to save coredata: \(error.localizedDescription)") }
     }
 
-    func executeOrLogError(_ request: NSPersistentStoreRequest) {
-        do { try execute(request) }
+    func executeOrLogError(_ request: NSPersistentStoreRequest) -> NSPersistentStoreResult? {
+        var res: NSPersistentStoreResult?
+        do { res = try execute(request) }
         catch { os_log("failed to execute request: \(error.localizedDescription)") }
+        return res
+    }
+    
+    /// Executes the given `NSBatchDeleteRequest` and directly merges the changes to bring the given managed object context up to date.
+    /// From https://stackoverflow.com/a/60266079, although it is not updating the contexts though, hence not meeting its purpose.
+    /// Leaving it for reference.
+    ///
+    /// - Parameter batchDeleteRequest: The `NSBatchDeleteRequest` to execute.
+    /// - Throws: An error if anything went wrong executing the batch deletion.
+    public func deleteAndMergeChanges(using batchDeleteRequest: NSBatchDeleteRequest) {
+        batchDeleteRequest.resultType = .resultTypeObjectIDs
+        let result = executeOrLogError(batchDeleteRequest) as? NSBatchDeleteResult
+        let changes: [AnyHashable: Any] = [NSDeletedObjectsKey: result?.result as? [NSManagedObjectID] ?? []]
+        NSManagedObjectContext.mergeChanges(fromRemoteContextSave: changes, into: [self])
     }
 }
 

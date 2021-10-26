@@ -9,7 +9,7 @@ import AVKit
 import SwiftUI
 
 struct ConversationView: View {
-    var conversation: Conversation
+    @ObservedObject var conversation: Conversation
     var namespace: Namespace.ID
     
     let model: ConversationViewModel

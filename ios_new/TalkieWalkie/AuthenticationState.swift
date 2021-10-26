@@ -25,6 +25,12 @@ enum AuthenticationState {
 class AuthState: ObservableObject {
     let persistentContainer: NSPersistentContainer
     var moc: NSManagedObjectContext { persistentContainer.viewContext }
+    lazy var backgroundMoc: NSManagedObjectContext = {
+        let moc = persistentContainer.newBackgroundContext()
+        moc.automaticallyMergesChangesFromParent = true
+        return moc
+    }()
+
     var me: Me? { Me.fromCache(context: moc) }
 
     private var logger = Logger.withLabel("AuthState")
@@ -39,7 +45,7 @@ class AuthState: ObservableObject {
 
         persistentContainer.loadPersistentStores { _, error in
             persistentContainer.viewContext.automaticallyMergesChangesFromParent = true
-
+            persistentContainer.viewContext.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
             if let error = error {
                 fatalError("Unable to load persistent stores: \(error)")
             }
@@ -78,8 +84,8 @@ class AuthState: ObservableObject {
                         me.displayName = res.user.displayName
                         me.firebaseUid = self.firebaseUser?.uid
 
-                        me.objectWillChange.send()
                         context.saveOrLogError()
+                        me.objectWillChange.send()
                         DispatchQueue.main.async { self.state = AuthenticationState.Connected(api, me) }
                     }
                 }
@@ -96,16 +102,20 @@ class AuthState: ObservableObject {
             return
         }
 
+        persistentContainer.performBackgroundTask { context in self.cleanCoreData(context: context) }
+    }
+
+    func cleanCoreData(context: NSManagedObjectContext) {
         // Clear coredata on logout
         // No strong candidate to do this better: https://stackoverflow.com/questions/1077810
-        moc.executeOrLogError(NSBatchDeleteRequest(fetchRequest: NSFetchRequest(entityName: User.entity().name!)))
-        moc.executeOrLogError(NSBatchDeleteRequest(fetchRequest: NSFetchRequest(entityName: Me.entity().name!)))
-        moc.executeOrLogError(NSBatchDeleteRequest(fetchRequest: NSFetchRequest(entityName: Conversation.entity().name!)))
-        moc.executeOrLogError(NSBatchDeleteRequest(fetchRequest: NSFetchRequest(entityName: Message.entity().name!)))
-        moc.executeOrLogError(NSBatchDeleteRequest(fetchRequest: NSFetchRequest(entityName: MessageContent.entity().name!)))
-        moc.executeOrLogError(NSBatchDeleteRequest(fetchRequest: NSFetchRequest(entityName: TextMessage.entity().name!)))
-        moc.executeOrLogError(NSBatchDeleteRequest(fetchRequest: NSFetchRequest(entityName: VoiceMessage.entity().name!)))
-        moc.saveOrLogError()
+        context.deleteAndMergeChanges(using: NSBatchDeleteRequest(fetchRequest: NSFetchRequest(entityName: User.entity().name!)))
+        context.deleteAndMergeChanges(using: NSBatchDeleteRequest(fetchRequest: NSFetchRequest(entityName: Me.entity().name!)))
+        context.deleteAndMergeChanges(using: NSBatchDeleteRequest(fetchRequest: NSFetchRequest(entityName: Conversation.entity().name!)))
+        context.deleteAndMergeChanges(using: NSBatchDeleteRequest(fetchRequest: NSFetchRequest(entityName: Message.entity().name!)))
+        context.deleteAndMergeChanges(using: NSBatchDeleteRequest(fetchRequest: NSFetchRequest(entityName: MessageContent.entity().name!)))
+        context.deleteAndMergeChanges(using: NSBatchDeleteRequest(fetchRequest: NSFetchRequest(entityName: TextMessage.entity().name!)))
+        context.deleteAndMergeChanges(using: NSBatchDeleteRequest(fetchRequest: NSFetchRequest(entityName: VoiceMessage.entity().name!)))
+        context.saveOrLogError()
     }
 
     func setConnecting() {

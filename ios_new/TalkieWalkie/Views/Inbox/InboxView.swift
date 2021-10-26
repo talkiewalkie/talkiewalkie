@@ -13,7 +13,7 @@ struct InboxView: View {
     @Namespace var namespace
     @ObservedObject var model: InboxViewModel
     @EnvironmentObject var authed: AuthState
-    
+
     @State var guideState = false
     @State var isRecording = false
 
@@ -52,7 +52,7 @@ struct InboxView: View {
 }
 
 struct ConversationAvatar: View {
-    var conversation: Conversation
+    @ObservedObject var conversation: Conversation
     @EnvironmentObject var authed: AuthState
 
     var body: some View {
@@ -76,7 +76,7 @@ struct ConversationAvatar: View {
 }
 
 struct ConversationListItemView: View {
-    var conversation: Conversation
+    @ObservedObject var conversation: Conversation
 
     var body: some View {
         HStack(alignment: .top) {
