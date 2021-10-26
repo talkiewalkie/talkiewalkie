@@ -29,20 +29,25 @@ struct ConversationView: View {
                 ScrollViewReader { _ in
                     ReversedScrollView(.vertical, showsIndicators: false) {
                         VStack {
+                            Text("\(conversation.messages?.count ?? 0) messages here")
+                            ForEach(conversation.messages!.array as! [Message]) { message in
+                                MessageView(message: message)
+                            }
+                            
     //                        ForEach(dummyChatMessages) { message in
     //                            ChatBubble(message: message, namespace: namespace)
     //                        }
-                            Text("\(conversation.messages?.count ?? 0) messages here")
-                            ForEach(conversation.messages!.array as! [Message]) { message in
-                                switch message.content! {
-                                case let tmee as TextMessage:
-                                    Text(tmee.text ?? "no text")
-                                case let vm as VoiceMessage:
-                                    Text(String(data: vm.rawAudio!, encoding: .utf8) ?? "no audio")
-                                default:
-                                    Text("fatalerrrrrrror")
-                                }
-                            }
+//
+//                            ForEach(conversation.messages!.array as! [Message]) { message in
+//                                switch message.content! {
+//                                case let tmee as TextMessage:
+//                                    Text(tmee.text ?? "no text")
+//                                case let vm as VoiceMessage:
+//                                    Text(String(data: vm.rawAudio!, encoding: .utf8) ?? "no audio")
+//                                default:
+//                                    Text("fatalerrrrrrror")
+//                                }
+//                            }
                         }
                         .frame(maxWidth: .infinity, alignment: .trailing)
                         .padding(.horizontal)

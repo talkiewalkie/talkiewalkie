@@ -11,17 +11,56 @@ import CoreData
 struct MessageView: View {
     var message: Message
     
+    var showAuthor: Bool = true
+    
+    var isMe: Bool { // TODO: wrong logic
+        return message.author == nil
+    }
+    
     var body: some View {
         HStack {
-            VStack {
-                Text(message.author?.displayName ?? "")
+            VStack(alignment: .leading) {
+                if showAuthor, let displayName = message.author?.displayName {
+                    Text(displayName)
+                        .foregroundColor(.init(generateColorFor(text: message.author?.displayName ?? "")))
+                }
                 
                 content
-                
-                if let date = message.createdAt {
-                    Text(Self.dateFormatter.string(from: date))
-                }
             }
+            .frame(minWidth: .zero, maxWidth: DrawingConstraints.maxWidth, alignment: .leading)
+            .padding(.bottom, 0)
+            .padding(.trailing, 2)
+            .overlay(
+                HStack(spacing: 4) {
+                    if let date = message.createdAt {
+                        Text(Self.dateFormatter.string(from: date))
+                            .font(.footnote)
+                            .foregroundColor(.init(UIColor.tertiaryLabel))
+                    }
+                    
+                    if isMe {
+                        checkStatus
+                    }
+                   
+                }, alignment: .bottomTrailing
+            )
+            .padding(8)
+        }
+        .background(isMe ? Color("LightGreen") : .white)
+        .cornerRadius(10)
+        .clipped()
+        .shadow(color: .black.opacity(0.1), radius: 2)
+        .frame(maxWidth: .infinity, alignment: isMe ? .trailing : .leading)
+    }
+    
+    var checkStatus: some View {
+        let checkmark = Image(systemName: "checkmark")
+            .font(.footnote)
+            .foregroundColor(.accentColor)
+        
+        return HStack(spacing: -9) {
+            checkmark
+            checkmark
         }
     }
     
@@ -31,19 +70,21 @@ struct MessageView: View {
                 case let tm as TextMessage:
                     Text(tm.text ?? "no text")
                 case let vm as VoiceMessage:
-                Text(String(data: vm.rawAudio ?? Data(), encoding: .utf8) ?? "no audio")
+                    Text(String(data: vm.rawAudio ?? Data(), encoding: .utf8) ?? "no audio")
                 default:
                     Text("")
             }
         }
     }
     
+    struct DrawingConstraints {
+        static let maxWidth: CGFloat = 315
+    }
+    
     static let dateFormatter: DateFormatter = {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateStyle = .medium
-        dateFormatter.timeStyle = .none
-        dateFormatter.locale = Locale.current
-        return dateFormatter
+        let formatter = DateFormatter()
+        formatter.dateFormat = "HH:mm"
+        return formatter
     }()
 }
 
@@ -74,7 +115,7 @@ struct BubbleView_Previews: PreviewProvider {
             }
             
             let textMessage = App_TextMessage.with { tm in
-                tm.content = "Hello there"
+                tm.content = "Hello there Hello there Hello there Hello there Hello there Hello there"
             }
             
             let message = App_Message.with { m in
