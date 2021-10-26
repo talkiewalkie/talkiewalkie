@@ -37,7 +37,10 @@ struct InboxView: View {
                 }
             }
             .navigationTitle("Chats")
-            .navigationBarItems(leading: HeaderSettingsView())
+            .navigationBarItems(
+                leading: HeaderSettingsView(),
+                trailing: Button(action: model.syncConversations) { Image(systemName: "arrow.clockwise") }
+            )
             .toolbar {
                 ToolbarItem(placement: .principal) {
                     Text(model.loading ? "syncing..." : "connected")

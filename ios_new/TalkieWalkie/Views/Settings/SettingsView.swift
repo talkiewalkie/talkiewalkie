@@ -169,15 +169,19 @@ struct SettingsView: View {
                 }
 
                 #if DEBUG
-                Section {
-                    Button("Log out") {
-                        os_log("logging out")
-                        show = false
-                        DispatchQueue.main.async {
-                            authState.logout()
+                    Section {
+                        Button("Log out") {
+                            os_log("logging out")
+                            show = false
+                            DispatchQueue.global(qos: .background).async { authState.logout() }
+                        }
+                        Button("Wipe out local state") {
+                            os_log("wiping out core data")
+                            authState.persistentContainer.performBackgroundTask { context in
+                                authState.cleanCoreData(context: context)
+                            }
                         }
                     }
-                }
                 #endif
             }
             .listStyle(InsetGroupedListStyle())
