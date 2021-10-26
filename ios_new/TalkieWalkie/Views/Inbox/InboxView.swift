@@ -43,7 +43,19 @@ struct InboxView: View {
             )
             .toolbar {
                 ToolbarItem(placement: .principal) {
-                    Text(model.loading ? "syncing..." : "connected")
+                    // TODO: Not working
+                    if case .Connected(let api, _) = authed.state {
+                        switch api.stateDelegate.state {
+                        case .Disconnected:
+                            Text("disconnected")
+                        case .Connected:
+                            Text("connected")
+                        case .Connecting:
+                            Text("connecting...")
+                        }
+                    } else {
+                        EmptyView()
+                    }
                 }
             }
             .onAppear { model.syncConversations() }
