@@ -13,6 +13,8 @@ struct ConversationView: View {
     var namespace: Namespace.ID
     
     let model: ConversationViewModel
+    
+    @State var isTextFieldFocused: Bool = false
 
     var body: some View {
         ZStack(alignment: .top) {
@@ -51,12 +53,12 @@ struct ConversationView: View {
                         }
                         .frame(maxWidth: .infinity, alignment: .trailing)
                         .padding(.horizontal)
-                        .padding(.bottom, 100)
+                        .padding(.bottom, isTextFieldFocused ? 60 : 108)
                     }
                 }
             }
             
-            RecordSheetView()
+            RecordSheetView(isTextFieldFocused: $isTextFieldFocused)
                 .frame(maxHeight: .infinity, alignment: .bottom)
         }
         .navigationBarTitleDisplayMode(.inline)

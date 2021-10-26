@@ -100,6 +100,7 @@
 		73AB53D52720802100AA6033 /* VisualEffectView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73AB53D42720802100AA6033 /* VisualEffectView.swift */; };
 		73ABB4A42727746B00592F38 /* AudioWaveView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73ABB4A32727746B00592F38 /* AudioWaveView.swift */; };
 		73ABB4A62727748000592F38 /* AudioRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73ABB4A52727748000592F38 /* AudioRecorder.swift */; };
+		73ABB4A92727D59900592F38 /* GiphyUISDK in Frameworks */ = {isa = PBXBuildFile; productRef = 73ABB4A82727D59900592F38 /* GiphyUISDK */; };
 		73B14AE5271046DE003542D6 /* PhoneNumberKit in Frameworks */ = {isa = PBXBuildFile; productRef = 73B14AE4271046DE003542D6 /* PhoneNumberKit */; };
 		73B63B3F271079B100994B92 /* bell-notification.json in Resources */ = {isa = PBXBuildFile; fileRef = 73B63B3E271079B100994B92 /* bell-notification.json */; };
 		73B63B4127107BF900994B92 /* notification-bell.json in Resources */ = {isa = PBXBuildFile; fileRef = 73B63B4027107BF900994B92 /* notification-bell.json */; };
@@ -264,6 +265,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				73ABB4A92727D59900592F38 /* GiphyUISDK in Frameworks */,
 				E4CC7920271B3310003C359A /* FirebaseMessaging in Frameworks */,
 				73B14AE5271046DE003542D6 /* PhoneNumberKit in Frameworks */,
 				E4CC791C271B3310003C359A /* FirebaseAuth in Frameworks */,
@@ -637,6 +639,7 @@
 				E4CC791B271B3310003C359A /* FirebaseAuth */,
 				E4CC791D271B3310003C359A /* FirebaseCrashlytics */,
 				E4CC791F271B3310003C359A /* FirebaseMessaging */,
+				73ABB4A82727D59900592F38 /* GiphyUISDK */,
 			);
 			productName = TalkieWalkie;
 			productReference = 73519D25270B3A34009BA6FF /* TalkieWalkie.app */;
@@ -674,6 +677,7 @@
 				E4D9BD7C27157A26005CD3A0 /* XCRemoteSwiftPackageReference "swift-protobuf" */,
 				E4D9BD8327157BFE005CD3A0 /* XCRemoteSwiftPackageReference "grpc-swift" */,
 				E4CC7918271B3310003C359A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				73ABB4A72727D59900592F38 /* XCRemoteSwiftPackageReference "giphy-ios-sdk" */,
 			);
 			productRefGroup = 73519D26270B3A34009BA6FF /* Products */;
 			projectDirPath = "";
@@ -1059,6 +1063,14 @@
 				minimumVersion = 3.2.3;
 			};
 		};
+		73ABB4A72727D59900592F38 /* XCRemoteSwiftPackageReference "giphy-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Giphy/giphy-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.0;
+			};
+		};
 		73B14AE3271046DD003542D6 /* XCRemoteSwiftPackageReference "PhoneNumberKit" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/marmelroy/PhoneNumberKit";
@@ -1108,6 +1120,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 73853D9E270C52B300B0B4BF /* XCRemoteSwiftPackageReference "lottie-ios" */;
 			productName = Lottie;
+		};
+		73ABB4A82727D59900592F38 /* GiphyUISDK */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 73ABB4A72727D59900592F38 /* XCRemoteSwiftPackageReference "giphy-ios-sdk" */;
+			productName = GiphyUISDK;
 		};
 		73B14AE4271046DE003542D6 /* PhoneNumberKit */ = {
 			isa = XCSwiftPackageProductDependency;

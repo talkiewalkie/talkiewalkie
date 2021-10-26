@@ -9,6 +9,7 @@ import Firebase
 import FirebaseMessaging
 import OSLog
 import UIKit
+import GiphyUISDK
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -46,6 +47,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         if let path = FileManager.default.urls(for: .libraryDirectory, in: .userDomainMask).last {
             os_log(.debug, "CoreData sqlite files: '\(path)Application\\ Support'")
         }
+        
+        // Giphy
+        Giphy.configure(apiKey: "9eyAVdK8MCwzgBwTN1vTi0cNoIHNQ3oM")
 
         // HACK: display LaunchScreen 1s longer
         sleep(1)

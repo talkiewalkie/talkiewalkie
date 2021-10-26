@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import GiphyUISDK
 
 enum RecordSheetState {
     case inactive
@@ -19,6 +20,8 @@ enum RecordSheetState {
 }
 
 struct RecordSheetView: View {
+    @Binding var isTextFieldFocused: Bool
+    
     @State var isRecording: Bool = false
     @State var recordState: RecordSheetState = .inactive
     
@@ -30,7 +33,6 @@ struct RecordSheetView: View {
     @State var offset: CGFloat = .zero
     
     @State var text: String = ""
-    @State var isTextFocused: Bool = false
     
     var textfield: some View {
         HStack {
@@ -43,12 +45,12 @@ struct RecordSheetView: View {
                 
                 .onTapGesture {
                     withAnimation(.easeInOut(duration: 0.20)) {
-                        isTextFocused.toggle()
+                        isTextFieldFocused.toggle()
                     }
                 }
             
         }
-        .frame(maxWidth: isTextFocused ? .infinity : 100)
+        .frame(maxWidth: isTextFieldFocused ? .infinity : 100)
         
     }
     
@@ -62,6 +64,37 @@ struct RecordSheetView: View {
                     .foregroundColor(.secondary)
             )
             .foregroundColor(.secondary)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 15)
+            .contentShape(Rectangle())
+            .onTapGesture {
+                guard let root = UIApplication.shared.windows.last?.rootViewController else { return }
+                
+                let giphy = GiphyViewController()
+                giphy.mediaTypeConfig = [.gifs, .recents]
+                giphy.theme = GPHTheme(type: .lightBlur)
+                
+                root.present(giphy, animated: true, completion: nil)
+            }
+    }
+    
+    var stickerIcon: some View {
+        Image("sticker")
+            .resizable()
+            .aspectRatio(contentMode: .fit)
+            .frame(height: 26)
+            .foregroundColor(.secondary)
+            .padding(10)
+            .contentShape(Rectangle())
+            .onTapGesture {
+                guard let root = UIApplication.shared.windows.last?.rootViewController else { return }
+                
+                let giphy = GiphyViewController()
+                giphy.mediaTypeConfig = [.stickers]
+                giphy.theme = GPHTheme(type: .lightBlur)
+                
+                root.present(giphy, animated: true, completion: nil)
+            }
     }
     
     var body: some View {
@@ -92,14 +125,10 @@ struct RecordSheetView: View {
                     .opacity(recordState.isInactive ? 1 : 0)
                     
                     
-                    HStack(spacing: 20) {
+                    HStack(spacing: 0) {
                         gifIcon
                         
-                        Image("sticker")
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .frame(height: 26)
-                            .foregroundColor(.secondary)
+                        stickerIcon
                         
                     }
                     .frame(maxWidth: .infinity, alignment: .trailing)
@@ -107,10 +136,10 @@ struct RecordSheetView: View {
                     
                     RecordButton(isRecording: $isRecording)
                         .padding(5)
-                        .opacity(isTextFocused ? 0 : 1)
-                        .animation(.easeInOut(duration: 0.05), value: isTextFocused)
-                        .frame(maxWidth: .infinity, alignment: isTextFocused ? .trailing : .center)
-                        .frame(height: isTextFocused ? 0 : nil)
+                        .opacity(isTextFieldFocused ? 0 : 1)
+                        .animation(.easeInOut(duration: 0.05), value: isTextFieldFocused)
+                        .frame(maxWidth: .infinity, alignment: isTextFieldFocused ? .trailing : .center)
+                        .frame(height: isTextFieldFocused ? 0 : nil)
                     
                     HStack(spacing: 10) {
                         cancelButton
@@ -295,6 +324,8 @@ struct RecordSheetView_Previews: PreviewProvider {
     }
     
     struct TestView: View {
+        @State var isTextFieldFocused: Bool = false
+        
         var body: some View {
             ZStack(alignment: .bottom) {
                 List(1..<20) { i in
@@ -302,7 +333,8 @@ struct RecordSheetView_Previews: PreviewProvider {
                 }
                 
                 
-                RecordSheetView(recordState: .inactive, audioPowers: [0.2, 1.0, 0.5])
+                RecordSheetView(isTextFieldFocused: $isTextFieldFocused,
+                                recordState: .inactive, audioPowers: [0.2, 1.0, 0.5])
             }
         }
     }
