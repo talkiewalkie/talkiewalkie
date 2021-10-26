@@ -29,6 +29,11 @@ func NewConversationService(c *common.Components) ConversationService {
 }
 
 func (c ConversationService) Get(ctx context.Context, input *pb.ConversationGetInput) (*pb.Conversation, error) {
+	me, err := common.GetUser(ctx)
+	if err != nil {
+		return nil, status.Error(codes.PermissionDenied, err.Error())
+	}
+
 	uid, err := uuid2.FromString(input.Uuid)
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, fmt.Sprintf("bad uuid: %+v", err))
@@ -40,6 +45,10 @@ func (c ConversationService) Get(ctx context.Context, input *pb.ConversationGetI
 	).One(ctx, c.Db)
 	if err != nil {
 		return nil, status.Error(codes.Internal, fmt.Sprintf("could not get conversation: %+v", err))
+	}
+
+	if ok, err := entities.CanAccessConversation(conv, me); !ok || err != nil {
+		return nil, status.Errorf(codes.PermissionDenied, "cannot access this conversation: %+v", err)
 	}
 
 	messages, err := models.Messages(
@@ -65,7 +74,7 @@ func (c ConversationService) Get(ctx context.Context, input *pb.ConversationGetI
 		msgs = append(msgs, pbm)
 	}
 
-	title, err := entities.ConversationDisplay(conv)
+	title, err := entities.ConversationDisplay(conv, me)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "could not compute conversation title: %+v", err)
 	}
@@ -79,13 +88,13 @@ func (c ConversationService) Get(ctx context.Context, input *pb.ConversationGetI
 }
 
 func (c ConversationService) List(input *pb.ConversationListInput, server pb.ConversationService_ListServer) error {
-	u, err := common.GetUser(server.Context())
+	me, err := common.GetUser(server.Context())
 	if err != nil {
 		return status.Error(codes.PermissionDenied, err.Error())
 	}
 
 	myConvs, err := models.UserConversations(
-		models.UserConversationWhere.UserID.EQ(u.ID),
+		models.UserConversationWhere.UserID.EQ(me.ID),
 		qm.Load(qm.Rels(models.UserConversationRels.Conversation, models.ConversationRels.UserConversations, models.UserConversationRels.User)),
 		qm.Limit(20), qm.Offset(int(input.Page)),
 	).All(server.Context(), c.Db)
@@ -120,7 +129,7 @@ WHERE "conversation_id" in (%s);
 
 	for _, uc := range myConvs {
 		conv := uc.R.Conversation
-		title, err := entities.ConversationDisplay(conv)
+		title, err := entities.ConversationDisplay(conv, me)
 		if err != nil {
 			return status.Errorf(codes.Internal, "could not display conversation title: %+v", err)
 		}
