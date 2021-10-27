@@ -1,0 +1,13 @@
+{
+  "name": "tokenfetcher",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "theo",
+  "license": "MIT",
+  "dependencies": {
+    "puppeteer": "^10.4.0"
+  },
+  "bin": {
+    "getIdToken": "./getIdToken.js"
+  }
+}

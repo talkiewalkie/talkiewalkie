@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>firebase id token fetcher</title>
+
+    <script type="module">
+      document.documentElement.classList.remove("no-js");
+      document.documentElement.classList.add("js");
+    </script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.1.2/firebase-app-compat.min.js"
+      integrity="sha512-+zNhJeibQaOyPti6Wlmeh06YR+upTJZD9M4aou7hHNrcxLs6Ttjs3hhwL81FqRuYf1zkNbc8Kdd1IPjWiGnRpg=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.1.2/firebase-auth-compat.min.js"
+      integrity="sha512-//C8KzwUnTVl7RCCkVgixnoJBjAmj8PEwOan4XRrvIgkK1Jtlr9XzymLtFd0TaC0rcfpYiY82SIsz8DbV90WIQ=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+  </head>
+
+  <body>
+    <p>
+      this is an empty page solely meant to execute js code to fetch id tokens
+      from firebase
+    </p>
+    <p id="idToken" style="display: none"></p>
+    <script type="module">
+      const firebaseConfig = {
+        apiKey: "AIzaSyCJUWsDAQY9HnmcdmP6tb8-5wgiIyIt89w",
+        authDomain: "talkiewalkie-305117.firebaseapp.com",
+        databaseURL:
+          "https://talkiewalkie-305117-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "talkiewalkie-305117",
+        storageBucket: "talkiewalkie-305117.appspot.com",
+        messagingSenderId: "719337728540",
+        appId: "1:719337728540:web:bbafdbb493565ec3a78dd9",
+        measurementId: "G-ZJ2Y9884YN",
+      };
+
+      let idTokenEl = document.getElementById("idToken");
+      const urlParams = new URLSearchParams(window.location.search);
+      const customToken = urlParams.get("customToken");
+      if (!customToken) {
+        idTokenEl.style.display = "block";
+        idTokenEl.innerText = "error: expected a customToken query param";
+      } else {
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        app
+          .auth()
+          .signInWithCustomToken(customToken)
+          .then(() => app.auth().currentUser.getIdToken())
+          .then((token) => {
+            idTokenEl.style.display = "block";
+            idTokenEl.innerText = token;
+          })
+          .catch((err) => {
+            idTokenEl.style.display = "block";
+            idTokenEl.innerText = err;
+          });
+      }
+    </script>
+  </body>
+</html>

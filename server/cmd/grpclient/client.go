@@ -2,47 +2,66 @@ package main
 
 import (
 	"context"
-	"crypto/tls"
 	"flag"
 	"fmt"
+	"github.com/joho/godotenv"
+	"github.com/talkiewalkie/talkiewalkie/common"
 	"github.com/talkiewalkie/talkiewalkie/pb"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/metadata"
 	"io/ioutil"
 	"log"
+	"os"
+	"os/exec"
+	"path/filepath"
 	"strings"
+	"time"
 )
 
 var (
 	convUuid = flag.String("convUuid", "", "")
 	audio    = flag.String("audio", "", "")
-	token    = flag.String("token", "", "")
-	host     = flag.String("host", "localhost:8080", "")
+
+	host  = flag.String("host", "localhost:8080", "")
+	fbUid = flag.String("asUser", "k6WhmQLnpvUCeKuDdpknVzBUu9r1", "firebase uid")
 )
 
 func main() {
-	log.SetFlags(log.Lshortfile)
+	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
 	flag.Parse()
 
-	var secOpt grpc.DialOption
-	if strings.HasPrefix(*host, "localhost") {
-		secOpt = grpc.WithInsecure()
-	} else {
-		conn, err := tls.Dial("tcp", *host, &tls.Config{InsecureSkipVerify: true})
-		if err != nil {
-			panic(err)
-		}
-
-		certs := conn.ConnectionState().PeerCertificates
-		_ = conn.Close()
-
-		secOpt = grpc.WithTransportCredentials(credentials.NewServerTLSFromCert(&tls.Certificate{
-			Certificate: [][]byte{certs[0].Raw},
-		}))
+	if err := godotenv.Load(".env.dev"); err != nil {
+		log.Panicf("could not load env: %+v", err)
 	}
 
-	conn, err := grpc.Dial(*host, secOpt)
+	components, err := common.InitComponents()
+	if err != nil {
+		log.Panicf("could not initiate components: %+v", err)
+	}
+
+	ctok, err := components.FbAuth.CustomToken(context.Background(), *fbUid)
+	if err != nil {
+		log.Panic(err)
+	}
+
+	ex, err := os.Executable()
+	if err != nil {
+		panic(err)
+	}
+	exPath := filepath.Dir(ex)
+	fmt.Println(exPath)
+
+	cmd := exec.Command("/bin/sh", "-c", fmt.Sprintf("cd cmd/grpclient/tokenfetcher && ./getIdToken.js '%s'", ctok))
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		log.Panic(string(output))
+	}
+	token := strings.TrimSpace(string(output))
+
+	secOpt := grpc.WithInsecure()
+	conn, err := grpc.Dial(*host, secOpt, grpc.WithConnectParams(grpc.ConnectParams{
+		MinConnectTimeout: 3 * time.Second,
+	}))
 	if err != nil {
 		log.Panic(err)
 	}
@@ -53,7 +72,7 @@ func main() {
 		log.Panic(err)
 	}
 
-	authHeader := metadata.New(map[string]string{"Authorization": fmt.Sprintf("Bearer %s", *token)})
+	authHeader := metadata.New(map[string]string{"Authorization": fmt.Sprintf("Bearer %s", token)})
 	ctx := metadata.NewOutgoingContext(context.Background(), authHeader)
 	if _, err = client.Send(ctx, &pb.MessageSendInput{
 		Recipients: &pb.MessageSendInput_ConvUuid{ConvUuid: *convUuid},
