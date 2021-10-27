@@ -78,13 +78,13 @@ class AuthState: ObservableObject {
                 let (res, _) = api.me()
                 if let res = res {
                     let uuid = UUID(uuidString: res.user.uuid)!
-                    self.persistentContainer.performBackgroundTask { context in
+                    self.backgroundMoc.perform {
                         let me = Me.getByUuidOrCreate(uuid, context: self.moc)
                         me.uuid = uuid
                         me.displayName = res.user.displayName
                         me.firebaseUid = self.firebaseUser?.uid
 
-                        context.saveOrLogError()
+                        self.backgroundMoc.saveOrLogError()
                         me.objectWillChange.send()
                         DispatchQueue.main.async { self.state = AuthenticationState.Connected(api, me) }
                     }
@@ -102,7 +102,7 @@ class AuthState: ObservableObject {
             return
         }
 
-        persistentContainer.performBackgroundTask { context in self.cleanCoreData(context: context) }
+        backgroundMoc.perform { self.cleanCoreData(context: self.backgroundMoc) }
     }
 
     func cleanCoreData(context: NSManagedObjectContext) {
