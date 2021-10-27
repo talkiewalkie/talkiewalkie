@@ -11,13 +11,13 @@ import OSLog
 class InboxViewModel: ObservableObject {
     private let authed: AuthState
 
-    @Published var loading = true
+    @Published var loading = false
 
     init(_ authed: AuthState) {
         self.authed = authed
 
         if case .Connected(let api, _) = authed.state {
-            os_log(.debug, "subscribing...")
+            os_log(.debug, "subscribing to grpc inbox stream...")
             api.subscribeIncomingMessages { msg in
                 os_log("hello i received a new message")
                 let savedMsg = Message.upsert(msg, context: authed.moc)
@@ -25,22 +25,20 @@ class InboxViewModel: ObservableObject {
 
                 conversation.addToMessages(savedMsg)
 
+                authed.moc.saveOrLogError()
+
                 savedMsg.objectWillChange.send()
                 conversation.objectWillChange.send()
-
-                authed.moc.saveOrLogError()
             }
         }
     }
 
     func syncConversations() {
         self.loading = true
-        DispatchQueue.global(qos: .background).async {
+        self.authed.backgroundMoc.perform {
             if case .Connected(let api, _) = self.authed.state {
                 let (convs, _) = api.listConvs()
-                self.authed.persistentContainer.performBackgroundTask { context in
-                    Conversation.dumpFromRemote(convs, context: context)
-                }
+                Conversation.dumpFromRemote(convs, context: self.authed.backgroundMoc)
             }
             DispatchQueue.main.async { self.loading = false }
         }

@@ -12,18 +12,39 @@ import GRPC
 import NIO
 import OSLog
 
-private class GrpcConnectivityState: ConnectivityStateDelegate {
+
+enum GrpcConnectionState {
+    case Disconnected
+    case Connecting
+    case Connected
+}
+
+class GrpcConnectivityState: ConnectivityStateDelegate, ObservableObject {
     private let url: URL
     private let logger = Logger.withLabel("grpc-status")
+    @Published var state = GrpcConnectionState.Disconnected
+    
     init(_ url: URL) {
         self.url = url
     }
 
     func connectivityStateDidChange(from oldState: ConnectivityState, to newState: ConnectivityState) {
-        if oldState != .ready, newState == .ready { logger.debug("got connected [\(self.url.absoluteString)]") }
-        else if oldState == .ready, newState != .ready { logger.debug("got disconnected [\(self.url.absoluteString)]") }
-        if newState == .connecting { logger.debug("connecting [\(self.url.absoluteString)]") }
-        if newState == .transientFailure { logger.debug("error (transient failure) [\(self.url.absoluteString)]") }
+        if oldState != .ready, newState == .ready {
+            logger.debug("got connected [\(self.url.absoluteString)]")
+            state = .Connected
+        }
+        else if oldState == .ready, newState != .ready {
+            logger.debug("got disconnected (\(String(describing: newState))) [\(self.url.absoluteString)]")
+            state = .Disconnected
+        }
+        if newState == .connecting {
+            logger.debug("connecting [\(self.url.absoluteString)]")
+            state = .Connecting
+        }
+        if newState == .transientFailure {
+            logger.debug("error (transient failure) [\(self.url.absoluteString)]")
+            state = .Disconnected
+        }
     }
 }
 
@@ -38,6 +59,8 @@ private extension String {
 }
 
 class AuthedGrpcApi {
+    let stateDelegate: GrpcConnectivityState
+    
     private let url: URL
 
     private let logger = Logger.withLabel("grpc-client")
@@ -45,7 +68,6 @@ class AuthedGrpcApi {
 
     private let group: EventLoopGroup
     private let channel: ClientConnection
-    private let stateDelegate: GrpcConnectivityState
     private let token: String
     private let userClient: App_UserServiceClient
     private let convClient: App_ConversationServiceClient
@@ -67,7 +89,12 @@ class AuthedGrpcApi {
         #endif
         channel = channelBuilder
             .withConnectionReestablishment(enabled: true)
-            .withConnectivityStateDelegate(stateDelegate, executingOn: DispatchQueue.main)
+            .withCallStartBehavior(.fastFailure)
+            .withConnectionBackoff(initial: .seconds(1))
+            .withConnectionBackoff(maximum: .seconds(30))
+            .withConnectionBackoff(multiplier: 1)
+            .withConnectionTimeout(minimum: .seconds(5))
+            .withConnectivityStateDelegate(stateDelegate, executingOn: DispatchQueue.global(qos: .background))
             .connect(host: url.host!, port: url.port!)
 
         userClient = App_UserServiceClient(channel: channel)
@@ -82,7 +109,7 @@ class AuthedGrpcApi {
 
     deinit {
         do {
-            try channel.close().wait()
+            try? channel.close().wait()
             try group.syncShutdownGracefully()
         } catch { logger.error("could not end connection: \(error.localizedDescription)") }
     }

@@ -169,15 +169,19 @@ struct SettingsView: View {
                 }
 
                 #if DEBUG
-                Section {
-                    Button("Log out") {
-                        os_log("logging out")
-                        show = false
-                        DispatchQueue.main.async {
+                    Section {
+                        Button("Log out") {
+                            os_log("logging out")
+                            show = false
                             authState.logout()
                         }
+                        Button("Wipe out local state") {
+                            os_log("wiping out core data")
+                            authState.backgroundMoc.perform {
+                                authState.cleanCoreData(context: authState.backgroundMoc)
+                            }
+                        }
                     }
-                }
                 #endif
             }
             .listStyle(InsetGroupedListStyle())

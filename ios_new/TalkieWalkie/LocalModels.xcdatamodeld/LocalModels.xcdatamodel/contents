@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="19206" systemVersion="20G219" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="19461" systemVersion="20E241" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
     <entity name="Conversation" representedClassName=".Conversation" syncable="YES" codeGenerationType="class">
         <attribute name="createdAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="lastMemberReadUntil" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
@@ -7,6 +7,11 @@
         <attribute name="uuid" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
         <relationship name="messages" optional="YES" toMany="YES" deletionRule="Nullify" ordered="YES" destinationEntity="Message" inverseName="conversation" inverseEntity="Message"/>
         <relationship name="users" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="User" inverseName="conversations" inverseEntity="User"/>
+        <uniquenessConstraints>
+            <uniquenessConstraint>
+                <constraint value="uuid"/>
+            </uniquenessConstraint>
+        </uniquenessConstraints>
     </entity>
     <entity name="Me" representedClassName=".Me" parentEntity="User" syncable="YES" codeGenerationType="class">
         <attribute name="firebaseUid" optional="YES" attributeType="String"/>
@@ -18,6 +23,11 @@
         <relationship name="author" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="User" inverseName="authoredMessages_" inverseEntity="User"/>
         <relationship name="content" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="MessageContent" inverseName="message" inverseEntity="MessageContent"/>
         <relationship name="conversation" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Conversation" inverseName="messages" inverseEntity="Conversation"/>
+        <uniquenessConstraints>
+            <uniquenessConstraint>
+                <constraint value="uuid"/>
+            </uniquenessConstraint>
+        </uniquenessConstraints>
     </entity>
     <entity name="MessageContent" representedClassName=".MessageContent" isAbstract="YES" syncable="YES" codeGenerationType="class">
         <relationship name="message" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Message" inverseName="content" inverseEntity="Message"/>
@@ -31,6 +41,11 @@
         <attribute name="uuid" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
         <relationship name="authoredMessages_" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Message" inverseName="author" inverseEntity="Message"/>
         <relationship name="conversations" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Conversation" inverseName="users" inverseEntity="Conversation"/>
+        <uniquenessConstraints>
+            <uniquenessConstraint>
+                <constraint value="uuid"/>
+            </uniquenessConstraint>
+        </uniquenessConstraints>
     </entity>
     <entity name="VoiceMessage" representedClassName=".VoiceMessage" parentEntity="MessageContent" syncable="YES" codeGenerationType="class">
         <attribute name="processedAudio" optional="YES" attributeType="Binary"/>

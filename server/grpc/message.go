@@ -99,7 +99,7 @@ func (ms MessageService) Incoming(_ *pb.Empty, server pb.MessageService_Incoming
 }
 
 func (ms MessageService) Send(ctx context.Context, input *pb.MessageSendInput) (*pb.Empty, error) {
-	u, err := common.GetUser(ctx)
+	me, err := common.GetUser(ctx)
 	if err != nil {
 		return nil, status.Error(codes.PermissionDenied, err.Error())
 	}
@@ -122,7 +122,7 @@ func (ms MessageService) Send(ctx context.Context, input *pb.MessageSendInput) (
 		}
 
 	case *pb.MessageSendInput_RecipientUuids:
-		allUuids := append(input.GetRecipientUuids().Uuids, u.UUID.String())
+		allUuids := append(input.GetRecipientUuids().Uuids, me.UUID.String())
 		uuids := []uuid2.UUID{}
 		for _, uidStr := range allUuids {
 
@@ -151,15 +151,15 @@ func (ms MessageService) Send(ctx context.Context, input *pb.MessageSendInput) (
 			return nil, status.Error(codes.Internal, fmt.Sprintf("some users where not found: provided %d unique uids, found %d users in db", len(uuids), len(recipients)))
 		}
 
-		ids := []int{u.ID}
+		ids := []int{me.ID}
 		for _, recipient := range recipients {
-			if recipient.ID != u.ID {
+			if recipient.ID != me.ID {
 				ids = append(ids, recipient.ID)
 			}
 		}
 
 		ugs, err := models.UserConversations(
-			models.UserConversationWhere.UserID.EQ(u.ID),
+			models.UserConversationWhere.UserID.EQ(me.ID),
 			qm.Load(qm.Rels(models.UserConversationRels.Conversation, models.ConversationRels.UserConversations)),
 		).All(ctx, ms.Db)
 		if err != nil {
@@ -236,6 +236,10 @@ func (ms MessageService) Send(ctx context.Context, input *pb.MessageSendInput) (
 		}
 	}
 
+	if ok, err := entities.CanAccessConversation(conv, me); !ok || err != nil {
+		return nil, status.Errorf(codes.PermissionDenied, "can't send message to this conversation: (err = %+v)", err)
+	}
+
 	var msg *models.Message
 	switch input.Content.(type) {
 	case *pb.MessageSendInput_TextMessage:
@@ -243,7 +247,7 @@ func (ms MessageService) Send(ctx context.Context, input *pb.MessageSendInput) (
 		msg = &models.Message{
 			Type:           models.MessageTypeText,
 			Text:           null.StringFrom(text),
-			AuthorID:       null.IntFrom(u.ID),
+			AuthorID:       null.IntFrom(me.ID),
 			ConversationID: conv.ID,
 			CreatedAt:      time.Now(),
 		}
@@ -277,7 +281,7 @@ func (ms MessageService) Send(ctx context.Context, input *pb.MessageSendInput) (
 			SiriTranscript: null.BytesFrom(pbTranscript),
 			RawAudioID:     null.IntFrom(asset.ID),
 
-			AuthorID:       null.IntFrom(u.ID),
+			AuthorID:       null.IntFrom(me.ID),
 			ConversationID: conv.ID,
 			CreatedAt:      time.Now(),
 		}

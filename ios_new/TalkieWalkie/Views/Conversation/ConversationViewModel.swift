@@ -25,8 +25,8 @@ class ConversationViewModel: ObservableObject {
                 let (remoteConv, _) = api.convByUuid(uuid)
                 self.loading = false
                 if let remoteConv = remoteConv {
-                    self.authed.persistentContainer.performBackgroundTask { context in
-                        Conversation.dumpFromRemote([remoteConv], context: context)
+                    self.authed.backgroundMoc.perform {
+                        Conversation.dumpFromRemote([remoteConv], context: self.authed.backgroundMoc)
                     }
                 }
             } else {

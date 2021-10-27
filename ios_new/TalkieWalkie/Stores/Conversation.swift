@@ -7,8 +7,10 @@
 
 import CoreData
 import Foundation
+import OSLog
 
 extension Conversation {
+    @discardableResult
     static func upsert(_ conv: App_Conversation, context: NSManagedObjectContext) -> Conversation {
         let localC = Conversation.getByUuidOrCreate(conv.uuid.uuidOrThrow(), context: context)
         localC.uuid = conv.uuid.uuidOrThrow()
@@ -28,14 +30,15 @@ extension Conversation {
     }
 
     static func dumpFromRemote(_ convs: [App_Conversation], context: NSManagedObjectContext) {
-        let localConvs: [Conversation] = convs.map { Conversation.upsert($0, context: context) }
-        localConvs.forEach { $0.objectWillChange.send() }
+        convs.forEach { Conversation.upsert($0, context: context) }
         context.saveOrLogError()
     }
 
-    var lastActivity: Date? {
-        (self.messages?.array as? [Message] ?? []).last?.createdAt
+    var lastMessage: Message? {
+        (self.messages?.array as? [Message] ?? []).last
     }
+    
+    var lastActivity: Date? { lastMessage?.createdAt }
 
     func firstParticipant(thatIsNot user: User?) -> User? {
         let allUsers: Set<User> = (self.users as? Set<User>) ?? Set()
