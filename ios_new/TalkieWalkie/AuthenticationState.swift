@@ -96,12 +96,14 @@ class AuthState: ObservableObject {
     func logout() {
         state = AuthenticationState.Disconnected
 
-        do { try Auth.auth().signOut() }
-        catch {
-            os_log(.error, "failed to signout!")
-            return
+        DispatchQueue.global(qos: .background).async {
+            do { try Auth.auth().signOut() }
+            catch {
+                os_log(.error, "failed to signout!")
+                return
+            }
         }
-
+        
         backgroundMoc.perform { self.cleanCoreData(context: self.backgroundMoc) }
     }
 

@@ -26,7 +26,7 @@ class ConversationViewModel: ObservableObject {
                 self.loading = false
                 if let remoteConv = remoteConv {
                     self.authed.backgroundMoc.perform {
-                        Conversation.dumpFromRemote([remoteConv], context: self.authed.backgroundMoc.perform)
+                        Conversation.dumpFromRemote([remoteConv], context: self.authed.backgroundMoc)
                     }
                 }
             } else {
