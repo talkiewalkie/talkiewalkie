@@ -34,24 +34,23 @@ struct RecordSheetView: View {
     
     @State var text: String = ""
     
+    @State var showAttachementActionSheet: Bool = false
+    
     var textfield: some View {
-        HStack {
-            TextField("Aa", text: $text)
-                .multilineTextAlignment(.leading)
-                .padding(.vertical, 8)
-                .padding(.horizontal, 12)
-                .background(Color.gray.opacity(0.15))
-                .cornerRadius(24)
-                
-                .onTapGesture {
-                    withAnimation(.easeInOut(duration: 0.20)) {
-                        isTextFieldFocused.toggle()
-                    }
-                }
-            
-        }
-        .frame(maxWidth: isTextFieldFocused ? .infinity : 100)
-        
+        AutoTextField($text, isFocused: $isTextFieldFocused)
+            .placeholder("Aa")
+            .setMaxHeight(105)
+            .maxLines(isTextFieldFocused ? 0 : 1)
+            .multilineTextAlignment(.leading)
+            .padding(.vertical, 8)
+            .padding(.horizontal, 12)
+            .background(Color.gray.opacity(0.15))
+            .cornerRadius(24)
+            .contentShape(Rectangle())
+            .onTapGesture {
+                isTextFieldFocused = true
+            }
+            .frame(maxWidth: isTextFieldFocused ? .infinity : 100)
     }
     
     var gifIcon: some View {
@@ -64,8 +63,8 @@ struct RecordSheetView: View {
                     .foregroundColor(.secondary)
             )
             .foregroundColor(.secondary)
-            .padding(.horizontal, 10)
-            .padding(.vertical, 15)
+            .padding(.horizontal, 15)
+            .padding(.vertical, 18)
             .contentShape(Rectangle())
             .onTapGesture {
                 guard let root = UIApplication.shared.windows.last?.rootViewController else { return }
@@ -84,7 +83,7 @@ struct RecordSheetView: View {
             .aspectRatio(contentMode: .fit)
             .frame(height: 26)
             .foregroundColor(.secondary)
-            .padding(10)
+            .padding(15)
             .contentShape(Rectangle())
             .onTapGesture {
                 guard let root = UIApplication.shared.windows.last?.rootViewController else { return }
@@ -95,6 +94,39 @@ struct RecordSheetView: View {
                 
                 root.present(giphy, animated: true, completion: nil)
             }
+    }
+    
+    var attachmentIcon: some View {
+        Button(action: { showAttachementActionSheet = true }) {
+            Image(systemName: "paperclip")
+                .font(.title3)
+                .foregroundColor(.secondary)
+                .contentShape(Rectangle().scale(1.75))
+                .padding(.horizontal, 15)
+                .padding(.vertical, 2)
+        }.actionSheet(isPresented: $showAttachementActionSheet) {
+            ActionSheet(title: Text("Add attachment"), buttons: [
+                .cancel(),
+                .default(Text("Photo or Video"), action: { }),
+                .default(Text("File"), action: { }),
+                .default(Text("Location"), action: { }),
+                .default(Text("Contact"), action: { })
+            ])
+        }
+    }
+    
+    var textSendButton: some View {
+        Button(action: { }) {
+            Image(systemName: "paperplane.fill")
+                .padding(8)
+                .offset(x: -1, y: 1)
+                .foregroundColor(.white)
+                .background(
+                    Circle().foregroundColor(.accentColor)
+                )
+                .contentShape(Rectangle().scale(1.5))
+                .padding(.horizontal, 12)
+        }
     }
     
     var body: some View {
@@ -111,33 +143,38 @@ struct RecordSheetView: View {
                 }
                 .padding(.vertical, 25)
                 .frame(height: recordState.isInactive ? 0 : DrawingConstraints.MIN_HEIGHT - min(offset, 0))
+                .padding(.horizontal)
                 
                 ZStack {
-                    HStack(spacing: 15) {
-                        Image(systemName: "paperclip")
-                            .font(.title3)
-                            .foregroundColor(.secondary)
+                    HStack(alignment: .bottom, spacing: 0) {
+                        attachmentIcon
+//                            .background(Color.blue.opacity(0.5))
                         
                         textfield
+//                            .background(Color.yellow.opacity(0.5))
                         
+                        textSendButton
+                            .opacity(isTextFieldFocused ? 1 : 0)
+                            .frame(width: isTextFieldFocused ? nil : 0)
+//                            .background(Color.purple.opacity(0.5))
                     }
+                    .padding(.vertical, 5)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .opacity(recordState.isInactive ? 1 : 0)
-                    
                     
                     HStack(spacing: 0) {
                         gifIcon
                         
                         stickerIcon
-                        
                     }
+                    .opacity(isTextFieldFocused ? 0 : 1)
+                    .offset(x: isTextFieldFocused ? 100 : 0)
                     .frame(maxWidth: .infinity, alignment: .trailing)
                     .opacity(recordState.isInactive ? 1 : 0)
                     
                     RecordButton(isRecording: $isRecording)
                         .padding(5)
                         .opacity(isTextFieldFocused ? 0 : 1)
-                        .animation(.easeInOut(duration: 0.05), value: isTextFieldFocused)
                         .frame(maxWidth: .infinity, alignment: isTextFieldFocused ? .trailing : .center)
                         .frame(height: isTextFieldFocused ? 0 : nil)
                     
@@ -145,14 +182,14 @@ struct RecordSheetView: View {
                         cancelButton
                             .opacity(recordState == .recordingFinished ? 1 : 0)
                         
-                        sendButton
+                        audioSendButton
                             .opacity(recordState == .recordingFinished ? 1 : 0)
                     }
                     .frame(maxWidth: .infinity, alignment: .trailing)
                 }
             }
-            .padding(.horizontal)
         }
+        .animation(.easeInOut(duration: 0.15), value: isTextFieldFocused)
         .frame(maxWidth: .infinity)
         .background(
             VisualEffectView(effect: UIBlurEffect(
@@ -214,8 +251,6 @@ struct RecordSheetView: View {
                 audioRecorder.recorder.updateMeters()
                 
                 let power = audioRecorder.recorder.averagePower(forChannel: 0)
-                
-                print(power)
                 let scaledPower = sigmoid((power + 17) / 1.3) / 0.96 + 0.04
                 
                 audioPowers.append(scaledPower)
@@ -244,7 +279,7 @@ struct RecordSheetView: View {
             .frame(maxWidth: .infinity)
     }
     
-    var sendButton: some View {
+    var audioSendButton: some View {
         Button(action: {
             audioPowers.removeAll()
             
@@ -331,7 +366,6 @@ struct RecordSheetView_Previews: PreviewProvider {
                 List(1..<20) { i in
                     Text("\(i)")
                 }
-                
                 
                 RecordSheetView(isTextFieldFocused: $isTextFieldFocused,
                                 recordState: .inactive, audioPowers: [0.2, 1.0, 0.5])
