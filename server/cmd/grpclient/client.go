@@ -11,9 +11,7 @@ import (
 	"google.golang.org/grpc/metadata"
 	"io/ioutil"
 	"log"
-	"os"
 	"os/exec"
-	"path/filepath"
 	"strings"
 	"time"
 )
@@ -43,13 +41,6 @@ func main() {
 	if err != nil {
 		log.Panic(err)
 	}
-
-	ex, err := os.Executable()
-	if err != nil {
-		panic(err)
-	}
-	exPath := filepath.Dir(ex)
-	fmt.Println(exPath)
 
 	cmd := exec.Command("/bin/sh", "-c", fmt.Sprintf("cd cmd/grpclient/tokenfetcher && ./getIdToken.js '%s'", ctok))
 	output, err := cmd.CombinedOutput()
