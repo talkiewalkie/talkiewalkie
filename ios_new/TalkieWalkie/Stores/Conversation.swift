@@ -34,9 +34,11 @@ extension Conversation {
         context.saveOrLogError()
     }
 
-    var lastActivity: Date? {
-        (self.messages?.array as? [Message] ?? []).last?.createdAt
+    var lastMessage: Message? {
+        (self.messages?.array as? [Message] ?? []).last
     }
+    
+    var lastActivity: Date? { lastMessage?.createdAt }
 
     func firstParticipant(thatIsNot user: User?) -> User? {
         let allUsers: Set<User> = (self.users as? Set<User>) ?? Set()

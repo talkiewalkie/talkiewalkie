@@ -13,8 +13,13 @@ struct MessageView: View {
     
     var showAuthor: Bool = true
     
-    var isMe: Bool { // TODO: wrong logic
-        return message.author == nil
+    @EnvironmentObject var authed: AuthState
+    var isMe: Bool {
+        if let me = authed.me {
+            return message.author?.uuid == me.uuid
+        } else {
+            return false
+        }
     }
     
     var body: some View {

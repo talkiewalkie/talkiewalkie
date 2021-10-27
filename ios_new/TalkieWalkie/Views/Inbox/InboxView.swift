@@ -90,14 +90,32 @@ struct ConversationAvatar: View {
 struct ConversationListItemView: View {
     @ObservedObject var conversation: Conversation
 
+    var convPreview: String {
+        switch conversation.lastMessage?.content {
+        case nil:
+            return "No messages yet!"
+        case let tm as TextMessage:
+            return tm.text ?? "weird"
+        case _ as VoiceMessage:
+            return "audio message"
+        default:
+            return "new message!"
+        }
+    }
+
     var body: some View {
         HStack(alignment: .top) {
             ConversationAvatar(conversation: conversation)
 
             HStack {
-                VStack {
+                VStack(alignment: .leading) {
                     Text(conversation.title ?? "new conv")
+                        .font(.body)
                         .fontWeight(.medium)
+                    Spacer()
+                    Text(convPreview)
+                        .font(.callout)
+                        .foregroundColor(.gray)
                 }
 
                 Spacer()

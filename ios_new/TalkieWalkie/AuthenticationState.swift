@@ -28,6 +28,7 @@ class AuthState: ObservableObject {
     lazy var backgroundMoc: NSManagedObjectContext = {
         let moc = persistentContainer.newBackgroundContext()
         moc.automaticallyMergesChangesFromParent = true
+        moc.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
         return moc
     }()
 
@@ -66,7 +67,6 @@ class AuthState: ObservableObject {
                 return
             }
 
-            self.logger.debug("token: '\(res.token)'")
             let api = AuthedGrpcApi(url: self.config.apiUrl, token: res.token, persistentContainer: self.persistentContainer)
 
             if let me = Me.fromCache(context: self.moc) {
