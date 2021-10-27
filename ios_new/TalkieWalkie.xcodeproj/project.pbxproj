@@ -101,6 +101,12 @@
 		73ABB4A42727746B00592F38 /* AudioWaveView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73ABB4A32727746B00592F38 /* AudioWaveView.swift */; };
 		73ABB4A62727748000592F38 /* AudioRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73ABB4A52727748000592F38 /* AudioRecorder.swift */; };
 		73ABB4A92727D59900592F38 /* GiphyUISDK in Frameworks */ = {isa = PBXBuildFile; productRef = 73ABB4A82727D59900592F38 /* GiphyUISDK */; };
+		73ABB4AC2728143500592F38 /* Coordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73ABB4AB2728143500592F38 /* Coordinator.swift */; };
+		73ABB4AE2728144800592F38 /* Modifiers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73ABB4AD2728144800592F38 /* Modifiers.swift */; };
+		73ABB4B02728145400592F38 /* Representable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73ABB4AF2728145400592F38 /* Representable.swift */; };
+		73ABB4B22728146000592F38 /* TextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73ABB4B12728146000592F38 /* TextView.swift */; };
+		73ABB4B42728146800592F38 /* UIFont.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73ABB4B32728146800592F38 /* UIFont.swift */; };
+		73ABB4B62728971E00592F38 /* View+hideKeyboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73ABB4B52728971E00592F38 /* View+hideKeyboard.swift */; };
 		73B14AE5271046DE003542D6 /* PhoneNumberKit in Frameworks */ = {isa = PBXBuildFile; productRef = 73B14AE4271046DE003542D6 /* PhoneNumberKit */; };
 		73B63B3F271079B100994B92 /* bell-notification.json in Resources */ = {isa = PBXBuildFile; fileRef = 73B63B3E271079B100994B92 /* bell-notification.json */; };
 		73B63B4127107BF900994B92 /* notification-bell.json in Resources */ = {isa = PBXBuildFile; fileRef = 73B63B4027107BF900994B92 /* notification-bell.json */; };
@@ -232,6 +238,12 @@
 		73AB53D42720802100AA6033 /* VisualEffectView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisualEffectView.swift; sourceTree = "<group>"; };
 		73ABB4A32727746B00592F38 /* AudioWaveView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioWaveView.swift; sourceTree = "<group>"; };
 		73ABB4A52727748000592F38 /* AudioRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioRecorder.swift; sourceTree = "<group>"; };
+		73ABB4AB2728143500592F38 /* Coordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Coordinator.swift; sourceTree = "<group>"; };
+		73ABB4AD2728144800592F38 /* Modifiers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Modifiers.swift; sourceTree = "<group>"; };
+		73ABB4AF2728145400592F38 /* Representable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Representable.swift; sourceTree = "<group>"; };
+		73ABB4B12728146000592F38 /* TextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextView.swift; sourceTree = "<group>"; };
+		73ABB4B32728146800592F38 /* UIFont.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIFont.swift; sourceTree = "<group>"; };
+		73ABB4B52728971E00592F38 /* View+hideKeyboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "View+hideKeyboard.swift"; sourceTree = "<group>"; };
 		73B63B3E271079B100994B92 /* bell-notification.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = "bell-notification.json"; sourceTree = "<group>"; };
 		73B63B4027107BF900994B92 /* notification-bell.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = "notification-bell.json"; sourceTree = "<group>"; };
 		73B63B4227107C4500994B92 /* notification.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = notification.json; sourceTree = "<group>"; };
@@ -396,6 +408,7 @@
 		73853D53270C4FEB00B0B4BF /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				73ABB4AA2728140800592F38 /* AutoTextField */,
 				73AB53CB27204C9200AA6033 /* Flexible */,
 				734BF828270C9E33008438D9 /* TWButton.swift */,
 				E482102C271AD6F600A84A2C /* Audiogram */,
@@ -504,6 +517,7 @@
 				E4D9BDA02716019A005CD3A0 /* OSLog.swift */,
 				E4CC7923271C1149003C359A /* CNContactStore.swift */,
 				E4CC7929271D4F86003C359A /* Published.swift */,
+				73ABB4B52728971E00592F38 /* View+hideKeyboard.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -539,6 +553,18 @@
 				73AB53D027204D0D00AA6033 /* FlexibleView.swift */,
 			);
 			path = Flexible;
+			sourceTree = "<group>";
+		};
+		73ABB4AA2728140800592F38 /* AutoTextField */ = {
+			isa = PBXGroup;
+			children = (
+				73ABB4AB2728143500592F38 /* Coordinator.swift */,
+				73ABB4AD2728144800592F38 /* Modifiers.swift */,
+				73ABB4AF2728145400592F38 /* Representable.swift */,
+				73ABB4B12728146000592F38 /* TextView.swift */,
+				73ABB4B32728146800592F38 /* UIFont.swift */,
+			);
+			path = AutoTextField;
 			sourceTree = "<group>";
 		};
 		E4821027271AD64400A84A2C /* Views */ = {
@@ -782,6 +808,7 @@
 				E4CC7922271B3C28003C359A /* ContactListView.swift in Sources */,
 				73853DA8270C579F00B0B4BF /* Bundle+AppInfo.swift in Sources */,
 				73853D5B270C508100B0B4BF /* MemeFont.swift in Sources */,
+				73ABB4AC2728143500592F38 /* Coordinator.swift in Sources */,
 				7376608D270DA281001BA79F /* AppDelegate.swift in Sources */,
 				E482102E271AD91E00A84A2C /* InboxViewModel.swift in Sources */,
 				73853D5D270C509700B0B4BF /* HoledMask.swift in Sources */,
@@ -815,8 +842,11 @@
 				73AB53D32720712D00AA6033 /* RecordSheetView.swift in Sources */,
 				73853D73270C51AE00B0B4BF /* WebURLView.swift in Sources */,
 				73853DA6270C579300B0B4BF /* AnyShape.swift in Sources */,
+				73ABB4B42728146800592F38 /* UIFont.swift in Sources */,
 				737660B6270DFED3001BA79F /* AudioRecorderView.swift in Sources */,
 				73853DC4270C58BF00B0B4BF /* PartialSheetViewModifier.swift in Sources */,
+				73ABB4B62728971E00592F38 /* View+hideKeyboard.swift in Sources */,
+				73ABB4B02728145400592F38 /* Representable.swift in Sources */,
 				E4CC792A271D4F86003C359A /* Published.swift in Sources */,
 				73853DAE270C57D000B0B4BF /* View+rotated.swift in Sources */,
 				73AB53D127204D0D00AA6033 /* FlexibleView.swift in Sources */,
@@ -834,8 +864,10 @@
 				73853DC3270C58BF00B0B4BF /* BlurEffectView.swift in Sources */,
 				73853DB2270C57EB00B0B4BF /* Sheet+Environment.swift in Sources */,
 				7376608F270DA305001BA79F /* SceneDelegate.swift in Sources */,
+				73ABB4AE2728144800592F38 /* Modifiers.swift in Sources */,
 				73853DC5270C58BF00B0B4BF /* View+PartialSheetModifier.swift in Sources */,
 				73853DB4270C57FB00B0B4BF /* Photos+authorization.swift in Sources */,
+				73ABB4B22728146000592F38 /* TextView.swift in Sources */,
 				73AB53CD27204CF200AA6033 /* _FlexibleView.swift in Sources */,
 				73853D4F270C4ED900B0B4BF /* SettingsView.swift in Sources */,
 				737660B4270DDFB9001BA79F /* MessageDetailView.swift in Sources */,

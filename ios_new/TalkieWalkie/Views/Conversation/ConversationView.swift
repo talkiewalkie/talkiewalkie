@@ -18,44 +18,49 @@ struct ConversationView: View {
 
     var body: some View {
         ZStack(alignment: .top) {
-            Image("hex_pattern")
-                .resizable(resizingMode: .tile)
-                .brightness(-0.2)
-                .opacity(0.4)
-            
-            Color.gray.opacity(0.1).frame(height: 1)
-            
-            VStack {
-                if model.loading { ProgressView() }
+            ZStack(alignment: .top) {
+                Image("hex_pattern")
+                    .resizable(resizingMode: .tile)
+                    .brightness(-0.2)
+                    .opacity(0.4)
+                
+                Color.gray.opacity(0.1).frame(height: 1)
+                
+                VStack {
+                    if model.loading { ProgressView() }
 
-                ScrollViewReader { _ in
-                    ReversedScrollView(.vertical, showsIndicators: false) {
-                        VStack {
-                            Text("\(conversation.messages?.count ?? 0) messages here")
-                            ForEach(conversation.messages!.array as! [Message]) { message in
-                                MessageView(message: message)
+                    ScrollViewReader { _ in
+                        ReversedScrollView(.vertical, showsIndicators: false) {
+                            VStack {
+                                Text("\(conversation.messages?.count ?? 0) messages here")
+                                ForEach(conversation.messages!.array as! [Message]) { message in
+                                    MessageView(message: message)
+                                }
+                                
+        //                        ForEach(dummyChatMessages) { message in
+        //                            ChatBubble(message: message, namespace: namespace)
+        //                        }
+    //
+    //                            ForEach(conversation.messages!.array as! [Message]) { message in
+    //                                switch message.content! {
+    //                                case let tmee as TextMessage:
+    //                                    Text(tmee.text ?? "no text")
+    //                                case let vm as VoiceMessage:
+    //                                    Text(String(data: vm.rawAudio!, encoding: .utf8) ?? "no audio")
+    //                                default:
+    //                                    Text("fatalerrrrrrror")
+    //                                }
+    //                            }
                             }
-                            
-    //                        ForEach(dummyChatMessages) { message in
-    //                            ChatBubble(message: message, namespace: namespace)
-    //                        }
-//
-//                            ForEach(conversation.messages!.array as! [Message]) { message in
-//                                switch message.content! {
-//                                case let tmee as TextMessage:
-//                                    Text(tmee.text ?? "no text")
-//                                case let vm as VoiceMessage:
-//                                    Text(String(data: vm.rawAudio!, encoding: .utf8) ?? "no audio")
-//                                default:
-//                                    Text("fatalerrrrrrror")
-//                                }
-//                            }
+                            .frame(maxWidth: .infinity, alignment: .trailing)
+                            .padding(.horizontal)
+                            .padding(.bottom, isTextFieldFocused ? 60 : 108)
                         }
-                        .frame(maxWidth: .infinity, alignment: .trailing)
-                        .padding(.horizontal)
-                        .padding(.bottom, isTextFieldFocused ? 60 : 108)
                     }
                 }
+            }
+            .onTapGesture {
+                hideKeyboard()
             }
             
             RecordSheetView(isTextFieldFocused: $isTextFieldFocused)
