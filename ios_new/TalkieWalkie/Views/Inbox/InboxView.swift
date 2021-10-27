@@ -13,7 +13,7 @@ struct InboxView: View {
     @Namespace var namespace
     @ObservedObject var model: InboxViewModel
     @EnvironmentObject var authed: AuthState
-    
+
     @State var guideState = false
     @State var isRecording = false
 
@@ -37,10 +37,25 @@ struct InboxView: View {
                 }
             }
             .navigationTitle("Chats")
-            .navigationBarItems(leading: HeaderSettingsView())
+            .navigationBarItems(
+                leading: HeaderSettingsView(),
+                trailing: Button(action: model.syncConversations) { Image(systemName: "arrow.clockwise") }
+            )
             .toolbar {
                 ToolbarItem(placement: .principal) {
-                    Text(model.loading ? "syncing..." : "connected")
+                    // TODO: Not working
+                    if case .Connected(let api, _) = authed.state {
+                        switch api.stateDelegate.state {
+                        case .Disconnected:
+                            Text("disconnected")
+                        case .Connected:
+                            Text("connected")
+                        case .Connecting:
+                            Text("connecting...")
+                        }
+                    } else {
+                        EmptyView()
+                    }
                 }
             }
             .onAppear { model.syncConversations() }
@@ -49,7 +64,7 @@ struct InboxView: View {
 }
 
 struct ConversationAvatar: View {
-    var conversation: Conversation
+    @ObservedObject var conversation: Conversation
     @EnvironmentObject var authed: AuthState
 
     var body: some View {
@@ -73,7 +88,7 @@ struct ConversationAvatar: View {
 }
 
 struct ConversationListItemView: View {
-    var conversation: Conversation
+    @ObservedObject var conversation: Conversation
 
     var body: some View {
         HStack(alignment: .top) {

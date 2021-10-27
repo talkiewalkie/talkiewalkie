@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-func ConversationDisplay(c *models.Conversation) (string, error) {
+func ConversationDisplay(c *models.Conversation, me *models.User) (string, error) {
 	if c.R.UserConversations == nil {
 		return "", errors.New("need to load user conversations")
 	} else if len(c.R.UserConversations) > 0 && c.R.UserConversations[0].R.User == nil {
@@ -20,6 +20,9 @@ func ConversationDisplay(c *models.Conversation) (string, error) {
 
 	handles := []string{}
 	for _, ug := range c.R.UserConversations {
+		if ug.UserID == me.ID {
+			continue
+		}
 		redundant := false
 		displayName := UserDisplayName(ug.R.User)
 		for _, h := range handles {
