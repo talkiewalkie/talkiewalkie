@@ -44,8 +44,14 @@ struct ScaleButtonStyle: ButtonStyle {
 
 struct TWButton_Previews: PreviewProvider {
     static var previews: some View {
-        TWButton(action: {}, primary: false, compact: false) {
-            Text("Continue".uppercased())
+        VStack {
+            TWButton(action: {}, primary: false, compact: false) {
+                Text("Continue".uppercased())
+            }
+            
+            TWButton(action: {}, primary: true, compact: true) {
+                Text("Continue".uppercased())
+            }
         }
     }
 }

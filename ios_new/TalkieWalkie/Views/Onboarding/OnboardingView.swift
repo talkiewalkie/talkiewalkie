@@ -643,6 +643,7 @@ struct FinalSuccessView: View {
 struct Onboarding_Previews: PreviewProvider {
     static var previews: some View {
         TestView()
+            .withDummmyEnvironments()
     }
 
     struct TestView: View {
