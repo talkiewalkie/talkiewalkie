@@ -42,7 +42,7 @@
 		73853D4F270C4ED900B0B4BF /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73853D4E270C4ED900B0B4BF /* SettingsView.swift */; };
 		73853D55270C503200B0B4BF /* LottieView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73853D54270C503200B0B4BF /* LottieView.swift */; };
 		73853D57270C505000B0B4BF /* CloseButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73853D56270C505000B0B4BF /* CloseButton.swift */; };
-		73853D59270C506900B0B4BF /* ErrorPopup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73853D58270C506900B0B4BF /* ErrorPopup.swift */; };
+		73853D59270C506900B0B4BF /* ErrorPopupManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73853D58270C506900B0B4BF /* ErrorPopupManager.swift */; };
 		73853D5B270C508100B0B4BF /* MemeFont.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73853D5A270C508100B0B4BF /* MemeFont.swift */; };
 		73853D5D270C509700B0B4BF /* HoledMask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73853D5C270C509700B0B4BF /* HoledMask.swift */; };
 		73853D5F270C50AB00B0B4BF /* AnimatedEllipsis.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73853D5E270C50AB00B0B4BF /* AnimatedEllipsis.swift */; };
@@ -90,6 +90,8 @@
 		73853DC3270C58BF00B0B4BF /* BlurEffectView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73853DBD270C58BF00B0B4BF /* BlurEffectView.swift */; };
 		73853DC4270C58BF00B0B4BF /* PartialSheetViewModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73853DBE270C58BF00B0B4BF /* PartialSheetViewModifier.swift */; };
 		73853DC5270C58BF00B0B4BF /* View+PartialSheetModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73853DBF270C58BF00B0B4BF /* View+PartialSheetModifier.swift */; };
+		73904A372729B0E000A5B306 /* DummyStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73904A362729B0E000A5B306 /* DummyStore.swift */; };
+		73A97275272ACED500B14507 /* LocalNotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73A97274272ACED500B14507 /* LocalNotificationManager.swift */; };
 		73AB53C327204B0200AA6033 /* AudioMessageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73AB53C227204B0200AA6033 /* AudioMessageView.swift */; };
 		73AB53C527204B1200AA6033 /* TextMessageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73AB53C427204B1200AA6033 /* TextMessageView.swift */; };
 		73AB53C927204B3000AA6033 /* MessageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73AB53C827204B3000AA6033 /* MessageView.swift */; };
@@ -100,7 +102,6 @@
 		73AB53D52720802100AA6033 /* VisualEffectView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73AB53D42720802100AA6033 /* VisualEffectView.swift */; };
 		73ABB4A42727746B00592F38 /* AudioWaveView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73ABB4A32727746B00592F38 /* AudioWaveView.swift */; };
 		73ABB4A62727748000592F38 /* AudioRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73ABB4A52727748000592F38 /* AudioRecorder.swift */; };
-		73ABB4A92727D59900592F38 /* GiphyUISDK in Frameworks */ = {isa = PBXBuildFile; productRef = 73ABB4A82727D59900592F38 /* GiphyUISDK */; };
 		73ABB4AC2728143500592F38 /* Coordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73ABB4AB2728143500592F38 /* Coordinator.swift */; };
 		73ABB4AE2728144800592F38 /* Modifiers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73ABB4AD2728144800592F38 /* Modifiers.swift */; };
 		73ABB4B02728145400592F38 /* Representable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73ABB4AF2728145400592F38 /* Representable.swift */; };
@@ -183,7 +184,7 @@
 		73853D4E270C4ED900B0B4BF /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		73853D54270C503200B0B4BF /* LottieView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LottieView.swift; sourceTree = "<group>"; };
 		73853D56270C505000B0B4BF /* CloseButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloseButton.swift; sourceTree = "<group>"; };
-		73853D58270C506900B0B4BF /* ErrorPopup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorPopup.swift; sourceTree = "<group>"; };
+		73853D58270C506900B0B4BF /* ErrorPopupManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorPopupManager.swift; sourceTree = "<group>"; };
 		73853D5A270C508100B0B4BF /* MemeFont.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemeFont.swift; sourceTree = "<group>"; };
 		73853D5C270C509700B0B4BF /* HoledMask.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HoledMask.swift; sourceTree = "<group>"; };
 		73853D5E270C50AB00B0B4BF /* AnimatedEllipsis.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnimatedEllipsis.swift; sourceTree = "<group>"; };
@@ -229,6 +230,8 @@
 		73853DBD270C58BF00B0B4BF /* BlurEffectView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BlurEffectView.swift; sourceTree = "<group>"; };
 		73853DBE270C58BF00B0B4BF /* PartialSheetViewModifier.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PartialSheetViewModifier.swift; sourceTree = "<group>"; };
 		73853DBF270C58BF00B0B4BF /* View+PartialSheetModifier.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "View+PartialSheetModifier.swift"; sourceTree = "<group>"; };
+		73904A362729B0E000A5B306 /* DummyStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DummyStore.swift; sourceTree = "<group>"; };
+		73A97274272ACED500B14507 /* LocalNotificationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalNotificationManager.swift; sourceTree = "<group>"; };
 		73AB53C227204B0200AA6033 /* AudioMessageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioMessageView.swift; sourceTree = "<group>"; };
 		73AB53C427204B1200AA6033 /* TextMessageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextMessageView.swift; sourceTree = "<group>"; };
 		73AB53C827204B3000AA6033 /* MessageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageView.swift; sourceTree = "<group>"; };
@@ -399,6 +402,7 @@
 		73853D50270C4F9000B0B4BF /* Stores */ = {
 			isa = PBXGroup;
 			children = (
+				73904A362729B0E000A5B306 /* DummyStore.swift */,
 				E4D9BD9027157DC3005CD3A0 /* Conversation.swift */,
 				E4D9BD8F27157DC2005CD3A0 /* Message.swift */,
 				E4D9BD9127157DC3005CD3A0 /* User.swift */,
@@ -419,7 +423,6 @@
 				73853DB9270C58B200B0B4BF /* PartialSheet */,
 				73853D54270C503200B0B4BF /* LottieView.swift */,
 				73853D56270C505000B0B4BF /* CloseButton.swift */,
-				73853D58270C506900B0B4BF /* ErrorPopup.swift */,
 				73853D5A270C508100B0B4BF /* MemeFont.swift */,
 				73853D5C270C509700B0B4BF /* HoledMask.swift */,
 				73853D5E270C50AB00B0B4BF /* AnimatedEllipsis.swift */,
@@ -428,6 +431,8 @@
 				73853D64270C511000B0B4BF /* MarqueeText.swift */,
 				73853D66270C512C00B0B4BF /* OnboardingTourView.swift */,
 				73853D68270C513D00B0B4BF /* PageCounter.swift */,
+				73853D58270C506900B0B4BF /* ErrorPopupManager.swift */,
+				73A97274272ACED500B14507 /* LocalNotificationManager.swift */,
 				73853D6E270C518900B0B4BF /* TooltipManager.swift */,
 				73853D70270C519C00B0B4BF /* TooltipShape.swift */,
 				73853D72270C51AE00B0B4BF /* WebURLView.swift */,
@@ -789,7 +794,7 @@
 			files = (
 				73ABB4A62727748000592F38 /* AudioRecorder.swift in Sources */,
 				73853D69270C513D00B0B4BF /* PageCounter.swift in Sources */,
-				73853D59270C506900B0B4BF /* ErrorPopup.swift in Sources */,
+				73853D59270C506900B0B4BF /* ErrorPopupManager.swift in Sources */,
 				73853D49270C3D3F00B0B4BF /* SplashScreen.swift in Sources */,
 				73853DB0270C57E200B0B4BF /* TimeInterval.swift in Sources */,
 				73AB53CF27204D0200AA6033 /* SizeReader.swift in Sources */,
@@ -828,6 +833,7 @@
 				73519D38270B3EDE009BA6FF /* Audiogram1.swift in Sources */,
 				E4CC7928271D2D0F003C359A /* AuthenticationState.swift in Sources */,
 				E4D9BD8C27157D39005CD3A0 /* app.pb.swift in Sources */,
+				73A97275272ACED500B14507 /* LocalNotificationManager.swift in Sources */,
 				73853D5F270C50AB00B0B4BF /* AnimatedEllipsis.swift in Sources */,
 				E4D9BD7827157530005CD3A0 /* LocalModels.xcdatamodeld in Sources */,
 				E4CC7926271C136D003C359A /* AutomaticAvatar.swift in Sources */,
@@ -847,6 +853,7 @@
 				737660B6270DFED3001BA79F /* AudioRecorderView.swift in Sources */,
 				73853DC4270C58BF00B0B4BF /* PartialSheetViewModifier.swift in Sources */,
 				73ABB4B62728971E00592F38 /* View+hideKeyboard.swift in Sources */,
+				73904A372729B0E000A5B306 /* DummyStore.swift in Sources */,
 				73ABB4B02728145400592F38 /* Representable.swift in Sources */,
 				E4CC792A271D4F86003C359A /* Published.swift in Sources */,
 				73853DAE270C57D000B0B4BF /* View+rotated.swift in Sources */,

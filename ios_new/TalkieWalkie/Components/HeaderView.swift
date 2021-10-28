@@ -32,5 +32,6 @@ struct HeaderSettingsView: View {
 struct HeaderView_Previews: PreviewProvider {
     static var previews: some View {
         HeaderSettingsView()
+            .withDummmyEnvironments()
     }
 }

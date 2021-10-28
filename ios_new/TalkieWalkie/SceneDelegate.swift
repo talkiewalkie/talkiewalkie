@@ -24,16 +24,18 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let appDelegate = (UIApplication.shared.delegate as! AppDelegate)
         
         let auth = appDelegate.auth
-        let tooltipManager = TooltipManager()
-        let pp = PartialSheetManager()
 
         let contentView = HomeView()
             .environment(\.managedObjectContext, auth.moc)
             .environmentObject(auth)
             .addTooltip()
-            .environmentObject(tooltipManager)
+            .environmentObject(TooltipManager())
             .addPartialSheet()
-            .environmentObject(pp)
+            .environmentObject(PartialSheetManager())
+            .addLocalNotification()
+            .environmentObject(LocalNotificationManager())
+            .addErrorPopup()
+            .environmentObject(ErrorPopupManager())
 
         // Use a UIHostingController as window root view controller.
         if let windowScene = scene as? UIWindowScene {

@@ -107,6 +107,7 @@ struct BubbleView_Previews: PreviewProvider {
     
     static var previews: some View {
         TestView()
+            .withDummmyEnvironments()
             .environment(\.managedObjectContext, persistentContainer.viewContext)
     }
     
