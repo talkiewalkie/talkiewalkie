@@ -23,12 +23,14 @@ class InboxViewModel: ObservableObject {
                 let savedMsg = Message.upsert(msg, context: authed.moc)
                 let conversation = Conversation.getByUuidOrCreate(msg.convUuid.uuidOrThrow(), context: authed.moc)
 
-                conversation.addToMessages(savedMsg)
+                conversation.addToMessages_(savedMsg)
 
                 authed.moc.saveOrLogError()
 
-                savedMsg.objectWillChange.send()
-                conversation.objectWillChange.send()
+                DispatchQueue.main.async {
+                    savedMsg.objectWillChange.send()
+                    conversation.objectWillChange.send()
+                }
             }
         }
     }

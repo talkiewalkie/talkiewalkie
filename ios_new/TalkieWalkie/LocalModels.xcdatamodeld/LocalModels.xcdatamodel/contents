@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="19461" systemVersion="20E241" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
     <entity name="Conversation" representedClassName=".Conversation" syncable="YES" codeGenerationType="class">
-        <attribute name="createdAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
-        <attribute name="lastMemberReadUntil" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="lastActivity_" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="title" optional="YES" attributeType="String"/>
         <attribute name="uuid" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
-        <relationship name="messages" optional="YES" toMany="YES" deletionRule="Nullify" ordered="YES" destinationEntity="Message" inverseName="conversation" inverseEntity="Message"/>
-        <relationship name="users" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="User" inverseName="conversations" inverseEntity="User"/>
+        <relationship name="messages_" optional="YES" toMany="YES" deletionRule="Nullify" ordered="YES" destinationEntity="Message" inverseName="conversation" inverseEntity="Message"/>
+        <relationship name="users_" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="UserConversation" inverseName="conversation" inverseEntity="UserConversation"/>
         <uniquenessConstraints>
             <uniquenessConstraint>
                 <constraint value="uuid"/>
@@ -16,13 +15,18 @@
     <entity name="Me" representedClassName=".Me" parentEntity="User" syncable="YES" codeGenerationType="class">
         <attribute name="firebaseUid" optional="YES" attributeType="String"/>
         <attribute name="locale" optional="YES" attributeType="String"/>
+        <uniquenessConstraints>
+            <uniquenessConstraint>
+                <constraint value="firebaseUid"/>
+            </uniquenessConstraint>
+        </uniquenessConstraints>
     </entity>
     <entity name="Message" representedClassName=".Message" syncable="YES" codeGenerationType="class">
         <attribute name="createdAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="uuid" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
         <relationship name="author" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="User" inverseName="authoredMessages_" inverseEntity="User"/>
         <relationship name="content" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="MessageContent" inverseName="message" inverseEntity="MessageContent"/>
-        <relationship name="conversation" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Conversation" inverseName="messages" inverseEntity="Conversation"/>
+        <relationship name="conversation" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Conversation" inverseName="messages_" inverseEntity="Conversation"/>
         <uniquenessConstraints>
             <uniquenessConstraint>
                 <constraint value="uuid"/>
@@ -40,12 +44,17 @@
         <attribute name="phone" optional="YES" attributeType="String"/>
         <attribute name="uuid" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
         <relationship name="authoredMessages_" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Message" inverseName="author" inverseEntity="Message"/>
-        <relationship name="conversations" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Conversation" inverseName="users" inverseEntity="Conversation"/>
+        <relationship name="conversations" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="UserConversation" inverseName="user" inverseEntity="UserConversation"/>
         <uniquenessConstraints>
             <uniquenessConstraint>
                 <constraint value="uuid"/>
             </uniquenessConstraint>
         </uniquenessConstraints>
+    </entity>
+    <entity name="UserConversation" representedClassName=".UserConversation" syncable="YES" codeGenerationType="class">
+        <attribute name="readUntil" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <relationship name="conversation" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Conversation" inverseName="users_" inverseEntity="Conversation"/>
+        <relationship name="user" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="User" inverseName="conversations" inverseEntity="User"/>
     </entity>
     <entity name="VoiceMessage" representedClassName=".VoiceMessage" parentEntity="MessageContent" syncable="YES" codeGenerationType="class">
         <attribute name="processedAudio" optional="YES" attributeType="Binary"/>
@@ -53,12 +62,13 @@
         <attribute name="siriTranscript" optional="YES" attributeType="Binary"/>
     </entity>
     <elements>
-        <element name="Conversation" positionX="18" positionY="63" width="128" height="119"/>
+        <element name="Conversation" positionX="-9" positionY="45" width="128" height="104"/>
         <element name="Me" positionX="36" positionY="81" width="128" height="59"/>
         <element name="Message" positionX="-54" positionY="9" width="128" height="104"/>
         <element name="MessageContent" positionX="-36" positionY="36" width="128" height="44"/>
         <element name="TextMessage" positionX="-18" positionY="45" width="128" height="44"/>
         <element name="User" positionX="-63" positionY="-18" width="128" height="104"/>
+        <element name="UserConversation" positionX="-18" positionY="72" width="128" height="74"/>
         <element name="VoiceMessage" positionX="0" positionY="54" width="128" height="74"/>
     </elements>
 </model>

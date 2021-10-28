@@ -82,6 +82,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         completionHandler(UIBackgroundFetchResult.newData)
     }
+    
+    func applicationWillTerminate(_ application: UIApplication) {
+        if case .Connected(let api, _) = self.auth.state {
+            // TODO: send last connected at
+        }
+    }
 }
 
 extension AppDelegate: UNUserNotificationCenterDelegate {

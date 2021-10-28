@@ -33,6 +33,7 @@ class AuthState: ObservableObject {
     }()
 
     var me: Me? { Me.fromCache(context: moc) }
+    var meOrThrow: Me { me! }
 
     private var logger = Logger.withLabel("AuthState")
     private let config = Config.load(version: env)
@@ -70,7 +71,7 @@ class AuthState: ObservableObject {
             let api = AuthedGrpcApi(url: self.config.apiUrl, token: res.token, persistentContainer: self.persistentContainer)
 
             if let me = Me.fromCache(context: self.moc) {
-                self.logger.debug("loaded user info from cache: \(me)")
+                self.logger.debug("loaded my user info from cache")
                 self.state = AuthenticationState.Connected(api, me)
             }
 
@@ -78,16 +79,18 @@ class AuthState: ObservableObject {
                 let (res, _) = api.me()
                 if let res = res {
                     let uuid = UUID(uuidString: res.user.uuid)!
-                    self.backgroundMoc.perform {
-                        let me = Me.getByUuidOrCreate(uuid, context: self.moc)
+                    self.backgroundMoc.performAndWait {
+                        let me = Me(context: self.backgroundMoc)
                         me.uuid = uuid
                         me.displayName = res.user.displayName
                         me.firebaseUid = self.firebaseUser?.uid
 
-                        self.backgroundMoc.saveOrLogError()
-                        me.objectWillChange.send()
-                        DispatchQueue.main.async { self.state = AuthenticationState.Connected(api, me) }
+                        DispatchQueue.main.async {
+                            me.objectWillChange.send()
+                            self.state = AuthenticationState.Connected(api, me)
+                        }
                     }
+                    self.backgroundMoc.saveOrLogError()
                 }
             }
         }
@@ -103,7 +106,7 @@ class AuthState: ObservableObject {
                 return
             }
         }
-        
+
         backgroundMoc.perform { self.cleanCoreData(context: self.backgroundMoc) }
     }
 

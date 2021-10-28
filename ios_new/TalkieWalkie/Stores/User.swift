@@ -13,7 +13,7 @@ import FirebaseAuth
 extension User {
     @discardableResult
     static func upsert(_ u: App_User, context: NSManagedObjectContext) -> User {
-        let localU = User.getByUuidOrCreate(u.uuid.uuidOrThrow(), context: context)
+        let localU = User(context: context)
         localU.uuid = u.uuid.uuidOrThrow()
         localU.displayName = u.displayName
         localU.phone = u.phone
@@ -27,6 +27,13 @@ extension Me {
         req.predicate = .all
 
         let res = (try? context.fetch(req)) ?? []
-        return res.first
+        
+        // I hate Core Data. Why would we have multiple instance of the Me object???
+        context.perform {
+            res.filter { $0.uuid == nil }.forEach { context.delete($0) }
+            context.saveOrLogError()
+        }
+        
+        return res.first { $0.uuid != nil }
     }
 }

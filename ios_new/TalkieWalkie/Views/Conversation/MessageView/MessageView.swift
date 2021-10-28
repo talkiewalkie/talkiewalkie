@@ -7,6 +7,7 @@
 
 import SwiftUI
 import CoreData
+import OSLog
 
 struct MessageView: View {
     var message: Message
@@ -14,13 +15,7 @@ struct MessageView: View {
     var showAuthor: Bool = true
     
     @EnvironmentObject var authed: AuthState
-    var isMe: Bool {
-        if let me = authed.me {
-            return message.author?.uuid == me.uuid
-        } else {
-            return false
-        }
-    }
+    var isMe: Bool { message.author?.uuid == authed.meOrThrow.uuid }
     
     var body: some View {
         HStack {

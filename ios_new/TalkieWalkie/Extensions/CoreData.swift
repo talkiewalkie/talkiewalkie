@@ -16,8 +16,12 @@ extension NSPredicate {
 
 extension NSManagedObjectContext {
     func saveOrLogError() {
-        do { try save() }
-        catch { os_log(.error, "Failed to save coredata: \(error.localizedDescription)") }
+        performAndWait {
+            if hasChanges {
+                do { try save() }
+                catch { os_log(.error, "Failed to save coredata: \(error.localizedDescription)") }
+            }
+        }
     }
 
     func executeOrLogError(_ request: NSPersistentStoreRequest) -> NSPersistentStoreResult? {
@@ -26,7 +30,7 @@ extension NSManagedObjectContext {
         catch { os_log("failed to execute request: \(error.localizedDescription)") }
         return res
     }
-    
+
     /// Executes the given `NSBatchDeleteRequest` and directly merges the changes to bring the given managed object context up to date.
     /// From https://stackoverflow.com/a/60266079, although it is not updating the contexts though, hence not meeting its purpose.
     /// Leaving it for reference.
@@ -58,8 +62,6 @@ extension NSManagedObject {
         } else {
             os_log(.debug, "[coredata:\(ename)] creating item for uuid:[\(uuid)]")
             let new = Self(context: context)
-            try? context.save()
-
             return new
         }
     }

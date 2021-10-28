@@ -38,6 +38,7 @@ type User struct {
 	DisplayName        null.String       `db:"display_name" boil:"display_name" json:"display_name,omitempty" toml:"display_name" yaml:"display_name,omitempty"`
 	Locales            types.StringArray `db:"locales" boil:"locales" json:"locales,omitempty" toml:"locales" yaml:"locales,omitempty"`
 	BroadcastArrival   bool              `db:"broadcast_arrival" boil:"broadcast_arrival" json:"broadcast_arrival" toml:"broadcast_arrival" yaml:"broadcast_arrival"`
+	LastConnectedAt    time.Time         `db:"last_connected_at" boil:"last_connected_at" json:"last_connected_at" toml:"last_connected_at" yaml:"last_connected_at"`
 
 	R *userR `db:"-" boil:"-" json:"-" toml:"-" yaml:"-"`
 	L userL  `db:"-" boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -56,6 +57,7 @@ var UserColumns = struct {
 	DisplayName        string
 	Locales            string
 	BroadcastArrival   string
+	LastConnectedAt    string
 }{
 	ID:                 "id",
 	UUID:               "uuid",
@@ -69,6 +71,7 @@ var UserColumns = struct {
 	DisplayName:        "display_name",
 	Locales:            "locales",
 	BroadcastArrival:   "broadcast_arrival",
+	LastConnectedAt:    "last_connected_at",
 }
 
 var UserTableColumns = struct {
@@ -84,6 +87,7 @@ var UserTableColumns = struct {
 	DisplayName        string
 	Locales            string
 	BroadcastArrival   string
+	LastConnectedAt    string
 }{
 	ID:                 "user.id",
 	UUID:               "user.uuid",
@@ -97,6 +101,7 @@ var UserTableColumns = struct {
 	DisplayName:        "user.display_name",
 	Locales:            "user.locales",
 	BroadcastArrival:   "user.broadcast_arrival",
+	LastConnectedAt:    "user.last_connected_at",
 }
 
 // Generated where
@@ -171,6 +176,7 @@ var UserWhere = struct {
 	DisplayName        whereHelpernull_String
 	Locales            whereHelpertypes_StringArray
 	BroadcastArrival   whereHelperbool
+	LastConnectedAt    whereHelpertime_Time
 }{
 	ID:                 whereHelperint{field: "\"user\".\"id\""},
 	UUID:               whereHelperuuid_UUID{field: "\"user\".\"uuid\""},
@@ -184,6 +190,7 @@ var UserWhere = struct {
 	DisplayName:        whereHelpernull_String{field: "\"user\".\"display_name\""},
 	Locales:            whereHelpertypes_StringArray{field: "\"user\".\"locales\""},
 	BroadcastArrival:   whereHelperbool{field: "\"user\".\"broadcast_arrival\""},
+	LastConnectedAt:    whereHelpertime_Time{field: "\"user\".\"last_connected_at\""},
 }
 
 // UserRels is where relationship names are stored.
@@ -213,9 +220,9 @@ func (*userR) NewStruct() *userR {
 type userL struct{}
 
 var (
-	userAllColumns            = []string{"id", "uuid", "firebase_uid", "profile_picture", "created_at", "updated_at", "status", "phone_number", "onboarding_finished", "display_name", "locales", "broadcast_arrival"}
+	userAllColumns            = []string{"id", "uuid", "firebase_uid", "profile_picture", "created_at", "updated_at", "status", "phone_number", "onboarding_finished", "display_name", "locales", "broadcast_arrival", "last_connected_at"}
 	userColumnsWithoutDefault = []string{"firebase_uid", "profile_picture", "status", "phone_number", "display_name", "locales"}
-	userColumnsWithDefault    = []string{"id", "uuid", "created_at", "updated_at", "onboarding_finished", "broadcast_arrival"}
+	userColumnsWithDefault    = []string{"id", "uuid", "created_at", "updated_at", "onboarding_finished", "broadcast_arrival", "last_connected_at"}
 	userPrimaryKeyColumns     = []string{"id"}
 )
 

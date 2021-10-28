@@ -1,14 +1,14 @@
 //
-//  RecordSheetView.swift
+//  ComposerView.swift
 //  TalkieWalkie
 //
 //  Created by Alexandre Carlier on 20.10.21.
 //
 
-import SwiftUI
 import GiphyUISDK
+import SwiftUI
 
-enum RecordSheetState {
+enum ComposerState {
     case inactive
     case recording
     case recordingFinished
@@ -19,11 +19,12 @@ enum RecordSheetState {
     }
 }
 
-struct RecordSheetView: View {
+struct ComposerView: View {
+    let conversationUuid: UUID
     @Binding var isTextFieldFocused: Bool
     
     @State var isRecording: Bool = false
-    @State var recordState: RecordSheetState = .inactive
+    @State var recordState: ComposerState = .inactive
     
     @State var audioRecorder = AudioRecorder()
     @State var timer = Timer.publish(every: 0.05, on: .main, in: .common).autoconnect()
@@ -35,6 +36,8 @@ struct RecordSheetView: View {
     @State var text: String = ""
     
     @State var showAttachementActionSheet: Bool = false
+    
+    @EnvironmentObject var authed: AuthState
     
     var textfield: some View {
         AutoTextField($text, isFocused: $isTextFieldFocused)
@@ -107,16 +110,38 @@ struct RecordSheetView: View {
         }.actionSheet(isPresented: $showAttachementActionSheet) {
             ActionSheet(title: Text("Add attachment"), buttons: [
                 .cancel(),
-                .default(Text("Photo or Video"), action: { }),
-                .default(Text("File"), action: { }),
-                .default(Text("Location"), action: { }),
-                .default(Text("Contact"), action: { })
+                .default(Text("Photo or Video"), action: {}),
+                .default(Text("File"), action: {}),
+                .default(Text("Location"), action: {}),
+                .default(Text("Contact"), action: {})
             ])
         }
     }
     
     var textSendButton: some View {
-        Button(action: { }) {
+        Button(action: {
+            // Core Data
+            authed.backgroundMoc.perform {
+                let backgroundMe = try! authed.backgroundMoc.existingObject(with: authed.meOrThrow.objectID)
+                
+                let message = Message(context: authed.backgroundMoc)
+                message.content = {
+                    let content = TextMessage(context: authed.backgroundMoc)
+                    content.text = text
+                    return content
+                }()
+                message.author = backgroundMe as? User
+                message.conversation = Conversation.getByUuidOrCreate(conversationUuid, context: authed.backgroundMoc)
+                message.createdAt = Date()
+                
+                authed.backgroundMoc.saveOrLogError()
+            }
+            
+            // Sync
+            if case .Connected(let api, _) = authed.state {
+                DispatchQueue.global(qos: .background).async { api.sendMessage(text: text, convUuid: conversationUuid) }
+            }
+        }) {
             Image(systemName: "paperplane.fill")
                 .padding(8)
                 .offset(x: -1, y: 1)
@@ -243,10 +268,9 @@ struct RecordSheetView: View {
                 withAnimation(.easeInOut) {
                     recordState = .recordingFinished
                 }
-                
             }
         }
-        .onReceive(timer) { (_) in
+        .onReceive(timer) { _ in
             if isRecording {
                 audioRecorder.recorder.updateMeters()
                 
@@ -254,7 +278,6 @@ struct RecordSheetView: View {
                 let scaledPower = sigmoid((power + 17) / 1.3) / 0.96 + 0.04
                 
                 audioPowers.append(scaledPower)
-                
             }
         }
     }
@@ -270,7 +293,6 @@ struct RecordSheetView: View {
             audioRecorder.stopPlayback()
         }
     }
-    
     
     var handle: some View {
         Capsule().foregroundColor(.gray.opacity(0.75))
@@ -312,8 +334,7 @@ struct RecordSheetView: View {
         }
     }
 
-    
-    struct DrawingConstraints {
+    enum DrawingConstraints {
         static let MIN_HEIGHT: CGFloat = 100
         static let SWIPE_TO_DISCARD_THRESHOLD: CGFloat = 200
     }
@@ -331,8 +352,6 @@ struct AudioWaveVisualizer: View {
 }
 
 struct AudioPowerVisualizer: View {
-    
-    
     var powers: [Float]
     var onTap: (() -> Void)?
     
@@ -349,11 +368,10 @@ struct AudioPowerVisualizer: View {
         .padding(.vertical, 10)
         .contentShape(Rectangle())
         .onTapGesture { onTap?() }
-        
     }
 }
 
-struct RecordSheetView_Previews: PreviewProvider {
+struct ComposerView_Previews: PreviewProvider {
     static var previews: some View {
         TestView()
     }
@@ -363,12 +381,15 @@ struct RecordSheetView_Previews: PreviewProvider {
         
         var body: some View {
             ZStack(alignment: .bottom) {
-                List(1..<20) { i in
+                List(1 ..< 20) { i in
                     Text("\(i)")
                 }
                 
-                RecordSheetView(isTextFieldFocused: $isTextFieldFocused,
-                                recordState: .inactive, audioPowers: [0.2, 1.0, 0.5])
+                ComposerView(
+                    conversationUuid: UUID(),
+                    isTextFieldFocused: $isTextFieldFocused,
+                    recordState: .inactive, audioPowers: [0.2, 1.0, 0.5]
+                )
             }
         }
     }

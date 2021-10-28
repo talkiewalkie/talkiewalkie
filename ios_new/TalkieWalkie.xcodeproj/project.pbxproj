@@ -96,11 +96,10 @@
 		73AB53CD27204CF200AA6033 /* _FlexibleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73AB53CC27204CF200AA6033 /* _FlexibleView.swift */; };
 		73AB53CF27204D0200AA6033 /* SizeReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73AB53CE27204D0200AA6033 /* SizeReader.swift */; };
 		73AB53D127204D0D00AA6033 /* FlexibleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73AB53D027204D0D00AA6033 /* FlexibleView.swift */; };
-		73AB53D32720712D00AA6033 /* RecordSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73AB53D22720712D00AA6033 /* RecordSheetView.swift */; };
+		73AB53D32720712D00AA6033 /* ComposerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73AB53D22720712D00AA6033 /* ComposerView.swift */; };
 		73AB53D52720802100AA6033 /* VisualEffectView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73AB53D42720802100AA6033 /* VisualEffectView.swift */; };
 		73ABB4A42727746B00592F38 /* AudioWaveView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73ABB4A32727746B00592F38 /* AudioWaveView.swift */; };
 		73ABB4A62727748000592F38 /* AudioRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73ABB4A52727748000592F38 /* AudioRecorder.swift */; };
-		73ABB4A92727D59900592F38 /* GiphyUISDK in Frameworks */ = {isa = PBXBuildFile; productRef = 73ABB4A82727D59900592F38 /* GiphyUISDK */; };
 		73ABB4AC2728143500592F38 /* Coordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73ABB4AB2728143500592F38 /* Coordinator.swift */; };
 		73ABB4AE2728144800592F38 /* Modifiers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73ABB4AD2728144800592F38 /* Modifiers.swift */; };
 		73ABB4B02728145400592F38 /* Representable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73ABB4AF2728145400592F38 /* Representable.swift */; };
@@ -235,7 +234,7 @@
 		73AB53CC27204CF200AA6033 /* _FlexibleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = _FlexibleView.swift; sourceTree = "<group>"; };
 		73AB53CE27204D0200AA6033 /* SizeReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SizeReader.swift; sourceTree = "<group>"; };
 		73AB53D027204D0D00AA6033 /* FlexibleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlexibleView.swift; sourceTree = "<group>"; };
-		73AB53D22720712D00AA6033 /* RecordSheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordSheetView.swift; sourceTree = "<group>"; };
+		73AB53D22720712D00AA6033 /* ComposerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComposerView.swift; sourceTree = "<group>"; };
 		73AB53D42720802100AA6033 /* VisualEffectView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisualEffectView.swift; sourceTree = "<group>"; };
 		73ABB4A32727746B00592F38 /* AudioWaveView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioWaveView.swift; sourceTree = "<group>"; };
 		73ABB4A52727748000592F38 /* AudioRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioRecorder.swift; sourceTree = "<group>"; };
@@ -585,7 +584,6 @@
 			children = (
 				734BF82C270CAF7C008438D9 /* InboxView.swift */,
 				E482102D271AD91E00A84A2C /* InboxViewModel.swift */,
-				73AB53D22720712D00AA6033 /* RecordSheetView.swift */,
 			);
 			path = Inbox;
 			sourceTree = "<group>";
@@ -595,6 +593,7 @@
 			children = (
 				73AB53B927204AA500AA6033 /* MessageView */,
 				73853D4A270C458500B0B4BF /* ConversationView.swift */,
+				73AB53D22720712D00AA6033 /* ComposerView.swift */,
 				E482102F271B0CF500A84A2C /* ConversationViewModel.swift */,
 			);
 			path = Conversation;
@@ -840,7 +839,7 @@
 				73AB53C927204B3000AA6033 /* MessageView.swift in Sources */,
 				73853D71270C519C00B0B4BF /* TooltipShape.swift in Sources */,
 				E4D9BD9427157DC3005CD3A0 /* Conversation.swift in Sources */,
-				73AB53D32720712D00AA6033 /* RecordSheetView.swift in Sources */,
+				73AB53D32720712D00AA6033 /* ComposerView.swift in Sources */,
 				73853D73270C51AE00B0B4BF /* WebURLView.swift in Sources */,
 				73853DA6270C579300B0B4BF /* AnyShape.swift in Sources */,
 				73ABB4B42728146800592F38 /* UIFont.swift in Sources */,

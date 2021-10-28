@@ -45,6 +45,7 @@ func main() {
 	switch *env {
 	case "dev":
 		host = "http://localhost:3000"
+		boil.DebugMode = true
 		if err := godotenv.Load(fmt.Sprintf(".env.%s", *env)); err != nil {
 			log.Panicf("could not load env: %v", err)
 		}
@@ -65,8 +66,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-
-	boil.DebugMode = true
 
 	server := grpc.NewServer(
 		//grpc.KeepaliveParams(keepalive.ServerParameters{Timeout: time.Hour}),

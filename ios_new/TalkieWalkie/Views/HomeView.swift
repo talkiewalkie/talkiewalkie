@@ -33,9 +33,10 @@ struct HomeView: View {
                     }
                 }
             })
-        } else if authed.firebaseUser == nil {
+        } else if authed.me == nil || authed.firebaseUser == nil {
             ProgressView().onAppear {
                 sleep(1)
+                authed.logout()
                 self.showOnboarding = true
             }
         } else {
