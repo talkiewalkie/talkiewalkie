@@ -79,38 +79,3 @@ jobs:
           kubectl wait --for=condition=complete --timeout=15m job/back-build-${{ github.sha }} -n prod && kubectl set image deployment/back back=gcr.io/${{ secrets.GKE_PROJECT }}/talkiewalkie-back:${{ github.sha }} -n prod
           # kubectl wait --for=condition=complete --timeout=15m job/web-build-${{ github.sha }} -n prod && kubectl set image deployment/webapp webapp=gcr.io/${{ secrets.GKE_PROJECT }}/talkiewalkie-front:${{ github.sha }} -n prod
 
-  web-build:
-    name: Webapp CI
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Prettier
-        working-directory: web
-        run: yarn && yarn prettier --check pages/ components/ lib/
-      - name: Eslint
-        working-directory: web
-        run: yarn eslint
-
-      - uses: google-github-actions/setup-gcloud@master
-        with:
-          version: '336.0.0'
-          service_account_email: ${{ secrets.GKE_EMAIL }}
-          service_account_key: ${{ secrets.GKE_SA_B64 }}
-
-      - name: Build
-        working-directory: web
-        run: |
-          gcloud auth configure-docker
-          gcloud container clusters get-credentials $GKE_CLUSTER --zone $GKE_ZONE --project $GKE_PROJECT
-          docker build \
-            --build-arg FIREBASE_PRIVATE_KEY=$(kubectl get secrets -n prod mysecrets --template={{.data.bucket_name}} | base64 -D) \
-            --build-arg FIREBASE_CLIENT_EMAIL=$(kubectl get secrets -n prod mysecrets --template={{.data.firebase_client_email}} | base64 -D) \
-            --build-arg COOKIE_SECRET_CURRENT=$(kubectl get secrets -n prod mysecrets --template={{.data.cookie_secret_current}} | base64 -D) \
-            --build-arg COOKIE_SECRET_PREVIOUS=$(kubectl get secrets -n prod mysecrets --template={{.data.cookie_secret_previous}} | base64 -D) \
-            --tag gcr.io/$GKE_PROJECT/talkiewalkie-front:$GITHUB_SHA \
-            .
-          docker push gcr.io/$GKE_PROJECT/talkiewalkie-front:$GITHUB_SHA
-          kubectl set image deployment/webapp webapp=gcr.io/${{ secrets.GKE_PROJECT }}/talkiewalkie-front:${{ github.sha }} -n prod

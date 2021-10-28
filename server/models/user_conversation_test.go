@@ -785,7 +785,7 @@ func testUserConversationsSelect(t *testing.T) {
 }
 
 var (
-	userConversationDBTypes = map[string]string{`ID`: `integer`, `UserID`: `integer`, `ConversationID`: `integer`, `CreatedAt`: `timestamp with time zone`}
+	userConversationDBTypes = map[string]string{`ID`: `integer`, `UserID`: `integer`, `ConversationID`: `integer`, `CreatedAt`: `timestamp with time zone`, `ReadUntil`: `timestamp with time zone`}
 	_                       = bytes.MinRead
 )
 

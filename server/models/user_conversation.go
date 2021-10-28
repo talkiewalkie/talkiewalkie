@@ -27,6 +27,7 @@ type UserConversation struct {
 	UserID         int       `db:"user_id" boil:"user_id" json:"user_id" toml:"user_id" yaml:"user_id"`
 	ConversationID int       `db:"conversation_id" boil:"conversation_id" json:"conversation_id" toml:"conversation_id" yaml:"conversation_id"`
 	CreatedAt      time.Time `db:"created_at" boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
+	ReadUntil      time.Time `db:"read_until" boil:"read_until" json:"read_until" toml:"read_until" yaml:"read_until"`
 
 	R *userConversationR `db:"-" boil:"-" json:"-" toml:"-" yaml:"-"`
 	L userConversationL  `db:"-" boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -37,11 +38,13 @@ var UserConversationColumns = struct {
 	UserID         string
 	ConversationID string
 	CreatedAt      string
+	ReadUntil      string
 }{
 	ID:             "id",
 	UserID:         "user_id",
 	ConversationID: "conversation_id",
 	CreatedAt:      "created_at",
+	ReadUntil:      "read_until",
 }
 
 var UserConversationTableColumns = struct {
@@ -49,11 +52,13 @@ var UserConversationTableColumns = struct {
 	UserID         string
 	ConversationID string
 	CreatedAt      string
+	ReadUntil      string
 }{
 	ID:             "user_conversation.id",
 	UserID:         "user_conversation.user_id",
 	ConversationID: "user_conversation.conversation_id",
 	CreatedAt:      "user_conversation.created_at",
+	ReadUntil:      "user_conversation.read_until",
 }
 
 // Generated where
@@ -63,11 +68,13 @@ var UserConversationWhere = struct {
 	UserID         whereHelperint
 	ConversationID whereHelperint
 	CreatedAt      whereHelpertime_Time
+	ReadUntil      whereHelpertime_Time
 }{
 	ID:             whereHelperint{field: "\"user_conversation\".\"id\""},
 	UserID:         whereHelperint{field: "\"user_conversation\".\"user_id\""},
 	ConversationID: whereHelperint{field: "\"user_conversation\".\"conversation_id\""},
 	CreatedAt:      whereHelpertime_Time{field: "\"user_conversation\".\"created_at\""},
+	ReadUntil:      whereHelpertime_Time{field: "\"user_conversation\".\"read_until\""},
 }
 
 // UserConversationRels is where relationship names are stored.
@@ -94,9 +101,9 @@ func (*userConversationR) NewStruct() *userConversationR {
 type userConversationL struct{}
 
 var (
-	userConversationAllColumns            = []string{"id", "user_id", "conversation_id", "created_at"}
+	userConversationAllColumns            = []string{"id", "user_id", "conversation_id", "created_at", "read_until"}
 	userConversationColumnsWithoutDefault = []string{"user_id", "conversation_id"}
-	userConversationColumnsWithDefault    = []string{"id", "created_at"}
+	userConversationColumnsWithDefault    = []string{"id", "created_at", "read_until"}
 	userConversationPrimaryKeyColumns     = []string{"id"}
 )
 
