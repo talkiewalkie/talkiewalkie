@@ -12,7 +12,6 @@ import GRPC
 import NIO
 import OSLog
 
-
 enum GrpcConnectionState {
     case Disconnected
     case Connecting
@@ -23,7 +22,7 @@ class GrpcConnectivityState: ConnectivityStateDelegate, ObservableObject {
     private let url: URL
     private let logger = Logger.withLabel("grpc-status")
     @Published var state = GrpcConnectionState.Disconnected
-    
+
     init(_ url: URL) {
         self.url = url
     }
@@ -32,8 +31,7 @@ class GrpcConnectivityState: ConnectivityStateDelegate, ObservableObject {
         if oldState != .ready, newState == .ready {
             logger.debug("got connected [\(self.url.absoluteString)]")
             state = .Connected
-        }
-        else if oldState == .ready, newState != .ready {
+        } else if oldState == .ready, newState != .ready {
             logger.debug("got disconnected (\(String(describing: newState))) [\(self.url.absoluteString)]")
             state = .Disconnected
         }
@@ -60,7 +58,7 @@ private extension String {
 
 class AuthedGrpcApi {
     let stateDelegate: GrpcConnectivityState
-    
+
     private let url: URL
 
     private let logger = Logger.withLabel("grpc-client")
@@ -136,15 +134,7 @@ class AuthedGrpcApi {
     func syncContactList(phones: [String]) -> (App_SyncContactsOutput?, Error?) {
         let input = App_SyncContactsInput.with { $0.phoneNumbers = phones }
 
-        let (twCl, error) = userClient.syncContacts(input).waitForOutput()
-        if let twCl = twCl {
-            persistentContainer.performBackgroundTask { context in
-                twCl.users.forEach { u in User.upsert(u, context: context) }
-                context.saveOrLogError()
-            }
-        }
-
-        return (twCl, error)
+        return userClient.syncContacts(input).waitForOutput()
     }
 
     func listConvs() -> ([App_Conversation], Error?) {
@@ -162,12 +152,13 @@ class AuthedGrpcApi {
         return convClient.get(input).waitForOutput()
     }
 
-    func sendMessage(text: String, convUuid: UUID) {
+    func sendMessage(text: String, convUuid: UUID) -> (App_Message?, Error?) {
         let input = App_MessageSendInput.with {
             $0.content = App_MessageSendInput.OneOf_Content.textMessage(App_TextMessage.with { tm in tm.content = text })
             $0.recipients = App_MessageSendInput.OneOf_Recipients.convUuid(convUuid.uuidString)
         }
-        mssgClient.send(input).waitForOutput()
+
+        return mssgClient.send(input).waitForOutput()
     }
 
     func subscribeIncomingMessages(completion: @escaping (App_Message) -> Void) {

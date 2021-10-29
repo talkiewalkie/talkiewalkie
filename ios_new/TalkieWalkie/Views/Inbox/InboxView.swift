@@ -9,6 +9,13 @@ import CoreData
 import OSLog
 import SwiftUI
 
+func sortedConvs(_ convs: FetchedResults<Conversation>) -> [Conversation] {
+    return convs.sorted(by: { a, b in
+        guard let tsA = a.lastActivity, let tsB = b.lastActivity else { return true }
+        return tsA > tsB
+    })
+}
+
 struct InboxView: View {
     @Namespace var namespace
     @ObservedObject var model: InboxViewModel
@@ -26,7 +33,7 @@ struct InboxView: View {
         NavigationView {
             ZStack {
                 VStack {
-                    List(conversations) { conversation in
+                    List(sortedConvs(conversations)) { conversation in
                         NavigationLink(
                             destination: ConversationView(conversation: conversation, namespace: namespace, model: ConversationViewModel(authed, conversation: conversation))
                         ) {
@@ -69,7 +76,7 @@ struct ConversationAvatar: View {
 
     var body: some View {
         Group {
-            let initialLetter = conversation.firstParticipant(thatIsNot: authed.me)?.displayName?.prefix(1) ?? "T"
+            let initialLetter = conversation.firstParticipant(thatIsNot: authed.meOrThrow)?.displayName?.prefix(1) ?? "T"
             let color = generateColorFor(text: conversation.uuid?.uuidString ?? UUID().uuidString)
 
             ZStack {

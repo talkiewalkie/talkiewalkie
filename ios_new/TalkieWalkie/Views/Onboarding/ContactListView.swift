@@ -93,9 +93,14 @@ struct ContactListView: View {
                                     $0.phone,
                                     withRegion: PhoneNumberKit.defaultRegionCode()
                                 ) else { return "" }
+
                                 return self.phoneNumberKit.format(phoneNumber, toType: .e164)
                             })
                             if let twCL = twCL {
+                                authState.withWriteContext { ctx, _ in
+                                    twCL.users.forEach { u in User.fromProto(u, context: ctx) }
+                                }
+
                                 talkiewalkieContacts = contactList.filter { twCL.users.map { u in u.phone }.contains($0.phone) }
                                 nonTalkieWalkieContacts = contactList.filter { !twCL.users.map { u in u.phone }.contains($0.phone) }
                             }

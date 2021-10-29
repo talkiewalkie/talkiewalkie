@@ -24,15 +24,19 @@ enum AuthenticationState {
 
 class AuthState: ObservableObject {
     let persistentContainer: NSPersistentContainer
-    var moc: NSManagedObjectContext { persistentContainer.viewContext }
-    lazy var backgroundMoc: NSManagedObjectContext = {
-        let moc = persistentContainer.newBackgroundContext()
-        moc.automaticallyMergesChangesFromParent = true
-        moc.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
-        return moc
+    var readContext: NSManagedObjectContext { persistentContainer.viewContext }
+    private let writeContext: NSManagedObjectContext
+
+    private lazy var backgroundQueue: OperationQueue = {
+        let persistentContainerQueue = OperationQueue()
+        persistentContainerQueue.maxConcurrentOperationCount = 1
+
+        return persistentContainerQueue
     }()
 
-    var me: Me? { Me.fromCache(context: moc) }
+    var me: Me? { Me.fromCache(context: readContext) }
+    var meOrThrow: Me { me! }
+    private lazy var backgroundMeOrThrow: Me = { Me.fromCache(context: writeContext)! }()
 
     private var logger = Logger.withLabel("AuthState")
     private let config = Config.load(version: env)
@@ -45,22 +49,26 @@ class AuthState: ObservableObject {
         let persistentContainer = NSPersistentContainer(name: "LocalModels")
 
         persistentContainer.loadPersistentStores { _, error in
+            persistentContainer.viewContext.mergePolicy = NSMergePolicy.error
             persistentContainer.viewContext.automaticallyMergesChangesFromParent = true
-            persistentContainer.viewContext.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
             if let error = error {
                 fatalError("Unable to load persistent stores: \(error)")
             }
         }
         self.persistentContainer = persistentContainer
+
+        self.writeContext = persistentContainer.newBackgroundContext()
+        writeContext.mergePolicy = NSMergePolicy.error
+        writeContext.automaticallyMergesChangesFromParent = true
     }
 
     // MARK: - Utils
 
     var firebaseUser: FirebaseAuth.User? { Auth.auth().currentUser }
 
-    func connect(with user: FirebaseAuth.User) {
+    func connect(with fbUser: FirebaseAuth.User) {
         setConnecting()
-        user.getIDTokenResult { res, err in
+        fbUser.getIDTokenResult { res, err in
             guard let res = res else {
                 guard let err = err else { return }
                 self.logger.error("failed to get firebase token: \(err.localizedDescription)")
@@ -69,8 +77,8 @@ class AuthState: ObservableObject {
 
             let api = AuthedGrpcApi(url: self.config.apiUrl, token: res.token, persistentContainer: self.persistentContainer)
 
-            if let me = Me.fromCache(context: self.moc) {
-                self.logger.debug("loaded user info from cache: \(me)")
+            if let me = Me.fromCache(context: self.readContext) {
+                self.logger.debug("loaded my user info from cache")
                 self.state = AuthenticationState.Connected(api, me)
             }
 
@@ -78,14 +86,14 @@ class AuthState: ObservableObject {
                 let (res, _) = api.me()
                 if let res = res {
                     let uuid = UUID(uuidString: res.user.uuid)!
-                    self.backgroundMoc.perform {
-                        let me = Me.getByUuidOrCreate(uuid, context: self.moc)
+
+                    // This is a very particuliar moment in the app startup and the only place we'll ever need blocking save
+                    self.readContext.performAndWait {
+                        let me = Me.fromCache(context: self.readContext) ?? Me(context: self.readContext)
                         me.uuid = uuid
                         me.displayName = res.user.displayName
-                        me.firebaseUid = self.firebaseUser?.uid
-
-                        self.backgroundMoc.saveOrLogError()
-                        me.objectWillChange.send()
+                        me.firebaseUid = fbUser.uid
+                        try! self.readContext.save()
                         DispatchQueue.main.async { self.state = AuthenticationState.Connected(api, me) }
                     }
                 }
@@ -103,8 +111,8 @@ class AuthState: ObservableObject {
                 return
             }
         }
-        
-        backgroundMoc.perform { self.cleanCoreData(context: self.backgroundMoc) }
+
+        withWriteContext { ctx, _ in self.cleanCoreData(context: ctx) }
     }
 
     func cleanCoreData(context: NSManagedObjectContext) {
@@ -117,11 +125,19 @@ class AuthState: ObservableObject {
         context.deleteAndMergeChanges(using: NSBatchDeleteRequest(fetchRequest: NSFetchRequest(entityName: MessageContent.entity().name!)))
         context.deleteAndMergeChanges(using: NSBatchDeleteRequest(fetchRequest: NSFetchRequest(entityName: TextMessage.entity().name!)))
         context.deleteAndMergeChanges(using: NSBatchDeleteRequest(fetchRequest: NSFetchRequest(entityName: VoiceMessage.entity().name!)))
-        context.saveOrLogError()
     }
 
     func setConnecting() {
         state = AuthenticationState.Connecting
+    }
+
+    func withWriteContext(block: @escaping (_ context: NSManagedObjectContext, _ me: Me) -> Void) {
+        backgroundQueue.addOperation {
+            self.writeContext.performAndWait {
+                block(self.writeContext, self.backgroundMeOrThrow)
+                try! self.writeContext.save()
+            }
+        }
     }
 }
 

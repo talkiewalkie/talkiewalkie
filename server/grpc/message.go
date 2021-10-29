@@ -98,7 +98,7 @@ func (ms MessageService) Incoming(_ *pb.Empty, server pb.MessageService_Incoming
 	}
 }
 
-func (ms MessageService) Send(ctx context.Context, input *pb.MessageSendInput) (*pb.Empty, error) {
+func (ms MessageService) Send(ctx context.Context, input *pb.MessageSendInput) (*pb.Message, error) {
 	me, err := common.GetUser(ctx)
 	if err != nil {
 		return nil, status.Error(codes.PermissionDenied, err.Error())
@@ -294,6 +294,9 @@ func (ms MessageService) Send(ctx context.Context, input *pb.MessageSendInput) (
 	}
 
 	for _, uc := range conv.R.UserConversations {
+		if uc.R.User.UUID == me.UUID {
+			continue
+		}
 		topic := entities.UserPubSubTopic(uc.R.User)
 		err = ms.PgPubSub.Publish(topic, common.NewMessageEvent{
 			PubSubEvent: common.PubSubEvent{Type: common.PubSubEventTypeNewMessage, Timestamp: time.Now()},
@@ -306,5 +309,21 @@ func (ms MessageService) Send(ctx context.Context, input *pb.MessageSendInput) (
 		}
 	}
 
-	return &pb.Empty{}, nil
+	// TODO: remove this and find a way to prime the messageR struct when we already have the objects in order to avoid pointless roundtrips.
+	if err = msg.L.LoadConversation(ctx, ms.Db, true, msg, qm.Comment("")); err != nil {
+		return nil, status.Errorf(codes.Internal, "failed ot load converstion: %+v", err)
+	}
+	if err = msg.L.LoadAuthor(ctx, ms.Db, true, msg, qm.Comment("")); err != nil {
+		return nil, status.Errorf(codes.Internal, "failed ot load converstion: %+v", err)
+	}
+	if err = msg.L.LoadRawAudio(ctx, ms.Db, true, msg, qm.Comment("")); err != nil {
+		return nil, status.Errorf(codes.Internal, "failed ot load converstion: %+v", err)
+	}
+
+	pbm, err := entities.MessageToPb(msg, ms.Components)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to marshal message as pb: %+v", err)
+	}
+
+	return pbm, nil
 }

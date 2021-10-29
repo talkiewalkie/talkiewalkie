@@ -13,7 +13,6 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
-	"log"
 	"strconv"
 	"strings"
 )
@@ -79,11 +78,22 @@ func (c ConversationService) Get(ctx context.Context, input *pb.ConversationGetI
 		return nil, status.Errorf(codes.Internal, "could not compute conversation title: %+v", err)
 	}
 
+	participants := []*pb.UserConversation{}
+	for _, uc := range conv.R.UserConversations {
+		user := uc.R.User
+		participants = append(participants, &pb.UserConversation{
+			User: &pb.User{DisplayName: entities.UserDisplayName(user),
+				Uuid:  user.UUID.String(),
+				Phone: user.PhoneNumber},
+			ReadUntil: timestamppb.New(uc.ReadUntil),
+		})
+	}
+
 	return &pb.Conversation{
 		Uuid:         conv.UUID.String(),
 		Title:        title,
 		Messages:     msgs,
-		Participants: nil, // TODO
+		Participants: participants,
 	}, nil
 }
 
@@ -118,13 +128,13 @@ func (c ConversationService) List(input *pb.ConversationListInput, server pb.Con
 	sqlStr := `
 SELECT 
 	DISTINCT ON (conversation_id) conversation_id discard_1, 
-	first_value("id") OVER (PARTITION BY "conversation_id" ORDER BY created_at) "discard_2", 
+	last_value("id") OVER (PARTITION BY "conversation_id" ORDER BY created_at DESC) "discard_2", 
 	*
 FROM "message"
 WHERE "conversation_id" in (%s);
 `
 	if err = models.NewQuery(qm.SQL(fmt.Sprintf(sqlStr, strings.Join(convIds, ",")))).Bind(server.Context(), c.Db, &mssgs); err != nil {
-		return err
+		return status.Errorf(codes.Internal, "could not fetch last messages for each conv: %+v", err)
 	}
 
 	for _, uc := range myConvs {
@@ -134,16 +144,19 @@ WHERE "conversation_id" in (%s);
 			return status.Errorf(codes.Internal, "could not display conversation title: %+v", err)
 		}
 
-		participants := []*pb.User{}
+		participants := []*pb.UserConversation{}
 		id2p := map[int]*models.User{}
 		for _, uc := range conv.R.UserConversations {
 			user := uc.R.User
-			participants = append(participants, &pb.User{
-				DisplayName: entities.UserDisplayName(user),
-				Uuid:        user.UUID.String(),
-				Phone:       user.PhoneNumber,
-			})
 			id2p[user.ID] = user
+		}
+		for _, user := range id2p {
+			participants = append(participants, &pb.UserConversation{
+				User: &pb.User{DisplayName: entities.UserDisplayName(user),
+					Uuid:  user.UUID.String(),
+					Phone: user.PhoneNumber},
+				ReadUntil: timestamppb.New(uc.ReadUntil),
+			})
 		}
 
 		messages := []*pb.Message{}
@@ -154,11 +167,11 @@ WHERE "conversation_id" in (%s);
 				case models.MessageTypeText:
 					content = &pb.Message_TextMessage{TextMessage: &pb.TextMessage{Content: m.Text.String}}
 				case models.MessageTypeVoice:
-					var pbTranscript *pb.AlignedTranscript
-					if err := proto.Unmarshal(m.SiriTranscript.Bytes, pbTranscript); err != nil {
+					var pbTranscript pb.AlignedTranscript
+					if err := proto.Unmarshal(m.SiriTranscript.Bytes, &pbTranscript); err != nil {
 						return status.Errorf(codes.Internal, "could not build protobuf from stored bytearray: %+v", err)
 					}
-					content = &pb.Message_VoiceMessage{VoiceMessage: &pb.VoiceMessage{SiriTranscript: pbTranscript}}
+					content = &pb.Message_VoiceMessage{VoiceMessage: &pb.VoiceMessage{SiriTranscript: &pbTranscript}}
 				}
 				var author *pb.User
 				if m.AuthorID.Valid {
@@ -180,7 +193,6 @@ WHERE "conversation_id" in (%s);
 			}
 		}
 
-		log.Printf("%d msgs found for conv %s", len(messages), conv.UUID.String())
 		if err = server.Send(&pb.Conversation{
 			Uuid:         conv.UUID.String(),
 			Title:        title,

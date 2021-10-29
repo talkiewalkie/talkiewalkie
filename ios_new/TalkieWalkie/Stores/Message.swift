@@ -11,13 +11,14 @@ import GRPC
 import OSLog
 
 extension Message {
-    static func upsert(_ msg: App_Message, context: NSManagedObjectContext) -> Message {
+    static func fromProto(_ msg: App_Message, context: NSManagedObjectContext, block: (_ message: Message) -> Void = { _ in }) -> Message {
         let localM = Message.getByUuidOrCreate(msg.uuid.uuidOrThrow(), context: context)
         localM.uuid = msg.uuid.uuidOrThrow()
         // TODO: grpc zeroes out msg.author when author is nil in db, which is a valid state (user deleted their accounts)
         //       this need to be handled in the next line.
-        localM.author = User.upsert(msg.author, context: context)
+        if msg.author.uuid == "" {} else { localM.author = User.fromProto(msg.author, context: context) }
         localM.createdAt = msg.createdAt.date
+
         switch msg.content {
         case let .textMessage(txt):
             let tm = TextMessage(context: context)
@@ -37,6 +38,20 @@ extension Message {
             fatalError()
         }
 
+        block(localM)
+
         return localM
+    }
+
+    static func getByLocalUuidOrThrow(_ uuid: UUID, context: NSManagedObjectContext) -> Message {
+        let request = Message.fetchRequest()
+        request.predicate = NSPredicate(format: "localUuid_ = %@", uuid as NSUUID)
+
+        let result = try! context.fetch(request)
+        if result.count != 1 {
+            fatalError("this should not happen: \(result.count) messages found for local uuid:[\(uuid)]")
+        }
+
+        return result.first!
     }
 }

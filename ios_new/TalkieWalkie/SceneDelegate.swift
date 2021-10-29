@@ -26,7 +26,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let auth = appDelegate.auth
 
         let contentView = HomeView()
-            .environment(\.managedObjectContext, auth.moc)
+            .environment(\.managedObjectContext, auth.readContext)
             .environmentObject(auth)
             .addTooltip()
             .environmentObject(TooltipManager())

@@ -7,20 +7,15 @@
 
 import SwiftUI
 import CoreData
+import OSLog
 
 struct MessageView: View {
-    var message: Message
+    @ObservedObject var message: Message
     
     var showAuthor: Bool = true
     
     @EnvironmentObject var authed: AuthState
-    var isMe: Bool {
-        if let me = authed.me {
-            return message.author?.uuid == me.uuid
-        } else {
-            return false
-        }
-    }
+    var isMe: Bool { message.author?.uuid == authed.meOrThrow.uuid }
     
     var body: some View {
         HStack {
@@ -61,7 +56,7 @@ struct MessageView: View {
     var checkStatus: some View {
         let checkmark = Image(systemName: "checkmark")
             .font(.footnote)
-            .foregroundColor(.accentColor)
+            .foregroundColor(message.status_ == 0 ? .secondary : .accentColor)
         
         return HStack(spacing: -9) {
             checkmark
@@ -131,7 +126,7 @@ struct BubbleView_Previews: PreviewProvider {
                 m.content = App_Message.OneOf_Content.textMessage(textMessage)
             }
             
-            return Message.upsert(message, context: moc)
+            return Message.fromProto(message, context: moc)
         }
         
         var body: some View {

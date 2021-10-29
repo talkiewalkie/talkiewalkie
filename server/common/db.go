@@ -36,7 +36,7 @@ func NewDbLogger(db *sqlx.DB) DBLogger {
 }
 
 func dbLogger(logger *log.Logger, query string, args ...interface{}) {
-	logger.Printf("query: '%s'", query)
+	logger.Printf("query: '%s'", sqlFmt(query))
 	logger.Printf(" args: %+v", args...)
 }
 
@@ -105,7 +105,7 @@ func DbUri(dbName, user, password, host, port string, ssl bool) string {
 }
 
 // Write queries on multiple lines in the code but wrap them in a single line for better logging
-func SqlFmt(qs string) string {
+func sqlFmt(qs string) string {
 	return strings.TrimSpace(strings.Replace(qs, "\n", " ", -1))
 }
 

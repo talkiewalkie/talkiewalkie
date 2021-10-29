@@ -358,7 +358,7 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type MessageServiceClient interface {
-	Send(ctx context.Context, in *MessageSendInput, opts ...grpc.CallOption) (*Empty, error)
+	Send(ctx context.Context, in *MessageSendInput, opts ...grpc.CallOption) (*Message, error)
 	Incoming(ctx context.Context, in *Empty, opts ...grpc.CallOption) (MessageService_IncomingClient, error)
 }
 
@@ -370,8 +370,8 @@ func NewMessageServiceClient(cc grpc.ClientConnInterface) MessageServiceClient {
 	return &messageServiceClient{cc}
 }
 
-func (c *messageServiceClient) Send(ctx context.Context, in *MessageSendInput, opts ...grpc.CallOption) (*Empty, error) {
-	out := new(Empty)
+func (c *messageServiceClient) Send(ctx context.Context, in *MessageSendInput, opts ...grpc.CallOption) (*Message, error) {
+	out := new(Message)
 	err := c.cc.Invoke(ctx, "/app.MessageService/Send", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -415,7 +415,7 @@ func (x *messageServiceIncomingClient) Recv() (*Message, error) {
 // All implementations should embed UnimplementedMessageServiceServer
 // for forward compatibility
 type MessageServiceServer interface {
-	Send(context.Context, *MessageSendInput) (*Empty, error)
+	Send(context.Context, *MessageSendInput) (*Message, error)
 	Incoming(*Empty, MessageService_IncomingServer) error
 }
 
@@ -423,7 +423,7 @@ type MessageServiceServer interface {
 type UnimplementedMessageServiceServer struct {
 }
 
-func (UnimplementedMessageServiceServer) Send(context.Context, *MessageSendInput) (*Empty, error) {
+func (UnimplementedMessageServiceServer) Send(context.Context, *MessageSendInput) (*Message, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Send not implemented")
 }
 func (UnimplementedMessageServiceServer) Incoming(*Empty, MessageService_IncomingServer) error {

@@ -108,7 +108,7 @@ message MessageSendInput {
 }
 
 service MessageService {
-  rpc Send(MessageSendInput) returns (Empty) {}
+  rpc Send(MessageSendInput) returns (Message) {}
   rpc Incoming(Empty) returns (stream Message) {}
 }
 
@@ -118,7 +118,12 @@ message Conversation {
   string uuid = 1;
   string title = 2;
   repeated Message messages = 3;
-  repeated User participants = 4;
+  repeated UserConversation participants = 4;
+}
+
+message UserConversation {
+  User user = 1;
+  google.protobuf.Timestamp readUntil = 2;
 }
 
 message ConversationGetInput {
