@@ -43,6 +43,7 @@ struct ConversationView: View {
                                 }
                             }
                             .onAppear {
+                                // https://stackoverflow.com/a/61036551
                                 scrollView.scrollTo(unseenMessages.last ?? seenMessages.last)
                             }
                             .frame(maxWidth: .infinity, alignment: .trailing)
