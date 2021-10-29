@@ -18,10 +18,21 @@ extension NSManagedObjectContext {
     func saveOrLogError() {
         performAndWait {
             if hasChanges {
-                do { try save() }
-                catch { os_log(.error, "Failed to save coredata: \(error.localizedDescription)") }
+//                do { try save() }
+//                catch { os_log(.error, "Failed to save coredata: \(error.localizedDescription)") }
+                try! save()
             }
         }
+    }
+
+    /// Debug method to inspect core data 
+    func stats(_ prefix: String = "core data state") {
+        let convs = Conversation.getAll(self) ?? []
+        let users = User.getAll(self) ?? []
+        let mes = Me.getAll(self) ?? []
+        let messages = Message.getAll(self) ?? []
+        
+        os_log(.debug, "\(prefix): \(convs.count) conversations - \(users.count) users (\(mes.count) me objects) - \(messages.count) messages")
     }
 
     func executeOrLogError(_ request: NSPersistentStoreRequest) -> NSPersistentStoreResult? {
@@ -48,21 +59,40 @@ extension NSManagedObjectContext {
 extension NSManagedObject {
     static func getByUuidOrCreate(_ uuid: UUID, context: NSManagedObjectContext) -> Self {
         guard let ename = Self.entity().name else {
-            os_log("why am i here?")
+            os_log(.error, "NSManagedObject is attached to a nameless entity: \(String(describing: Self.entity()))")
             return Self(context: context)
         }
 
-        let localUsersRq = NSFetchRequest<Self>(entityName: ename)
-        localUsersRq.predicate = NSPredicate(format: "uuid = %@", uuid.uuidString)
-        let localUsers = (try? context.fetch(localUsersRq)) ?? []
+        let request = NSFetchRequest<Self>(entityName: ename)
+        request.predicate = NSPredicate(format: "uuid = %@", uuid as NSUUID)
+        
+        let entities = try! context.fetch(request)
 
-        if let me = localUsers.first {
+        if entities.count > 1 {
+            os_log(.error, "[coredata:\(ename)] found \(entities.count) objects for uuid:[\(uuid)]")
+            fatalError()
+        }
+        
+        if let me = entities.first {
             os_log(.debug, "[coredata:\(ename)] found item for uuid:[\(uuid)]")
             return me
         } else {
             os_log(.debug, "[coredata:\(ename)] creating item for uuid:[\(uuid)]")
             let new = Self(context: context)
             return new
+        }
+    }
+
+    static func getAll(_ context: NSManagedObjectContext) -> [NSFetchRequestResult]? {
+        guard let ename = Self.entity().name else {
+            os_log(.error, "NSManagedObject is attached to a nameless entity: \(String(describing: Self.entity()))")
+            return nil
+        }
+
+        do { return try context.fetch(Self.fetchRequest()) }
+        catch {
+            os_log("failed to fetch \(ename): \(error.localizedDescription)")
+            return nil
         }
     }
 }

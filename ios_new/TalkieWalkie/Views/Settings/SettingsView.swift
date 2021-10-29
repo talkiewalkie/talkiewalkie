@@ -177,8 +177,8 @@ struct SettingsView: View {
                         }
                         Button("Wipe out local state") {
                             os_log("wiping out core data")
-                            authState.backgroundMoc.perform {
-                                authState.cleanCoreData(context: authState.backgroundMoc)
+                            authState.withWriteContext { ctx, _ in
+                                authState.cleanCoreData(context: ctx)
                             }
                         }
                     }

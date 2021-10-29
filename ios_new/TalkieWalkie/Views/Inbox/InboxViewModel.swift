@@ -20,16 +20,17 @@ class InboxViewModel: ObservableObject {
             os_log(.debug, "subscribing to grpc inbox stream...")
             api.subscribeIncomingMessages { msg in
                 os_log("hello i received a new message")
-                let savedMsg = Message.upsert(msg, context: authed.moc)
-                let conversation = Conversation.getByUuidOrCreate(msg.convUuid.uuidOrThrow(), context: authed.moc)
 
-                conversation.addToMessages_(savedMsg)
+                authed.withWriteContext { ctx, _ in
+                    let savedMsg = Message.fromProto(msg, context: ctx)
+                    let conversation = Conversation.getByUuidOrCreate(msg.convUuid.uuidOrThrow(), context: ctx)
 
-                authed.moc.saveOrLogError()
+                    conversation.addToMessages_(savedMsg)
 
-                DispatchQueue.main.async {
-                    savedMsg.objectWillChange.send()
-                    conversation.objectWillChange.send()
+                    DispatchQueue.main.async {
+                        savedMsg.objectWillChange.send()
+                        conversation.objectWillChange.send()
+                    }
                 }
             }
         }
@@ -37,10 +38,12 @@ class InboxViewModel: ObservableObject {
 
     func syncConversations() {
         self.loading = true
-        self.authed.backgroundMoc.perform {
+        DispatchQueue.global(qos: .background).async {
             if case .Connected(let api, _) = self.authed.state {
                 let (convs, _) = api.listConvs()
-                Conversation.dumpFromRemote(convs, context: self.authed.backgroundMoc)
+                self.authed.withWriteContext { ctx, _ in
+                    convs.forEach { remoteConv in Conversation.fromProto(remoteConv, context: ctx) }
+                }
             }
             DispatchQueue.main.async { self.loading = false }
         }

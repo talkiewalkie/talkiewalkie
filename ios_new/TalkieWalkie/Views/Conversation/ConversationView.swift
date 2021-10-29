@@ -33,7 +33,7 @@ struct ConversationView: View {
                 VStack {
                     if model.loading { ProgressView() }
 
-                    ScrollViewReader { _ in
+                    ScrollViewReader { scrollView in
                         ReversedScrollView(.vertical, showsIndicators: false) {
                             VStack {
                                 ForEach(seenMessages) { message in MessageView(message: message) }
@@ -41,6 +41,9 @@ struct ConversationView: View {
                                     Text("new").padding()
                                     ForEach(unseenMessages) { message in MessageView(message: message) }
                                 }
+                            }
+                            .onAppear {
+                                scrollView.scrollTo(unseenMessages.last ?? seenMessages.last)
                             }
                             .frame(maxWidth: .infinity, alignment: .trailing)
                             .padding(.horizontal)

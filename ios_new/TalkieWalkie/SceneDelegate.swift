@@ -28,7 +28,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let pp = PartialSheetManager()
 
         let contentView = HomeView()
-            .environment(\.managedObjectContext, auth.moc)
+            .environment(\.managedObjectContext, auth.readContext)
             .environmentObject(auth)
             .addTooltip()
             .environmentObject(tooltipManager)

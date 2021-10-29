@@ -148,13 +148,15 @@ WHERE "conversation_id" in (%s);
 		id2p := map[int]*models.User{}
 		for _, uc := range conv.R.UserConversations {
 			user := uc.R.User
+			id2p[user.ID] = user
+		}
+		for _, user := range id2p {
 			participants = append(participants, &pb.UserConversation{
 				User: &pb.User{DisplayName: entities.UserDisplayName(user),
 					Uuid:  user.UUID.String(),
 					Phone: user.PhoneNumber},
 				ReadUntil: timestamppb.New(uc.ReadUntil),
 			})
-			id2p[user.ID] = user
 		}
 
 		messages := []*pb.Message{}

@@ -19,14 +19,14 @@ class ConversationViewModel: ObservableObject {
     }
 
     func loadMessages() {
-        DispatchQueue.global().async {
+        DispatchQueue.global(qos: .background).async {
             if case .Connected(let api, _) = self.authed.state, let uuid = self.conversation.uuid {
                 self.loading = true
                 let (remoteConv, _) = api.convByUuid(uuid)
                 self.loading = false
                 if let remoteConv = remoteConv {
-                    self.authed.backgroundMoc.perform {
-                        Conversation.dumpFromRemote([remoteConv], context: self.authed.backgroundMoc)
+                    self.authed.withWriteContext { ctx, _ in
+                        Conversation.fromProto(remoteConv, context: ctx)
                     }
                 }
             } else {

@@ -267,7 +267,7 @@ public protocol App_MessageServiceClientProtocol: GRPCClient {
   func send(
     _ request: App_MessageSendInput,
     callOptions: CallOptions?
-  ) -> UnaryCall<App_MessageSendInput, App_Empty>
+  ) -> UnaryCall<App_MessageSendInput, App_Message>
 
   func incoming(
     _ request: App_Empty,
@@ -290,7 +290,7 @@ extension App_MessageServiceClientProtocol {
   public func send(
     _ request: App_MessageSendInput,
     callOptions: CallOptions? = nil
-  ) -> UnaryCall<App_MessageSendInput, App_Empty> {
+  ) -> UnaryCall<App_MessageSendInput, App_Message> {
     return self.makeUnaryCall(
       path: "/app.MessageService/Send",
       request: request,
@@ -324,7 +324,7 @@ extension App_MessageServiceClientProtocol {
 public protocol App_MessageServiceClientInterceptorFactoryProtocol {
 
   /// - Returns: Interceptors to use when invoking 'send'.
-  func makeSendInterceptors() -> [ClientInterceptor<App_MessageSendInput, App_Empty>]
+  func makeSendInterceptors() -> [ClientInterceptor<App_MessageSendInput, App_Message>]
 
   /// - Returns: Interceptors to use when invoking 'incoming'.
   func makeIncomingInterceptors() -> [ClientInterceptor<App_Empty, App_Message>]
@@ -585,7 +585,7 @@ public protocol App_UserServiceServerInterceptorFactoryProtocol {
 public protocol App_MessageServiceProvider: CallHandlerProvider {
   var interceptors: App_MessageServiceServerInterceptorFactoryProtocol? { get }
 
-  func send(request: App_MessageSendInput, context: StatusOnlyCallContext) -> EventLoopFuture<App_Empty>
+  func send(request: App_MessageSendInput, context: StatusOnlyCallContext) -> EventLoopFuture<App_Message>
 
   func incoming(request: App_Empty, context: StreamingResponseCallContext<App_Message>) -> EventLoopFuture<GRPCStatus>
 }
@@ -604,7 +604,7 @@ extension App_MessageServiceProvider {
       return UnaryServerHandler(
         context: context,
         requestDeserializer: ProtobufDeserializer<App_MessageSendInput>(),
-        responseSerializer: ProtobufSerializer<App_Empty>(),
+        responseSerializer: ProtobufSerializer<App_Message>(),
         interceptors: self.interceptors?.makeSendInterceptors() ?? [],
         userFunction: self.send(request:context:)
       )
@@ -628,7 +628,7 @@ public protocol App_MessageServiceServerInterceptorFactoryProtocol {
 
   /// - Returns: Interceptors to use when handling 'send'.
   ///   Defaults to calling `self.makeInterceptors()`.
-  func makeSendInterceptors() -> [ServerInterceptor<App_MessageSendInput, App_Empty>]
+  func makeSendInterceptors() -> [ServerInterceptor<App_MessageSendInput, App_Message>]
 
   /// - Returns: Interceptors to use when handling 'incoming'.
   ///   Defaults to calling `self.makeInterceptors()`.

@@ -108,7 +108,7 @@ message MessageSendInput {
 }
 
 service MessageService {
-  rpc Send(MessageSendInput) returns (Empty) {}
+  rpc Send(MessageSendInput) returns (Message) {}
   rpc Incoming(Empty) returns (stream Message) {}
 }
 

@@ -11,17 +11,22 @@ import OSLog
 
 extension Conversation {
     @discardableResult
-    static func upsert(_ conv: App_Conversation, context: NSManagedObjectContext) -> Conversation {
-        let localC = Conversation(context: context)
+    static func fromProto(
+        _ conv: App_Conversation,
+        context: NSManagedObjectContext,
+        block: (_ conv: Conversation) -> Void = { _ in }
+    ) -> Conversation {
+        let localC = Conversation.getByUuidOrCreate(conv.uuid.uuidOrThrow(), context: context)
         localC.uuid = conv.uuid.uuidOrThrow()
         localC.title = conv.title
+
         localC.lastActivity_ = conv.messages.last?.createdAt.date
 
-        let messages = conv.messages.map { Message.upsert($0, context: context) }
+        let messages = conv.messages.map { Message.fromProto($0, context: context) }
         localC.addToMessages_(NSOrderedSet(array: messages))
 
         let participants: [UserConversation] = conv.participants.map {
-            let u = User.upsert($0.user, context: context)
+            let u = User.fromProto($0.user, context: context)
             let uc = UserConversation(context: context)
             uc.readUntil = $0.readUntil.date
             uc.user = u
@@ -30,12 +35,9 @@ extension Conversation {
         }
         localC.addToUsers_(NSSet(array: participants))
 
-        return localC
-    }
+        block(localC)
 
-    static func dumpFromRemote(_ convs: [App_Conversation], context: NSManagedObjectContext) {
-        convs.forEach { Conversation.upsert($0, context: context) }
-        context.saveOrLogError()
+        return localC
     }
 
     var lastMessage: Message? { self.messages.last }

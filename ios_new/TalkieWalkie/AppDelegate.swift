@@ -7,9 +7,9 @@
 
 import Firebase
 import FirebaseMessaging
+import GiphyUISDK
 import OSLog
 import UIKit
-import GiphyUISDK
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -47,7 +47,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         if let path = FileManager.default.urls(for: .libraryDirectory, in: .userDomainMask).last {
             os_log(.debug, "CoreData sqlite files: '\(path)Application\\ Support'")
         }
-        
+
         // Giphy
         Giphy.configure(apiKey: "9eyAVdK8MCwzgBwTN1vTi0cNoIHNQ3oM")
 
@@ -82,8 +82,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         completionHandler(UIBackgroundFetchResult.newData)
     }
-    
-    func applicationWillTerminate(_ application: UIApplication) {
+
+    func applicationWillTerminate(_: UIApplication) {
         if case .Connected(let api, _) = self.auth.state {
             // TODO: send last connected at
         }
@@ -102,7 +102,9 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
             if let uuidString = (userInfo["uuid"] as? String), let uuid = UUID(uuidString: uuidString) {
                 let (user, _) = api.userByUuid(uuid)
                 if let user = user {
-                    User.upsert(user, context: self.auth.moc)
+                    self.auth.withWriteContext { ctx, _ in
+                        User.fromProto(user, context: ctx)
+                    }
                 }
             }
         }

@@ -120,26 +120,36 @@ struct ComposerView: View {
     
     var textSendButton: some View {
         Button(action: {
+            let messageLocalUuid = UUID()
+            
             // Core Data
-            authed.backgroundMoc.perform {
-                let backgroundMe = try! authed.backgroundMoc.existingObject(with: authed.meOrThrow.objectID)
-                
-                let message = Message(context: authed.backgroundMoc)
+            authed.withWriteContext { ctx, me in
+                let message = Message(context: ctx)
+                message.localUuid_ = messageLocalUuid
                 message.content = {
-                    let content = TextMessage(context: authed.backgroundMoc)
+                    let content = TextMessage(context: ctx)
                     content.text = text
                     return content
                 }()
-                message.author = backgroundMe as? User
-                message.conversation = Conversation.getByUuidOrCreate(conversationUuid, context: authed.backgroundMoc)
+                message.author = Me.fromCache(context: ctx)!
+                message.status_ = 0
+                message.conversation = Conversation.getByUuidOrCreate(conversationUuid, context: ctx)
                 message.createdAt = Date()
-                
-                authed.backgroundMoc.saveOrLogError()
             }
             
             // Sync
             if case .Connected(let api, _) = authed.state {
-                DispatchQueue.global(qos: .background).async { api.sendMessage(text: text, convUuid: conversationUuid) }
+                DispatchQueue.global(qos: .background).async {
+                    let (msg, _) = api.sendMessage(text: text, convUuid: conversationUuid)
+                    if let msg = msg {
+                        authed.withWriteContext { ctx, _ in
+                            let localMsg = Message.getByLocalUuidOrThrow(messageLocalUuid, context: ctx)
+                            localMsg.uuid = msg.uuid.uuidOrThrow()
+                            localMsg.createdAt = msg.createdAt.date
+                            localMsg.status_ = 1
+                        }
+                    }
+                }
             }
         }) {
             Image(systemName: "paperplane.fill")
