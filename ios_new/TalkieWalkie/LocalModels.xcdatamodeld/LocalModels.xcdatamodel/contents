@@ -23,6 +23,8 @@
     </entity>
     <entity name="Message" representedClassName=".Message" syncable="YES" codeGenerationType="class">
         <attribute name="createdAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="localUuid_" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="status_" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="uuid" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
         <relationship name="author" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="User" inverseName="authoredMessages_" inverseEntity="User"/>
         <relationship name="content" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="MessageContent" inverseName="message" inverseEntity="MessageContent"/>
@@ -43,7 +45,7 @@
         <attribute name="displayName" optional="YES" attributeType="String"/>
         <attribute name="phone" optional="YES" attributeType="String"/>
         <attribute name="uuid" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
-        <relationship name="authoredMessages_" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Message" inverseName="author" inverseEntity="Message"/>
+        <relationship name="authoredMessages_" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Message" inverseName="author" inverseEntity="Message"/>
         <relationship name="conversations" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="UserConversation" inverseName="user" inverseEntity="UserConversation"/>
         <uniquenessConstraints>
             <uniquenessConstraint>
@@ -64,7 +66,7 @@
     <elements>
         <element name="Conversation" positionX="-9" positionY="45" width="128" height="104"/>
         <element name="Me" positionX="36" positionY="81" width="128" height="59"/>
-        <element name="Message" positionX="-54" positionY="9" width="128" height="104"/>
+        <element name="Message" positionX="-54" positionY="9" width="128" height="134"/>
         <element name="MessageContent" positionX="-36" positionY="36" width="128" height="44"/>
         <element name="TextMessage" positionX="-18" positionY="45" width="128" height="44"/>
         <element name="User" positionX="-63" positionY="-18" width="128" height="104"/>

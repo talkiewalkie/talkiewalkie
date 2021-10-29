@@ -86,6 +86,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func applicationWillTerminate(_: UIApplication) {
         if case .Connected(let api, _) = self.auth.state {
             // TODO: send last connected at
+            
         }
     }
 }

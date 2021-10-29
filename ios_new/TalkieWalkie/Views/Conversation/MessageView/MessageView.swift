@@ -37,11 +37,8 @@ struct MessageView: View {
                             .font(.footnote)
                             .foregroundColor(.init(UIColor.tertiaryLabel))
                     }
-                    
-                    if isMe {
-                        checkStatus
-                    }
-                   
+
+                    if isMe { checkStatus }
                 }, alignment: .bottomTrailing
             )
             .padding(8)
