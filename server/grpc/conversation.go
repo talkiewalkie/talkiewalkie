@@ -3,34 +3,29 @@ package coco
 import (
 	"context"
 	"fmt"
-	"github.com/golang/protobuf/proto"
 	uuid2 "github.com/satori/go.uuid"
-	"github.com/talkiewalkie/talkiewalkie/common"
 	"github.com/talkiewalkie/talkiewalkie/entities"
 	"github.com/talkiewalkie/talkiewalkie/models"
 	"github.com/talkiewalkie/talkiewalkie/pb"
+	_ "github.com/talkiewalkie/talkiewalkie/pkg/slices"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"google.golang.org/protobuf/types/known/timestamppb"
-	"strconv"
-	"strings"
 )
 
 type ConversationService struct {
-	*common.Components
 }
 
 var _ pb.ConversationServiceServer = ConversationService{}
 
-func NewConversationService(c *common.Components) ConversationService {
-	return ConversationService{Components: c}
+func NewConversationService() ConversationService {
+	return ConversationService{}
 }
 
 func (c ConversationService) Get(ctx context.Context, input *pb.ConversationGetInput) (*pb.Conversation, error) {
-	me, err := common.GetUser(ctx)
+	components, me, err := WithAuthedContext(ctx)
 	if err != nil {
-		return nil, status.Error(codes.PermissionDenied, err.Error())
+		return nil, err
 	}
 
 	uid, err := uuid2.FromString(input.Uuid)
@@ -38,168 +33,81 @@ func (c ConversationService) Get(ctx context.Context, input *pb.ConversationGetI
 		return nil, status.Error(codes.InvalidArgument, fmt.Sprintf("bad uuid: %+v", err))
 	}
 
-	conv, err := models.Conversations(
-		models.ConversationWhere.UUID.EQ(uid),
-		qm.Load(qm.Rels(models.ConversationRels.UserConversations, models.UserConversationRels.User)),
-	).One(ctx, c.Db)
+	conv, err := components.ConversationStore.ByUuid(uid)
 	if err != nil {
 		return nil, status.Error(codes.Internal, fmt.Sprintf("could not get conversation: %+v", err))
 	}
 
-	if ok, err := entities.CanAccessConversation(conv, me); !ok || err != nil {
+	if ok, err := conv.HasAccess(me); !ok || err != nil {
 		return nil, status.Errorf(codes.PermissionDenied, "cannot access this conversation: %+v", err)
 	}
 
-	messages, err := models.Messages(
-		models.MessageWhere.ConversationID.EQ(conv.ID),
-		qm.Load(models.MessageRels.RawAudio),
-		qm.Load(models.MessageRels.Author),
+	messageRecords, err := models.Messages(
+		models.MessageWhere.ConversationID.EQ(conv.Record.ID),
 		qm.Limit(20),
 		qm.OrderBy(fmt.Sprintf("%s DESC", models.MessageColumns.CreatedAt)),
-	).All(ctx, c.Db)
+	).All(ctx, components.Db)
 
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "could not get conv's messages: %+v", err)
 	}
 
-	msgs := []*pb.Message{}
-	for _, message := range messages {
-		message.R.Conversation = conv
-		pbm, err := entities.MessageToPb(message, c.Components)
-		if err != nil {
-			return nil, status.Error(codes.Internal, err.Error())
-		}
-
-		msgs = append(msgs, pbm)
+	var messages entities.MessageSlicePtrs
+	for _, record := range messageRecords {
+		messages = append(messages, &entities.Message{record, components})
 	}
 
-	title, err := entities.ConversationDisplay(conv, me)
+	if _, err := messages.LoadAuthors(); err != nil {
+		return nil, err
+	}
+	if _, err := messages.LoadRawAudio(); err != nil {
+		return nil, err
+	}
+
+	pbConv, err := conv.ToPb(messages)
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "could not compute conversation title: %+v", err)
+		return nil, err
 	}
 
-	participants := []*pb.UserConversation{}
-	for _, uc := range conv.R.UserConversations {
-		user := uc.R.User
-		participants = append(participants, &pb.UserConversation{
-			User: &pb.User{DisplayName: entities.UserDisplayName(user),
-				Uuid:  user.UUID.String(),
-				Phone: user.PhoneNumber},
-			ReadUntil: timestamppb.New(uc.ReadUntil),
-		})
-	}
-
-	return &pb.Conversation{
-		Uuid:         conv.UUID.String(),
-		Title:        title,
-		Messages:     msgs,
-		Participants: participants,
-	}, nil
+	return pbConv, nil
 }
 
+// This is an expensive call - we're not paginating.
 func (c ConversationService) List(input *pb.ConversationListInput, server pb.ConversationService_ListServer) error {
-	me, err := common.GetUser(server.Context())
+	components, me, err := WithAuthedContext(server.Context())
 	if err != nil {
-		return status.Error(codes.PermissionDenied, err.Error())
+		return err
 	}
 
-	myConvs, err := models.UserConversations(
-		models.UserConversationWhere.UserID.EQ(me.ID),
-		qm.Load(qm.Rels(models.UserConversationRels.Conversation, models.ConversationRels.UserConversations, models.UserConversationRels.User)),
-		qm.Limit(20), qm.Offset(int(input.Page)),
-	).All(server.Context(), c.Db)
-
-	convIds := []string{}
-	for _, conv := range myConvs {
-		convIds = append(convIds, strconv.Itoa(conv.ConversationID))
+	myConversations, err := components.UserConversationStore.ByUserIds(me.Record.ID)
+	if err != nil {
+		return err
 	}
 
-	if len(convIds) == 0 {
+	if len(myConversations) == 0 {
 		return nil
 	}
 
-	type lastMessage struct {
-		Discard1       int `boil:"discard_1"`
-		Discard2       int `boil:"discard_2"`
-		models.Message `boil:",bind"`
+	// Eager load attached items
+	convs, err := components.UserConversationStore.LoadConversationsFromResult(myConversations)
+	if err != nil {
+		return err
 	}
-	var mssgs []*lastMessage
-
-	sqlStr := `
-SELECT 
-	DISTINCT ON (conversation_id) conversation_id discard_1, 
-	last_value("id") OVER (PARTITION BY "conversation_id" ORDER BY created_at DESC) "discard_2", 
-	*
-FROM "message"
-WHERE "conversation_id" in (%s);
-`
-	if err = models.NewQuery(qm.SQL(fmt.Sprintf(sqlStr, strings.Join(convIds, ",")))).Bind(server.Context(), c.Db, &mssgs); err != nil {
-		return status.Errorf(codes.Internal, "could not fetch last messages for each conv: %+v", err)
+	if _, err := components.UserConversationStore.LoadUsersFromResult(myConversations); err != nil {
+		return err
 	}
 
-	for _, uc := range myConvs {
-		conv := uc.R.Conversation
-		title, err := entities.ConversationDisplay(conv, me)
+	// Fetch last messages for display
+	lastMessages, err := convs.LoadLastMessages(server.Context())
+
+	for _, conv := range convs {
+		pbConv, err := conv.ToPb(lastMessages)
 		if err != nil {
-			return status.Errorf(codes.Internal, "could not display conversation title: %+v", err)
+			return err
 		}
 
-		participants := []*pb.UserConversation{}
-		id2p := map[int]*models.User{}
-		for _, uc := range conv.R.UserConversations {
-			user := uc.R.User
-			id2p[user.ID] = user
-		}
-		for _, user := range id2p {
-			participants = append(participants, &pb.UserConversation{
-				User: &pb.User{DisplayName: entities.UserDisplayName(user),
-					Uuid:  user.UUID.String(),
-					Phone: user.PhoneNumber},
-				ReadUntil: timestamppb.New(uc.ReadUntil),
-			})
-		}
-
-		messages := []*pb.Message{}
-		for _, m := range mssgs {
-			if m.ConversationID == conv.ID {
-				var content pb.MessageContentOneOf
-				switch m.Type {
-				case models.MessageTypeText:
-					content = &pb.Message_TextMessage{TextMessage: &pb.TextMessage{Content: m.Text.String}}
-				case models.MessageTypeVoice:
-					var pbTranscript pb.AlignedTranscript
-					if err := proto.Unmarshal(m.SiriTranscript.Bytes, &pbTranscript); err != nil {
-						return status.Errorf(codes.Internal, "could not build protobuf from stored bytearray: %+v", err)
-					}
-					content = &pb.Message_VoiceMessage{VoiceMessage: &pb.VoiceMessage{SiriTranscript: &pbTranscript}}
-				}
-				var author *pb.User
-				if m.AuthorID.Valid {
-					if tt, ok := id2p[m.AuthorID.Int]; ok {
-						author = &pb.User{
-							DisplayName: entities.UserDisplayName(tt),
-							Uuid:        tt.UUID.String(),
-							Phone:       tt.PhoneNumber,
-						}
-					}
-				}
-				messages = append(messages, &pb.Message{
-					Uuid:      m.UUID.String(),
-					ConvUuid:  conv.UUID.String(),
-					Content:   content,
-					Author:    author,
-					CreatedAt: timestamppb.New(m.CreatedAt),
-				})
-			}
-		}
-
-		if err = server.Send(&pb.Conversation{
-			Uuid:         conv.UUID.String(),
-			Title:        title,
-			Messages:     messages,
-			Participants: participants,
-		}); err != nil {
-			return status.Error(codes.Internal, err.Error())
+		if err = server.Send(pbConv); err != nil {
+			return err
 		}
 	}
 

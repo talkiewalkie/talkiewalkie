@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"github.com/go-chi/jwtauth"
 	"github.com/jmoiron/sqlx"
+	"github.com/talkiewalkie/talkiewalkie/entities"
 	"log"
 	"math/rand"
 	"os"
@@ -27,7 +28,21 @@ type Components struct {
 	Storage     StorageClient
 	Audio       *pb.CompressionClient
 
+	AssetStore            entities.AssetStore
+	ConversationStore     entities.ConversationStore
+	MessageStore          entities.MessageStore
+	UserStore             entities.UserStore
+	UserConversationStore entities.UserConversationStore
+
 	CompressImg func(string, int) (string, error)
+}
+
+func (components *Components) ResetEntityStores(ctx context.Context) {
+	components.AssetStore = entities.NewAssetStore(ctx, components)
+	components.ConversationStore = entities.NewConversationStore(ctx, components)
+	components.MessageStore = entities.NewMessageStore(ctx, components)
+	components.UserStore = entities.NewUserStore(ctx, components)
+	components.UserConversationStore = entities.NewUserConversationStore(ctx, components)
 }
 
 func InitComponents() (*Components, error) {
@@ -70,7 +85,7 @@ func InitComponents() (*Components, error) {
 
 	pgPubSub := NewPgPubSub(db, dbUri)
 
-	return &Components{
+	components := &Components{
 		Db:          db,
 		PgPubSub:    &pgPubSub,
 		EmailClient: emailClient,
@@ -107,5 +122,8 @@ func InitComponents() (*Components, error) {
 			}
 			return output, nil
 		},
-	}, nil
+	}
+
+	components.ResetEntityStores(context.Background())
+	return components, nil
 }

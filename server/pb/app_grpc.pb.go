@@ -106,7 +106,6 @@ type UserServiceClient interface {
 	Onboarding(ctx context.Context, in *OnboardingInput, opts ...grpc.CallOption) (*MeUser, error)
 	Me(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*MeUser, error)
 	Get(ctx context.Context, in *UserGetInput, opts ...grpc.CallOption) (*User, error)
-	List(ctx context.Context, in *UserListInput, opts ...grpc.CallOption) (UserService_ListClient, error)
 }
 
 type userServiceClient struct {
@@ -153,38 +152,6 @@ func (c *userServiceClient) Get(ctx context.Context, in *UserGetInput, opts ...g
 	return out, nil
 }
 
-func (c *userServiceClient) List(ctx context.Context, in *UserListInput, opts ...grpc.CallOption) (UserService_ListClient, error) {
-	stream, err := c.cc.NewStream(ctx, &UserService_ServiceDesc.Streams[0], "/app.UserService/List", opts...)
-	if err != nil {
-		return nil, err
-	}
-	x := &userServiceListClient{stream}
-	if err := x.ClientStream.SendMsg(in); err != nil {
-		return nil, err
-	}
-	if err := x.ClientStream.CloseSend(); err != nil {
-		return nil, err
-	}
-	return x, nil
-}
-
-type UserService_ListClient interface {
-	Recv() (*User, error)
-	grpc.ClientStream
-}
-
-type userServiceListClient struct {
-	grpc.ClientStream
-}
-
-func (x *userServiceListClient) Recv() (*User, error) {
-	m := new(User)
-	if err := x.ClientStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
-}
-
 // UserServiceServer is the server API for UserService service.
 // All implementations should embed UnimplementedUserServiceServer
 // for forward compatibility
@@ -193,7 +160,6 @@ type UserServiceServer interface {
 	Onboarding(context.Context, *OnboardingInput) (*MeUser, error)
 	Me(context.Context, *Empty) (*MeUser, error)
 	Get(context.Context, *UserGetInput) (*User, error)
-	List(*UserListInput, UserService_ListServer) error
 }
 
 // UnimplementedUserServiceServer should be embedded to have forward compatible implementations.
@@ -211,9 +177,6 @@ func (UnimplementedUserServiceServer) Me(context.Context, *Empty) (*MeUser, erro
 }
 func (UnimplementedUserServiceServer) Get(context.Context, *UserGetInput) (*User, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
-}
-func (UnimplementedUserServiceServer) List(*UserListInput, UserService_ListServer) error {
-	return status.Errorf(codes.Unimplemented, "method List not implemented")
 }
 
 // UnsafeUserServiceServer may be embedded to opt out of forward compatibility for this service.
@@ -299,27 +262,6 @@ func _UserService_Get_Handler(srv interface{}, ctx context.Context, dec func(int
 	return interceptor(ctx, in, info, handler)
 }
 
-func _UserService_List_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(UserListInput)
-	if err := stream.RecvMsg(m); err != nil {
-		return err
-	}
-	return srv.(UserServiceServer).List(m, &userServiceListServer{stream})
-}
-
-type UserService_ListServer interface {
-	Send(*User) error
-	grpc.ServerStream
-}
-
-type userServiceListServer struct {
-	grpc.ServerStream
-}
-
-func (x *userServiceListServer) Send(m *User) error {
-	return x.ServerStream.SendMsg(m)
-}
-
 // UserService_ServiceDesc is the grpc.ServiceDesc for UserService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -344,13 +286,7 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _UserService_Get_Handler,
 		},
 	},
-	Streams: []grpc.StreamDesc{
-		{
-			StreamName:    "List",
-			Handler:       _UserService_List_Handler,
-			ServerStreams: true,
-		},
-	},
+	Streams:  []grpc.StreamDesc{},
 	Metadata: "app.proto",
 }
 

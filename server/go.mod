@@ -7,6 +7,7 @@ require (
 	firebase.google.com/go/v4 v4.6.0
 	github.com/aws/aws-sdk-go v1.41.2
 	github.com/bxcodec/faker/v3 v3.6.0
+	github.com/cheekybits/genny v1.0.0
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.0.0 // indirect
 	github.com/friendsofgo/errors v0.9.2
 	github.com/go-chi/jwtauth v1.2.0

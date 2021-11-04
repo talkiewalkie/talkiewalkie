@@ -26,10 +26,7 @@ message MeUser {
 }
 
 message UserGetInput {
-  oneof id {
-    string handle = 1;
-    string uuid = 2;
-  }
+  string uuid = 2;
 }
 
 message UserListInput {
@@ -54,7 +51,6 @@ service UserService {
   rpc Onboarding(OnboardingInput) returns (MeUser) {}
   rpc Me(Empty)  returns (MeUser) {}
   rpc Get(UserGetInput)  returns (User) {}
-  rpc List(UserListInput)  returns (stream User) {}
 }
 
 // -----------------------
