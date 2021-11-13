@@ -13,7 +13,6 @@ import (
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 	"math/rand"
-	"strings"
 )
 
 type Context struct {
@@ -33,40 +32,27 @@ func AuthInterceptor(c *Components) func(ctx context.Context) (context.Context, 
 			return nil, status.Error(codes.PermissionDenied, "missing authorization metadata key")
 		}
 
-		tok, err := c.FbAuth.VerifyIDTokenAndCheckRevoked(ctx, strings.Replace(jwts[0], "Bearer ", "", 1))
+		uid, phone, err := c.AuthClient.VerifyJWT(ctx, jwts[0])
 		if err != nil {
-			return nil, status.Error(codes.PermissionDenied, fmt.Sprintf("auth header provided couldn't be verified: %+v", err))
+			return nil, err
 		}
 
-		u, err := models.Users(models.UserWhere.FirebaseUID.EQ(null.StringFrom(tok.UID))).One(ctx, c.Db)
+		u, err := models.Users(models.UserWhere.FirebaseUID.EQ(null.StringFrom(uid.String()))).One(ctx, c.Db)
 		if err != nil && errors2.Cause(err) == sql.ErrNoRows {
-			phonePayload, ok := tok.Claims["phone_number"]
-			if !ok {
-				// TODO: investigate why there are multiple phone claims payloads!
-				otherPhonePayload, otherOk := tok.Claims["phone"]
-				if !otherOk {
-					return nil, status.Error(codes.Internal, fmt.Sprintf("firebase user has no phone claim"))
-				}
-				phonePayload = otherPhonePayload
-			}
-			phone, ok := phonePayload.(string)
-			if !ok {
-				return nil, status.Error(codes.Internal, fmt.Sprintf("firebase user has unhandled phone claim (not a string)"))
-			}
-
 			u = &models.User{
+				PhoneNumber: phone,
+				FirebaseUID: null.StringFrom(uid.String()),
+
 				DisplayName:    null.StringFromPtr(nil),
-				PhoneNumber:    phone,
-				FirebaseUID:    null.NewString(tok.UID, true),
-				ProfilePicture: null.NewInt(0, false), // TODO reupload picture
+				ProfilePicture: null.IntFromPtr(nil), // TODO reupload picture
 			}
 			if err = u.Insert(ctx, c.Db, boil.Infer()); err != nil {
 				return nil, status.Error(codes.Internal, fmt.Sprintf("could not create matching db user for new firebase user: %+v", err))
 			}
+
 			if err = CreateDefaultConversation(c, ctx, u); err != nil {
 				return nil, err
 			}
-
 		} else if err != nil {
 			return nil, status.Error(codes.Internal, fmt.Sprintf("failed to query for user uid: %+v", err))
 		}

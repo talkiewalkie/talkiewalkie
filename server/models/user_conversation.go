@@ -100,6 +100,48 @@ func (*userConversationR) NewStruct() *userConversationR {
 // userConversationL is where Load methods for each relationship are stored.
 type userConversationL struct{}
 
+// ID gathering methods for self and relations
+// Slice utils for identifying columns
+func (o *UserConversationSlice) Ids() []int {
+	ids := map[int]bool{}
+	for _, item := range *o {
+		ids[item.ID] = true
+	}
+
+	out := []int{}
+	for id, _ := range ids {
+		out = append(out, id)
+	}
+	return out
+}
+
+func (o *UserConversationSlice) ConversationIDs() []int {
+	ids := map[int]bool{}
+	for _, item := range *o {
+
+		ids[item.ConversationID] = true
+	}
+
+	out := []int{}
+	for id, _ := range ids {
+		out = append(out, id)
+	}
+	return out
+}
+func (o *UserConversationSlice) UserIDs() []int {
+	ids := map[int]bool{}
+	for _, item := range *o {
+
+		ids[item.UserID] = true
+	}
+
+	out := []int{}
+	for id, _ := range ids {
+		out = append(out, id)
+	}
+	return out
+}
+
 var (
 	userConversationAllColumns            = []string{"id", "user_id", "conversation_id", "created_at", "read_until"}
 	userConversationColumnsWithoutDefault = []string{"user_id", "conversation_id"}
@@ -962,6 +1004,128 @@ func (o UserConversationSlice) UpdateAll(ctx context.Context, exec boil.ContextE
 	return rowsAff, nil
 }
 
+// Upsert attempts an insert using an executor, and does an update or ignore on conflict.
+// See boil.Columns documentation for how to properly use updateColumns and insertColumns.
+func (o *UserConversation) Upsert(ctx context.Context, exec boil.ContextExecutor, updateOnConflict bool, conflictColumns []string, updateColumns, insertColumns boil.Columns) error {
+	if o == nil {
+		return errors.New("models: no user_conversation provided for upsert")
+	}
+	if !boil.TimestampsAreSkipped(ctx) {
+		currTime := time.Now().In(boil.GetLocation())
+
+		if o.CreatedAt.IsZero() {
+			o.CreatedAt = currTime
+		}
+	}
+
+	if err := o.doBeforeUpsertHooks(ctx, exec); err != nil {
+		return err
+	}
+
+	nzDefaults := queries.NonZeroDefaultSet(userConversationColumnsWithDefault, o)
+
+	// Build cache key in-line uglily - mysql vs psql problems
+	buf := strmangle.GetBuffer()
+	if updateOnConflict {
+		buf.WriteByte('t')
+	} else {
+		buf.WriteByte('f')
+	}
+	buf.WriteByte('.')
+	for _, c := range conflictColumns {
+		buf.WriteString(c)
+	}
+	buf.WriteByte('.')
+	buf.WriteString(strconv.Itoa(updateColumns.Kind))
+	for _, c := range updateColumns.Cols {
+		buf.WriteString(c)
+	}
+	buf.WriteByte('.')
+	buf.WriteString(strconv.Itoa(insertColumns.Kind))
+	for _, c := range insertColumns.Cols {
+		buf.WriteString(c)
+	}
+	buf.WriteByte('.')
+	for _, c := range nzDefaults {
+		buf.WriteString(c)
+	}
+	key := buf.String()
+	strmangle.PutBuffer(buf)
+
+	userConversationUpsertCacheMut.RLock()
+	cache, cached := userConversationUpsertCache[key]
+	userConversationUpsertCacheMut.RUnlock()
+
+	var err error
+
+	if !cached {
+		insert, ret := insertColumns.InsertColumnSet(
+			userConversationAllColumns,
+			userConversationColumnsWithDefault,
+			userConversationColumnsWithoutDefault,
+			nzDefaults,
+		)
+		update := updateColumns.UpdateColumnSet(
+			userConversationAllColumns,
+			userConversationPrimaryKeyColumns,
+		)
+
+		if updateOnConflict && len(update) == 0 {
+			return errors.New("models: unable to upsert user_conversation, could not build update column list")
+		}
+
+		conflict := conflictColumns
+		if len(conflict) == 0 {
+			conflict = make([]string, len(userConversationPrimaryKeyColumns))
+			copy(conflict, userConversationPrimaryKeyColumns)
+		}
+		cache.query = buildUpsertQueryPostgres(dialect, "\"user_conversation\"", updateOnConflict, ret, update, conflict, insert)
+
+		cache.valueMapping, err = queries.BindMapping(userConversationType, userConversationMapping, insert)
+		if err != nil {
+			return err
+		}
+		if len(ret) != 0 {
+			cache.retMapping, err = queries.BindMapping(userConversationType, userConversationMapping, ret)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	value := reflect.Indirect(reflect.ValueOf(o))
+	vals := queries.ValuesFromMapping(value, cache.valueMapping)
+	var returns []interface{}
+	if len(cache.retMapping) != 0 {
+		returns = queries.PtrsFromMapping(value, cache.retMapping)
+	}
+
+	if boil.IsDebug(ctx) {
+		writer := boil.DebugWriterFrom(ctx)
+		fmt.Fprintln(writer, cache.query)
+		fmt.Fprintln(writer, vals)
+	}
+	if len(cache.retMapping) != 0 {
+		err = exec.QueryRowContext(ctx, cache.query, vals...).Scan(returns...)
+		if err == sql.ErrNoRows {
+			err = nil // Postgres doesn't return anything when there's no update
+		}
+	} else {
+		_, err = exec.ExecContext(ctx, cache.query, vals...)
+	}
+	if err != nil {
+		return errors.Wrap(err, "models: unable to upsert user_conversation")
+	}
+
+	if !cached {
+		userConversationUpsertCacheMut.Lock()
+		userConversationUpsertCache[key] = cache
+		userConversationUpsertCacheMut.Unlock()
+	}
+
+	return o.doAfterUpsertHooks(ctx, exec)
+}
+
 // Delete deletes a single UserConversation record with an executor.
 // Delete will match against the primary key column to find the record to delete.
 func (o *UserConversation) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
@@ -1127,126 +1291,4 @@ func UserConversationExists(ctx context.Context, exec boil.ContextExecutor, iD i
 	}
 
 	return exists, nil
-}
-
-// Upsert attempts an insert using an executor, and does an update or ignore on conflict.
-// See boil.Columns documentation for how to properly use updateColumns and insertColumns.
-func (o *UserConversation) Upsert(ctx context.Context, exec boil.ContextExecutor, updateOnConflict bool, conflictColumns []string, updateColumns, insertColumns boil.Columns) error {
-	if o == nil {
-		return errors.New("models: no user_conversation provided for upsert")
-	}
-	if !boil.TimestampsAreSkipped(ctx) {
-		currTime := time.Now().In(boil.GetLocation())
-
-		if o.CreatedAt.IsZero() {
-			o.CreatedAt = currTime
-		}
-	}
-
-	if err := o.doBeforeUpsertHooks(ctx, exec); err != nil {
-		return err
-	}
-
-	nzDefaults := queries.NonZeroDefaultSet(userConversationColumnsWithDefault, o)
-
-	// Build cache key in-line uglily - mysql vs psql problems
-	buf := strmangle.GetBuffer()
-	if updateOnConflict {
-		buf.WriteByte('t')
-	} else {
-		buf.WriteByte('f')
-	}
-	buf.WriteByte('.')
-	for _, c := range conflictColumns {
-		buf.WriteString(c)
-	}
-	buf.WriteByte('.')
-	buf.WriteString(strconv.Itoa(updateColumns.Kind))
-	for _, c := range updateColumns.Cols {
-		buf.WriteString(c)
-	}
-	buf.WriteByte('.')
-	buf.WriteString(strconv.Itoa(insertColumns.Kind))
-	for _, c := range insertColumns.Cols {
-		buf.WriteString(c)
-	}
-	buf.WriteByte('.')
-	for _, c := range nzDefaults {
-		buf.WriteString(c)
-	}
-	key := buf.String()
-	strmangle.PutBuffer(buf)
-
-	userConversationUpsertCacheMut.RLock()
-	cache, cached := userConversationUpsertCache[key]
-	userConversationUpsertCacheMut.RUnlock()
-
-	var err error
-
-	if !cached {
-		insert, ret := insertColumns.InsertColumnSet(
-			userConversationAllColumns,
-			userConversationColumnsWithDefault,
-			userConversationColumnsWithoutDefault,
-			nzDefaults,
-		)
-		update := updateColumns.UpdateColumnSet(
-			userConversationAllColumns,
-			userConversationPrimaryKeyColumns,
-		)
-
-		if updateOnConflict && len(update) == 0 {
-			return errors.New("models: unable to upsert user_conversation, could not build update column list")
-		}
-
-		conflict := conflictColumns
-		if len(conflict) == 0 {
-			conflict = make([]string, len(userConversationPrimaryKeyColumns))
-			copy(conflict, userConversationPrimaryKeyColumns)
-		}
-		cache.query = buildUpsertQueryPostgres(dialect, "\"user_conversation\"", updateOnConflict, ret, update, conflict, insert)
-
-		cache.valueMapping, err = queries.BindMapping(userConversationType, userConversationMapping, insert)
-		if err != nil {
-			return err
-		}
-		if len(ret) != 0 {
-			cache.retMapping, err = queries.BindMapping(userConversationType, userConversationMapping, ret)
-			if err != nil {
-				return err
-			}
-		}
-	}
-
-	value := reflect.Indirect(reflect.ValueOf(o))
-	vals := queries.ValuesFromMapping(value, cache.valueMapping)
-	var returns []interface{}
-	if len(cache.retMapping) != 0 {
-		returns = queries.PtrsFromMapping(value, cache.retMapping)
-	}
-
-	if boil.IsDebug(ctx) {
-		writer := boil.DebugWriterFrom(ctx)
-		fmt.Fprintln(writer, cache.query)
-		fmt.Fprintln(writer, vals)
-	}
-	if len(cache.retMapping) != 0 {
-		err = exec.QueryRowContext(ctx, cache.query, vals...).Scan(returns...)
-		if err == sql.ErrNoRows {
-			err = nil // Postgres doesn't return anything when there's no update
-		}
-	} else {
-		_, err = exec.ExecContext(ctx, cache.query, vals...)
-	}
-	if err != nil {
-		return errors.Wrap(err, "models: unable to upsert user_conversation")
-	}
-
-	if !cached {
-		userConversationUpsertCacheMut.Lock()
-		userConversationUpsertCache[key] = cache
-		userConversationUpsertCacheMut.Unlock()
-	}
-
-	return o.doAfterUpsertHooks(ctx, exec)
 }

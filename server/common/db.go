@@ -109,7 +109,12 @@ func sqlFmt(qs string) string {
 	return strings.TrimSpace(strings.Replace(qs, "\n", " ", -1))
 }
 
-func RunMigrations(migrationsDir, dbUrl string) {
+func RunMigrations(migrationsDir string) {
+	dbUrl := DbUri(
+		"talkiewalkie",
+		os.Getenv("POSTGRES_USER"), os.Getenv("POSTGRES_PASSWORD"),
+		os.Getenv("POSTGRES_HOST"), os.Getenv("POSTGRES_PORT"),
+		false)
 	m, err := migrate.New(fmt.Sprintf("file://%s", migrationsDir), dbUrl)
 	if err != nil {
 		log.Fatalf("could not migrate on '%s': %+v", dbUrl, err)

@@ -4,15 +4,17 @@
 package models
 
 var TableNames = struct {
-	Asset            string
-	Conversation     string
-	Message          string
-	User             string
-	UserConversation string
+	DieselSchemaMigrations string
+	Asset                  string
+	Conversation           string
+	Message                string
+	User                   string
+	UserConversation       string
 }{
-	Asset:            "asset",
-	Conversation:     "conversation",
-	Message:          "message",
-	User:             "user",
-	UserConversation: "user_conversation",
+	DieselSchemaMigrations: "__diesel_schema_migrations",
+	Asset:                  "asset",
+	Conversation:           "conversation",
+	Message:                "message",
+	User:                   "user",
+	UserConversation:       "user_conversation",
 }

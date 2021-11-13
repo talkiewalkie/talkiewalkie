@@ -9,6 +9,10 @@ import uuid2 "github.com/satori/go.uuid"
 type BoolSlice []bool
 type BoolSlicePtrs []*bool
 
+var (
+	_ uuid2.UUID
+)
+
 func (slice BoolSlice) UniqueBy(keyer func(bool) interface{}) BoolSlice {
 	u := map[interface{}]bool{}
 
@@ -131,7 +135,7 @@ func (slice BoolSlicePtrs) SameAs(other BoolSlicePtrs) bool {
 		return false
 	}
 	// create a map of string -> int
-	diff := make(map[bool]int, len(slice))
+	diff := make(map[*bool]int, len(slice))
 	for _, _x := range slice {
 		// 0 value for int is 0, so just increment a counter for the string
 		diff[_x]++
@@ -153,6 +157,10 @@ func (slice BoolSlicePtrs) SameAs(other BoolSlicePtrs) bool {
 
 type ByteSlice []byte
 type ByteSlicePtrs []*byte
+
+var (
+	_ uuid2.UUID
+)
 
 func (slice ByteSlice) UniqueBy(keyer func(byte) interface{}) ByteSlice {
 	u := map[interface{}]byte{}
@@ -276,7 +284,7 @@ func (slice ByteSlicePtrs) SameAs(other ByteSlicePtrs) bool {
 		return false
 	}
 	// create a map of string -> int
-	diff := make(map[byte]int, len(slice))
+	diff := make(map[*byte]int, len(slice))
 	for _, _x := range slice {
 		// 0 value for int is 0, so just increment a counter for the string
 		diff[_x]++
@@ -298,6 +306,10 @@ func (slice ByteSlicePtrs) SameAs(other ByteSlicePtrs) bool {
 
 type Complex128Slice []complex128
 type Complex128SlicePtrs []*complex128
+
+var (
+	_ uuid2.UUID
+)
 
 func (slice Complex128Slice) UniqueBy(keyer func(complex128) interface{}) Complex128Slice {
 	u := map[interface{}]complex128{}
@@ -421,7 +433,7 @@ func (slice Complex128SlicePtrs) SameAs(other Complex128SlicePtrs) bool {
 		return false
 	}
 	// create a map of string -> int
-	diff := make(map[complex128]int, len(slice))
+	diff := make(map[*complex128]int, len(slice))
 	for _, _x := range slice {
 		// 0 value for int is 0, so just increment a counter for the string
 		diff[_x]++
@@ -443,6 +455,10 @@ func (slice Complex128SlicePtrs) SameAs(other Complex128SlicePtrs) bool {
 
 type Complex64Slice []complex64
 type Complex64SlicePtrs []*complex64
+
+var (
+	_ uuid2.UUID
+)
 
 func (slice Complex64Slice) UniqueBy(keyer func(complex64) interface{}) Complex64Slice {
 	u := map[interface{}]complex64{}
@@ -566,7 +582,7 @@ func (slice Complex64SlicePtrs) SameAs(other Complex64SlicePtrs) bool {
 		return false
 	}
 	// create a map of string -> int
-	diff := make(map[complex64]int, len(slice))
+	diff := make(map[*complex64]int, len(slice))
 	for _, _x := range slice {
 		// 0 value for int is 0, so just increment a counter for the string
 		diff[_x]++
@@ -588,6 +604,10 @@ func (slice Complex64SlicePtrs) SameAs(other Complex64SlicePtrs) bool {
 
 type ErrorSlice []error
 type ErrorSlicePtrs []*error
+
+var (
+	_ uuid2.UUID
+)
 
 func (slice ErrorSlice) UniqueBy(keyer func(error) interface{}) ErrorSlice {
 	u := map[interface{}]error{}
@@ -711,7 +731,7 @@ func (slice ErrorSlicePtrs) SameAs(other ErrorSlicePtrs) bool {
 		return false
 	}
 	// create a map of string -> int
-	diff := make(map[error]int, len(slice))
+	diff := make(map[*error]int, len(slice))
 	for _, _x := range slice {
 		// 0 value for int is 0, so just increment a counter for the string
 		diff[_x]++
@@ -733,6 +753,10 @@ func (slice ErrorSlicePtrs) SameAs(other ErrorSlicePtrs) bool {
 
 type Float32Slice []float32
 type Float32SlicePtrs []*float32
+
+var (
+	_ uuid2.UUID
+)
 
 func (slice Float32Slice) UniqueBy(keyer func(float32) interface{}) Float32Slice {
 	u := map[interface{}]float32{}
@@ -856,7 +880,7 @@ func (slice Float32SlicePtrs) SameAs(other Float32SlicePtrs) bool {
 		return false
 	}
 	// create a map of string -> int
-	diff := make(map[float32]int, len(slice))
+	diff := make(map[*float32]int, len(slice))
 	for _, _x := range slice {
 		// 0 value for int is 0, so just increment a counter for the string
 		diff[_x]++
@@ -878,6 +902,10 @@ func (slice Float32SlicePtrs) SameAs(other Float32SlicePtrs) bool {
 
 type Float64Slice []float64
 type Float64SlicePtrs []*float64
+
+var (
+	_ uuid2.UUID
+)
 
 func (slice Float64Slice) UniqueBy(keyer func(float64) interface{}) Float64Slice {
 	u := map[interface{}]float64{}
@@ -1001,7 +1029,7 @@ func (slice Float64SlicePtrs) SameAs(other Float64SlicePtrs) bool {
 		return false
 	}
 	// create a map of string -> int
-	diff := make(map[float64]int, len(slice))
+	diff := make(map[*float64]int, len(slice))
 	for _, _x := range slice {
 		// 0 value for int is 0, so just increment a counter for the string
 		diff[_x]++
@@ -1023,6 +1051,10 @@ func (slice Float64SlicePtrs) SameAs(other Float64SlicePtrs) bool {
 
 type IntSlice []int
 type IntSlicePtrs []*int
+
+var (
+	_ uuid2.UUID
+)
 
 func (slice IntSlice) UniqueBy(keyer func(int) interface{}) IntSlice {
 	u := map[interface{}]int{}
@@ -1146,7 +1178,7 @@ func (slice IntSlicePtrs) SameAs(other IntSlicePtrs) bool {
 		return false
 	}
 	// create a map of string -> int
-	diff := make(map[int]int, len(slice))
+	diff := make(map[*int]int, len(slice))
 	for _, _x := range slice {
 		// 0 value for int is 0, so just increment a counter for the string
 		diff[_x]++
@@ -1168,6 +1200,10 @@ func (slice IntSlicePtrs) SameAs(other IntSlicePtrs) bool {
 
 type Int16Slice []int16
 type Int16SlicePtrs []*int16
+
+var (
+	_ uuid2.UUID
+)
 
 func (slice Int16Slice) UniqueBy(keyer func(int16) interface{}) Int16Slice {
 	u := map[interface{}]int16{}
@@ -1291,7 +1327,7 @@ func (slice Int16SlicePtrs) SameAs(other Int16SlicePtrs) bool {
 		return false
 	}
 	// create a map of string -> int
-	diff := make(map[int16]int, len(slice))
+	diff := make(map[*int16]int, len(slice))
 	for _, _x := range slice {
 		// 0 value for int is 0, so just increment a counter for the string
 		diff[_x]++
@@ -1313,6 +1349,10 @@ func (slice Int16SlicePtrs) SameAs(other Int16SlicePtrs) bool {
 
 type Int32Slice []int32
 type Int32SlicePtrs []*int32
+
+var (
+	_ uuid2.UUID
+)
 
 func (slice Int32Slice) UniqueBy(keyer func(int32) interface{}) Int32Slice {
 	u := map[interface{}]int32{}
@@ -1436,7 +1476,7 @@ func (slice Int32SlicePtrs) SameAs(other Int32SlicePtrs) bool {
 		return false
 	}
 	// create a map of string -> int
-	diff := make(map[int32]int, len(slice))
+	diff := make(map[*int32]int, len(slice))
 	for _, _x := range slice {
 		// 0 value for int is 0, so just increment a counter for the string
 		diff[_x]++
@@ -1458,6 +1498,10 @@ func (slice Int32SlicePtrs) SameAs(other Int32SlicePtrs) bool {
 
 type Int64Slice []int64
 type Int64SlicePtrs []*int64
+
+var (
+	_ uuid2.UUID
+)
 
 func (slice Int64Slice) UniqueBy(keyer func(int64) interface{}) Int64Slice {
 	u := map[interface{}]int64{}
@@ -1581,7 +1625,7 @@ func (slice Int64SlicePtrs) SameAs(other Int64SlicePtrs) bool {
 		return false
 	}
 	// create a map of string -> int
-	diff := make(map[int64]int, len(slice))
+	diff := make(map[*int64]int, len(slice))
 	for _, _x := range slice {
 		// 0 value for int is 0, so just increment a counter for the string
 		diff[_x]++
@@ -1603,6 +1647,10 @@ func (slice Int64SlicePtrs) SameAs(other Int64SlicePtrs) bool {
 
 type Int8Slice []int8
 type Int8SlicePtrs []*int8
+
+var (
+	_ uuid2.UUID
+)
 
 func (slice Int8Slice) UniqueBy(keyer func(int8) interface{}) Int8Slice {
 	u := map[interface{}]int8{}
@@ -1726,7 +1774,7 @@ func (slice Int8SlicePtrs) SameAs(other Int8SlicePtrs) bool {
 		return false
 	}
 	// create a map of string -> int
-	diff := make(map[int8]int, len(slice))
+	diff := make(map[*int8]int, len(slice))
 	for _, _x := range slice {
 		// 0 value for int is 0, so just increment a counter for the string
 		diff[_x]++
@@ -1748,6 +1796,10 @@ func (slice Int8SlicePtrs) SameAs(other Int8SlicePtrs) bool {
 
 type RuneSlice []rune
 type RuneSlicePtrs []*rune
+
+var (
+	_ uuid2.UUID
+)
 
 func (slice RuneSlice) UniqueBy(keyer func(rune) interface{}) RuneSlice {
 	u := map[interface{}]rune{}
@@ -1871,7 +1923,7 @@ func (slice RuneSlicePtrs) SameAs(other RuneSlicePtrs) bool {
 		return false
 	}
 	// create a map of string -> int
-	diff := make(map[rune]int, len(slice))
+	diff := make(map[*rune]int, len(slice))
 	for _, _x := range slice {
 		// 0 value for int is 0, so just increment a counter for the string
 		diff[_x]++
@@ -1893,6 +1945,10 @@ func (slice RuneSlicePtrs) SameAs(other RuneSlicePtrs) bool {
 
 type StringSlice []string
 type StringSlicePtrs []*string
+
+var (
+	_ uuid2.UUID
+)
 
 func (slice StringSlice) UniqueBy(keyer func(string) interface{}) StringSlice {
 	u := map[interface{}]string{}
@@ -2016,7 +2072,7 @@ func (slice StringSlicePtrs) SameAs(other StringSlicePtrs) bool {
 		return false
 	}
 	// create a map of string -> int
-	diff := make(map[string]int, len(slice))
+	diff := make(map[*string]int, len(slice))
 	for _, _x := range slice {
 		// 0 value for int is 0, so just increment a counter for the string
 		diff[_x]++
@@ -2038,6 +2094,10 @@ func (slice StringSlicePtrs) SameAs(other StringSlicePtrs) bool {
 
 type UintSlice []uint
 type UintSlicePtrs []*uint
+
+var (
+	_ uuid2.UUID
+)
 
 func (slice UintSlice) UniqueBy(keyer func(uint) interface{}) UintSlice {
 	u := map[interface{}]uint{}
@@ -2161,7 +2221,7 @@ func (slice UintSlicePtrs) SameAs(other UintSlicePtrs) bool {
 		return false
 	}
 	// create a map of string -> int
-	diff := make(map[uint]int, len(slice))
+	diff := make(map[*uint]int, len(slice))
 	for _, _x := range slice {
 		// 0 value for int is 0, so just increment a counter for the string
 		diff[_x]++
@@ -2183,6 +2243,10 @@ func (slice UintSlicePtrs) SameAs(other UintSlicePtrs) bool {
 
 type Uint16Slice []uint16
 type Uint16SlicePtrs []*uint16
+
+var (
+	_ uuid2.UUID
+)
 
 func (slice Uint16Slice) UniqueBy(keyer func(uint16) interface{}) Uint16Slice {
 	u := map[interface{}]uint16{}
@@ -2306,7 +2370,7 @@ func (slice Uint16SlicePtrs) SameAs(other Uint16SlicePtrs) bool {
 		return false
 	}
 	// create a map of string -> int
-	diff := make(map[uint16]int, len(slice))
+	diff := make(map[*uint16]int, len(slice))
 	for _, _x := range slice {
 		// 0 value for int is 0, so just increment a counter for the string
 		diff[_x]++
@@ -2328,6 +2392,10 @@ func (slice Uint16SlicePtrs) SameAs(other Uint16SlicePtrs) bool {
 
 type Uint32Slice []uint32
 type Uint32SlicePtrs []*uint32
+
+var (
+	_ uuid2.UUID
+)
 
 func (slice Uint32Slice) UniqueBy(keyer func(uint32) interface{}) Uint32Slice {
 	u := map[interface{}]uint32{}
@@ -2451,7 +2519,7 @@ func (slice Uint32SlicePtrs) SameAs(other Uint32SlicePtrs) bool {
 		return false
 	}
 	// create a map of string -> int
-	diff := make(map[uint32]int, len(slice))
+	diff := make(map[*uint32]int, len(slice))
 	for _, _x := range slice {
 		// 0 value for int is 0, so just increment a counter for the string
 		diff[_x]++
@@ -2473,6 +2541,10 @@ func (slice Uint32SlicePtrs) SameAs(other Uint32SlicePtrs) bool {
 
 type Uint64Slice []uint64
 type Uint64SlicePtrs []*uint64
+
+var (
+	_ uuid2.UUID
+)
 
 func (slice Uint64Slice) UniqueBy(keyer func(uint64) interface{}) Uint64Slice {
 	u := map[interface{}]uint64{}
@@ -2596,7 +2668,7 @@ func (slice Uint64SlicePtrs) SameAs(other Uint64SlicePtrs) bool {
 		return false
 	}
 	// create a map of string -> int
-	diff := make(map[uint64]int, len(slice))
+	diff := make(map[*uint64]int, len(slice))
 	for _, _x := range slice {
 		// 0 value for int is 0, so just increment a counter for the string
 		diff[_x]++
@@ -2618,6 +2690,10 @@ func (slice Uint64SlicePtrs) SameAs(other Uint64SlicePtrs) bool {
 
 type Uint8Slice []uint8
 type Uint8SlicePtrs []*uint8
+
+var (
+	_ uuid2.UUID
+)
 
 func (slice Uint8Slice) UniqueBy(keyer func(uint8) interface{}) Uint8Slice {
 	u := map[interface{}]uint8{}
@@ -2741,7 +2817,7 @@ func (slice Uint8SlicePtrs) SameAs(other Uint8SlicePtrs) bool {
 		return false
 	}
 	// create a map of string -> int
-	diff := make(map[uint8]int, len(slice))
+	diff := make(map[*uint8]int, len(slice))
 	for _, _x := range slice {
 		// 0 value for int is 0, so just increment a counter for the string
 		diff[_x]++
@@ -2763,6 +2839,10 @@ func (slice Uint8SlicePtrs) SameAs(other Uint8SlicePtrs) bool {
 
 type UintptrSlice []uintptr
 type UintptrSlicePtrs []*uintptr
+
+var (
+	_ uuid2.UUID
+)
 
 func (slice UintptrSlice) UniqueBy(keyer func(uintptr) interface{}) UintptrSlice {
 	u := map[interface{}]uintptr{}
@@ -2886,7 +2966,7 @@ func (slice UintptrSlicePtrs) SameAs(other UintptrSlicePtrs) bool {
 		return false
 	}
 	// create a map of string -> int
-	diff := make(map[uintptr]int, len(slice))
+	diff := make(map[*uintptr]int, len(slice))
 	for _, _x := range slice {
 		// 0 value for int is 0, so just increment a counter for the string
 		diff[_x]++
@@ -2908,6 +2988,10 @@ func (slice UintptrSlicePtrs) SameAs(other UintptrSlicePtrs) bool {
 
 type Uuid2UUIDSlice []uuid2.UUID
 type Uuid2UUIDSlicePtrs []*uuid2.UUID
+
+var (
+	_ uuid2.UUID
+)
 
 func (slice Uuid2UUIDSlice) UniqueBy(keyer func(uuid2.UUID) interface{}) Uuid2UUIDSlice {
 	u := map[interface{}]uuid2.UUID{}
@@ -3031,7 +3115,7 @@ func (slice Uuid2UUIDSlicePtrs) SameAs(other Uuid2UUIDSlicePtrs) bool {
 		return false
 	}
 	// create a map of string -> int
-	diff := make(map[uuid2.UUID]int, len(slice))
+	diff := make(map[*uuid2.UUID]int, len(slice))
 	for _, _x := range slice {
 		// 0 value for int is 0, so just increment a counter for the string
 		diff[_x]++
