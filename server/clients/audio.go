@@ -1,8 +1,7 @@
-package common
+package clients
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"os"
 	"time"
@@ -19,10 +18,15 @@ func grpcLogger(ctx context.Context, method string, req, reply interface{}, cc *
 	return err
 }
 
-func NewAudioClient() (pb.CompressionClient, error) {
-	conn, err := grpc.Dial(os.Getenv("AUDIO_SERVICE_URL"), grpc.WithInsecure(), grpc.WithChainUnaryInterceptor(grpcLogger))
+func NewAudioClient() pb.CompressionClient {
+	conn, err := grpc.Dial(
+		os.Getenv("AUDIO_SERVICE_URL"),
+		grpc.WithInsecure(),
+		grpc.WithChainUnaryInterceptor(grpcLogger),
+	)
 	if err != nil {
-		return nil, err
+		log.Printf("%+v", err)
+		return pb.NewCompressionClient(conn)
 	}
 
 	// poll status, if connection was not established after a second we consider the service unavailable
@@ -42,10 +46,10 @@ func NewAudioClient() (pb.CompressionClient, error) {
 	}()
 
 	if conn.GetState() != connectivity.Ready {
-		return nil, fmt.Errorf("could not reach audio service at '%s', status is '%v'",
+		log.Printf("could not reach audio service at '%s', status is '%v'",
 			os.Getenv("AUDIO_SERVICE_URL"),
 			conn.GetState())
 	}
 	client := pb.NewCompressionClient(conn)
-	return client, nil
+	return client
 }

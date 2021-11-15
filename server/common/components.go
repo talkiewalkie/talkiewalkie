@@ -3,11 +3,10 @@ package common
 import (
 	"context"
 	"firebase.google.com/go/v4"
-	"firebase.google.com/go/v4/auth"
-	"firebase.google.com/go/v4/messaging"
 	"fmt"
-	"github.com/go-chi/jwtauth"
 	"github.com/jmoiron/sqlx"
+	"github.com/talkiewalkie/talkiewalkie/clients"
+	"github.com/talkiewalkie/talkiewalkie/repositories"
 	"log"
 	"math/rand"
 	"os"
@@ -18,44 +17,32 @@ import (
 )
 
 type Components struct {
-	Db          *sqlx.DB
-	PgPubSub    *PgPubSub
-	EmailClient EmailClient
-	JwtAuth     *jwtauth.JWTAuth
-	FbAuth      *auth.Client
-	FbMssg      *messaging.Client
-	Storage     StorageClient
-	Audio       *pb.CompressionClient
+	Db *sqlx.DB
+
+	AuthClient      clients.AuthClient
+	MessagingClient clients.MessagingClient
+	PubSubClient    clients.PubSubClient
+	StorageClient   clients.StorageClient
+	AudioClient     pb.CompressionClient
+
+	// Context sensitive items
+	repositories.Repositories
 
 	CompressImg func(string, int) (string, error)
 }
 
-func InitComponents() (*Components, error) {
-	tokenAuth := jwtauth.New("HS256", []byte(os.Getenv("JWT_SECRET")), nil)
-	emailClient := initEmailClient()
+func (components *Components) ResetEntityStores(ctx context.Context) {
+	components.AssetRepository = repositories.NewAssetRepository(ctx, components.Db)
+	components.ConversationRepository = repositories.NewConversationRepository(ctx, components.Db)
+	components.MessageRepository = repositories.NewMessageRepository(ctx, components.Db)
+	components.UserRepository = repositories.NewUserRepository(ctx, components.Db)
+	components.UserConversationRepository = repositories.NewUserConversationRepository(ctx, components.Db)
+}
 
+func InitComponents() *Components {
 	app, err := firebase.NewApp(context.Background(), nil)
 	if err != nil {
 		log.Panicf("could not init the firebase sdk: %+v", err)
-	}
-	fbAuth, err := app.Auth(context.Background())
-	if err != nil {
-		log.Panicf("could not instantiate firebase auth service: %+v", err)
-	}
-	fbMssg, err := app.Messaging(context.Background())
-	if err != nil {
-		log.Panicf("could not instantiate firebase messaging service: %+v", err)
-	}
-
-	storageClient, err := NewGoogleStorageClient(context.Background())
-	if err != nil {
-		log.Panicf("could not init the storage: %+v", err)
-	}
-
-	audioClient, err := NewAudioClient()
-	if err != nil {
-		// TODO do fail when no audio client
-		log.Printf("could not initiate the audio client: %+v", err)
 	}
 
 	dbUri := DbUri(
@@ -65,20 +52,24 @@ func InitComponents() (*Components, error) {
 		false)
 	db, err := sqlx.Connect("postgres", dbUri)
 	if err != nil {
-		return nil, fmt.Errorf("could not connect to '%s': %+v", dbUri, err)
+		log.Panicf("could not connect to '%s': %+v", dbUri, err)
 	}
 
-	pgPubSub := NewPgPubSub(db, dbUri)
+	authClient := clients.NewFirebaseAuthClient(app)
+	messagingClient := clients.NewFirebaseMessagingClient(app)
+	storageClient := clients.NewGoogleStorageClient(context.Background())
+	audioClient := clients.NewAudioClient()
+	pubSubClient := clients.NewPgPubSub(db, dbUri)
 
-	return &Components{
-		Db:          db,
-		PgPubSub:    &pgPubSub,
-		EmailClient: emailClient,
-		JwtAuth:     tokenAuth,
-		FbAuth:      fbAuth,
-		FbMssg:      fbMssg,
-		Storage:     storageClient,
-		Audio:       &audioClient,
+	components := &Components{
+		Db: db,
+
+		AuthClient:      authClient,
+		MessagingClient: messagingClient,
+		PubSubClient:    pubSubClient,
+		StorageClient:   storageClient,
+		AudioClient:     audioClient,
+
 		CompressImg: func(path string, width int) (string, error) {
 			output := fmt.Sprintf("/tmp/%s.png", strconv.FormatInt(rand.Int63(), 10))
 
@@ -107,5 +98,8 @@ func InitComponents() (*Components, error) {
 			}
 			return output, nil
 		},
-	}, nil
+	}
+
+	components.ResetEntityStores(context.Background())
+	return components
 }

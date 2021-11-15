@@ -1,8 +1,7 @@
-package common
+package clients
 
 import (
 	"context"
-	"fmt"
 	"github.com/talkiewalkie/talkiewalkie/models"
 	"io"
 	"log"
@@ -41,17 +40,17 @@ func (g GoogleStorage) AssetUrl(asset *models.Asset) (string, error) {
 	}
 }
 
-func NewGoogleStorageClient(ctx context.Context) (StorageClient, error) {
+func NewGoogleStorageClient(ctx context.Context) StorageClient {
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		log.Fatalf("could not init storage client: %+v", err)
+		log.Panicf("could not init storage client: %+v", err)
 	}
 
 	g := GoogleStorage{Client: client, BucketName: os.Getenv("BUCKET_NAME")}
 	if g.BucketName == "" {
-		return nil, fmt.Errorf("bad config: no bucket name")
+		log.Panicf("Need a BUCKET_NAME")
 	}
-	return g, nil
+	return g
 }
 
 func (g GoogleStorage) Upload(c context.Context, blob io.ReadSeeker) (*uuid.UUID, error) {

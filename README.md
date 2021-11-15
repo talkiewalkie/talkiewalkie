@@ -9,4 +9,3 @@ TalkieWalkie monorepo: code for server, webapp, iOS app &amp; their deployment f
 - [protos](/protos): protobuf files for microservices<->main server interfaces
 - [scripts](/scripts): code for one time projects
 - [server](/server): Golang REST server
-- [sqlboiler](/sqlboiler): submodule for our own version of this SQL code generation tool for the server

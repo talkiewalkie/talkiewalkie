@@ -1,45 +1,47 @@
-package coco
+package api
 
 import (
 	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/golang/protobuf/proto"
-	uuid2 "github.com/satori/go.uuid"
-	"github.com/talkiewalkie/talkiewalkie/common"
-	"github.com/talkiewalkie/talkiewalkie/entities"
-	"github.com/talkiewalkie/talkiewalkie/models"
-	"github.com/talkiewalkie/talkiewalkie/pb"
-	"github.com/volatiletech/null/v8"
-	"github.com/volatiletech/sqlboiler/v4/boil"
-	"github.com/volatiletech/sqlboiler/v4/queries/qm"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 	"log"
-	"reflect"
-	"sort"
 	"sync"
 	"time"
+
+	"github.com/golang/protobuf/proto"
+	uuid2 "github.com/satori/go.uuid"
+	"github.com/volatiletech/null/v8"
+	"github.com/volatiletech/sqlboiler/v4/boil"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+
+	"github.com/talkiewalkie/talkiewalkie/clients"
+	"github.com/talkiewalkie/talkiewalkie/models"
+	"github.com/talkiewalkie/talkiewalkie/pb"
+	"github.com/talkiewalkie/talkiewalkie/pkg/slices"
+	"github.com/talkiewalkie/talkiewalkie/repositories"
 )
 
 type MessageService struct {
-	*common.Components
 }
 
 var _ pb.MessageServiceServer = MessageService{}
 
-func NewMessageService(c *common.Components) MessageService {
-	return MessageService{Components: c}
+func NewMessageService() MessageService {
+	return MessageService{}
 }
 
 func (ms MessageService) Incoming(_ *pb.Empty, server pb.MessageService_IncomingServer) error {
-	u, err := common.GetUser(server.Context())
+	components, me, err := WithAuthedContext(server.Context())
+	if err != nil {
+		return err
+	}
 
-	topic := entities.UserPubSubTopic(u)
+	topic := repositories.UserPubSubTopic(me)
 	log.Printf("established websocket connection [%s]", topic)
 
-	listener, unlisten, err := ms.PgPubSub.Subscribe(topic)
+	listener, unlisten, err := components.PubSubClient.Subscribe(topic)
 
 	if err != nil {
 		if err := unlisten(); err != nil {
@@ -55,36 +57,34 @@ func (ms MessageService) Incoming(_ *pb.Empty, server pb.MessageService_Incoming
 	}()
 
 	for {
-		psEvent := <-listener.Notify
-		var payload common.PubSubEvent
+		psEvent := <-listener
+		// On each new event we restore the request cache to mitigate caching issues
+		components.ResetEntityStores(server.Context())
+
+		var payload clients.PubSubEvent
 		if err := json.Unmarshal([]byte(psEvent.Extra), &payload); err != nil {
 			log.Printf("failed to parse pubsub payload on topic '%s': %s", topic, psEvent.Extra)
 		}
 
 		switch payload.Type {
-		case common.PubSubEventTypeNewMessage:
-			var msg common.NewMessageEvent
+		case clients.PubSubEventTypeNewMessage:
+			var msg clients.NewMessageEvent
 			if err = json.Unmarshal([]byte(psEvent.Extra), &msg); err != nil {
 				log.Printf("failed to unmarshal pubsub event: %+v", err)
 				break
 			}
 
-			newMsg, err := models.Messages(
-				models.MessageWhere.UUID.EQ(msg.MessageUuid),
-				qm.Load(models.MessageRels.Conversation),
-				qm.Load(models.MessageRels.Author),
-				qm.Load(models.MessageRels.RawAudio),
-			).One(server.Context(), ms.Db)
+			newMsg, err := components.MessageRepository.ByUuid(msg.MessageUuid)
 			if err != nil {
-				return status.Errorf(codes.Internal, "could not fetch message from db: %+v", err)
+				return err
 			}
 
-			pbMsg, err := entities.MessageToPb(newMsg, ms.Components)
+			pbMsgs, err := components.MessagesToProto([]*models.Message{newMsg})
 			if err != nil {
 				return status.Errorf(codes.Internal, "could not transform message to protobuf: %+v", err)
 			}
 
-			err = server.Send(pbMsg)
+			err = server.Send(pbMsgs[0])
 			if err != nil {
 				log.Printf("failed to send message in server stream: %+v", err)
 				break
@@ -99,9 +99,9 @@ func (ms MessageService) Incoming(_ *pb.Empty, server pb.MessageService_Incoming
 }
 
 func (ms MessageService) Send(ctx context.Context, input *pb.MessageSendInput) (*pb.Message, error) {
-	me, err := common.GetUser(ctx)
+	components, me, err := WithAuthedContext(ctx)
 	if err != nil {
-		return nil, status.Error(codes.PermissionDenied, err.Error())
+		return nil, err
 	}
 
 	var conv *models.Conversation
@@ -113,86 +113,56 @@ func (ms MessageService) Send(ctx context.Context, input *pb.MessageSendInput) (
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 
-		conv, err = models.Conversations(
-			models.ConversationWhere.UUID.EQ(uid),
-			qm.Load(qm.Rels(models.ConversationRels.UserConversations, models.UserConversationRels.User)),
-		).One(ctx, ms.Db)
+		dbConv, err := components.ConversationRepository.ByUuid(uid)
 		if err != nil {
-			return nil, status.Errorf(codes.Internal, "could not fetch conversation: %+v", err)
+			return nil, err
 		}
+
+		conv = dbConv
 
 	case *pb.MessageSendInput_RecipientUuids:
 		allUuids := append(input.GetRecipientUuids().Uuids, me.UUID.String())
-		uuids := []uuid2.UUID{}
+		var uuids slices.Uuid2UUIDSlice
 		for _, uidStr := range allUuids {
-
 			uid, err := uuid2.FromString(uidStr)
 			if err != nil {
 				return nil, status.Error(codes.InvalidArgument, err.Error())
 			}
 
-			redundant := false
-			for _, existingUid := range uuids {
-				if existingUid == uid {
-					redundant = true
-					break
-				}
-			}
-			if !redundant {
-				uuids = append(uuids, uid)
-			}
+			uuids = append(uuids, uid)
 		}
+		uuids = uuids.UniqueBy(func(uuid uuid2.UUID) interface{} { return uuid.String() })
 
-		recipients, err := models.Users(models.UserWhere.UUID.IN(uuids)).All(ctx, ms.Db)
+		recipients, err := components.UserRepository.ByUuids(uuids...)
 		if err != nil {
 			return nil, status.Error(codes.Internal, fmt.Sprintf("could not find recipients: %+v", err))
 		}
-		if len(recipients) != len(uuids) {
-			return nil, status.Error(codes.Internal, fmt.Sprintf("some users where not found: provided %d unique uids, found %d users in db", len(uuids), len(recipients)))
-		}
 
-		ids := []int{me.ID}
-		for _, recipient := range recipients {
-			if recipient.ID != me.ID {
-				ids = append(ids, recipient.ID)
-			}
-		}
+		var recipientIds slices.IntSlice
+		recipientIds = recipients.Ids()
 
-		ugs, err := models.UserConversations(
-			models.UserConversationWhere.UserID.EQ(me.ID),
-			qm.Load(qm.Rels(models.UserConversationRels.Conversation, models.ConversationRels.UserConversations)),
-		).All(ctx, ms.Db)
+		ugs, err := components.UserConversationRepository.ByUserIds(recipientIds...)
 		if err != nil {
 			return nil, status.Error(codes.Internal, fmt.Sprintf("could not find recipients conversations: %+v", err))
 		}
 
-		sort.Ints(ids)
-		for _, ug := range ugs {
-			conversationIds := []int{}
-			for _, ug := range ug.R.Conversation.R.UserConversations {
-				// TODO: somehow traversing the dependencies brings redundant rows, e.g. the list we're iterating on can
-				// 		yield [115, 115, 116] as user ids.
-				//      Relevant issue https://github.com/volatiletech/sqlboiler/issues/457
-				redundant := false
-				for _, id := range conversationIds {
-					if ug.UserID == id {
-						redundant = true
-						break
-					}
+		for _, convUCs := range ugs {
+			slice := models.UserConversationSlice(convUCs)
+			participantIds := slice.UserIDs()
+
+			if recipientIds.SameAs(participantIds) {
+				dbConv, err := components.ConversationRepository.ById(convUCs[0].ConversationID)
+				if err != nil {
+					return nil, err
 				}
-				if !redundant {
-					conversationIds = append(conversationIds, ug.UserID)
-				}
-			}
-			sort.Ints(conversationIds)
-			if reflect.DeepEqual(conversationIds, ids) {
-				conv = ug.R.Conversation
+
+				conv = dbConv
 				break
 			}
 		}
 
 		// TODO: use a batch insert method like COPY which would make things faster
-		tx, err := ms.Db.BeginTx(ctx, nil)
+		tx, err := components.Db.BeginTx(ctx, nil)
 		if err != nil {
 			tx.Rollback()
 			return nil, status.Error(codes.Internal, fmt.Sprintf("could not start transaction: %+v", err))
@@ -212,7 +182,7 @@ func (ms MessageService) Send(ctx context.Context, input *pb.MessageSendInput) (
 
 			errs := make(chan error, 1)
 			var wg sync.WaitGroup
-			for _, id := range ids {
+			for _, id := range recipientIds {
 				wg.Add(1)
 				uid := id
 				go func() {
@@ -236,7 +206,7 @@ func (ms MessageService) Send(ctx context.Context, input *pb.MessageSendInput) (
 		}
 	}
 
-	if ok, err := entities.CanAccessConversation(conv, me); !ok || err != nil {
+	if ok, err := components.ConversationHasAccess(me, conv); !ok || err != nil {
 		return nil, status.Errorf(codes.PermissionDenied, "can't send message to this conversation: (err = %+v)", err)
 	}
 
@@ -259,7 +229,7 @@ func (ms MessageService) Send(ctx context.Context, input *pb.MessageSendInput) (
 			return nil, status.Error(codes.InvalidArgument, "could not serialize transcript")
 		}
 
-		blobUuid, err := ms.Storage.Upload(ctx, bytes.NewReader(vm.RawContent))
+		blobUuid, err := components.StorageClient.Upload(ctx, bytes.NewReader(vm.RawContent))
 		if err != nil {
 			return nil, status.Error(codes.Internal, fmt.Sprintf("could not upload voice message content: %+v", err))
 		}
@@ -269,10 +239,10 @@ func (ms MessageService) Send(ctx context.Context, input *pb.MessageSendInput) (
 			FileName: "",
 			// TODO: normalize audio with audio service
 			MimeType: "audio/*",
-			Bucket:   null.StringFrom(ms.Storage.DefaultBucket()),
+			Bucket:   null.StringFrom(components.StorageClient.DefaultBucket()),
 			BlobName: null.StringFrom(blobUuid.String()),
 		}
-		if err = asset.Insert(ctx, ms.Db, boil.Infer()); err != nil {
+		if err = asset.Insert(ctx, components.Db, boil.Infer()); err != nil {
 			return nil, status.Errorf(codes.Internal, "could not register asset in db: %+v", err)
 		}
 
@@ -289,17 +259,24 @@ func (ms MessageService) Send(ctx context.Context, input *pb.MessageSendInput) (
 		return nil, status.Error(codes.Internal, "unknown content type!")
 	}
 
-	if err = msg.Insert(ctx, ms.Db, boil.Infer()); err != nil {
+	if err = msg.Insert(ctx, components.Db, boil.Infer()); err != nil {
 		return nil, status.Errorf(codes.Internal, "could not insert message: %+v", err)
 	}
 
-	for _, uc := range conv.R.UserConversations {
-		if uc.R.User.UUID == me.UUID {
+	ucs, err := components.ConversationUsers(conv)
+	for _, uc := range ucs {
+		if uc.UserID == me.ID {
 			continue
 		}
-		topic := entities.UserPubSubTopic(uc.R.User)
-		err = ms.PgPubSub.Publish(topic, common.NewMessageEvent{
-			PubSubEvent: common.PubSubEvent{Type: common.PubSubEventTypeNewMessage, Timestamp: time.Now()},
+
+		user, err := components.UserRepository.ById(uc.UserID)
+		if err != nil {
+			return nil, err
+		}
+
+		topic := repositories.UserPubSubTopic(user)
+		err = components.PubSubClient.Publish(topic, clients.NewMessageEvent{
+			PubSubEvent: clients.PubSubEvent{Type: clients.PubSubEventTypeNewMessage, Timestamp: time.Now()},
 			MessageUuid: msg.UUID,
 		})
 		if err != nil {
@@ -309,21 +286,10 @@ func (ms MessageService) Send(ctx context.Context, input *pb.MessageSendInput) (
 		}
 	}
 
-	// TODO: remove this and find a way to prime the messageR struct when we already have the objects in order to avoid pointless roundtrips.
-	if err = msg.L.LoadConversation(ctx, ms.Db, true, msg, qm.Comment("")); err != nil {
-		return nil, status.Errorf(codes.Internal, "failed ot load converstion: %+v", err)
-	}
-	if err = msg.L.LoadAuthor(ctx, ms.Db, true, msg, qm.Comment("")); err != nil {
-		return nil, status.Errorf(codes.Internal, "failed ot load converstion: %+v", err)
-	}
-	if err = msg.L.LoadRawAudio(ctx, ms.Db, true, msg, qm.Comment("")); err != nil {
-		return nil, status.Errorf(codes.Internal, "failed ot load converstion: %+v", err)
-	}
-
-	pbm, err := entities.MessageToPb(msg, ms.Components)
+	pbMsgs, err := components.MessagesToProto([]*models.Message{msg})
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to marshal message as pb: %+v", err)
 	}
 
-	return pbm, nil
+	return pbMsgs[0], nil
 }
