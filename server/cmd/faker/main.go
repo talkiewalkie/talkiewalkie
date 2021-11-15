@@ -34,22 +34,19 @@ func main() {
 		log.Panicf("could not load env: %+v", err)
 	}
 
-	components, err := common.InitComponents()
-	if err != nil {
-		log.Panicf("could not initiate components: %+v", err)
-	}
+	components := common.InitComponents()
 
-	fbu, err := components.FbAuth.GetUserByPhoneNumber(ctx, *phone)
+	fbuid, err := components.AuthClient.UserUidByPhoneNumber(ctx, *phone)
 	if err != nil {
 		log.Panicf("could not fetch firebase user: %+v", err)
 	}
 
-	u, err := models.Users(models.UserWhere.FirebaseUID.EQ(null.StringFrom(fbu.UID))).One(ctx, components.Db)
+	u, err := models.Users(models.UserWhere.FirebaseUID.EQ(null.StringFrom(fbuid))).One(ctx, components.Db)
 	if err != nil {
 		if errors.Cause(err) == sql.ErrNoRows {
 			u = &models.User{
 				DisplayName:        null.StringFrom(os.Getenv("USER")),
-				FirebaseUID:        null.StringFrom(fbu.UID),
+				FirebaseUID:        null.StringFrom(fbuid),
 				PhoneNumber:        *phone,
 				OnboardingFinished: true,
 				Locales:            []string{"fr"},
