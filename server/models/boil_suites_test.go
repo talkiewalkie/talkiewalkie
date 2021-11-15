@@ -12,7 +12,6 @@ import "testing"
 // It does NOT run each operation group in parallel.
 // Separating the tests thusly grants avoidance of Postgres deadlocks.
 func TestParent(t *testing.T) {
-	t.Run("DieselSchemaMigrations", testDieselSchemaMigrations)
 	t.Run("Assets", testAssets)
 	t.Run("Conversations", testConversations)
 	t.Run("Messages", testMessages)
@@ -21,7 +20,6 @@ func TestParent(t *testing.T) {
 }
 
 func TestDelete(t *testing.T) {
-	t.Run("DieselSchemaMigrations", testDieselSchemaMigrationsDelete)
 	t.Run("Assets", testAssetsDelete)
 	t.Run("Conversations", testConversationsDelete)
 	t.Run("Messages", testMessagesDelete)
@@ -30,7 +28,6 @@ func TestDelete(t *testing.T) {
 }
 
 func TestQueryDeleteAll(t *testing.T) {
-	t.Run("DieselSchemaMigrations", testDieselSchemaMigrationsQueryDeleteAll)
 	t.Run("Assets", testAssetsQueryDeleteAll)
 	t.Run("Conversations", testConversationsQueryDeleteAll)
 	t.Run("Messages", testMessagesQueryDeleteAll)
@@ -39,7 +36,6 @@ func TestQueryDeleteAll(t *testing.T) {
 }
 
 func TestSliceDeleteAll(t *testing.T) {
-	t.Run("DieselSchemaMigrations", testDieselSchemaMigrationsSliceDeleteAll)
 	t.Run("Assets", testAssetsSliceDeleteAll)
 	t.Run("Conversations", testConversationsSliceDeleteAll)
 	t.Run("Messages", testMessagesSliceDeleteAll)
@@ -48,7 +44,6 @@ func TestSliceDeleteAll(t *testing.T) {
 }
 
 func TestExists(t *testing.T) {
-	t.Run("DieselSchemaMigrations", testDieselSchemaMigrationsExists)
 	t.Run("Assets", testAssetsExists)
 	t.Run("Conversations", testConversationsExists)
 	t.Run("Messages", testMessagesExists)
@@ -57,7 +52,6 @@ func TestExists(t *testing.T) {
 }
 
 func TestFind(t *testing.T) {
-	t.Run("DieselSchemaMigrations", testDieselSchemaMigrationsFind)
 	t.Run("Assets", testAssetsFind)
 	t.Run("Conversations", testConversationsFind)
 	t.Run("Messages", testMessagesFind)
@@ -66,7 +60,6 @@ func TestFind(t *testing.T) {
 }
 
 func TestBind(t *testing.T) {
-	t.Run("DieselSchemaMigrations", testDieselSchemaMigrationsBind)
 	t.Run("Assets", testAssetsBind)
 	t.Run("Conversations", testConversationsBind)
 	t.Run("Messages", testMessagesBind)
@@ -75,7 +68,6 @@ func TestBind(t *testing.T) {
 }
 
 func TestOne(t *testing.T) {
-	t.Run("DieselSchemaMigrations", testDieselSchemaMigrationsOne)
 	t.Run("Assets", testAssetsOne)
 	t.Run("Conversations", testConversationsOne)
 	t.Run("Messages", testMessagesOne)
@@ -84,7 +76,6 @@ func TestOne(t *testing.T) {
 }
 
 func TestAll(t *testing.T) {
-	t.Run("DieselSchemaMigrations", testDieselSchemaMigrationsAll)
 	t.Run("Assets", testAssetsAll)
 	t.Run("Conversations", testConversationsAll)
 	t.Run("Messages", testMessagesAll)
@@ -93,7 +84,6 @@ func TestAll(t *testing.T) {
 }
 
 func TestCount(t *testing.T) {
-	t.Run("DieselSchemaMigrations", testDieselSchemaMigrationsCount)
 	t.Run("Assets", testAssetsCount)
 	t.Run("Conversations", testConversationsCount)
 	t.Run("Messages", testMessagesCount)
@@ -102,7 +92,6 @@ func TestCount(t *testing.T) {
 }
 
 func TestHooks(t *testing.T) {
-	t.Run("DieselSchemaMigrations", testDieselSchemaMigrationsHooks)
 	t.Run("Assets", testAssetsHooks)
 	t.Run("Conversations", testConversationsHooks)
 	t.Run("Messages", testMessagesHooks)
@@ -111,8 +100,6 @@ func TestHooks(t *testing.T) {
 }
 
 func TestInsert(t *testing.T) {
-	t.Run("DieselSchemaMigrations", testDieselSchemaMigrationsInsert)
-	t.Run("DieselSchemaMigrations", testDieselSchemaMigrationsInsertWhitelist)
 	t.Run("Assets", testAssetsInsert)
 	t.Run("Assets", testAssetsInsertWhitelist)
 	t.Run("Conversations", testConversationsInsert)
@@ -206,7 +193,6 @@ func TestToManyRemove(t *testing.T) {
 }
 
 func TestReload(t *testing.T) {
-	t.Run("DieselSchemaMigrations", testDieselSchemaMigrationsReload)
 	t.Run("Assets", testAssetsReload)
 	t.Run("Conversations", testConversationsReload)
 	t.Run("Messages", testMessagesReload)
@@ -215,7 +201,6 @@ func TestReload(t *testing.T) {
 }
 
 func TestReloadAll(t *testing.T) {
-	t.Run("DieselSchemaMigrations", testDieselSchemaMigrationsReloadAll)
 	t.Run("Assets", testAssetsReloadAll)
 	t.Run("Conversations", testConversationsReloadAll)
 	t.Run("Messages", testMessagesReloadAll)
@@ -224,7 +209,6 @@ func TestReloadAll(t *testing.T) {
 }
 
 func TestSelect(t *testing.T) {
-	t.Run("DieselSchemaMigrations", testDieselSchemaMigrationsSelect)
 	t.Run("Assets", testAssetsSelect)
 	t.Run("Conversations", testConversationsSelect)
 	t.Run("Messages", testMessagesSelect)
@@ -233,7 +217,6 @@ func TestSelect(t *testing.T) {
 }
 
 func TestUpdate(t *testing.T) {
-	t.Run("DieselSchemaMigrations", testDieselSchemaMigrationsUpdate)
 	t.Run("Assets", testAssetsUpdate)
 	t.Run("Conversations", testConversationsUpdate)
 	t.Run("Messages", testMessagesUpdate)
@@ -242,7 +225,6 @@ func TestUpdate(t *testing.T) {
 }
 
 func TestSliceUpdateAll(t *testing.T) {
-	t.Run("DieselSchemaMigrations", testDieselSchemaMigrationsSliceUpdateAll)
 	t.Run("Assets", testAssetsSliceUpdateAll)
 	t.Run("Conversations", testConversationsSliceUpdateAll)
 	t.Run("Messages", testMessagesSliceUpdateAll)
