@@ -5,10 +5,10 @@
 package caches
 
 import (
-	"errors"
-
 	uuid2 "github.com/satori/go.uuid"
 	"github.com/talkiewalkie/talkiewalkie/models"
+
+	"errors"
 )
 
 type MessageCacheByInt struct {
@@ -83,7 +83,10 @@ func (cache MessageCacheByInt) Prime(values ...*models.Message) {
 }
 
 // ENSURE IMPORTS
-var _ uuid2.UUID
+var (
+	_ uuid2.UUID
+	_ models.User
+)
 
 type MessageCacheByUuid struct {
 	cache   map[uuid2.UUID]*models.Message
@@ -157,4 +160,7 @@ func (cache MessageCacheByUuid) Prime(values ...*models.Message) {
 }
 
 // ENSURE IMPORTS
-var _ uuid2.UUID
+var (
+	_ uuid2.UUID
+	_ models.User
+)

@@ -6,9 +6,9 @@ package caches
 
 import (
 	"errors"
-	"log"
-
+	uuid2 "github.com/satori/go.uuid"
 	"github.com/talkiewalkie/talkiewalkie/models"
+	"log"
 )
 
 type UserConversationMultiCacheByInt struct {
@@ -85,3 +85,8 @@ func (cache UserConversationMultiCacheByInt) Prime(values ...[]*models.UserConve
 		}
 	}
 }
+
+var (
+	_ models.User
+	_ uuid2.UUID
+)

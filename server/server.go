@@ -32,14 +32,13 @@ var (
 //go:generate protoc -I=protos/ --go_out=pb --go-grpc_out=pb --go_opt=paths=source_relative --go-grpc_opt=paths=source_relative,require_unimplemented_servers=false protos/audio_proc.proto
 //go:generate protoc -I=protos/ --go_out=pb --go-grpc_out=pb --go_opt=paths=source_relative --go-grpc_opt=paths=source_relative,require_unimplemented_servers=false protos/app.proto
 
-//go:generate genny -in=generics/cache.go -out=repositories/caches/asset.go -pkg caches gen "CacheKey=int,uuid:uuid2.UUID CacheValue=Asset:models.Asset"
-//go:generate genny -in=generics/cache.go -out=repositories/caches/conversation.go -pkg caches gen "CacheKey=int,uuid:uuid2.UUID CacheValue=Conversation:models.Conversation"
-//go:generate genny -in=generics/cache.go -out=repositories/caches/message.go -pkg caches gen "CacheKey=int,uuid:uuid2.UUID CacheValue=Message:models.Message"
-//go:generate genny -in=generics/cache.go -out=repositories/caches/user.go -pkg caches gen "CacheKey=int,uuid:uuid2.UUID,string CacheValue=User:models.User"
-//go:generate genny -in=generics/multicache.go -out=repositories/caches/userconversation.go -pkg caches gen "CacheKey=int CacheValue=UserConversation:models.UserConversation"
+//go:generate genny -in=pkg/generics/cache.go -out=repositories/caches/asset.go -pkg caches gen "CacheKey=int,uuid:uuid2.UUID CacheValue=Asset:models.Asset"
+//go:generate genny -in=pkg/generics/cache.go -out=repositories/caches/conversation.go -pkg caches gen "CacheKey=int,uuid:uuid2.UUID CacheValue=Conversation:models.Conversation"
+//go:generate genny -in=pkg/generics/cache.go -out=repositories/caches/message.go -pkg caches gen "CacheKey=int,uuid:uuid2.UUID CacheValue=Message:models.Message"
+//go:generate genny -in=pkg/generics/cache.go -out=repositories/caches/user.go -pkg caches gen "CacheKey=int,uuid:uuid2.UUID,string CacheValue=User:models.User"
+//go:generate genny -in=pkg/generics/multicache.go -out=repositories/caches/userconversation.go -pkg caches gen "CacheKey=int CacheValue=UserConversation:models.UserConversation"
 
-//go:generate genny -in=generics/slice.go -out=pkg/slices/builtins.go -pkg slices gen "ItemType=BUILTINS,uuid2.UUID"
-//go:generate genny -in=generics/slicemap.go -out=pkg/slices/builtins_map.go -pkg slices gen "ItemType=BUILTINS MapTarget=BUILTINS"
+//go:generate genny -in=pkg/generics/slice.go -out=pkg/slices/builtins.go -pkg slices gen "ItemType=BUILTINS,uuid2.UUID"
 
 func main() {
 	log.SetFlags(log.Ldate | log.Ltime | log.Lmicroseconds | log.Llongfile)

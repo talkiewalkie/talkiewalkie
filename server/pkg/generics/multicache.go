@@ -2,6 +2,8 @@ package generics
 
 import (
 	"errors"
+	uuid2 "github.com/satori/go.uuid"
+	"github.com/talkiewalkie/talkiewalkie/models"
 	"log"
 )
 
@@ -79,3 +81,8 @@ func (cache CacheValueMultiCacheByCacheKey) Prime(values ...[]*CacheValue) {
 		}
 	}
 }
+
+var (
+	_ models.User
+	_ uuid2.UUID
+)

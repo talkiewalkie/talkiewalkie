@@ -2,8 +2,10 @@ package generics
 
 import (
 	"errors"
-	"github.com/cheekybits/genny/generic"
 	uuid2 "github.com/satori/go.uuid"
+	"github.com/talkiewalkie/talkiewalkie/models"
+
+	"github.com/cheekybits/genny/generic"
 )
 
 type CacheKey generic.Type
@@ -81,4 +83,7 @@ func (cache CacheValueCacheByCacheKey) Prime(values ...*CacheValue) {
 }
 
 // ENSURE IMPORTS
-var _ uuid2.UUID
+var (
+	_ uuid2.UUID
+	_ models.User
+)

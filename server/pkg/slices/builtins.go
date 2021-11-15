@@ -4,7 +4,9 @@
 
 package slices
 
-import uuid2 "github.com/satori/go.uuid"
+import (
+	uuid2 "github.com/satori/go.uuid"
+)
 
 type BoolSlice []bool
 type BoolSlicePtrs []*bool

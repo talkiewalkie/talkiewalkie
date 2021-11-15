@@ -6,7 +6,6 @@ package caches
 
 import (
 	"errors"
-
 	uuid2 "github.com/satori/go.uuid"
 	"github.com/talkiewalkie/talkiewalkie/models"
 )
@@ -83,7 +82,10 @@ func (cache ConversationCacheByInt) Prime(values ...*models.Conversation) {
 }
 
 // ENSURE IMPORTS
-var _ uuid2.UUID
+var (
+	_ uuid2.UUID
+	_ models.User
+)
 
 type ConversationCacheByUuid struct {
 	cache   map[uuid2.UUID]*models.Conversation
@@ -157,4 +159,7 @@ func (cache ConversationCacheByUuid) Prime(values ...*models.Conversation) {
 }
 
 // ENSURE IMPORTS
-var _ uuid2.UUID
+var (
+	_ uuid2.UUID
+	_ models.User
+)
