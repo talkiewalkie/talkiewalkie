@@ -3,7 +3,9 @@ package testutils
 import (
 	"context"
 	"fmt"
+	"github.com/bxcodec/faker/v3"
 	"github.com/gorilla/websocket"
+	"github.com/talkiewalkie/talkiewalkie/clients"
 	"io"
 	"io/ioutil"
 	"log"
@@ -34,33 +36,63 @@ func SetupDb() *sqlx.DB {
 	return db
 }
 
-func TearDownDb(db *sqlx.DB) {
+func TearDownDb(ctx context.Context, db *sqlx.DB) {
 	tx := db.MustBegin()
-	tx.MustExec(`DELETE FROM "message";`)
-	tx.MustExec(`DELETE FROM "user_conversation";`)
-	tx.MustExec(`DELETE FROM "conversation";`)
-	tx.MustExec(`DELETE FROM "walk";`)
-	tx.MustExec(`DELETE FROM "user_walk";`)
-	tx.MustExec(`DELETE FROM "asset";`)
-	tx.MustExec(`DELETE FROM "user";`)
+	if _, err := models.Messages().DeleteAll(ctx, tx); err != nil {
+		panic(err)
+	}
+	if _, err := models.UserConversations().DeleteAll(ctx, tx); err != nil {
+		panic(err)
+	}
+	if _, err := models.Conversations().DeleteAll(ctx, tx); err != nil {
+		panic(err)
+	}
+	if _, err := models.Users().DeleteAll(ctx, tx); err != nil {
+		panic(err)
+	}
+	if _, err := models.Events().DeleteAll(ctx, tx); err != nil {
+		panic(err)
+	}
+	if _, err := models.Assets().DeleteAll(ctx, tx); err != nil {
+		panic(err)
+	}
 	if err := tx.Commit(); err != nil {
 		log.Panicf("could not reset db state: %+v", err)
 	}
 }
 
-func AddFakeComponentsToRequest(r *http.Request, u *models.User, db *sqlx.DB) *http.Request {
-	pgps := common.NewPgPubSub(db, testDbUrl())
+func NewContext(db *sqlx.DB, t *testing.T) (*common.Components, *models.User, context.Context) {
+	me := AddMockUser(db, t)
+	components := NewFakeComponents(db)
+	ctx := context.WithValue(context.Background(), "components", components)
+	ctx = context.WithValue(ctx, "me", me)
 
+	components.ResetEntityStores(ctx)
+	return components, me, ctx
+}
+
+func NewFakeComponents(db *sqlx.DB) *common.Components {
+	pubsubClient := clients.NewPgPubSub(db, testDbUrl())
+
+	return &common.Components{
+		Db: db,
+
+		AuthClient:      nil,
+		MessagingClient: nil,
+		PubSubClient:    pubsubClient,
+		StorageClient:   FakeStorageClient{},
+		AudioClient:     nil,
+
+		CompressImg: func(s string, i int) (string, error) {
+			f, _ := ioutil.TempFile("", "")
+			return f.Name(), nil
+		}}
+}
+
+func AddFakeComponentsToRequest(r *http.Request, u *models.User, db *sqlx.DB) *http.Request {
 	twCtx := common.Context{
-		Components: &common.Components{
-			Db:       db,
-			PgPubSub: &pgps,
-			Storage:  FakeStorageClient{},
-			CompressImg: func(s string, i int) (string, error) {
-				f, _ := ioutil.TempFile("", "")
-				return f.Name(), nil
-			}},
-		User: u,
+		Components: NewFakeComponents(db),
+		User:       u,
 	}
 
 	return r.WithContext(context.WithValue(r.Context(), "context", twCtx))
@@ -113,7 +145,10 @@ func AddMockUser(db common.DBLogger, t *testing.T) *models.User {
 	rnd := fmt.Sprintf("%f", rng.Float32())
 	rndId := rnd[len(rnd)-6:]
 	u := &models.User{
-		Handle: fmt.Sprintf("test-user-%s", rndId),
+		PhoneNumber:        faker.Phonenumber(),
+		DisplayName:        null.StringFrom(fmt.Sprintf("test-user-%s", rndId)),
+		Locales:            []string{"fr"},
+		OnboardingFinished: true,
 	}
 	if err := u.Insert(context.Background(), db, boil.Infer()); err != nil {
 		t.Log(err)
@@ -125,30 +160,6 @@ func AddMockUser(db common.DBLogger, t *testing.T) *models.User {
 var (
 	IPPUDO = pgeo.Point{X: 48.8645814, Y: 2.3425034} // yumyum tasty ramens
 )
-
-func AddMockWalk(u *models.User, db common.DBLogger, t *testing.T) *models.Walk {
-	w := &models.Walk{
-		Title:      "some title",
-		CoverID:    null.Int{Valid: false},
-		AudioID:    null.Int{Valid: false},
-		AuthorID:   u.ID,
-		StartPoint: IPPUDO,
-	}
-	if err := w.Insert(context.Background(), db, boil.Infer()); err != nil {
-		t.Log(err)
-		t.Fail()
-	}
-	return w
-}
-
-func AddMockAsset(mimeType string, db common.DBLogger, t *testing.T) *models.Asset {
-	a := &models.Asset{MimeType: mimeType}
-	if err := a.Insert(context.Background(), db, boil.Infer()); err != nil {
-		t.Log(err)
-		t.Fail()
-	}
-	return a
-}
 
 func AddMockConversation(db common.DBLogger, t *testing.T, users ...*models.User) *models.Conversation {
 	g := &models.Conversation{}

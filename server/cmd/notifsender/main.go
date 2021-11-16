@@ -2,9 +2,9 @@ package main
 
 import (
 	"context"
-	"firebase.google.com/go/v4/messaging"
 	"flag"
 	"github.com/joho/godotenv"
+	"github.com/talkiewalkie/talkiewalkie/clients"
 	"github.com/talkiewalkie/talkiewalkie/common"
 	"log"
 )
@@ -25,18 +25,13 @@ func main() {
 		log.Panicf("could not load env: %+v", err)
 	}
 
-	components, err := common.InitComponents()
-	if err != nil {
-		log.Panicf("could not initiate components: %+v", err)
-	}
+	components := common.InitComponents()
 
-	res, err := components.FbMssg.Send(ctx, &messaging.Message{
+	res, err := components.MessagingClient.Send(ctx, clients.MessageInput{
 		Topic: *fbUid,
 		Data:  map[string]string{"uuid": "this is not a uuid haha you fell in my trap"},
-		Notification: &messaging.Notification{
-			Body:  "hey",
-			Title: "theo",
-		},
+		Body:  "hey",
+		Title: "theo",
 	})
 
 	if err != nil {

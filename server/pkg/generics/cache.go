@@ -1,7 +1,7 @@
 package generics
 
 import (
-	"errors"
+	"fmt"
 	uuid2 "github.com/satori/go.uuid"
 	"github.com/talkiewalkie/talkiewalkie/models"
 
@@ -63,9 +63,9 @@ func (cache *CacheValueCacheByCacheKey) Get(
 		}
 	}
 
-	for _, value := range out {
+	for index, value := range out {
 		if value == nil {
-			return nil, errors.New("could not fetch from : found nil value")
+			return nil, fmt.Errorf("[CacheValueCacheByCacheKey] error: found nil value at position %d", index)
 		}
 	}
 

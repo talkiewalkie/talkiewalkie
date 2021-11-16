@@ -10,6 +10,8 @@ func TestUpsert(t *testing.T) {
 
 	t.Run("Conversations", testConversationsUpsert)
 
+	t.Run("Events", testEventsUpsert)
+
 	t.Run("Messages", testMessagesUpsert)
 
 	t.Run("Users", testUsersUpsert)

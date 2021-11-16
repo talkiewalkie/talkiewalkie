@@ -171,7 +171,18 @@ func (s Repositories) messagesLoadConversations(messages []*models.Message) ([]*
 	return s.ConversationRepository.ByIds(uniqueIds...)
 }
 
-func (s Repositories) MessagesToProto(messages models.MessageSlice) ([]*pb.Message, error) {
+type PbMessageSlice []*pb.Message
+
+func (s PbMessageSlice) UuidMap() (out map[uuid2.UUID]*pb.Message) {
+	for _, pbm := range s {
+		uid, _ := uuid2.FromString(pbm.Uuid)
+		out[uid] = pbm
+	}
+
+	return out
+}
+
+func (s Repositories) MessagesToProto(messages models.MessageSlice) (PbMessageSlice, error) {
 	if _, err := s.UserRepository.ByIds(messages.AuthorIDs()...); err != nil {
 		return nil, err
 	}

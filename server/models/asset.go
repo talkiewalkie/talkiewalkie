@@ -269,6 +269,24 @@ func (o *AssetSlice) Uuids() []uuid.UUID {
 	}
 	return out
 }
+func (o *AssetSlice) IdMap() (out map[int]*Asset) {
+	for _, item := range *o {
+		out[item.ID] = item
+	}
+	return out
+}
+func (o *AssetSlice) UuidMap() (out map[uuid.UUID]*Asset) {
+	for _, item := range *o {
+		out[item.UUID] = item
+	}
+	return out
+}
+func (o *AssetSlice) IntToUuidMap() (out map[int]uuid.UUID) {
+	for _, item := range *o {
+		out[item.ID] = item.UUID
+	}
+	return out
+}
 
 var (
 	assetAllColumns            = []string{"id", "uuid", "file_name", "mime_type", "uploaded_at", "bucket", "blob_name"}

@@ -99,7 +99,18 @@ var _ ConversationRepository = ConversationRepositoryImpl{}
 
 // UTILS
 
-func (s Repositories) ConversationsToProto(convs models.ConversationSlice) ([]*pb.Conversation, error) {
+type PbConversationSlice []*pb.Conversation
+
+func (s PbConversationSlice) UuidMap() (out map[uuid2.UUID]*pb.Conversation) {
+	for _, item := range s {
+		uid, _ := uuid2.FromString(item.Uuid)
+		out[uid] = item
+	}
+
+	return out
+}
+
+func (s Repositories) ConversationsToProto(convs models.ConversationSlice) (PbConversationSlice, error) {
 	convIds := []int{}
 	for _, conv := range convs {
 		convIds = append(convIds, conv.ID)

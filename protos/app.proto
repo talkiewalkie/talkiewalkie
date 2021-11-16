@@ -110,11 +110,84 @@ service MessageService {
 
 // ----------------------
 
+message Event {
+  string uuid = 1;
+  string localUuid = 8;
+
+  message SentNewMessage {
+    MessageSendInput message = 1;
+    oneof conversation {
+      string convUuid = 2;
+      ConversationInput newConversation = 3;
+    };
+  }
+  message ReceivedNewMessage {
+    Message message = 1;
+    Conversation conversation = 2;
+  }
+  message DeletedMessage {
+    string uuid = 1;
+  }
+  message ChangedPicture {
+    string uuid = 1;
+    string picUrl = 2;
+  }
+  message JoinedConversation {
+    string convUuid = 1;
+    string userUuid = 2;
+  }
+  message LeftConversation {
+    string convUuid = 1;
+    string userUuid = 2;
+  }
+  message ConversationTitleChanged {
+    string convUuid = 1;
+    string newTitle = 2;
+  }
+  message UserOnline {
+    string userUuid = 1;
+  }
+  message UserOffline {
+    string userUuid = 1;
+  }
+
+  oneof content {
+    SentNewMessage sentNewMessage = 2;
+    ReceivedNewMessage receivedNewMessage = 9;
+    DeletedMessage deletedMessage = 3;
+    ChangedPicture changedPicture = 4;
+    JoinedConversation joinedConversation = 5;
+    LeftConversation leftConversation = 6;
+    ConversationTitleChanged conversationTitleChanged = 7;
+  };
+}
+
+message UpSync {
+  repeated Event events = 1;
+  string lastEventUuid = 2;
+}
+message DownSync {
+  repeated Event events = 1;
+  string lastEventUuid = 2;
+}
+
+service EventService {
+  rpc Sync(UpSync) returns (DownSync);
+  rpc Connect(stream Event) returns (stream Event);
+}
+
+// ----------------------
+
 message Conversation {
   string uuid = 1;
   string title = 2;
   repeated Message messages = 3;
   repeated UserConversation participants = 4;
+}
+
+message ConversationInput {
+  repeated string userUuids = 1;
+  string title = 2;
 }
 
 message UserConversation {

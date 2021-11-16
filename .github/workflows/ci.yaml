@@ -50,6 +50,10 @@ jobs:
           export GO111MODULE=on
           pushd server && go get -d -v ./... && popd
 
+      - name: Build
+        run: |
+          pushd server && go build ./... && popd
+
       - name: Test
         run: |
         #          pushd server && go test ./common/... ./cmd/... ./testutils/... ./entities/... ./grpc/... && popd

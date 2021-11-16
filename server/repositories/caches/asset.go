@@ -5,7 +5,7 @@
 package caches
 
 import (
-	"errors"
+	"fmt"
 	uuid2 "github.com/satori/go.uuid"
 	"github.com/talkiewalkie/talkiewalkie/models"
 )
@@ -62,9 +62,9 @@ func (cache *AssetCacheByInt) Get(
 		}
 	}
 
-	for _, value := range out {
+	for index, value := range out {
 		if value == nil {
-			return nil, errors.New("could not fetch from : found nil value")
+			return nil, fmt.Errorf("[AssetCacheByInt] error: found nil value at position %d", index)
 		}
 	}
 
@@ -139,9 +139,9 @@ func (cache *AssetCacheByUuid) Get(
 		}
 	}
 
-	for _, value := range out {
+	for index, value := range out {
 		if value == nil {
-			return nil, errors.New("could not fetch from : found nil value")
+			return nil, fmt.Errorf("[AssetCacheByUuid] error: found nil value at position %d", index)
 		}
 	}
 

@@ -494,6 +494,334 @@ func testMessagesInsertWhitelist(t *testing.T) {
 	}
 }
 
+func testMessageToManyEvents(t *testing.T) {
+	var err error
+	ctx := context.Background()
+	tx := MustTx(boil.BeginTx(ctx, nil))
+	defer func() { _ = tx.Rollback() }()
+
+	var a Message
+	var b, c Event
+
+	seed := randomize.NewSeed()
+	if err = randomize.Struct(seed, &a, messageDBTypes, true, messageColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Message struct: %s", err)
+	}
+
+	if err := a.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	if err = randomize.Struct(seed, &b, eventDBTypes, false, eventColumnsWithDefault...); err != nil {
+		t.Fatal(err)
+	}
+	if err = randomize.Struct(seed, &c, eventDBTypes, false, eventColumnsWithDefault...); err != nil {
+		t.Fatal(err)
+	}
+
+	queries.Assign(&b.MessageID, a.ID)
+	queries.Assign(&c.MessageID, a.ID)
+	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+	if err = c.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	check, err := a.Events().All(ctx, tx)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	bFound, cFound := false, false
+	for _, v := range check {
+		if queries.Equal(v.MessageID, b.MessageID) {
+			bFound = true
+		}
+		if queries.Equal(v.MessageID, c.MessageID) {
+			cFound = true
+		}
+	}
+
+	if !bFound {
+		t.Error("expected to find b")
+	}
+	if !cFound {
+		t.Error("expected to find c")
+	}
+
+	slice := MessageSlice{&a}
+	if err = a.L.LoadEvents(ctx, tx, false, (*[]*Message)(&slice), nil); err != nil {
+		t.Fatal(err)
+	}
+	if got := len(a.R.Events); got != 2 {
+		t.Error("number of eager loaded records wrong, got:", got)
+	}
+
+	a.R.Events = nil
+	if err = a.L.LoadEvents(ctx, tx, true, &a, nil); err != nil {
+		t.Fatal(err)
+	}
+	if got := len(a.R.Events); got != 2 {
+		t.Error("number of eager loaded records wrong, got:", got)
+	}
+
+	if t.Failed() {
+		t.Logf("%#v", check)
+	}
+}
+
+func testMessageToManyAddOpEvents(t *testing.T) {
+	var err error
+
+	ctx := context.Background()
+	tx := MustTx(boil.BeginTx(ctx, nil))
+	defer func() { _ = tx.Rollback() }()
+
+	var a Message
+	var b, c, d, e Event
+
+	seed := randomize.NewSeed()
+	if err = randomize.Struct(seed, &a, messageDBTypes, false, strmangle.SetComplement(messagePrimaryKeyColumns, messageColumnsWithoutDefault)...); err != nil {
+		t.Fatal(err)
+	}
+	foreigners := []*Event{&b, &c, &d, &e}
+	for _, x := range foreigners {
+		if err = randomize.Struct(seed, x, eventDBTypes, false, strmangle.SetComplement(eventPrimaryKeyColumns, eventColumnsWithoutDefault)...); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	if err := a.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+	if err = c.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	foreignersSplitByInsertion := [][]*Event{
+		{&b, &c},
+		{&d, &e},
+	}
+
+	for i, x := range foreignersSplitByInsertion {
+		err = a.AddEvents(ctx, tx, i != 0, x...)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		first := x[0]
+		second := x[1]
+
+		if !queries.Equal(a.ID, first.MessageID) {
+			t.Error("foreign key was wrong value", a.ID, first.MessageID)
+		}
+		if !queries.Equal(a.ID, second.MessageID) {
+			t.Error("foreign key was wrong value", a.ID, second.MessageID)
+		}
+
+		if first.R.Message != &a {
+			t.Error("relationship was not added properly to the foreign slice")
+		}
+		if second.R.Message != &a {
+			t.Error("relationship was not added properly to the foreign slice")
+		}
+
+		if a.R.Events[i*2] != first {
+			t.Error("relationship struct slice not set to correct value")
+		}
+		if a.R.Events[i*2+1] != second {
+			t.Error("relationship struct slice not set to correct value")
+		}
+
+		count, err := a.Events().Count(ctx, tx)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if want := int64((i + 1) * 2); count != want {
+			t.Error("want", want, "got", count)
+		}
+	}
+}
+
+func testMessageToManySetOpEvents(t *testing.T) {
+	var err error
+
+	ctx := context.Background()
+	tx := MustTx(boil.BeginTx(ctx, nil))
+	defer func() { _ = tx.Rollback() }()
+
+	var a Message
+	var b, c, d, e Event
+
+	seed := randomize.NewSeed()
+	if err = randomize.Struct(seed, &a, messageDBTypes, false, strmangle.SetComplement(messagePrimaryKeyColumns, messageColumnsWithoutDefault)...); err != nil {
+		t.Fatal(err)
+	}
+	foreigners := []*Event{&b, &c, &d, &e}
+	for _, x := range foreigners {
+		if err = randomize.Struct(seed, x, eventDBTypes, false, strmangle.SetComplement(eventPrimaryKeyColumns, eventColumnsWithoutDefault)...); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	if err = a.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+	if err = c.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	err = a.SetEvents(ctx, tx, false, &b, &c)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	count, err := a.Events().Count(ctx, tx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if count != 2 {
+		t.Error("count was wrong:", count)
+	}
+
+	err = a.SetEvents(ctx, tx, true, &d, &e)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	count, err = a.Events().Count(ctx, tx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if count != 2 {
+		t.Error("count was wrong:", count)
+	}
+
+	if !queries.IsValuerNil(b.MessageID) {
+		t.Error("want b's foreign key value to be nil")
+	}
+	if !queries.IsValuerNil(c.MessageID) {
+		t.Error("want c's foreign key value to be nil")
+	}
+	if !queries.Equal(a.ID, d.MessageID) {
+		t.Error("foreign key was wrong value", a.ID, d.MessageID)
+	}
+	if !queries.Equal(a.ID, e.MessageID) {
+		t.Error("foreign key was wrong value", a.ID, e.MessageID)
+	}
+
+	if b.R.Message != nil {
+		t.Error("relationship was not removed properly from the foreign struct")
+	}
+	if c.R.Message != nil {
+		t.Error("relationship was not removed properly from the foreign struct")
+	}
+	if d.R.Message != &a {
+		t.Error("relationship was not added properly to the foreign struct")
+	}
+	if e.R.Message != &a {
+		t.Error("relationship was not added properly to the foreign struct")
+	}
+
+	if a.R.Events[0] != &d {
+		t.Error("relationship struct slice not set to correct value")
+	}
+	if a.R.Events[1] != &e {
+		t.Error("relationship struct slice not set to correct value")
+	}
+}
+
+func testMessageToManyRemoveOpEvents(t *testing.T) {
+	var err error
+
+	ctx := context.Background()
+	tx := MustTx(boil.BeginTx(ctx, nil))
+	defer func() { _ = tx.Rollback() }()
+
+	var a Message
+	var b, c, d, e Event
+
+	seed := randomize.NewSeed()
+	if err = randomize.Struct(seed, &a, messageDBTypes, false, strmangle.SetComplement(messagePrimaryKeyColumns, messageColumnsWithoutDefault)...); err != nil {
+		t.Fatal(err)
+	}
+	foreigners := []*Event{&b, &c, &d, &e}
+	for _, x := range foreigners {
+		if err = randomize.Struct(seed, x, eventDBTypes, false, strmangle.SetComplement(eventPrimaryKeyColumns, eventColumnsWithoutDefault)...); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	if err := a.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	err = a.AddEvents(ctx, tx, true, foreigners...)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	count, err := a.Events().Count(ctx, tx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if count != 4 {
+		t.Error("count was wrong:", count)
+	}
+
+	err = a.RemoveEvents(ctx, tx, foreigners[:2]...)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	count, err = a.Events().Count(ctx, tx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if count != 2 {
+		t.Error("count was wrong:", count)
+	}
+
+	if !queries.IsValuerNil(b.MessageID) {
+		t.Error("want b's foreign key value to be nil")
+	}
+	if !queries.IsValuerNil(c.MessageID) {
+		t.Error("want c's foreign key value to be nil")
+	}
+
+	if b.R.Message != nil {
+		t.Error("relationship was not removed properly from the foreign struct")
+	}
+	if c.R.Message != nil {
+		t.Error("relationship was not removed properly from the foreign struct")
+	}
+	if d.R.Message != &a {
+		t.Error("relationship to a should have been preserved")
+	}
+	if e.R.Message != &a {
+		t.Error("relationship to a should have been preserved")
+	}
+
+	if len(a.R.Events) != 2 {
+		t.Error("should have preserved two relationships")
+	}
+
+	// Removal doesn't do a stable deletion for performance so we have to flip the order
+	if a.R.Events[1] != &d {
+		t.Error("relationship to d should have been preserved")
+	}
+	if a.R.Events[0] != &e {
+		t.Error("relationship to e should have been preserved")
+	}
+}
+
 func testMessageToOneUserUsingAuthor(t *testing.T) {
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))

@@ -122,7 +122,7 @@ func (ms MessageService) Send(ctx context.Context, input *pb.MessageSendInput) (
 
 	case *pb.MessageSendInput_RecipientUuids:
 		allUuids := append(input.GetRecipientUuids().Uuids, me.UUID.String())
-		var uuids slices.Uuid2UUIDSlice
+		var uuids slices.UuidSlice
 		for _, uidStr := range allUuids {
 			uid, err := uuid2.FromString(uidStr)
 			if err != nil {

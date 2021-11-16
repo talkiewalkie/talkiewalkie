@@ -3,7 +3,7 @@ package testutils
 import (
 	"context"
 	uuid "github.com/satori/go.uuid"
-	"github.com/talkiewalkie/talkiewalkie/common"
+	"github.com/talkiewalkie/talkiewalkie/clients"
 	"github.com/talkiewalkie/talkiewalkie/models"
 	"io"
 )
@@ -32,4 +32,4 @@ func (f FakeStorageClient) SignedUrl(bucket, blobName string) (string, error) {
 	return "https://some.fake.url/123", nil
 }
 
-var _ common.StorageClient = FakeStorageClient{}
+var _ clients.StorageClient = FakeStorageClient{}

@@ -14,6 +14,7 @@ import "testing"
 func TestParent(t *testing.T) {
 	t.Run("Assets", testAssets)
 	t.Run("Conversations", testConversations)
+	t.Run("Events", testEvents)
 	t.Run("Messages", testMessages)
 	t.Run("Users", testUsers)
 	t.Run("UserConversations", testUserConversations)
@@ -22,6 +23,7 @@ func TestParent(t *testing.T) {
 func TestDelete(t *testing.T) {
 	t.Run("Assets", testAssetsDelete)
 	t.Run("Conversations", testConversationsDelete)
+	t.Run("Events", testEventsDelete)
 	t.Run("Messages", testMessagesDelete)
 	t.Run("Users", testUsersDelete)
 	t.Run("UserConversations", testUserConversationsDelete)
@@ -30,6 +32,7 @@ func TestDelete(t *testing.T) {
 func TestQueryDeleteAll(t *testing.T) {
 	t.Run("Assets", testAssetsQueryDeleteAll)
 	t.Run("Conversations", testConversationsQueryDeleteAll)
+	t.Run("Events", testEventsQueryDeleteAll)
 	t.Run("Messages", testMessagesQueryDeleteAll)
 	t.Run("Users", testUsersQueryDeleteAll)
 	t.Run("UserConversations", testUserConversationsQueryDeleteAll)
@@ -38,6 +41,7 @@ func TestQueryDeleteAll(t *testing.T) {
 func TestSliceDeleteAll(t *testing.T) {
 	t.Run("Assets", testAssetsSliceDeleteAll)
 	t.Run("Conversations", testConversationsSliceDeleteAll)
+	t.Run("Events", testEventsSliceDeleteAll)
 	t.Run("Messages", testMessagesSliceDeleteAll)
 	t.Run("Users", testUsersSliceDeleteAll)
 	t.Run("UserConversations", testUserConversationsSliceDeleteAll)
@@ -46,6 +50,7 @@ func TestSliceDeleteAll(t *testing.T) {
 func TestExists(t *testing.T) {
 	t.Run("Assets", testAssetsExists)
 	t.Run("Conversations", testConversationsExists)
+	t.Run("Events", testEventsExists)
 	t.Run("Messages", testMessagesExists)
 	t.Run("Users", testUsersExists)
 	t.Run("UserConversations", testUserConversationsExists)
@@ -54,6 +59,7 @@ func TestExists(t *testing.T) {
 func TestFind(t *testing.T) {
 	t.Run("Assets", testAssetsFind)
 	t.Run("Conversations", testConversationsFind)
+	t.Run("Events", testEventsFind)
 	t.Run("Messages", testMessagesFind)
 	t.Run("Users", testUsersFind)
 	t.Run("UserConversations", testUserConversationsFind)
@@ -62,6 +68,7 @@ func TestFind(t *testing.T) {
 func TestBind(t *testing.T) {
 	t.Run("Assets", testAssetsBind)
 	t.Run("Conversations", testConversationsBind)
+	t.Run("Events", testEventsBind)
 	t.Run("Messages", testMessagesBind)
 	t.Run("Users", testUsersBind)
 	t.Run("UserConversations", testUserConversationsBind)
@@ -70,6 +77,7 @@ func TestBind(t *testing.T) {
 func TestOne(t *testing.T) {
 	t.Run("Assets", testAssetsOne)
 	t.Run("Conversations", testConversationsOne)
+	t.Run("Events", testEventsOne)
 	t.Run("Messages", testMessagesOne)
 	t.Run("Users", testUsersOne)
 	t.Run("UserConversations", testUserConversationsOne)
@@ -78,6 +86,7 @@ func TestOne(t *testing.T) {
 func TestAll(t *testing.T) {
 	t.Run("Assets", testAssetsAll)
 	t.Run("Conversations", testConversationsAll)
+	t.Run("Events", testEventsAll)
 	t.Run("Messages", testMessagesAll)
 	t.Run("Users", testUsersAll)
 	t.Run("UserConversations", testUserConversationsAll)
@@ -86,6 +95,7 @@ func TestAll(t *testing.T) {
 func TestCount(t *testing.T) {
 	t.Run("Assets", testAssetsCount)
 	t.Run("Conversations", testConversationsCount)
+	t.Run("Events", testEventsCount)
 	t.Run("Messages", testMessagesCount)
 	t.Run("Users", testUsersCount)
 	t.Run("UserConversations", testUserConversationsCount)
@@ -94,6 +104,7 @@ func TestCount(t *testing.T) {
 func TestHooks(t *testing.T) {
 	t.Run("Assets", testAssetsHooks)
 	t.Run("Conversations", testConversationsHooks)
+	t.Run("Events", testEventsHooks)
 	t.Run("Messages", testMessagesHooks)
 	t.Run("Users", testUsersHooks)
 	t.Run("UserConversations", testUserConversationsHooks)
@@ -104,6 +115,8 @@ func TestInsert(t *testing.T) {
 	t.Run("Assets", testAssetsInsertWhitelist)
 	t.Run("Conversations", testConversationsInsert)
 	t.Run("Conversations", testConversationsInsertWhitelist)
+	t.Run("Events", testEventsInsert)
+	t.Run("Events", testEventsInsertWhitelist)
 	t.Run("Messages", testMessagesInsert)
 	t.Run("Messages", testMessagesInsertWhitelist)
 	t.Run("Users", testUsersInsert)
@@ -115,6 +128,9 @@ func TestInsert(t *testing.T) {
 // TestToOne tests cannot be run in parallel
 // or deadlocks can occur.
 func TestToOne(t *testing.T) {
+	t.Run("EventToConversationUsingConversation", testEventToOneConversationUsingConversation)
+	t.Run("EventToMessageUsingMessage", testEventToOneMessageUsingMessage)
+	t.Run("EventToUserUsingRecipient", testEventToOneUserUsingRecipient)
 	t.Run("MessageToUserUsingAuthor", testMessageToOneUserUsingAuthor)
 	t.Run("MessageToConversationUsingConversation", testMessageToOneConversationUsingConversation)
 	t.Run("MessageToAssetUsingRawAudio", testMessageToOneAssetUsingRawAudio)
@@ -132,8 +148,11 @@ func TestOneToOne(t *testing.T) {}
 func TestToMany(t *testing.T) {
 	t.Run("AssetToRawAudioMessages", testAssetToManyRawAudioMessages)
 	t.Run("AssetToProfilePictureUsers", testAssetToManyProfilePictureUsers)
+	t.Run("ConversationToEvents", testConversationToManyEvents)
 	t.Run("ConversationToMessages", testConversationToManyMessages)
 	t.Run("ConversationToUserConversations", testConversationToManyUserConversations)
+	t.Run("MessageToEvents", testMessageToManyEvents)
+	t.Run("UserToRecipientEvents", testUserToManyRecipientEvents)
 	t.Run("UserToAuthorMessages", testUserToManyAuthorMessages)
 	t.Run("UserToUserConversations", testUserToManyUserConversations)
 }
@@ -141,6 +160,9 @@ func TestToMany(t *testing.T) {
 // TestToOneSet tests cannot be run in parallel
 // or deadlocks can occur.
 func TestToOneSet(t *testing.T) {
+	t.Run("EventToConversationUsingEvents", testEventToOneSetOpConversationUsingConversation)
+	t.Run("EventToMessageUsingEvents", testEventToOneSetOpMessageUsingMessage)
+	t.Run("EventToUserUsingRecipientEvents", testEventToOneSetOpUserUsingRecipient)
 	t.Run("MessageToUserUsingAuthorMessages", testMessageToOneSetOpUserUsingAuthor)
 	t.Run("MessageToConversationUsingMessages", testMessageToOneSetOpConversationUsingConversation)
 	t.Run("MessageToAssetUsingRawAudioMessages", testMessageToOneSetOpAssetUsingRawAudio)
@@ -152,6 +174,8 @@ func TestToOneSet(t *testing.T) {
 // TestToOneRemove tests cannot be run in parallel
 // or deadlocks can occur.
 func TestToOneRemove(t *testing.T) {
+	t.Run("EventToConversationUsingEvents", testEventToOneRemoveOpConversationUsingConversation)
+	t.Run("EventToMessageUsingEvents", testEventToOneRemoveOpMessageUsingMessage)
 	t.Run("MessageToUserUsingAuthorMessages", testMessageToOneRemoveOpUserUsingAuthor)
 	t.Run("MessageToAssetUsingRawAudioMessages", testMessageToOneRemoveOpAssetUsingRawAudio)
 	t.Run("UserToAssetUsingProfilePictureUsers", testUserToOneRemoveOpAssetUsingProfilePictureAsset)
@@ -170,8 +194,11 @@ func TestOneToOneRemove(t *testing.T) {}
 func TestToManyAdd(t *testing.T) {
 	t.Run("AssetToRawAudioMessages", testAssetToManyAddOpRawAudioMessages)
 	t.Run("AssetToProfilePictureUsers", testAssetToManyAddOpProfilePictureUsers)
+	t.Run("ConversationToEvents", testConversationToManyAddOpEvents)
 	t.Run("ConversationToMessages", testConversationToManyAddOpMessages)
 	t.Run("ConversationToUserConversations", testConversationToManyAddOpUserConversations)
+	t.Run("MessageToEvents", testMessageToManyAddOpEvents)
+	t.Run("UserToRecipientEvents", testUserToManyAddOpRecipientEvents)
 	t.Run("UserToAuthorMessages", testUserToManyAddOpAuthorMessages)
 	t.Run("UserToUserConversations", testUserToManyAddOpUserConversations)
 }
@@ -181,6 +208,8 @@ func TestToManyAdd(t *testing.T) {
 func TestToManySet(t *testing.T) {
 	t.Run("AssetToRawAudioMessages", testAssetToManySetOpRawAudioMessages)
 	t.Run("AssetToProfilePictureUsers", testAssetToManySetOpProfilePictureUsers)
+	t.Run("ConversationToEvents", testConversationToManySetOpEvents)
+	t.Run("MessageToEvents", testMessageToManySetOpEvents)
 	t.Run("UserToAuthorMessages", testUserToManySetOpAuthorMessages)
 }
 
@@ -189,12 +218,15 @@ func TestToManySet(t *testing.T) {
 func TestToManyRemove(t *testing.T) {
 	t.Run("AssetToRawAudioMessages", testAssetToManyRemoveOpRawAudioMessages)
 	t.Run("AssetToProfilePictureUsers", testAssetToManyRemoveOpProfilePictureUsers)
+	t.Run("ConversationToEvents", testConversationToManyRemoveOpEvents)
+	t.Run("MessageToEvents", testMessageToManyRemoveOpEvents)
 	t.Run("UserToAuthorMessages", testUserToManyRemoveOpAuthorMessages)
 }
 
 func TestReload(t *testing.T) {
 	t.Run("Assets", testAssetsReload)
 	t.Run("Conversations", testConversationsReload)
+	t.Run("Events", testEventsReload)
 	t.Run("Messages", testMessagesReload)
 	t.Run("Users", testUsersReload)
 	t.Run("UserConversations", testUserConversationsReload)
@@ -203,6 +235,7 @@ func TestReload(t *testing.T) {
 func TestReloadAll(t *testing.T) {
 	t.Run("Assets", testAssetsReloadAll)
 	t.Run("Conversations", testConversationsReloadAll)
+	t.Run("Events", testEventsReloadAll)
 	t.Run("Messages", testMessagesReloadAll)
 	t.Run("Users", testUsersReloadAll)
 	t.Run("UserConversations", testUserConversationsReloadAll)
@@ -211,6 +244,7 @@ func TestReloadAll(t *testing.T) {
 func TestSelect(t *testing.T) {
 	t.Run("Assets", testAssetsSelect)
 	t.Run("Conversations", testConversationsSelect)
+	t.Run("Events", testEventsSelect)
 	t.Run("Messages", testMessagesSelect)
 	t.Run("Users", testUsersSelect)
 	t.Run("UserConversations", testUserConversationsSelect)
@@ -219,6 +253,7 @@ func TestSelect(t *testing.T) {
 func TestUpdate(t *testing.T) {
 	t.Run("Assets", testAssetsUpdate)
 	t.Run("Conversations", testConversationsUpdate)
+	t.Run("Events", testEventsUpdate)
 	t.Run("Messages", testMessagesUpdate)
 	t.Run("Users", testUsersUpdate)
 	t.Run("UserConversations", testUserConversationsUpdate)
@@ -227,6 +262,7 @@ func TestUpdate(t *testing.T) {
 func TestSliceUpdateAll(t *testing.T) {
 	t.Run("Assets", testAssetsSliceUpdateAll)
 	t.Run("Conversations", testConversationsSliceUpdateAll)
+	t.Run("Events", testEventsSliceUpdateAll)
 	t.Run("Messages", testMessagesSliceUpdateAll)
 	t.Run("Users", testUsersSliceUpdateAll)
 	t.Run("UserConversations", testUserConversationsSliceUpdateAll)
