@@ -45,7 +45,7 @@ func (cache *MessageCacheByInt) Get(
 	}
 
 	if len(key2index) > 0 {
-		missingKeys := make([]int, len(key2index))
+		missingKeys := []int{}
 		for key, _ := range key2index {
 			missingKeys = append(missingKeys, key)
 		}
@@ -124,7 +124,7 @@ func (cache *MessageCacheByUuid) Get(
 	}
 
 	if len(key2index) > 0 {
-		missingKeys := make([]uuid2.UUID, len(key2index))
+		missingKeys := []uuid2.UUID{}
 		for key, _ := range key2index {
 			missingKeys = append(missingKeys, key)
 		}

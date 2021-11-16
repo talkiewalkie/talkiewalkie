@@ -5,10 +5,9 @@
 package caches
 
 import (
-	"github.com/talkiewalkie/talkiewalkie/models"
-
 	"errors"
 	uuid2 "github.com/satori/go.uuid"
+	"github.com/talkiewalkie/talkiewalkie/models"
 )
 
 var AssetCacheByIntErrNotFound = errors.New("AssetCacheByInt error did not find values for keys")
@@ -46,7 +45,7 @@ func (cache *AssetCacheByInt) Get(
 	}
 
 	if len(key2index) > 0 {
-		missingKeys := make([]int, len(key2index))
+		missingKeys := []int{}
 		for key, _ := range key2index {
 			missingKeys = append(missingKeys, key)
 		}
@@ -125,7 +124,7 @@ func (cache *AssetCacheByUuid) Get(
 	}
 
 	if len(key2index) > 0 {
-		missingKeys := make([]uuid2.UUID, len(key2index))
+		missingKeys := []uuid2.UUID{}
 		for key, _ := range key2index {
 			missingKeys = append(missingKeys, key)
 		}

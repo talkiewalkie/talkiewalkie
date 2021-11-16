@@ -176,3 +176,15 @@ func AddMockConversation(db common.DBLogger, t *testing.T, users ...*models.User
 	}
 	return g
 }
+
+func AddMockMessage(db common.DBLogger, t *testing.T, message *models.Message) *models.Message {
+	message.Type = models.MessageTypeText
+	message.Text = null.StringFrom("coucou")
+
+	if err := message.Insert(context.Background(), db, boil.Infer()); err != nil {
+		t.Log(err)
+		t.Fail()
+	}
+
+	return message
+}

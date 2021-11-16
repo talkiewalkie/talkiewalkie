@@ -46,7 +46,7 @@ func (cache *CacheValueCacheByCacheKey) Get(
 	}
 
 	if len(key2index) > 0 {
-		missingKeys := make([]CacheKey, len(key2index))
+		missingKeys := []CacheKey{}
 		for key, _ := range key2index {
 			missingKeys = append(missingKeys, key)
 		}
