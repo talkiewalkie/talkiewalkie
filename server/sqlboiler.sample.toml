@@ -1,0 +1,23 @@
+output = "models"
+add-global-variants	= false
+wipe = true
+tag = ["db"]
+
+
+[psql]
+dbname = "talkiewalkie"
+host = "localhost"
+port = 5432
+user = "theo"
+pass = ""
+schema = "public"
+sslmode = "disable"
+blacklist = ["schema_migrations"]
+
+[[types]]
+  [types.match]
+    name = "uuid"
+  [types.replace]
+    type = "uuid.UUID"
+  [types.imports]
+    third_party = ['"github.com/satori/go.uuid"']
