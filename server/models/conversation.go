@@ -122,6 +122,24 @@ func (o *ConversationSlice) Uuids() []uuid.UUID {
 	}
 	return out
 }
+func (o *ConversationSlice) IdMap() (out map[int]*Conversation) {
+	for _, item := range *o {
+		out[item.ID] = item
+	}
+	return out
+}
+func (o *ConversationSlice) UuidMap() (out map[uuid.UUID]*Conversation) {
+	for _, item := range *o {
+		out[item.UUID] = item
+	}
+	return out
+}
+func (o *ConversationSlice) IntToUuidMap() (out map[int]uuid.UUID) {
+	for _, item := range *o {
+		out[item.ID] = item.UUID
+	}
+	return out
+}
 
 var (
 	conversationAllColumns            = []string{"id", "uuid", "name", "created_at"}

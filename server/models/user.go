@@ -248,6 +248,24 @@ func (o *UserSlice) Uuids() []uuid.UUID {
 	}
 	return out
 }
+func (o *UserSlice) IdMap() (out map[int]*User) {
+	for _, item := range *o {
+		out[item.ID] = item
+	}
+	return out
+}
+func (o *UserSlice) UuidMap() (out map[uuid.UUID]*User) {
+	for _, item := range *o {
+		out[item.UUID] = item
+	}
+	return out
+}
+func (o *UserSlice) IntToUuidMap() (out map[int]uuid.UUID) {
+	for _, item := range *o {
+		out[item.ID] = item.UUID
+	}
+	return out
+}
 
 func (o *UserSlice) ProfilePictures() []int {
 	ids := map[int]bool{}

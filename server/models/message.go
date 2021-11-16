@@ -208,6 +208,24 @@ func (o *MessageSlice) Uuids() []uuid.UUID {
 	}
 	return out
 }
+func (o *MessageSlice) IdMap() (out map[int]*Message) {
+	for _, item := range *o {
+		out[item.ID] = item
+	}
+	return out
+}
+func (o *MessageSlice) UuidMap() (out map[uuid.UUID]*Message) {
+	for _, item := range *o {
+		out[item.UUID] = item
+	}
+	return out
+}
+func (o *MessageSlice) IntToUuidMap() (out map[int]uuid.UUID) {
+	for _, item := range *o {
+		out[item.ID] = item.UUID
+	}
+	return out
+}
 
 func (o *MessageSlice) AuthorIDs() []int {
 	ids := map[int]bool{}
