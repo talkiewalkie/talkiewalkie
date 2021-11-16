@@ -11,6 +11,8 @@ import (
 type CacheKey generic.Type
 type CacheValue generic.Type
 
+var CacheValueCacheByCacheKeyErrNotFound = errors.New("CacheValueCacheByCacheKey error did not find values for keys")
+
 type CacheValueCacheByCacheKey struct {
 	cache   map[CacheKey]*CacheValue
 	fetcher func([]CacheKey) ([]*CacheValue, error)
@@ -44,7 +46,7 @@ func (cache *CacheValueCacheByCacheKey) Get(
 	}
 
 	if len(key2index) > 0 {
-		missingKeys := make([]CacheKey, len(key2index))
+		missingKeys := []CacheKey{}
 		for key, _ := range key2index {
 			missingKeys = append(missingKeys, key)
 		}
@@ -65,7 +67,7 @@ func (cache *CacheValueCacheByCacheKey) Get(
 
 	for _, value := range out {
 		if value == nil {
-			return nil, errors.New("could not fetch from : found nil value")
+			return nil, CacheValueCacheByCacheKeyErrNotFound
 		}
 	}
 

@@ -39,6 +39,8 @@ type User struct {
 	Locales            types.StringArray `db:"locales" boil:"locales" json:"locales,omitempty" toml:"locales" yaml:"locales,omitempty"`
 	BroadcastArrival   bool              `db:"broadcast_arrival" boil:"broadcast_arrival" json:"broadcast_arrival" toml:"broadcast_arrival" yaml:"broadcast_arrival"`
 	LastConnectedAt    time.Time         `db:"last_connected_at" boil:"last_connected_at" json:"last_connected_at" toml:"last_connected_at" yaml:"last_connected_at"`
+	IsOnline           bool              `db:"is_online" boil:"is_online" json:"is_online" toml:"is_online" yaml:"is_online"`
+	LastOnlineAt       time.Time         `db:"last_online_at" boil:"last_online_at" json:"last_online_at" toml:"last_online_at" yaml:"last_online_at"`
 
 	R *userR `db:"-" boil:"-" json:"-" toml:"-" yaml:"-"`
 	L userL  `db:"-" boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -58,6 +60,8 @@ var UserColumns = struct {
 	Locales            string
 	BroadcastArrival   string
 	LastConnectedAt    string
+	IsOnline           string
+	LastOnlineAt       string
 }{
 	ID:                 "id",
 	UUID:               "uuid",
@@ -72,6 +76,8 @@ var UserColumns = struct {
 	Locales:            "locales",
 	BroadcastArrival:   "broadcast_arrival",
 	LastConnectedAt:    "last_connected_at",
+	IsOnline:           "is_online",
+	LastOnlineAt:       "last_online_at",
 }
 
 var UserTableColumns = struct {
@@ -88,6 +94,8 @@ var UserTableColumns = struct {
 	Locales            string
 	BroadcastArrival   string
 	LastConnectedAt    string
+	IsOnline           string
+	LastOnlineAt       string
 }{
 	ID:                 "user.id",
 	UUID:               "user.uuid",
@@ -102,6 +110,8 @@ var UserTableColumns = struct {
 	Locales:            "user.locales",
 	BroadcastArrival:   "user.broadcast_arrival",
 	LastConnectedAt:    "user.last_connected_at",
+	IsOnline:           "user.is_online",
+	LastOnlineAt:       "user.last_online_at",
 }
 
 // Generated where
@@ -179,6 +189,8 @@ var UserWhere = struct {
 	Locales            whereHelpertypes_StringArray
 	BroadcastArrival   whereHelperbool
 	LastConnectedAt    whereHelpertime_Time
+	IsOnline           whereHelperbool
+	LastOnlineAt       whereHelpertime_Time
 }{
 	ID:                 whereHelperint{field: "\"user\".\"id\""},
 	UUID:               whereHelperuuid_UUID{field: "\"user\".\"uuid\""},
@@ -193,15 +205,19 @@ var UserWhere = struct {
 	Locales:            whereHelpertypes_StringArray{field: "\"user\".\"locales\""},
 	BroadcastArrival:   whereHelperbool{field: "\"user\".\"broadcast_arrival\""},
 	LastConnectedAt:    whereHelpertime_Time{field: "\"user\".\"last_connected_at\""},
+	IsOnline:           whereHelperbool{field: "\"user\".\"is_online\""},
+	LastOnlineAt:       whereHelpertime_Time{field: "\"user\".\"last_online_at\""},
 }
 
 // UserRels is where relationship names are stored.
 var UserRels = struct {
 	ProfilePictureAsset string
+	RecipientEvents     string
 	AuthorMessages      string
 	UserConversations   string
 }{
 	ProfilePictureAsset: "ProfilePictureAsset",
+	RecipientEvents:     "RecipientEvents",
 	AuthorMessages:      "AuthorMessages",
 	UserConversations:   "UserConversations",
 }
@@ -209,6 +225,7 @@ var UserRels = struct {
 // userR is where relationships are stored.
 type userR struct {
 	ProfilePictureAsset *Asset                `db:"ProfilePictureAsset" boil:"ProfilePictureAsset" json:"ProfilePictureAsset" toml:"ProfilePictureAsset" yaml:"ProfilePictureAsset"`
+	RecipientEvents     EventSlice            `db:"RecipientEvents" boil:"RecipientEvents" json:"RecipientEvents" toml:"RecipientEvents" yaml:"RecipientEvents"`
 	AuthorMessages      MessageSlice          `db:"AuthorMessages" boil:"AuthorMessages" json:"AuthorMessages" toml:"AuthorMessages" yaml:"AuthorMessages"`
 	UserConversations   UserConversationSlice `db:"UserConversations" boil:"UserConversations" json:"UserConversations" toml:"UserConversations" yaml:"UserConversations"`
 }
@@ -248,19 +265,22 @@ func (o *UserSlice) Uuids() []uuid.UUID {
 	}
 	return out
 }
-func (o *UserSlice) IdMap() (out map[int]*User) {
+func (o *UserSlice) IdMap() map[int]*User {
+	out := make(map[int]*User, len(*o))
 	for _, item := range *o {
 		out[item.ID] = item
 	}
 	return out
 }
-func (o *UserSlice) UuidMap() (out map[uuid.UUID]*User) {
+func (o *UserSlice) UuidMap() map[uuid.UUID]*User {
+	out := make(map[uuid.UUID]*User, len(*o))
 	for _, item := range *o {
 		out[item.UUID] = item
 	}
 	return out
 }
-func (o *UserSlice) IntToUuidMap() (out map[int]uuid.UUID) {
+func (o *UserSlice) IntToUuidMap() map[int]uuid.UUID {
+	out := make(map[int]uuid.UUID, len(*o))
 	for _, item := range *o {
 		out[item.ID] = item.UUID
 	}
@@ -283,9 +303,9 @@ func (o *UserSlice) ProfilePictures() []int {
 }
 
 var (
-	userAllColumns            = []string{"id", "uuid", "firebase_uid", "profile_picture", "created_at", "updated_at", "status", "phone_number", "onboarding_finished", "display_name", "locales", "broadcast_arrival", "last_connected_at"}
+	userAllColumns            = []string{"id", "uuid", "firebase_uid", "profile_picture", "created_at", "updated_at", "status", "phone_number", "onboarding_finished", "display_name", "locales", "broadcast_arrival", "last_connected_at", "is_online", "last_online_at"}
 	userColumnsWithoutDefault = []string{"firebase_uid", "profile_picture", "status", "phone_number", "display_name", "locales"}
-	userColumnsWithDefault    = []string{"id", "uuid", "created_at", "updated_at", "onboarding_finished", "broadcast_arrival", "last_connected_at"}
+	userColumnsWithDefault    = []string{"id", "uuid", "created_at", "updated_at", "onboarding_finished", "broadcast_arrival", "last_connected_at", "is_online", "last_online_at"}
 	userPrimaryKeyColumns     = []string{"id"}
 )
 
@@ -578,6 +598,27 @@ func (o *User) ProfilePictureAsset(mods ...qm.QueryMod) assetQuery {
 	return query
 }
 
+// RecipientEvents retrieves all the event's Events with an executor via recipient_id column.
+func (o *User) RecipientEvents(mods ...qm.QueryMod) eventQuery {
+	var queryMods []qm.QueryMod
+	if len(mods) != 0 {
+		queryMods = append(queryMods, mods...)
+	}
+
+	queryMods = append(queryMods,
+		qm.Where("\"event\".\"recipient_id\"=?", o.ID),
+	)
+
+	query := Events(queryMods...)
+	queries.SetFrom(query.Query, "\"event\"")
+
+	if len(queries.GetSelect(query.Query)) == 0 {
+		queries.SetSelect(query.Query, []string{"\"event\".*"})
+	}
+
+	return query
+}
+
 // AuthorMessages retrieves all the message's Messages with an executor via author_id column.
 func (o *User) AuthorMessages(mods ...qm.QueryMod) messageQuery {
 	var queryMods []qm.QueryMod
@@ -720,6 +761,104 @@ func (userL) LoadProfilePictureAsset(ctx context.Context, e boil.ContextExecutor
 					foreign.R = &assetR{}
 				}
 				foreign.R.ProfilePictureUsers = append(foreign.R.ProfilePictureUsers, local)
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
+// LoadRecipientEvents allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for a 1-M or N-M relationship.
+func (userL) LoadRecipientEvents(ctx context.Context, e boil.ContextExecutor, singular bool, maybeUser interface{}, mods queries.Applicator) error {
+	var slice []*User
+	var object *User
+
+	if singular {
+		object = maybeUser.(*User)
+	} else {
+		slice = *maybeUser.(*[]*User)
+	}
+
+	args := make([]interface{}, 0, 1)
+	if singular {
+		if object.R == nil {
+			object.R = &userR{}
+		}
+		args = append(args, object.ID)
+	} else {
+	Outer:
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &userR{}
+			}
+
+			for _, a := range args {
+				if a == obj.ID {
+					continue Outer
+				}
+			}
+
+			args = append(args, obj.ID)
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	query := NewQuery(
+		qm.From(`event`),
+		qm.WhereIn(`event.recipient_id in ?`, args...),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load event")
+	}
+
+	var resultSlice []*Event
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice event")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results in eager load on event")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for event")
+	}
+
+	if len(eventAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+	if singular {
+		object.R.RecipientEvents = resultSlice
+		for _, foreign := range resultSlice {
+			if foreign.R == nil {
+				foreign.R = &eventR{}
+			}
+			foreign.R.Recipient = object
+		}
+		return nil
+	}
+
+	for _, foreign := range resultSlice {
+		for _, local := range slice {
+			if local.ID == foreign.RecipientID {
+				local.R.RecipientEvents = append(local.R.RecipientEvents, foreign)
+				if foreign.R == nil {
+					foreign.R = &eventR{}
+				}
+				foreign.R.Recipient = local
 				break
 			}
 		}
@@ -1000,6 +1139,59 @@ func (o *User) RemoveProfilePictureAsset(ctx context.Context, exec boil.ContextE
 		}
 		related.R.ProfilePictureUsers = related.R.ProfilePictureUsers[:ln-1]
 		break
+	}
+	return nil
+}
+
+// AddRecipientEvents adds the given related objects to the existing relationships
+// of the user, optionally inserting them as new records.
+// Appends related to o.R.RecipientEvents.
+// Sets related.R.Recipient appropriately.
+func (o *User) AddRecipientEvents(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Event) error {
+	var err error
+	for _, rel := range related {
+		if insert {
+			rel.RecipientID = o.ID
+			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
+				return errors.Wrap(err, "failed to insert into foreign table")
+			}
+		} else {
+			updateQuery := fmt.Sprintf(
+				"UPDATE \"event\" SET %s WHERE %s",
+				strmangle.SetParamNames("\"", "\"", 1, []string{"recipient_id"}),
+				strmangle.WhereClause("\"", "\"", 2, eventPrimaryKeyColumns),
+			)
+			values := []interface{}{o.ID, rel.ID}
+
+			if boil.IsDebug(ctx) {
+				writer := boil.DebugWriterFrom(ctx)
+				fmt.Fprintln(writer, updateQuery)
+				fmt.Fprintln(writer, values)
+			}
+			if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+				return errors.Wrap(err, "failed to update foreign table")
+			}
+
+			rel.RecipientID = o.ID
+		}
+	}
+
+	if o.R == nil {
+		o.R = &userR{
+			RecipientEvents: related,
+		}
+	} else {
+		o.R.RecipientEvents = append(o.R.RecipientEvents, related...)
+	}
+
+	for _, rel := range related {
+		if rel.R == nil {
+			rel.R = &eventR{
+				Recipient: o,
+			}
+		} else {
+			rel.R.Recipient = o
+		}
 	}
 	return nil
 }

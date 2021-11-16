@@ -14,6 +14,7 @@ import (
 type AuthClient interface {
 	VerifyJWT(context.Context, string) (string, string, error)
 	UserUidByPhoneNumber(context.Context, string) (string, error)
+	CustomToken(context.Context, string) (string, error)
 }
 
 type FirebaseAuthClientImpl struct {

@@ -32,12 +32,9 @@ func main() {
 		log.Panicf("could not load env: %+v", err)
 	}
 
-	components, err := common.InitComponents()
-	if err != nil {
-		log.Panicf("could not initiate components: %+v", err)
-	}
+	components := common.InitComponents()
 
-	ctok, err := components.FbAuth.CustomToken(context.Background(), *fbUid)
+	ctok, err := components.AuthClient.CustomToken(context.Background(), *fbUid)
 	if err != nil {
 		log.Panic(err)
 	}

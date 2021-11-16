@@ -35,13 +35,20 @@ type MessageRepository interface {
 
 	FromConversations(models.ConversationSlice, TimePagination) (models.MessageSlice, error)
 	FromConversationsLast(models.ConversationSlice) (models.MessageSlice, error)
+	Clear()
 }
 
 type MessageRepositoryImpl struct {
-	Db        *sqlx.DB
-	Context   context.Context
+	Db      *sqlx.DB
+	Context context.Context
+
 	IdCache   caches.MessageCacheByInt
 	UuidCache caches.MessageCacheByUuid
+}
+
+func (repository MessageRepositoryImpl) Clear() {
+	repository.IdCache.Clear()
+	repository.UuidCache.Clear()
 }
 
 func NewMessageRepository(context context.Context, db *sqlx.DB) *MessageRepositoryImpl {
@@ -171,7 +178,19 @@ func (s Repositories) messagesLoadConversations(messages []*models.Message) ([]*
 	return s.ConversationRepository.ByIds(uniqueIds...)
 }
 
-func (s Repositories) MessagesToProto(messages models.MessageSlice) ([]*pb.Message, error) {
+type PbMessageSlice []*pb.Message
+
+func (s PbMessageSlice) UuidMap() map[uuid2.UUID]*pb.Message {
+	out := make(map[uuid2.UUID]*pb.Message, len(s))
+	for _, pbm := range s {
+		uid, _ := uuid2.FromString(pbm.Uuid)
+		out[uid] = pbm
+	}
+
+	return out
+}
+
+func (s Repositories) MessagesToProto(messages models.MessageSlice) (PbMessageSlice, error) {
 	if _, err := s.UserRepository.ByIds(messages.AuthorIDs()...); err != nil {
 		return nil, err
 	}

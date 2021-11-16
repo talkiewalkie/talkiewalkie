@@ -11,6 +11,8 @@ import (
 	"errors"
 )
 
+var AssetCacheByIntErrNotFound = errors.New("AssetCacheByInt error did not find values for keys")
+
 type AssetCacheByInt struct {
 	cache   map[int]*models.Asset
 	fetcher func([]int) ([]*models.Asset, error)
@@ -44,7 +46,7 @@ func (cache *AssetCacheByInt) Get(
 	}
 
 	if len(key2index) > 0 {
-		missingKeys := make([]int, len(key2index))
+		missingKeys := []int{}
 		for key, _ := range key2index {
 			missingKeys = append(missingKeys, key)
 		}
@@ -65,7 +67,7 @@ func (cache *AssetCacheByInt) Get(
 
 	for _, value := range out {
 		if value == nil {
-			return nil, errors.New("could not fetch from : found nil value")
+			return nil, AssetCacheByIntErrNotFound
 		}
 	}
 
@@ -87,6 +89,8 @@ var (
 	_ uuid2.UUID
 	_ models.User
 )
+
+var AssetCacheByUuidErrNotFound = errors.New("AssetCacheByUuid error did not find values for keys")
 
 type AssetCacheByUuid struct {
 	cache   map[uuid2.UUID]*models.Asset
@@ -121,7 +125,7 @@ func (cache *AssetCacheByUuid) Get(
 	}
 
 	if len(key2index) > 0 {
-		missingKeys := make([]uuid2.UUID, len(key2index))
+		missingKeys := []uuid2.UUID{}
 		for key, _ := range key2index {
 			missingKeys = append(missingKeys, key)
 		}
@@ -142,7 +146,7 @@ func (cache *AssetCacheByUuid) Get(
 
 	for _, value := range out {
 		if value == nil {
-			return nil, errors.New("could not fetch from : found nil value")
+			return nil, AssetCacheByUuidErrNotFound
 		}
 	}
 

@@ -51,6 +51,16 @@ func makeCacheKey(cols boil.Columns, nzDefaults []string) string {
 	return str
 }
 
+// Enum values for event_type
+const (
+	EventTypeNewMessage               = "new_message"
+	EventTypeDeletedMessage           = "deleted_message"
+	EventTypeChangedPicture           = "changed_picture"
+	EventTypeJoinedConversation       = "joined_conversation"
+	EventTypeLeftConversation         = "left_conversation"
+	EventTypeConversationTitleChanged = "conversation_title_changed"
+)
+
 // Enum values for message_type
 const (
 	MessageTypeText  = "text"

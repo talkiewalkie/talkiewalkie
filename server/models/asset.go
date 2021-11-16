@@ -269,19 +269,22 @@ func (o *AssetSlice) Uuids() []uuid.UUID {
 	}
 	return out
 }
-func (o *AssetSlice) IdMap() (out map[int]*Asset) {
+func (o *AssetSlice) IdMap() map[int]*Asset {
+	out := make(map[int]*Asset, len(*o))
 	for _, item := range *o {
 		out[item.ID] = item
 	}
 	return out
 }
-func (o *AssetSlice) UuidMap() (out map[uuid.UUID]*Asset) {
+func (o *AssetSlice) UuidMap() map[uuid.UUID]*Asset {
+	out := make(map[uuid.UUID]*Asset, len(*o))
 	for _, item := range *o {
 		out[item.UUID] = item
 	}
 	return out
 }
-func (o *AssetSlice) IntToUuidMap() (out map[int]uuid.UUID) {
+func (o *AssetSlice) IntToUuidMap() map[int]uuid.UUID {
+	out := make(map[int]uuid.UUID, len(*o))
 	for _, item := range *o {
 		out[item.ID] = item.UUID
 	}

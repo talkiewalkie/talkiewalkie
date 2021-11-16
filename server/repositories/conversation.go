@@ -22,13 +22,21 @@ type ConversationRepository interface {
 	ByUuid(uuid uuid2.UUID) (*models.Conversation, error)
 
 	FromUserConversations([][]*models.UserConversation) (models.ConversationSlice, error)
+
+	Clear()
 }
 
 type ConversationRepositoryImpl struct {
-	Db        *sqlx.DB
-	Context   context.Context
+	Db      *sqlx.DB
+	Context context.Context
+
 	IdCache   caches.ConversationCacheByInt
 	UuidCache caches.ConversationCacheByUuid
+}
+
+func (repository ConversationRepositoryImpl) Clear() {
+	repository.IdCache.Clear()
+	repository.UuidCache.Clear()
 }
 
 func NewConversationRepository(context context.Context, db *sqlx.DB) *ConversationRepositoryImpl {
@@ -99,7 +107,19 @@ var _ ConversationRepository = ConversationRepositoryImpl{}
 
 // UTILS
 
-func (s Repositories) ConversationsToProto(convs models.ConversationSlice) ([]*pb.Conversation, error) {
+type PbConversationSlice []*pb.Conversation
+
+func (s PbConversationSlice) UuidMap() map[uuid2.UUID]*pb.Conversation {
+	out := make(map[uuid2.UUID]*pb.Conversation, len(s))
+	for _, item := range s {
+		uid, _ := uuid2.FromString(item.Uuid)
+		out[uid] = item
+	}
+
+	return out
+}
+
+func (s Repositories) ConversationsToProto(convs models.ConversationSlice) (PbConversationSlice, error) {
 	convIds := []int{}
 	for _, conv := range convs {
 		convIds = append(convIds, conv.ID)

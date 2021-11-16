@@ -74,15 +74,18 @@ var ConversationWhere = struct {
 
 // ConversationRels is where relationship names are stored.
 var ConversationRels = struct {
+	Events            string
 	Messages          string
 	UserConversations string
 }{
+	Events:            "Events",
 	Messages:          "Messages",
 	UserConversations: "UserConversations",
 }
 
 // conversationR is where relationships are stored.
 type conversationR struct {
+	Events            EventSlice            `db:"Events" boil:"Events" json:"Events" toml:"Events" yaml:"Events"`
 	Messages          MessageSlice          `db:"Messages" boil:"Messages" json:"Messages" toml:"Messages" yaml:"Messages"`
 	UserConversations UserConversationSlice `db:"UserConversations" boil:"UserConversations" json:"UserConversations" toml:"UserConversations" yaml:"UserConversations"`
 }
@@ -122,19 +125,22 @@ func (o *ConversationSlice) Uuids() []uuid.UUID {
 	}
 	return out
 }
-func (o *ConversationSlice) IdMap() (out map[int]*Conversation) {
+func (o *ConversationSlice) IdMap() map[int]*Conversation {
+	out := make(map[int]*Conversation, len(*o))
 	for _, item := range *o {
 		out[item.ID] = item
 	}
 	return out
 }
-func (o *ConversationSlice) UuidMap() (out map[uuid.UUID]*Conversation) {
+func (o *ConversationSlice) UuidMap() map[uuid.UUID]*Conversation {
+	out := make(map[uuid.UUID]*Conversation, len(*o))
 	for _, item := range *o {
 		out[item.UUID] = item
 	}
 	return out
 }
-func (o *ConversationSlice) IntToUuidMap() (out map[int]uuid.UUID) {
+func (o *ConversationSlice) IntToUuidMap() map[int]uuid.UUID {
+	out := make(map[int]uuid.UUID, len(*o))
 	for _, item := range *o {
 		out[item.ID] = item.UUID
 	}
@@ -423,6 +429,27 @@ func (q conversationQuery) Exists(ctx context.Context, exec boil.ContextExecutor
 	return count > 0, nil
 }
 
+// Events retrieves all the event's Events with an executor.
+func (o *Conversation) Events(mods ...qm.QueryMod) eventQuery {
+	var queryMods []qm.QueryMod
+	if len(mods) != 0 {
+		queryMods = append(queryMods, mods...)
+	}
+
+	queryMods = append(queryMods,
+		qm.Where("\"event\".\"conversation_id\"=?", o.ID),
+	)
+
+	query := Events(queryMods...)
+	queries.SetFrom(query.Query, "\"event\"")
+
+	if len(queries.GetSelect(query.Query)) == 0 {
+		queries.SetSelect(query.Query, []string{"\"event\".*"})
+	}
+
+	return query
+}
+
 // Messages retrieves all the message's Messages with an executor.
 func (o *Conversation) Messages(mods ...qm.QueryMod) messageQuery {
 	var queryMods []qm.QueryMod
@@ -463,6 +490,104 @@ func (o *Conversation) UserConversations(mods ...qm.QueryMod) userConversationQu
 	}
 
 	return query
+}
+
+// LoadEvents allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for a 1-M or N-M relationship.
+func (conversationL) LoadEvents(ctx context.Context, e boil.ContextExecutor, singular bool, maybeConversation interface{}, mods queries.Applicator) error {
+	var slice []*Conversation
+	var object *Conversation
+
+	if singular {
+		object = maybeConversation.(*Conversation)
+	} else {
+		slice = *maybeConversation.(*[]*Conversation)
+	}
+
+	args := make([]interface{}, 0, 1)
+	if singular {
+		if object.R == nil {
+			object.R = &conversationR{}
+		}
+		args = append(args, object.ID)
+	} else {
+	Outer:
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &conversationR{}
+			}
+
+			for _, a := range args {
+				if queries.Equal(a, obj.ID) {
+					continue Outer
+				}
+			}
+
+			args = append(args, obj.ID)
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	query := NewQuery(
+		qm.From(`event`),
+		qm.WhereIn(`event.conversation_id in ?`, args...),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load event")
+	}
+
+	var resultSlice []*Event
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice event")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results in eager load on event")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for event")
+	}
+
+	if len(eventAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+	if singular {
+		object.R.Events = resultSlice
+		for _, foreign := range resultSlice {
+			if foreign.R == nil {
+				foreign.R = &eventR{}
+			}
+			foreign.R.Conversation = object
+		}
+		return nil
+	}
+
+	for _, foreign := range resultSlice {
+		for _, local := range slice {
+			if queries.Equal(local.ID, foreign.ConversationID) {
+				local.R.Events = append(local.R.Events, foreign)
+				if foreign.R == nil {
+					foreign.R = &eventR{}
+				}
+				foreign.R.Conversation = local
+				break
+			}
+		}
+	}
+
+	return nil
 }
 
 // LoadMessages allows an eager lookup of values, cached into the
@@ -655,6 +780,133 @@ func (conversationL) LoadUserConversations(ctx context.Context, e boil.ContextEx
 				foreign.R.Conversation = local
 				break
 			}
+		}
+	}
+
+	return nil
+}
+
+// AddEvents adds the given related objects to the existing relationships
+// of the conversation, optionally inserting them as new records.
+// Appends related to o.R.Events.
+// Sets related.R.Conversation appropriately.
+func (o *Conversation) AddEvents(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Event) error {
+	var err error
+	for _, rel := range related {
+		if insert {
+			queries.Assign(&rel.ConversationID, o.ID)
+			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
+				return errors.Wrap(err, "failed to insert into foreign table")
+			}
+		} else {
+			updateQuery := fmt.Sprintf(
+				"UPDATE \"event\" SET %s WHERE %s",
+				strmangle.SetParamNames("\"", "\"", 1, []string{"conversation_id"}),
+				strmangle.WhereClause("\"", "\"", 2, eventPrimaryKeyColumns),
+			)
+			values := []interface{}{o.ID, rel.ID}
+
+			if boil.IsDebug(ctx) {
+				writer := boil.DebugWriterFrom(ctx)
+				fmt.Fprintln(writer, updateQuery)
+				fmt.Fprintln(writer, values)
+			}
+			if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+				return errors.Wrap(err, "failed to update foreign table")
+			}
+
+			queries.Assign(&rel.ConversationID, o.ID)
+		}
+	}
+
+	if o.R == nil {
+		o.R = &conversationR{
+			Events: related,
+		}
+	} else {
+		o.R.Events = append(o.R.Events, related...)
+	}
+
+	for _, rel := range related {
+		if rel.R == nil {
+			rel.R = &eventR{
+				Conversation: o,
+			}
+		} else {
+			rel.R.Conversation = o
+		}
+	}
+	return nil
+}
+
+// SetEvents removes all previously related items of the
+// conversation replacing them completely with the passed
+// in related items, optionally inserting them as new records.
+// Sets o.R.Conversation's Events accordingly.
+// Replaces o.R.Events with related.
+// Sets related.R.Conversation's Events accordingly.
+func (o *Conversation) SetEvents(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Event) error {
+	query := "update \"event\" set \"conversation_id\" = null where \"conversation_id\" = $1"
+	values := []interface{}{o.ID}
+	if boil.IsDebug(ctx) {
+		writer := boil.DebugWriterFrom(ctx)
+		fmt.Fprintln(writer, query)
+		fmt.Fprintln(writer, values)
+	}
+	_, err := exec.ExecContext(ctx, query, values...)
+	if err != nil {
+		return errors.Wrap(err, "failed to remove relationships before set")
+	}
+
+	if o.R != nil {
+		for _, rel := range o.R.Events {
+			queries.SetScanner(&rel.ConversationID, nil)
+			if rel.R == nil {
+				continue
+			}
+
+			rel.R.Conversation = nil
+		}
+
+		o.R.Events = nil
+	}
+	return o.AddEvents(ctx, exec, insert, related...)
+}
+
+// RemoveEvents relationships from objects passed in.
+// Removes related items from R.Events (uses pointer comparison, removal does not keep order)
+// Sets related.R.Conversation.
+func (o *Conversation) RemoveEvents(ctx context.Context, exec boil.ContextExecutor, related ...*Event) error {
+	if len(related) == 0 {
+		return nil
+	}
+
+	var err error
+	for _, rel := range related {
+		queries.SetScanner(&rel.ConversationID, nil)
+		if rel.R != nil {
+			rel.R.Conversation = nil
+		}
+		if _, err = rel.Update(ctx, exec, boil.Whitelist("conversation_id")); err != nil {
+			return err
+		}
+	}
+	if o.R == nil {
+		return nil
+	}
+
+	for _, rel := range related {
+		for i, ri := range o.R.Events {
+			if rel != ri {
+				continue
+			}
+
+			ln := len(o.R.Events)
+			if ln > 1 && i < ln-1 {
+				o.R.Events[i] = o.R.Events[ln-1]
+			}
+			o.R.Events = o.R.Events[:ln-1]
+			break
 		}
 	}
 

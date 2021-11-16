@@ -5,11 +5,12 @@
 package caches
 
 import (
-	"github.com/talkiewalkie/talkiewalkie/models"
-
 	"errors"
 	uuid2 "github.com/satori/go.uuid"
+	"github.com/talkiewalkie/talkiewalkie/models"
 )
+
+var ConversationCacheByIntErrNotFound = errors.New("ConversationCacheByInt error did not find values for keys")
 
 type ConversationCacheByInt struct {
 	cache   map[int]*models.Conversation
@@ -44,7 +45,7 @@ func (cache *ConversationCacheByInt) Get(
 	}
 
 	if len(key2index) > 0 {
-		missingKeys := make([]int, len(key2index))
+		missingKeys := []int{}
 		for key, _ := range key2index {
 			missingKeys = append(missingKeys, key)
 		}
@@ -65,7 +66,7 @@ func (cache *ConversationCacheByInt) Get(
 
 	for _, value := range out {
 		if value == nil {
-			return nil, errors.New("could not fetch from : found nil value")
+			return nil, ConversationCacheByIntErrNotFound
 		}
 	}
 
@@ -87,6 +88,8 @@ var (
 	_ uuid2.UUID
 	_ models.User
 )
+
+var ConversationCacheByUuidErrNotFound = errors.New("ConversationCacheByUuid error did not find values for keys")
 
 type ConversationCacheByUuid struct {
 	cache   map[uuid2.UUID]*models.Conversation
@@ -121,7 +124,7 @@ func (cache *ConversationCacheByUuid) Get(
 	}
 
 	if len(key2index) > 0 {
-		missingKeys := make([]uuid2.UUID, len(key2index))
+		missingKeys := []uuid2.UUID{}
 		for key, _ := range key2index {
 			missingKeys = append(missingKeys, key)
 		}
@@ -142,7 +145,7 @@ func (cache *ConversationCacheByUuid) Get(
 
 	for _, value := range out {
 		if value == nil {
-			return nil, errors.New("could not fetch from : found nil value")
+			return nil, ConversationCacheByUuidErrNotFound
 		}
 	}
 

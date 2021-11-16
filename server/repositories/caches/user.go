@@ -10,6 +10,8 @@ import (
 	"github.com/talkiewalkie/talkiewalkie/models"
 )
 
+var UserCacheByIntErrNotFound = errors.New("UserCacheByInt error did not find values for keys")
+
 type UserCacheByInt struct {
 	cache   map[int]*models.User
 	fetcher func([]int) ([]*models.User, error)
@@ -43,7 +45,7 @@ func (cache *UserCacheByInt) Get(
 	}
 
 	if len(key2index) > 0 {
-		missingKeys := make([]int, len(key2index))
+		missingKeys := []int{}
 		for key, _ := range key2index {
 			missingKeys = append(missingKeys, key)
 		}
@@ -64,7 +66,7 @@ func (cache *UserCacheByInt) Get(
 
 	for _, value := range out {
 		if value == nil {
-			return nil, errors.New("could not fetch from : found nil value")
+			return nil, UserCacheByIntErrNotFound
 		}
 	}
 
@@ -86,6 +88,8 @@ var (
 	_ uuid2.UUID
 	_ models.User
 )
+
+var UserCacheByUuidErrNotFound = errors.New("UserCacheByUuid error did not find values for keys")
 
 type UserCacheByUuid struct {
 	cache   map[uuid2.UUID]*models.User
@@ -120,7 +124,7 @@ func (cache *UserCacheByUuid) Get(
 	}
 
 	if len(key2index) > 0 {
-		missingKeys := make([]uuid2.UUID, len(key2index))
+		missingKeys := []uuid2.UUID{}
 		for key, _ := range key2index {
 			missingKeys = append(missingKeys, key)
 		}
@@ -141,7 +145,7 @@ func (cache *UserCacheByUuid) Get(
 
 	for _, value := range out {
 		if value == nil {
-			return nil, errors.New("could not fetch from : found nil value")
+			return nil, UserCacheByUuidErrNotFound
 		}
 	}
 
@@ -163,6 +167,8 @@ var (
 	_ uuid2.UUID
 	_ models.User
 )
+
+var UserCacheByStringErrNotFound = errors.New("UserCacheByString error did not find values for keys")
 
 type UserCacheByString struct {
 	cache   map[string]*models.User
@@ -197,7 +203,7 @@ func (cache *UserCacheByString) Get(
 	}
 
 	if len(key2index) > 0 {
-		missingKeys := make([]string, len(key2index))
+		missingKeys := []string{}
 		for key, _ := range key2index {
 			missingKeys = append(missingKeys, key)
 		}
@@ -218,7 +224,7 @@ func (cache *UserCacheByString) Get(
 
 	for _, value := range out {
 		if value == nil {
-			return nil, errors.New("could not fetch from : found nil value")
+			return nil, UserCacheByStringErrNotFound
 		}
 	}
 

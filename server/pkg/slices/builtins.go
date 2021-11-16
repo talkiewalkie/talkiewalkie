@@ -15,6 +15,18 @@ var (
 	_ uuid2.UUID
 )
 
+func (slice BoolSlice) Unique() (out BoolSlice) {
+	umap := map[bool]int{}
+	for _, item := range slice {
+		umap[item]++
+	}
+
+	for item, _ := range umap {
+		out = append(out, item)
+	}
+	return out
+}
+
 func (slice BoolSlice) UniqueBy(keyer func(bool) interface{}) BoolSlice {
 	u := map[interface{}]bool{}
 
@@ -163,6 +175,18 @@ type ByteSlicePtrs []*byte
 var (
 	_ uuid2.UUID
 )
+
+func (slice ByteSlice) Unique() (out ByteSlice) {
+	umap := map[byte]int{}
+	for _, item := range slice {
+		umap[item]++
+	}
+
+	for item, _ := range umap {
+		out = append(out, item)
+	}
+	return out
+}
 
 func (slice ByteSlice) UniqueBy(keyer func(byte) interface{}) ByteSlice {
 	u := map[interface{}]byte{}
@@ -313,6 +337,18 @@ var (
 	_ uuid2.UUID
 )
 
+func (slice Complex128Slice) Unique() (out Complex128Slice) {
+	umap := map[complex128]int{}
+	for _, item := range slice {
+		umap[item]++
+	}
+
+	for item, _ := range umap {
+		out = append(out, item)
+	}
+	return out
+}
+
 func (slice Complex128Slice) UniqueBy(keyer func(complex128) interface{}) Complex128Slice {
 	u := map[interface{}]complex128{}
 
@@ -461,6 +497,18 @@ type Complex64SlicePtrs []*complex64
 var (
 	_ uuid2.UUID
 )
+
+func (slice Complex64Slice) Unique() (out Complex64Slice) {
+	umap := map[complex64]int{}
+	for _, item := range slice {
+		umap[item]++
+	}
+
+	for item, _ := range umap {
+		out = append(out, item)
+	}
+	return out
+}
 
 func (slice Complex64Slice) UniqueBy(keyer func(complex64) interface{}) Complex64Slice {
 	u := map[interface{}]complex64{}
@@ -611,6 +659,18 @@ var (
 	_ uuid2.UUID
 )
 
+func (slice ErrorSlice) Unique() (out ErrorSlice) {
+	umap := map[error]int{}
+	for _, item := range slice {
+		umap[item]++
+	}
+
+	for item, _ := range umap {
+		out = append(out, item)
+	}
+	return out
+}
+
 func (slice ErrorSlice) UniqueBy(keyer func(error) interface{}) ErrorSlice {
 	u := map[interface{}]error{}
 
@@ -759,6 +819,18 @@ type Float32SlicePtrs []*float32
 var (
 	_ uuid2.UUID
 )
+
+func (slice Float32Slice) Unique() (out Float32Slice) {
+	umap := map[float32]int{}
+	for _, item := range slice {
+		umap[item]++
+	}
+
+	for item, _ := range umap {
+		out = append(out, item)
+	}
+	return out
+}
 
 func (slice Float32Slice) UniqueBy(keyer func(float32) interface{}) Float32Slice {
 	u := map[interface{}]float32{}
@@ -909,6 +981,18 @@ var (
 	_ uuid2.UUID
 )
 
+func (slice Float64Slice) Unique() (out Float64Slice) {
+	umap := map[float64]int{}
+	for _, item := range slice {
+		umap[item]++
+	}
+
+	for item, _ := range umap {
+		out = append(out, item)
+	}
+	return out
+}
+
 func (slice Float64Slice) UniqueBy(keyer func(float64) interface{}) Float64Slice {
 	u := map[interface{}]float64{}
 
@@ -1057,6 +1141,18 @@ type IntSlicePtrs []*int
 var (
 	_ uuid2.UUID
 )
+
+func (slice IntSlice) Unique() (out IntSlice) {
+	umap := map[int]int{}
+	for _, item := range slice {
+		umap[item]++
+	}
+
+	for item, _ := range umap {
+		out = append(out, item)
+	}
+	return out
+}
 
 func (slice IntSlice) UniqueBy(keyer func(int) interface{}) IntSlice {
 	u := map[interface{}]int{}
@@ -1207,6 +1303,18 @@ var (
 	_ uuid2.UUID
 )
 
+func (slice Int16Slice) Unique() (out Int16Slice) {
+	umap := map[int16]int{}
+	for _, item := range slice {
+		umap[item]++
+	}
+
+	for item, _ := range umap {
+		out = append(out, item)
+	}
+	return out
+}
+
 func (slice Int16Slice) UniqueBy(keyer func(int16) interface{}) Int16Slice {
 	u := map[interface{}]int16{}
 
@@ -1355,6 +1463,18 @@ type Int32SlicePtrs []*int32
 var (
 	_ uuid2.UUID
 )
+
+func (slice Int32Slice) Unique() (out Int32Slice) {
+	umap := map[int32]int{}
+	for _, item := range slice {
+		umap[item]++
+	}
+
+	for item, _ := range umap {
+		out = append(out, item)
+	}
+	return out
+}
 
 func (slice Int32Slice) UniqueBy(keyer func(int32) interface{}) Int32Slice {
 	u := map[interface{}]int32{}
@@ -1505,6 +1625,18 @@ var (
 	_ uuid2.UUID
 )
 
+func (slice Int64Slice) Unique() (out Int64Slice) {
+	umap := map[int64]int{}
+	for _, item := range slice {
+		umap[item]++
+	}
+
+	for item, _ := range umap {
+		out = append(out, item)
+	}
+	return out
+}
+
 func (slice Int64Slice) UniqueBy(keyer func(int64) interface{}) Int64Slice {
 	u := map[interface{}]int64{}
 
@@ -1653,6 +1785,18 @@ type Int8SlicePtrs []*int8
 var (
 	_ uuid2.UUID
 )
+
+func (slice Int8Slice) Unique() (out Int8Slice) {
+	umap := map[int8]int{}
+	for _, item := range slice {
+		umap[item]++
+	}
+
+	for item, _ := range umap {
+		out = append(out, item)
+	}
+	return out
+}
 
 func (slice Int8Slice) UniqueBy(keyer func(int8) interface{}) Int8Slice {
 	u := map[interface{}]int8{}
@@ -1803,6 +1947,18 @@ var (
 	_ uuid2.UUID
 )
 
+func (slice RuneSlice) Unique() (out RuneSlice) {
+	umap := map[rune]int{}
+	for _, item := range slice {
+		umap[item]++
+	}
+
+	for item, _ := range umap {
+		out = append(out, item)
+	}
+	return out
+}
+
 func (slice RuneSlice) UniqueBy(keyer func(rune) interface{}) RuneSlice {
 	u := map[interface{}]rune{}
 
@@ -1951,6 +2107,18 @@ type StringSlicePtrs []*string
 var (
 	_ uuid2.UUID
 )
+
+func (slice StringSlice) Unique() (out StringSlice) {
+	umap := map[string]int{}
+	for _, item := range slice {
+		umap[item]++
+	}
+
+	for item, _ := range umap {
+		out = append(out, item)
+	}
+	return out
+}
 
 func (slice StringSlice) UniqueBy(keyer func(string) interface{}) StringSlice {
 	u := map[interface{}]string{}
@@ -2101,6 +2269,18 @@ var (
 	_ uuid2.UUID
 )
 
+func (slice UintSlice) Unique() (out UintSlice) {
+	umap := map[uint]int{}
+	for _, item := range slice {
+		umap[item]++
+	}
+
+	for item, _ := range umap {
+		out = append(out, item)
+	}
+	return out
+}
+
 func (slice UintSlice) UniqueBy(keyer func(uint) interface{}) UintSlice {
 	u := map[interface{}]uint{}
 
@@ -2249,6 +2429,18 @@ type Uint16SlicePtrs []*uint16
 var (
 	_ uuid2.UUID
 )
+
+func (slice Uint16Slice) Unique() (out Uint16Slice) {
+	umap := map[uint16]int{}
+	for _, item := range slice {
+		umap[item]++
+	}
+
+	for item, _ := range umap {
+		out = append(out, item)
+	}
+	return out
+}
 
 func (slice Uint16Slice) UniqueBy(keyer func(uint16) interface{}) Uint16Slice {
 	u := map[interface{}]uint16{}
@@ -2399,6 +2591,18 @@ var (
 	_ uuid2.UUID
 )
 
+func (slice Uint32Slice) Unique() (out Uint32Slice) {
+	umap := map[uint32]int{}
+	for _, item := range slice {
+		umap[item]++
+	}
+
+	for item, _ := range umap {
+		out = append(out, item)
+	}
+	return out
+}
+
 func (slice Uint32Slice) UniqueBy(keyer func(uint32) interface{}) Uint32Slice {
 	u := map[interface{}]uint32{}
 
@@ -2547,6 +2751,18 @@ type Uint64SlicePtrs []*uint64
 var (
 	_ uuid2.UUID
 )
+
+func (slice Uint64Slice) Unique() (out Uint64Slice) {
+	umap := map[uint64]int{}
+	for _, item := range slice {
+		umap[item]++
+	}
+
+	for item, _ := range umap {
+		out = append(out, item)
+	}
+	return out
+}
 
 func (slice Uint64Slice) UniqueBy(keyer func(uint64) interface{}) Uint64Slice {
 	u := map[interface{}]uint64{}
@@ -2697,6 +2913,18 @@ var (
 	_ uuid2.UUID
 )
 
+func (slice Uint8Slice) Unique() (out Uint8Slice) {
+	umap := map[uint8]int{}
+	for _, item := range slice {
+		umap[item]++
+	}
+
+	for item, _ := range umap {
+		out = append(out, item)
+	}
+	return out
+}
+
 func (slice Uint8Slice) UniqueBy(keyer func(uint8) interface{}) Uint8Slice {
 	u := map[interface{}]uint8{}
 
@@ -2846,6 +3074,18 @@ var (
 	_ uuid2.UUID
 )
 
+func (slice UintptrSlice) Unique() (out UintptrSlice) {
+	umap := map[uintptr]int{}
+	for _, item := range slice {
+		umap[item]++
+	}
+
+	for item, _ := range umap {
+		out = append(out, item)
+	}
+	return out
+}
+
 func (slice UintptrSlice) UniqueBy(keyer func(uintptr) interface{}) UintptrSlice {
 	u := map[interface{}]uintptr{}
 
@@ -2988,14 +3228,26 @@ func (slice UintptrSlicePtrs) SameAs(other UintptrSlicePtrs) bool {
 	return len(diff) == 0
 }
 
-type Uuid2UUIDSlice []uuid2.UUID
-type Uuid2UUIDSlicePtrs []*uuid2.UUID
+type UuidSlice []uuid2.UUID
+type UuidSlicePtrs []*uuid2.UUID
 
 var (
 	_ uuid2.UUID
 )
 
-func (slice Uuid2UUIDSlice) UniqueBy(keyer func(uuid2.UUID) interface{}) Uuid2UUIDSlice {
+func (slice UuidSlice) Unique() (out UuidSlice) {
+	umap := map[uuid2.UUID]int{}
+	for _, item := range slice {
+		umap[item]++
+	}
+
+	for item, _ := range umap {
+		out = append(out, item)
+	}
+	return out
+}
+
+func (slice UuidSlice) UniqueBy(keyer func(uuid2.UUID) interface{}) UuidSlice {
 	u := map[interface{}]uuid2.UUID{}
 
 	for _, item := range slice {
@@ -3010,7 +3262,7 @@ func (slice Uuid2UUIDSlice) UniqueBy(keyer func(uuid2.UUID) interface{}) Uuid2UU
 	return out
 }
 
-func (slice Uuid2UUIDSlice) FilterBy(predicate func(uuid2.UUID) bool) Uuid2UUIDSlice {
+func (slice UuidSlice) FilterBy(predicate func(uuid2.UUID) bool) UuidSlice {
 	out := []uuid2.UUID{}
 	for _, item := range slice {
 		if predicate(item) {
@@ -3021,7 +3273,7 @@ func (slice Uuid2UUIDSlice) FilterBy(predicate func(uuid2.UUID) bool) Uuid2UUIDS
 	return out
 }
 
-func (slice Uuid2UUIDSlice) Contains(t uuid2.UUID) bool {
+func (slice UuidSlice) Contains(t uuid2.UUID) bool {
 	for _, item := range slice {
 		if item == t {
 			return true
@@ -3031,12 +3283,12 @@ func (slice Uuid2UUIDSlice) Contains(t uuid2.UUID) bool {
 	return false
 }
 
-func (slice Uuid2UUIDSlice) IsEmpty() bool {
+func (slice UuidSlice) IsEmpty() bool {
 	return len(slice) == 0
 }
 
 // from https://stackoverflow.com/a/36000696
-func (slice Uuid2UUIDSlice) SameAs(other Uuid2UUIDSlice) bool {
+func (slice UuidSlice) SameAs(other UuidSlice) bool {
 	if len(slice) != len(other) {
 		return false
 	}
@@ -3065,7 +3317,7 @@ func (slice Uuid2UUIDSlice) SameAs(other Uuid2UUIDSlice) bool {
 // Slice of pointers
 //
 
-func (slice Uuid2UUIDSlicePtrs) UniqueBy(keyer func(*uuid2.UUID) interface{}) Uuid2UUIDSlicePtrs {
+func (slice UuidSlicePtrs) UniqueBy(keyer func(*uuid2.UUID) interface{}) UuidSlicePtrs {
 	u := map[interface{}]*uuid2.UUID{}
 
 	for _, item := range slice {
@@ -3080,7 +3332,7 @@ func (slice Uuid2UUIDSlicePtrs) UniqueBy(keyer func(*uuid2.UUID) interface{}) Uu
 	return out
 }
 
-func (slice Uuid2UUIDSlicePtrs) FilterBy(predicate func(*uuid2.UUID) bool) Uuid2UUIDSlicePtrs {
+func (slice UuidSlicePtrs) FilterBy(predicate func(*uuid2.UUID) bool) UuidSlicePtrs {
 	out := []*uuid2.UUID{}
 	for _, item := range slice {
 		if predicate(item) {
@@ -3091,7 +3343,7 @@ func (slice Uuid2UUIDSlicePtrs) FilterBy(predicate func(*uuid2.UUID) bool) Uuid2
 	return out
 }
 
-func (slice Uuid2UUIDSlicePtrs) Contains(t *uuid2.UUID) bool {
+func (slice UuidSlicePtrs) Contains(t *uuid2.UUID) bool {
 	for _, item := range slice {
 		if item == t {
 			return true
@@ -3101,18 +3353,18 @@ func (slice Uuid2UUIDSlicePtrs) Contains(t *uuid2.UUID) bool {
 	return false
 }
 
-func (slice Uuid2UUIDSlicePtrs) FilterNotNil() Uuid2UUIDSlicePtrs {
+func (slice UuidSlicePtrs) FilterNotNil() UuidSlicePtrs {
 	return slice.FilterBy(func(t *uuid2.UUID) bool {
 		return t != nil
 	})
 }
 
-func (slice Uuid2UUIDSlicePtrs) IsEmpty() bool {
+func (slice UuidSlicePtrs) IsEmpty() bool {
 	return len(slice) == 0
 }
 
 // from https://stackoverflow.com/a/36000696
-func (slice Uuid2UUIDSlicePtrs) SameAs(other Uuid2UUIDSlicePtrs) bool {
+func (slice UuidSlicePtrs) SameAs(other UuidSlicePtrs) bool {
 	if len(slice) != len(other) {
 		return false
 	}

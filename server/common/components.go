@@ -26,12 +26,14 @@ type Components struct {
 	AudioClient     pb.CompressionClient
 
 	// Context sensitive items
+	Ctx context.Context
 	repositories.Repositories
 
 	CompressImg func(string, int) (string, error)
 }
 
 func (components *Components) ResetEntityStores(ctx context.Context) {
+	components.Ctx = ctx
 	components.AssetRepository = repositories.NewAssetRepository(ctx, components.Db)
 	components.ConversationRepository = repositories.NewConversationRepository(ctx, components.Db)
 	components.MessageRepository = repositories.NewMessageRepository(ctx, components.Db)

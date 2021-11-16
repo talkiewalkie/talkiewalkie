@@ -27,11 +27,23 @@ new_secret() {
   openssl rand -hex 32
 }
 
-install_sqlboiler_cli() {
-  go get github.com/volatiletech/sqlboiler/v4
-  go get github.com/volatiletech/null/v8
-  GO111MODULE=off go get github.com/volatiletech/sqlboiler/drivers/sqlboiler-psql
-  mv "${GOPATH}/bin/sqlboiler-psql" .
+install_codegen_tools() {
+  pushd ../.. || exit 1
+  mkdir -p codegen_tools/
+  pushd codegen_tools || exit 1
+
+  git clone git@github.com:theo-m/genny.git
+  pushd genny || exit 1
+  go install
+  popd
+
+  git clone git@github.com:theo-m/sqlboiler.git
+  pushd sqlboiler || exit 1
+  ./install-fork.sh
+  popd
+
+  popd
+  popd
 }
 
 push_back() {

@@ -28,7 +28,7 @@ func ServerStreamLoggerInterceptor(srv interface{}, ss grpc.ServerStream, info *
 	defer func() {
 		if recErr := recover(); recErr != nil || panicked {
 			err = status.Errorf(codes.Internal, "%+v", recErr)
-			log.Printf("[grpc,stream] %q panicked: %+v", err)
+			log.Printf("[grpc,stream] %q panicked: %+v", info.FullMethod, err)
 		}
 	}()
 
@@ -50,7 +50,7 @@ func UnaryLoggerInterceptor(ctx context.Context, req interface{}, info *grpc.Una
 	defer func() {
 		if recErr := recover(); recErr != nil || panicked {
 			err = status.Errorf(codes.Internal, "%+v", recErr)
-			log.Printf("[grpc,unary] %q panicked: %+v", err)
+			log.Printf("[grpc,unary] %q panicked: %+v", info.FullMethod, err)
 		}
 	}()
 

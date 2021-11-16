@@ -6,12 +6,14 @@ package models
 var TableNames = struct {
 	Asset            string
 	Conversation     string
+	Event            string
 	Message          string
 	User             string
 	UserConversation string
 }{
 	Asset:            "asset",
 	Conversation:     "conversation",
+	Event:            "event",
 	Message:          "message",
 	User:             "user",
 	UserConversation: "user_conversation",

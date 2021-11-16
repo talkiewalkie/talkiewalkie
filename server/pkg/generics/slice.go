@@ -13,6 +13,18 @@ var (
 	_ uuid2.UUID
 )
 
+func (slice ItemTypeSlice) Unique() (out ItemTypeSlice) {
+	umap := map[ItemType]int{}
+	for _, item := range slice {
+		umap[item]++
+	}
+
+	for item, _ := range umap {
+		out = append(out, item)
+	}
+	return out
+}
+
 func (slice ItemTypeSlice) UniqueBy(keyer func(ItemType) interface{}) ItemTypeSlice {
 	u := map[interface{}]ItemType{}
 

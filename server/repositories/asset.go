@@ -14,13 +14,21 @@ type AssetRepository interface {
 
 	ById(int) (*models.Asset, error)
 	ByUuid(uuid2.UUID) (*models.Asset, error)
+
+	Clear()
 }
 
 type AssetRepositoryImpl struct {
-	Db        *sqlx.DB
-	Context   context.Context
+	Db      *sqlx.DB
+	Context context.Context
+
 	IdCache   caches.AssetCacheByInt
 	UuidCache caches.AssetCacheByUuid
+}
+
+func (repository AssetRepositoryImpl) Clear() {
+	repository.IdCache.Clear()
+	repository.UuidCache.Clear()
 }
 
 func NewAssetRepository(context context.Context, db *sqlx.DB) *AssetRepositoryImpl {

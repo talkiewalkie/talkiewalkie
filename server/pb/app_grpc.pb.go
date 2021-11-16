@@ -438,6 +438,159 @@ var MessageService_ServiceDesc = grpc.ServiceDesc{
 	Metadata: "app.proto",
 }
 
+// EventServiceClient is the client API for EventService service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+type EventServiceClient interface {
+	Sync(ctx context.Context, in *UpSync, opts ...grpc.CallOption) (*DownSync, error)
+	Connect(ctx context.Context, opts ...grpc.CallOption) (EventService_ConnectClient, error)
+}
+
+type eventServiceClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewEventServiceClient(cc grpc.ClientConnInterface) EventServiceClient {
+	return &eventServiceClient{cc}
+}
+
+func (c *eventServiceClient) Sync(ctx context.Context, in *UpSync, opts ...grpc.CallOption) (*DownSync, error) {
+	out := new(DownSync)
+	err := c.cc.Invoke(ctx, "/app.EventService/Sync", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *eventServiceClient) Connect(ctx context.Context, opts ...grpc.CallOption) (EventService_ConnectClient, error) {
+	stream, err := c.cc.NewStream(ctx, &EventService_ServiceDesc.Streams[0], "/app.EventService/Connect", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &eventServiceConnectClient{stream}
+	return x, nil
+}
+
+type EventService_ConnectClient interface {
+	Send(*Event) error
+	Recv() (*Event, error)
+	grpc.ClientStream
+}
+
+type eventServiceConnectClient struct {
+	grpc.ClientStream
+}
+
+func (x *eventServiceConnectClient) Send(m *Event) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *eventServiceConnectClient) Recv() (*Event, error) {
+	m := new(Event)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+// EventServiceServer is the server API for EventService service.
+// All implementations should embed UnimplementedEventServiceServer
+// for forward compatibility
+type EventServiceServer interface {
+	Sync(context.Context, *UpSync) (*DownSync, error)
+	Connect(EventService_ConnectServer) error
+}
+
+// UnimplementedEventServiceServer should be embedded to have forward compatible implementations.
+type UnimplementedEventServiceServer struct {
+}
+
+func (UnimplementedEventServiceServer) Sync(context.Context, *UpSync) (*DownSync, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Sync not implemented")
+}
+func (UnimplementedEventServiceServer) Connect(EventService_ConnectServer) error {
+	return status.Errorf(codes.Unimplemented, "method Connect not implemented")
+}
+
+// UnsafeEventServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to EventServiceServer will
+// result in compilation errors.
+type UnsafeEventServiceServer interface {
+	mustEmbedUnimplementedEventServiceServer()
+}
+
+func RegisterEventServiceServer(s grpc.ServiceRegistrar, srv EventServiceServer) {
+	s.RegisterService(&EventService_ServiceDesc, srv)
+}
+
+func _EventService_Sync_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpSync)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EventServiceServer).Sync(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/app.EventService/Sync",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EventServiceServer).Sync(ctx, req.(*UpSync))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _EventService_Connect_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(EventServiceServer).Connect(&eventServiceConnectServer{stream})
+}
+
+type EventService_ConnectServer interface {
+	Send(*Event) error
+	Recv() (*Event, error)
+	grpc.ServerStream
+}
+
+type eventServiceConnectServer struct {
+	grpc.ServerStream
+}
+
+func (x *eventServiceConnectServer) Send(m *Event) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *eventServiceConnectServer) Recv() (*Event, error) {
+	m := new(Event)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+// EventService_ServiceDesc is the grpc.ServiceDesc for EventService service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var EventService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "app.EventService",
+	HandlerType: (*EventServiceServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "Sync",
+			Handler:    _EventService_Sync_Handler,
+		},
+	},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "Connect",
+			Handler:       _EventService_Connect_Handler,
+			ServerStreams: true,
+			ClientStreams: true,
+		},
+	},
+	Metadata: "app.proto",
+}
+
 // ConversationServiceClient is the client API for ConversationService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.

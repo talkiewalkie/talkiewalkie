@@ -4,8 +4,9 @@ import (
 	"errors"
 	uuid2 "github.com/satori/go.uuid"
 	"github.com/talkiewalkie/talkiewalkie/models"
-	"log"
 )
+
+var CacheValueMultiCacheByCacheKeyErrNotFound = errors.New("CacheValueMultiCacheByCacheKey error did not find values for keys")
 
 type CacheValueMultiCacheByCacheKey struct {
 	cache   map[CacheKey][]*CacheValue
@@ -59,12 +60,6 @@ func (cache *CacheValueMultiCacheByCacheKey) Get(identifiers []CacheKey) ([][]*C
 		}
 	}
 
-	for _, value := range out {
-		if value == nil {
-			return nil, errors.New("could not fetch from : found nil value")
-		}
-	}
-
 	return out, nil
 }
 
@@ -76,8 +71,6 @@ func (cache CacheValueMultiCacheByCacheKey) Prime(values ...[]*CacheValue) {
 	for _, value := range values {
 		if len(value) > 0 {
 			cache.cache[cache.primer(value[0])] = value
-		} else {
-			log.Printf("error?: sending empty lists to prime the cache")
 		}
 	}
 }

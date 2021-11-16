@@ -19,14 +19,22 @@ type UserRepository interface {
 	ById(int) (*models.User, error)
 
 	FromUserConversations([][]*models.UserConversation) (models.UserSlice, error)
+	Clear()
 }
 
 type UserRepositoryImpl struct {
-	Db         *sqlx.DB
-	Context    context.Context
+	Db      *sqlx.DB
+	Context context.Context
+
 	IdCache    caches.UserCacheByInt
 	UuidCache  caches.UserCacheByUuid
 	PhoneCache caches.UserCacheByString
+}
+
+func (repository UserRepositoryImpl) Clear() {
+	repository.IdCache.Clear()
+	repository.UuidCache.Clear()
+	repository.PhoneCache.Clear()
 }
 
 func NewUserRepository(context context.Context, db *sqlx.DB) *UserRepositoryImpl {
