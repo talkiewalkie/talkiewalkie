@@ -4,8 +4,13 @@
 
 - Needs `go1.17` installed, `postgresql` version 11 or above.
 - We've forked codegen tools for our purposes: [`sqlboiler`](https://github.com/theo-m/sqlboiler), our ORM,
-  and [`genny`](https://github.com/theo-m/genny) for generic slice utils. Install instructions available are on each
-  repo.
+  and [`genny`](https://github.com/theo-m/genny) for generic slice utils. Install them with:
+
+```bash
+# (will clone repos at ../..)
+./cmd.sh install_codegen_tools
+```
+
 - Run the following and fill with your info:
 
 ```bash
