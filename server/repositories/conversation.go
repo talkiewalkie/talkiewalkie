@@ -22,13 +22,21 @@ type ConversationRepository interface {
 	ByUuid(uuid uuid2.UUID) (*models.Conversation, error)
 
 	FromUserConversations([][]*models.UserConversation) (models.ConversationSlice, error)
+
+	Clear()
 }
 
 type ConversationRepositoryImpl struct {
-	Db        *sqlx.DB
-	Context   context.Context
+	Db      *sqlx.DB
+	Context context.Context
+
 	IdCache   caches.ConversationCacheByInt
 	UuidCache caches.ConversationCacheByUuid
+}
+
+func (repository ConversationRepositoryImpl) Clear() {
+	repository.IdCache.Clear()
+	repository.UuidCache.Clear()
 }
 
 func NewConversationRepository(context context.Context, db *sqlx.DB) *ConversationRepositoryImpl {
@@ -101,7 +109,8 @@ var _ ConversationRepository = ConversationRepositoryImpl{}
 
 type PbConversationSlice []*pb.Conversation
 
-func (s PbConversationSlice) UuidMap() (out map[uuid2.UUID]*pb.Conversation) {
+func (s PbConversationSlice) UuidMap() map[uuid2.UUID]*pb.Conversation {
+	out := make(map[uuid2.UUID]*pb.Conversation, len(s))
 	for _, item := range s {
 		uid, _ := uuid2.FromString(item.Uuid)
 		out[uid] = item

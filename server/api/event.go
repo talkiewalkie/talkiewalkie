@@ -65,6 +65,7 @@ func (e EventService) Sync(ctx context.Context, sync *pb.UpSync) (*pb.DownSync, 
 			return nil, err
 		}
 	}
+
 	in := []*models.Event{}
 	for _, event := range sync.Events {
 		switch event.Content.(type) {
@@ -224,6 +225,7 @@ func OnNewMessage(components *common.Components, me *models.User, nm *pb.Event_S
 		return nil, status.Errorf(codes.Internal, "received unknown conversation input: %q", nm.Conversation)
 	}
 
+	components.ResetEntityStores(components.Ctx)
 	if ok, err := components.ConversationHasAccess(me, conv); !ok || err != nil {
 		return nil, status.Errorf(codes.PermissionDenied, "can't send message to this conversation: (err = %+v)", err)
 	}
@@ -296,10 +298,10 @@ func OnNewMessage(components *common.Components, me *models.User, nm *pb.Event_S
 	q := sq.Insert(models.TableNames.Event).Columns(
 		models.EventColumns.Type,
 		models.EventColumns.RecipientID,
-		models.EventColumns.MessageID, models.EventColumns.ConversationID,
+		models.EventColumns.MessageID,
 	)
 	for _, p := range participants {
-		q = q.Values(models.EventTypeNewMessage, p.ID, nil, conv.ID)
+		q = q.Values(models.EventTypeNewMessage, p.ID, msg.ID)
 	}
 	query, args, _ := q.Suffix("RETURNING *").
 		PlaceholderFormat(sq.Dollar).
@@ -380,9 +382,10 @@ func getOrCreateConvForUsers(
 		q = q.Values(id, conv.ID)
 	}
 	query, args, _ := q.PlaceholderFormat(sq.Dollar).ToSql()
-	if _, err = components.Db.Exec(query, args); err != nil {
+	if _, err = components.Db.Exec(query, args...); err != nil {
 		return nil, status.Errorf(codes.Internal, "could not insert new members to conv: %+v", err)
 	}
+	components.UserConversationRepository.Clear()
 
 	return conv, nil
 }

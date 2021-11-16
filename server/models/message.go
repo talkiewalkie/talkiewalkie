@@ -187,19 +187,22 @@ func (o *MessageSlice) Uuids() []uuid.UUID {
 	}
 	return out
 }
-func (o *MessageSlice) IdMap() (out map[int]*Message) {
+func (o *MessageSlice) IdMap() map[int]*Message {
+	out := make(map[int]*Message, len(*o))
 	for _, item := range *o {
 		out[item.ID] = item
 	}
 	return out
 }
-func (o *MessageSlice) UuidMap() (out map[uuid.UUID]*Message) {
+func (o *MessageSlice) UuidMap() map[uuid.UUID]*Message {
+	out := make(map[uuid.UUID]*Message, len(*o))
 	for _, item := range *o {
 		out[item.UUID] = item
 	}
 	return out
 }
-func (o *MessageSlice) IntToUuidMap() (out map[int]uuid.UUID) {
+func (o *MessageSlice) IntToUuidMap() map[int]uuid.UUID {
+	out := make(map[int]uuid.UUID, len(*o))
 	for _, item := range *o {
 		out[item.ID] = item.UUID
 	}

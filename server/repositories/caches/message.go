@@ -5,10 +5,12 @@
 package caches
 
 import (
-	"fmt"
+	"errors"
 	uuid2 "github.com/satori/go.uuid"
 	"github.com/talkiewalkie/talkiewalkie/models"
 )
+
+var MessageCacheByIntErrNotFound = errors.New("MessageCacheByInt error did not find values for keys")
 
 type MessageCacheByInt struct {
 	cache   map[int]*models.Message
@@ -62,9 +64,9 @@ func (cache *MessageCacheByInt) Get(
 		}
 	}
 
-	for index, value := range out {
+	for _, value := range out {
 		if value == nil {
-			return nil, fmt.Errorf("[MessageCacheByInt] error: found nil value at position %d", index)
+			return nil, MessageCacheByIntErrNotFound
 		}
 	}
 
@@ -86,6 +88,8 @@ var (
 	_ uuid2.UUID
 	_ models.User
 )
+
+var MessageCacheByUuidErrNotFound = errors.New("MessageCacheByUuid error did not find values for keys")
 
 type MessageCacheByUuid struct {
 	cache   map[uuid2.UUID]*models.Message
@@ -139,9 +143,9 @@ func (cache *MessageCacheByUuid) Get(
 		}
 	}
 
-	for index, value := range out {
+	for _, value := range out {
 		if value == nil {
-			return nil, fmt.Errorf("[MessageCacheByUuid] error: found nil value at position %d", index)
+			return nil, MessageCacheByUuidErrNotFound
 		}
 	}
 

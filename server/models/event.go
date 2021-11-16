@@ -177,19 +177,22 @@ func (o *EventSlice) Uuids() []uuid.UUID {
 	}
 	return out
 }
-func (o *EventSlice) IdMap() (out map[int]*Event) {
+func (o *EventSlice) IdMap() map[int]*Event {
+	out := make(map[int]*Event, len(*o))
 	for _, item := range *o {
 		out[item.ID] = item
 	}
 	return out
 }
-func (o *EventSlice) UuidMap() (out map[uuid.UUID]*Event) {
+func (o *EventSlice) UuidMap() map[uuid.UUID]*Event {
+	out := make(map[uuid.UUID]*Event, len(*o))
 	for _, item := range *o {
 		out[item.UUID] = item
 	}
 	return out
 }
-func (o *EventSlice) IntToUuidMap() (out map[int]uuid.UUID) {
+func (o *EventSlice) IntToUuidMap() map[int]uuid.UUID {
+	out := make(map[int]uuid.UUID, len(*o))
 	for _, item := range *o {
 		out[item.ID] = item.UUID
 	}

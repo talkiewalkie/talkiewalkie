@@ -5,11 +5,12 @@
 package caches
 
 import (
-	"fmt"
+	"errors"
 	uuid2 "github.com/satori/go.uuid"
 	"github.com/talkiewalkie/talkiewalkie/models"
-	"log"
 )
+
+var UserConversationMultiCacheByIntErrNotFound = errors.New("UserConversationMultiCacheByInt error did not find values for keys")
 
 type UserConversationMultiCacheByInt struct {
 	cache   map[int][]*models.UserConversation
@@ -63,12 +64,6 @@ func (cache *UserConversationMultiCacheByInt) Get(identifiers []int) ([][]*model
 		}
 	}
 
-	for index, value := range out {
-		if value == nil {
-			return nil, fmt.Errorf("[UserConversationMultiCacheByInt] error: found nil value at position %d", index)
-		}
-	}
-
 	return out, nil
 }
 
@@ -80,8 +75,6 @@ func (cache UserConversationMultiCacheByInt) Prime(values ...[]*models.UserConve
 	for _, value := range values {
 		if len(value) > 0 {
 			cache.cache[cache.primer(value[0])] = value
-		} else {
-			log.Printf("error?: sending empty lists to prime the cache")
 		}
 	}
 }

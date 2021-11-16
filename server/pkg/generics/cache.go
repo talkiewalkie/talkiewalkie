@@ -1,7 +1,7 @@
 package generics
 
 import (
-	"fmt"
+	"errors"
 	uuid2 "github.com/satori/go.uuid"
 	"github.com/talkiewalkie/talkiewalkie/models"
 
@@ -10,6 +10,8 @@ import (
 
 type CacheKey generic.Type
 type CacheValue generic.Type
+
+var CacheValueCacheByCacheKeyErrNotFound = errors.New("CacheValueCacheByCacheKey error did not find values for keys")
 
 type CacheValueCacheByCacheKey struct {
 	cache   map[CacheKey]*CacheValue
@@ -63,9 +65,9 @@ func (cache *CacheValueCacheByCacheKey) Get(
 		}
 	}
 
-	for index, value := range out {
+	for _, value := range out {
 		if value == nil {
-			return nil, fmt.Errorf("[CacheValueCacheByCacheKey] error: found nil value at position %d", index)
+			return nil, CacheValueCacheByCacheKeyErrNotFound
 		}
 	}
 

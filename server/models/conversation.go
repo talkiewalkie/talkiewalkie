@@ -125,19 +125,22 @@ func (o *ConversationSlice) Uuids() []uuid.UUID {
 	}
 	return out
 }
-func (o *ConversationSlice) IdMap() (out map[int]*Conversation) {
+func (o *ConversationSlice) IdMap() map[int]*Conversation {
+	out := make(map[int]*Conversation, len(*o))
 	for _, item := range *o {
 		out[item.ID] = item
 	}
 	return out
 }
-func (o *ConversationSlice) UuidMap() (out map[uuid.UUID]*Conversation) {
+func (o *ConversationSlice) UuidMap() map[uuid.UUID]*Conversation {
+	out := make(map[uuid.UUID]*Conversation, len(*o))
 	for _, item := range *o {
 		out[item.UUID] = item
 	}
 	return out
 }
-func (o *ConversationSlice) IntToUuidMap() (out map[int]uuid.UUID) {
+func (o *ConversationSlice) IntToUuidMap() map[int]uuid.UUID {
+	out := make(map[int]uuid.UUID, len(*o))
 	for _, item := range *o {
 		out[item.ID] = item.UUID
 	}

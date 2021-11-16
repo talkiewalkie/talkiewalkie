@@ -21,14 +21,16 @@ type UserConversationRepository interface {
 }
 
 type UserConversationRepositoryImpl struct {
-	Db                  *sqlx.DB
-	Context             context.Context
+	Db      *sqlx.DB
+	Context context.Context
+
 	ConversationIdCache caches.UserConversationMultiCacheByInt
 	UserIdCache         caches.UserConversationMultiCacheByInt
 }
 
 func (repository UserConversationRepositoryImpl) Clear() {
 	repository.ConversationIdCache.Clear()
+	repository.UserIdCache.Clear()
 }
 
 func NewUserConversationRepository(context context.Context, db *sqlx.DB) *UserConversationRepositoryImpl {

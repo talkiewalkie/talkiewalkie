@@ -5,10 +5,12 @@
 package caches
 
 import (
-	"fmt"
+	"errors"
 	uuid2 "github.com/satori/go.uuid"
 	"github.com/talkiewalkie/talkiewalkie/models"
 )
+
+var UserCacheByIntErrNotFound = errors.New("UserCacheByInt error did not find values for keys")
 
 type UserCacheByInt struct {
 	cache   map[int]*models.User
@@ -62,9 +64,9 @@ func (cache *UserCacheByInt) Get(
 		}
 	}
 
-	for index, value := range out {
+	for _, value := range out {
 		if value == nil {
-			return nil, fmt.Errorf("[UserCacheByInt] error: found nil value at position %d", index)
+			return nil, UserCacheByIntErrNotFound
 		}
 	}
 
@@ -86,6 +88,8 @@ var (
 	_ uuid2.UUID
 	_ models.User
 )
+
+var UserCacheByUuidErrNotFound = errors.New("UserCacheByUuid error did not find values for keys")
 
 type UserCacheByUuid struct {
 	cache   map[uuid2.UUID]*models.User
@@ -139,9 +143,9 @@ func (cache *UserCacheByUuid) Get(
 		}
 	}
 
-	for index, value := range out {
+	for _, value := range out {
 		if value == nil {
-			return nil, fmt.Errorf("[UserCacheByUuid] error: found nil value at position %d", index)
+			return nil, UserCacheByUuidErrNotFound
 		}
 	}
 
@@ -163,6 +167,8 @@ var (
 	_ uuid2.UUID
 	_ models.User
 )
+
+var UserCacheByStringErrNotFound = errors.New("UserCacheByString error did not find values for keys")
 
 type UserCacheByString struct {
 	cache   map[string]*models.User
@@ -216,9 +222,9 @@ func (cache *UserCacheByString) Get(
 		}
 	}
 
-	for index, value := range out {
+	for _, value := range out {
 		if value == nil {
-			return nil, fmt.Errorf("[UserCacheByString] error: found nil value at position %d", index)
+			return nil, UserCacheByStringErrNotFound
 		}
 	}
 
