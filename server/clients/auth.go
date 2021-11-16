@@ -14,10 +14,20 @@ import (
 
 type AuthClient interface {
 	VerifyJWT(context.Context, string) (*uuid2.UUID, string, error)
+	UserUidByPhoneNumber(context.Context, string) (string, error)
 }
 
 type FirebaseAuthClientImpl struct {
 	*auth.Client
+}
+
+func (f FirebaseAuthClientImpl) UserUidByPhoneNumber(ctx context.Context, s string) (string, error) {
+	fbU, err := f.GetUserByPhoneNumber(ctx, s)
+	if err != nil {
+		return "", err
+	}
+
+	return fbU.UID, nil
 }
 
 func (f FirebaseAuthClientImpl) VerifyJWT(ctx context.Context, s string) (*uuid2.UUID, string, error) {
