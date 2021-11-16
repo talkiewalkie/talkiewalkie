@@ -48,7 +48,7 @@ jobs:
           sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf go1.17.3.linux-amd64.tar.gz
           export PATH=$PATH:/usr/local/go/bin
           export GO111MODULE=on
-          pushd server && go get -d -v ./... && popd
+          pushd server && go get -d -v ./... && go install github.com/golang-migrate/migrate/v4 && popd
 
       - name: Build
         run: |
