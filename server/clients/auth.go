@@ -5,7 +5,6 @@ import (
 	firebase "firebase.google.com/go/v4"
 	"firebase.google.com/go/v4/auth"
 	"fmt"
-	uuid2 "github.com/satori/go.uuid"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"log"
@@ -13,7 +12,7 @@ import (
 )
 
 type AuthClient interface {
-	VerifyJWT(context.Context, string) (*uuid2.UUID, string, error)
+	VerifyJWT(context.Context, string) (string, string, error)
 	UserUidByPhoneNumber(context.Context, string) (string, error)
 	CustomToken(context.Context, string) (string, error)
 }
@@ -31,11 +30,11 @@ func (f FirebaseAuthClientImpl) UserUidByPhoneNumber(ctx context.Context, s stri
 	return fbU.UID, nil
 }
 
-func (f FirebaseAuthClientImpl) VerifyJWT(ctx context.Context, s string) (*uuid2.UUID, string, error) {
+func (f FirebaseAuthClientImpl) VerifyJWT(ctx context.Context, s string) (string, string, error) {
 	jwt := strings.Replace(s, "Bearer ", "", 1)
-	tok, err := f.VerifyIDTokenAndCheckRevoked(ctx, jwt)
+	tok, err := f.VerifyIDToken(ctx, jwt)
 	if err != nil {
-		return nil, "", status.Error(codes.PermissionDenied, fmt.Sprintf("auth header provided couldn't be verified: %+v", err))
+		return "", "", status.Error(codes.PermissionDenied, fmt.Sprintf("auth header provided couldn't be verified: %+v", err))
 	}
 
 	phonePayload, ok := tok.Claims["phone_number"]
@@ -43,18 +42,17 @@ func (f FirebaseAuthClientImpl) VerifyJWT(ctx context.Context, s string) (*uuid2
 		// TODO: investigate why there are multiple phone claims payloads!
 		otherPhonePayload, otherOk := tok.Claims["phone"]
 		if !otherOk {
-			return nil, "", status.Error(codes.Internal, fmt.Sprintf("firebase user has no phone claim"))
+			return "", "", status.Error(codes.Internal, fmt.Sprintf("firebase user has no phone claim"))
 		}
 		phonePayload = otherPhonePayload
 	}
 
 	phone, ok := phonePayload.(string)
 	if !ok {
-		return nil, "", status.Error(codes.Internal, fmt.Sprintf("firebase user has unhandled phone claim (not a string)"))
+		return "", "", status.Error(codes.Internal, fmt.Sprintf("firebase user has unhandled phone claim (not a string)"))
 	}
 
-	uid, err := uuid2.FromString(tok.UID)
-	return &uid, phone, err
+	return tok.UID, phone, err
 }
 
 var _ AuthClient = FirebaseAuthClientImpl{}

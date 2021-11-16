@@ -37,11 +37,11 @@ func AuthInterceptor(c *Components) func(ctx context.Context) (context.Context, 
 			return nil, err
 		}
 
-		u, err := models.Users(models.UserWhere.FirebaseUID.EQ(null.StringFrom(uid.String()))).One(ctx, c.Db)
+		u, err := models.Users(models.UserWhere.FirebaseUID.EQ(null.StringFrom(uid))).One(ctx, c.Db)
 		if err != nil && errors2.Cause(err) == sql.ErrNoRows {
 			u = &models.User{
 				PhoneNumber: phone,
-				FirebaseUID: null.StringFrom(uid.String()),
+				FirebaseUID: null.StringFrom(uid),
 
 				DisplayName:    null.StringFromPtr(nil),
 				ProfilePicture: null.IntFromPtr(nil), // TODO reupload picture
@@ -57,7 +57,7 @@ func AuthInterceptor(c *Components) func(ctx context.Context) (context.Context, 
 			return nil, status.Error(codes.Internal, fmt.Sprintf("failed to query for user uid: %+v", err))
 		}
 
-		newCtx := context.WithValue(ctx, "user", u)
+		newCtx := context.WithValue(ctx, "me", u)
 		return newCtx, nil
 	}
 }
