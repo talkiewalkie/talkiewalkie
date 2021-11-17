@@ -91,7 +91,7 @@ func (e EventService) Sync(ctx context.Context, sync *pb.UpSync) (*pb.DownSync, 
 	var pbNewEvents events.EventSlice
 	var dbNewEvents models.EventSlice
 	for _, event := range sync.Events {
-		dbEvs, pbEvs, err := events.HandleNewEvent(components, me, event, false)
+		dbEvs, pbEvs, err := events.HandleNewEvent(components, me, event)
 		if err != nil {
 			return nil, err
 		}

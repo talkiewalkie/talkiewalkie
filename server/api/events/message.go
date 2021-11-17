@@ -25,7 +25,6 @@ func OnNewMessage(
 	components *common.Components,
 	me *models.User,
 	event *pb.Event,
-	sendThroughWire bool,
 ) (
 	ev *pb.Event,
 	dbEv *models.Event,
@@ -163,10 +162,6 @@ func OnNewMessage(
 	userToEvents := dbEvs.GroupByRecipientIDs()
 
 	for _, uc := range ucs {
-		if uc.UserID == me.ID && !sendThroughWire {
-			//TODO: Send an event to acknowledge that the message was effectively sent
-			continue
-		}
 		user, err := components.UserRepository.ById(uc.UserID)
 		if err != nil {
 			return nil, nil, err

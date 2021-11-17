@@ -13,14 +13,10 @@ func HandleNewEvent(
 	components *common.Components,
 	me *models.User,
 	event *pb.Event,
-	// whether or not to publish messages on pubsub if user is connected - typically on Sync we set it to false in order
-	// to avoid double ingestion.
-	// but maybe double ingestion is not a problem since we have the localuuid?
-	sendThroughWire bool,
 ) (dbSlice models.EventSlice, pbslice EventSlice, err error) {
 	switch event.Content.(type) {
 	case *pb.Event_SentNewMessage_:
-		pbNewEvent, dbNewEvent, err := OnNewMessage(components, me, event, sendThroughWire)
+		pbNewEvent, dbNewEvent, err := OnNewMessage(components, me, event)
 		if err != nil {
 			return nil, nil, err
 		}
@@ -62,7 +58,7 @@ func HandleIncomingEvents(components *common.Components, me *models.User, server
 		}
 
 		log.Printf("processing new event: %T", event.Content)
-		_, _, err = HandleNewEvent(components, me, event, true)
+		_, _, err = HandleNewEvent(components, me, event)
 		if err != nil {
 			errChan <- err
 			return

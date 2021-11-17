@@ -72,10 +72,10 @@ func TestSync(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		localUuid := uuid2.NewV4()
+		sent := newMsgEvent(conv.UUID.String())
 		out, err := service.Sync(ctx,
 			&pb.UpSync{
-				Events:        []*pb.Event{newMsgEvent(conv.UUID.String())},
+				Events:        []*pb.Event{sent},
 				LastEventUuid: evs[0].UUID.String(),
 			})
 
@@ -88,7 +88,7 @@ func TestSync(t *testing.T) {
 
 		require.Equal(t, "", out.Events[0].LocalUuid) // non "local" events
 		require.Equal(t, "", out.Events[1].LocalUuid) // non "local" events
-		require.Equal(t, localUuid.String(), out.Events[2].LocalUuid)
+		require.Equal(t, sent.LocalUuid, out.Events[2].LocalUuid)
 	})
 }
 

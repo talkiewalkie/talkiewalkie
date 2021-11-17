@@ -104,7 +104,7 @@ func NewFakeServer(
 	*bufconn.Listener, // this is returned only to bypass the GC so that the connection is not closed.
 ) {
 	components, me, ctx := NewContext(db, t)
-	ctx, cancel := context.WithTimeout(ctx, 500*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
 
 	s := grpc.NewServer(grpc.StreamInterceptor(func(srv interface{}, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
 		newCtx := context.WithValue(ss.Context(), "components", components)
