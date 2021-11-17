@@ -5,12 +5,14 @@ import (
 	"log"
 	"strings"
 
+	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpcauth "github.com/grpc-ecosystem/go-grpc-middleware/auth"
-	"github.com/talkiewalkie/talkiewalkie/common"
-	"github.com/talkiewalkie/talkiewalkie/models"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+
+	"github.com/talkiewalkie/talkiewalkie/common"
+	"github.com/talkiewalkie/talkiewalkie/models"
 )
 
 func ServerStreamAuthInterceptor(components *common.Components) func(interface{}, grpc.ServerStream, *grpc.StreamServerInfo, grpc.StreamHandler) error {
@@ -81,7 +83,9 @@ func ServerStreamRequestComponentsInterceptor(components *common.Components) fun
 		newCtx := context.WithValue(ss.Context(), "components", components)
 		components.ResetEntityStores(newCtx)
 
-		return handler(newCtx, ss)
+		newSS := grpc_middleware.WrapServerStream(ss)
+		newSS.WrappedContext = newCtx
+		return handler(srv, newSS)
 	}
 }
 
