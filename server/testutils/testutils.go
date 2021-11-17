@@ -13,6 +13,8 @@ import (
 	"math/rand"
 	"net"
 	"os"
+	"path"
+	"runtime"
 	"testing"
 	"time"
 
@@ -30,7 +32,11 @@ func testDbUrl() string {
 func SetupDb() *sqlx.DB {
 	dbUrl := testDbUrl()
 	db := sqlx.MustConnect("postgres", dbUrl)
-	common.RunMigrations("../migrations", dbUrl)
+
+	_, fn, _, _ := runtime.Caller(0)
+	sdir := path.Dir(path.Dir(fn))
+	common.RunMigrations(fmt.Sprintf("%s/migrations", sdir), dbUrl)
+
 	return db
 }
 
