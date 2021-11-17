@@ -41,14 +41,14 @@ jobs:
         with:
           submodules: 'recursive'
 
+      - name: Go install
+        uses: actions/setup-go@v2
+        with:
+          go-version: '1.17.3'
+        run: go version
+
       - name: Test deps
         run: |
-          # GO INSTALLL
-          curl -LO https://golang.org/dl/go1.17.3.linux-amd64.tar.gz
-          sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf go1.17.3.linux-amd64.tar.gz
-          export GOPATH=/usr/local/go
-          export PATH=$PATH:$GOPATH/bin
-          export GO111MODULE=on
           pushd server
           go get -d -v ./...
           popd
