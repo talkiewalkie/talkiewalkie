@@ -33,8 +33,10 @@ func SetupDb() *sqlx.DB {
 	dbUrl := testDbUrl()
 	db := sqlx.MustConnect("postgres", dbUrl)
 
+	// https://stackoverflow.com/a/28200371
 	_, fn, _, _ := runtime.Caller(0)
 	sdir := path.Dir(path.Dir(fn))
+
 	common.RunMigrations(fmt.Sprintf("%s/migrations", sdir), dbUrl)
 
 	return db
@@ -44,10 +46,10 @@ func TearDownDb(db *sqlx.DB) {
 	ctx := context.Background()
 
 	tx := db.MustBegin()
-	if _, err := models.Messages().DeleteAll(ctx, tx); err != nil {
+	if _, err := models.UserConversations().DeleteAll(ctx, tx); err != nil {
 		panic(err)
 	}
-	if _, err := models.UserConversations().DeleteAll(ctx, tx); err != nil {
+	if _, err := models.Messages().DeleteAll(ctx, tx); err != nil {
 		panic(err)
 	}
 	if _, err := models.Conversations().DeleteAll(ctx, tx); err != nil {
