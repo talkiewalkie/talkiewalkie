@@ -50,10 +50,9 @@ jobs:
           export PATH=$PATH:$GOPATH/bin
           export GO111MODULE=on
           pushd server
-          go version
           go get -d -v ./...
-          go get -tags 'postgres' -u github.com/golang-migrate/migrate/cmd/migrate
           popd
+          go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
 
       - name: Build
         run: |
