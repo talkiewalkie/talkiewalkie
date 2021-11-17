@@ -51,7 +51,7 @@ jobs:
           export GO111MODULE=on
           pushd server
           go get -d -v ./...
-          GO111MODULE=on go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
+          go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
           popd
 
       - name: Build
