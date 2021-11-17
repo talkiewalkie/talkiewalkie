@@ -28,15 +28,21 @@ new_secret() {
 }
 
 install_codegen_tools() {
+  # protobuf codegen
+  go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.27.1
+  go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.1.0
+
   pushd ../.. || exit 1
   mkdir -p codegen_tools/
   pushd codegen_tools || exit 1
 
+  # generics codegen
   git clone git@github.com:theo-m/genny.git
   pushd genny || exit 1
   go install
   popd
 
+  # orm codegen
   git clone git@github.com:theo-m/sqlboiler.git
   pushd sqlboiler || exit 1
   ./install-fork.sh
