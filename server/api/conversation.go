@@ -3,13 +3,15 @@ package api
 import (
 	"context"
 	"fmt"
+
 	uuid2 "github.com/satori/go.uuid"
-	"github.com/talkiewalkie/talkiewalkie/models"
-	"github.com/talkiewalkie/talkiewalkie/pb"
-	_ "github.com/talkiewalkie/talkiewalkie/pkg/slices"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+
+	"github.com/talkiewalkie/talkiewalkie/models"
+	"github.com/talkiewalkie/talkiewalkie/pb"
+	_ "github.com/talkiewalkie/talkiewalkie/pkg/slices"
 )
 
 type ConversationService struct {

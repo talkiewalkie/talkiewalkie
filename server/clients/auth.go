@@ -2,13 +2,14 @@ package clients
 
 import (
 	"context"
-	firebase "firebase.google.com/go/v4"
-	"firebase.google.com/go/v4/auth"
 	"fmt"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 	"log"
 	"strings"
+
+	firebase "firebase.google.com/go/v4"
+	"firebase.google.com/go/v4/auth"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type AuthClient interface {

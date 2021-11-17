@@ -28,6 +28,13 @@ go run .
 For development one can use [`air`](https://github.com/cosmtrek/air) to reload the server on file changes. Once
 installed just run `air`.
 
+The code is formatted with:
+
+- `gofmt` - standard formatter
+- `goimports`
+    - install with `go install golang.org/x/tools/cmd/goimports@latest`
+    - run with `goimports -local github.com/talkiewalkie -w testutils/ api/ common/ cmd/ clients/ repositories/ pkg/`
+
 ### Getting data
 
 Running the following will insert 500+ walks and a few users to the db.

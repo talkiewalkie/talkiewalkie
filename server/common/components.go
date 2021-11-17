@@ -2,16 +2,18 @@ package common
 
 import (
 	"context"
-	"firebase.google.com/go/v4"
 	"fmt"
-	"github.com/jmoiron/sqlx"
-	"github.com/talkiewalkie/talkiewalkie/clients"
-	"github.com/talkiewalkie/talkiewalkie/repositories"
 	"log"
 	"math/rand"
 	"os"
 	"os/exec"
 	"strconv"
+
+	firebase "firebase.google.com/go/v4"
+	"github.com/jmoiron/sqlx"
+
+	"github.com/talkiewalkie/talkiewalkie/clients"
+	"github.com/talkiewalkie/talkiewalkie/repositories"
 
 	"github.com/talkiewalkie/talkiewalkie/pb"
 )

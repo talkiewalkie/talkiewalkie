@@ -2,10 +2,12 @@ package testutils
 
 import (
 	"context"
+	"io"
+
 	uuid "github.com/satori/go.uuid"
+
 	"github.com/talkiewalkie/talkiewalkie/clients"
 	"github.com/talkiewalkie/talkiewalkie/models"
-	"io"
 )
 
 type FakeStorageClient struct{}

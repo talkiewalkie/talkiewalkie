@@ -3,13 +3,15 @@ package api
 import (
 	"context"
 	"fmt"
+	"sort"
+
 	uuid2 "github.com/satori/go.uuid"
-	"github.com/talkiewalkie/talkiewalkie/api/events"
-	"github.com/talkiewalkie/talkiewalkie/repositories"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/encoding/protojson"
-	"sort"
+
+	"github.com/talkiewalkie/talkiewalkie/api/events"
+	"github.com/talkiewalkie/talkiewalkie/repositories"
 
 	"github.com/talkiewalkie/talkiewalkie/models"
 	"github.com/talkiewalkie/talkiewalkie/pb"

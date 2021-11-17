@@ -2,10 +2,12 @@ package events
 
 import (
 	"context"
+
 	sq "github.com/Masterminds/squirrel"
 	"github.com/jmoiron/sqlx"
-	"github.com/talkiewalkie/talkiewalkie/models"
 	"github.com/volatiletech/sqlboiler/v4/queries"
+
+	"github.com/talkiewalkie/talkiewalkie/models"
 )
 
 func BatchInsert(ctx context.Context, db *sqlx.DB, slice models.EventSlice) (models.EventSlice, error) {

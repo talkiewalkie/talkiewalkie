@@ -4,16 +4,18 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"github.com/joho/godotenv"
-	"github.com/talkiewalkie/talkiewalkie/common"
-	"github.com/talkiewalkie/talkiewalkie/pb"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/metadata"
 	"io/ioutil"
 	"log"
 	"os/exec"
 	"strings"
 	"time"
+
+	"github.com/joho/godotenv"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/metadata"
+
+	"github.com/talkiewalkie/talkiewalkie/common"
+	"github.com/talkiewalkie/talkiewalkie/pb"
 )
 
 var (

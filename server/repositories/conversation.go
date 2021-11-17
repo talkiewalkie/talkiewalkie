@@ -3,16 +3,18 @@ package repositories
 import (
 	"context"
 	"fmt"
+	"strconv"
+	"strings"
+
 	"github.com/jmoiron/sqlx"
 	uuid2 "github.com/satori/go.uuid"
-	"github.com/talkiewalkie/talkiewalkie/models"
-	"github.com/talkiewalkie/talkiewalkie/pb"
-	"github.com/talkiewalkie/talkiewalkie/repositories/caches"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"strconv"
-	"strings"
+
+	"github.com/talkiewalkie/talkiewalkie/models"
+	"github.com/talkiewalkie/talkiewalkie/pb"
+	"github.com/talkiewalkie/talkiewalkie/repositories/caches"
 )
 
 type ConversationRepository interface {

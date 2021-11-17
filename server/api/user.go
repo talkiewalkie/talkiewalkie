@@ -3,16 +3,18 @@ package api
 import (
 	"context"
 	"fmt"
+	"log"
+	"strings"
+
 	uuid2 "github.com/satori/go.uuid"
-	"github.com/talkiewalkie/talkiewalkie/clients"
-	"github.com/talkiewalkie/talkiewalkie/pb"
-	"github.com/talkiewalkie/talkiewalkie/repositories"
 	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"log"
-	"strings"
+
+	"github.com/talkiewalkie/talkiewalkie/clients"
+	"github.com/talkiewalkie/talkiewalkie/pb"
+	"github.com/talkiewalkie/talkiewalkie/repositories"
 )
 
 type UserService struct {

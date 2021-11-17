@@ -1,16 +1,18 @@
 package api
 
 import (
+	"testing"
+
 	uuid2 "github.com/satori/go.uuid"
 	"github.com/stretchr/testify/require"
+	"github.com/volatiletech/null/v8"
+	"google.golang.org/grpc"
+
 	"github.com/talkiewalkie/talkiewalkie/api/events"
 	"github.com/talkiewalkie/talkiewalkie/models"
 	"github.com/talkiewalkie/talkiewalkie/pb"
 	"github.com/talkiewalkie/talkiewalkie/repositories"
 	"github.com/talkiewalkie/talkiewalkie/testutils"
-	"github.com/volatiletech/null/v8"
-	"google.golang.org/grpc"
-	"testing"
 )
 
 func TestSync(t *testing.T) {

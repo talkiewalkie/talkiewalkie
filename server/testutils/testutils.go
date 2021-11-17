@@ -3,11 +3,6 @@ package testutils
 import (
 	"context"
 	"fmt"
-	"github.com/bxcodec/faker/v3"
-	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
-	"github.com/talkiewalkie/talkiewalkie/clients"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/test/bufconn"
 	"io/ioutil"
 	"log"
 	"math/rand"
@@ -18,11 +13,19 @@ import (
 	"testing"
 	"time"
 
+	"github.com/bxcodec/faker/v3"
+	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/test/bufconn"
+
+	"github.com/talkiewalkie/talkiewalkie/clients"
+
 	"github.com/jmoiron/sqlx"
-	"github.com/talkiewalkie/talkiewalkie/common"
-	"github.com/talkiewalkie/talkiewalkie/models"
 	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
+
+	"github.com/talkiewalkie/talkiewalkie/common"
+	"github.com/talkiewalkie/talkiewalkie/models"
 )
 
 func testDbUrl() string {

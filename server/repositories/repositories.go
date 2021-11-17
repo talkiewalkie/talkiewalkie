@@ -2,7 +2,9 @@ package repositories
 
 import (
 	"context"
+
 	"github.com/jmoiron/sqlx"
+
 	"github.com/talkiewalkie/talkiewalkie/clients"
 )
 

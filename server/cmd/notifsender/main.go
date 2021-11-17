@@ -3,10 +3,12 @@ package main
 import (
 	"context"
 	"flag"
+	"log"
+
 	"github.com/joho/godotenv"
+
 	"github.com/talkiewalkie/talkiewalkie/clients"
 	"github.com/talkiewalkie/talkiewalkie/common"
-	"log"
 )
 
 var (

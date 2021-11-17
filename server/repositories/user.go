@@ -3,12 +3,14 @@ package repositories
 import (
 	"context"
 	"fmt"
+	"strings"
+
 	"github.com/jmoiron/sqlx"
 	uuid2 "github.com/satori/go.uuid"
+
 	"github.com/talkiewalkie/talkiewalkie/models"
 	"github.com/talkiewalkie/talkiewalkie/pb"
 	"github.com/talkiewalkie/talkiewalkie/repositories/caches"
-	"strings"
 )
 
 type UserRepository interface {

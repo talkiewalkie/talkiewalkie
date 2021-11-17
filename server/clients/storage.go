@@ -2,17 +2,18 @@ package clients
 
 import (
 	"context"
-	"github.com/talkiewalkie/talkiewalkie/models"
 	"io"
 	"log"
 	"os"
 	"time"
 
+	"github.com/talkiewalkie/talkiewalkie/models"
+
 	"cloud.google.com/go/storage"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/satori/go.uuid"
+	uuid "github.com/satori/go.uuid"
 )
 
 type StorageClient interface {

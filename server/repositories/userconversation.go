@@ -2,12 +2,14 @@ package repositories
 
 import (
 	"context"
+
 	"github.com/jmoiron/sqlx"
+	"google.golang.org/protobuf/types/known/timestamppb"
+
 	"github.com/talkiewalkie/talkiewalkie/models"
 	"github.com/talkiewalkie/talkiewalkie/pb"
 	"github.com/talkiewalkie/talkiewalkie/pkg/slices"
 	"github.com/talkiewalkie/talkiewalkie/repositories/caches"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type UserConversationRepository interface {

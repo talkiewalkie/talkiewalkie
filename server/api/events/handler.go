@@ -1,12 +1,14 @@
 package events
 
 import (
+	"log"
+
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+
 	"github.com/talkiewalkie/talkiewalkie/common"
 	"github.com/talkiewalkie/talkiewalkie/models"
 	"github.com/talkiewalkie/talkiewalkie/pb"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
-	"log"
 )
 
 func HandleNewEvent(

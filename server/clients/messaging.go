@@ -2,9 +2,10 @@ package clients
 
 import (
 	"context"
+	"log"
+
 	firebase "firebase.google.com/go/v4"
 	"firebase.google.com/go/v4/messaging"
-	"log"
 )
 
 type MessageInput struct {

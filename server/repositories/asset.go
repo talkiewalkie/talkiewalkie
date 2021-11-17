@@ -2,8 +2,10 @@ package repositories
 
 import (
 	"context"
+
 	"github.com/jmoiron/sqlx"
 	uuid2 "github.com/satori/go.uuid"
+
 	"github.com/talkiewalkie/talkiewalkie/models"
 	"github.com/talkiewalkie/talkiewalkie/repositories/caches"
 )

@@ -5,16 +5,18 @@ import (
 	"database/sql"
 	"flag"
 	"fmt"
-	"github.com/bxcodec/faker/v3"
-	"github.com/friendsofgo/errors"
-	"github.com/joho/godotenv"
-	"github.com/talkiewalkie/talkiewalkie/common"
-	"github.com/talkiewalkie/talkiewalkie/models"
-	"github.com/volatiletech/null/v8"
-	"github.com/volatiletech/sqlboiler/v4/boil"
 	"log"
 	"math/rand"
 	"os"
+
+	"github.com/bxcodec/faker/v3"
+	"github.com/friendsofgo/errors"
+	"github.com/joho/godotenv"
+	"github.com/volatiletech/null/v8"
+	"github.com/volatiletech/sqlboiler/v4/boil"
+
+	"github.com/talkiewalkie/talkiewalkie/common"
+	"github.com/talkiewalkie/talkiewalkie/models"
 )
 
 var (

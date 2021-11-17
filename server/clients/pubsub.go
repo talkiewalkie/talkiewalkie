@@ -2,12 +2,14 @@ package clients
 
 import (
 	"fmt"
-	"github.com/jmoiron/sqlx"
-	"github.com/lib/pq"
-	"github.com/talkiewalkie/talkiewalkie/pb"
-	"google.golang.org/protobuf/encoding/protojson"
 	"log"
 	"time"
+
+	"github.com/jmoiron/sqlx"
+	"github.com/lib/pq"
+	"google.golang.org/protobuf/encoding/protojson"
+
+	"github.com/talkiewalkie/talkiewalkie/pb"
 )
 
 type PubSubClient interface {
@@ -70,7 +72,7 @@ func (ps PgPubSub) Publish(topic string, event *pb.Event) error {
 	if err != nil {
 		return fmt.Errorf("could not serialize event: %+v", err)
 	}
-	log.Printf("publishing to '%s': %+v", topic, event)
+	log.Printf("publishing to '%s' (%T)", topic, event.Content)
 	_, err = ps.db.Exec(fmt.Sprintf("NOTIFY %s, '%s'", topic, string(payload)))
 	if err != nil {
 		return fmt.Errorf("could not notify of event in topic '%s': %+v", topic, err)

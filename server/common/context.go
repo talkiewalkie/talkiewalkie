@@ -5,14 +5,16 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"math/rand"
+
 	errors2 "github.com/friendsofgo/errors"
-	"github.com/talkiewalkie/talkiewalkie/models"
 	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
-	"math/rand"
+
+	"github.com/talkiewalkie/talkiewalkie/models"
 )
 
 type Context struct {
