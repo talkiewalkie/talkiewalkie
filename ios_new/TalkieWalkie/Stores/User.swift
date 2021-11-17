@@ -33,12 +33,19 @@ extension Me {
         let res = (try? context.fetch(req)) ?? []
 
         if res.count > 1 {
-            os_log(.error, "getting \(res.count) instances of [Me] object in core data.")
+            os_log(.error, "getting \(res.count) instances of [Me] object in core data in ctx(\(context.description))")
             // I hate Core Data. Why would we have multiple instance of the Me object???
             context.perform {
                 res.filter { $0.uuid == nil }.forEach { context.delete($0) }
                 context.saveOrLogError()
             }
+        } else if res.isEmpty {
+            os_log(.debug, "no [Me] object found in core data in ctx(\(context.description))")
+        }
+        
+        let me = res.first { $0.uuid != nil }
+        if let _ = me {
+            os_log(.debug, "found [Me] object in core data in ctx(\(context.description))")
         }
 
         return res.first { $0.uuid != nil }

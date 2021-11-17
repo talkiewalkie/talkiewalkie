@@ -124,6 +124,7 @@ struct ComposerView: View {
             
             // Core Data
             authed.withWriteContext { ctx, me in
+                guard let me = me else { fatalError() }
                 let message = Message(context: ctx)
                 message.localUuid_ = messageLocalUuid
                 message.content = {
@@ -131,7 +132,7 @@ struct ComposerView: View {
                     content.text = text
                     return content
                 }()
-                message.author = Me.fromCache(context: ctx)!
+                message.author = me
                 message.status_ = 0
                 message.conversation = Conversation.getByUuidOrCreate(conversationUuid, context: ctx)
                 message.createdAt = Date()

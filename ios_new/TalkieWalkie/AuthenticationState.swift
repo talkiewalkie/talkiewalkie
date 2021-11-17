@@ -36,7 +36,7 @@ class AuthState: ObservableObject {
 
     var me: Me? { Me.fromCache(context: readContext) }
     var meOrThrow: Me { me! }
-    private lazy var backgroundMeOrThrow: Me = { Me.fromCache(context: writeContext)! }()
+    private lazy var backgroundMe: Me? = { Me.fromCache(context: writeContext) }()
 
     private var logger = Logger.withLabel("AuthState")
     private let config = Config.load(version: env)
@@ -131,10 +131,10 @@ class AuthState: ObservableObject {
         state = AuthenticationState.Connecting
     }
 
-    func withWriteContext(block: @escaping (_ context: NSManagedObjectContext, _ me: Me) -> Void) {
+    func withWriteContext(block: @escaping (_ context: NSManagedObjectContext, _ me: Me?) -> Void) {
         backgroundQueue.addOperation {
             self.writeContext.performAndWait {
-                block(self.writeContext, self.backgroundMeOrThrow)
+                block(self.writeContext, self.backgroundMe)
                 try! self.writeContext.save()
             }
         }

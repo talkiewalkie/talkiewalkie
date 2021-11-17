@@ -33,7 +33,7 @@ extension View {
             .environmentObject(DummyStore.shared.messageViewModel)
             .environmentObject(DummyStore.shared.onboardingViewModel)
         
-            .environment(\.managedObjectContext, DummyStore.shared.auth.moc)
+//            .environment(\.managedObjectContext, DummyStore.shared.auth.moc)
         
             .preferredColorScheme(DummyStore.shared.isDarkMode ? .dark : .light)
             .environment(\.colorScheme, DummyStore.shared.isDarkMode ? .dark : .light)
