@@ -21,7 +21,16 @@ import (
 	"github.com/talkiewalkie/talkiewalkie/repositories"
 )
 
-func OnNewMessage(components *common.Components, me *models.User, event *pb.Event) (ev *pb.Event, dbEv *models.Event, err error) {
+func OnNewMessage(
+	components *common.Components,
+	me *models.User,
+	event *pb.Event,
+	sendThroughWire bool,
+) (
+	ev *pb.Event,
+	dbEv *models.Event,
+	err error,
+) {
 	nm := event.GetSentNewMessage()
 
 	var conv *models.Conversation
@@ -154,8 +163,8 @@ func OnNewMessage(components *common.Components, me *models.User, event *pb.Even
 	userToEvents := dbEvs.GroupByRecipientIDs()
 
 	for _, uc := range ucs {
-		if uc.UserID == me.ID {
-			// TODO: Send an event to acknowledge that the message was effectively sent
+		if uc.UserID == me.ID && !sendThroughWire {
+			//TODO: Send an event to acknowledge that the message was effectively sent
 			continue
 		}
 		user, err := components.UserRepository.ById(uc.UserID)
@@ -166,8 +175,11 @@ func OnNewMessage(components *common.Components, me *models.User, event *pb.Even
 		topic := repositories.UserPubSubTopic(user)
 
 		userEvents := userToEvents[uc.UserID]
-		for _, event := range userEvents {
-			pbEvent := pbNewEvents.UuidMap()[event.UUID.String()]
+		for _, dbevent := range userEvents {
+			pbEvent := pbNewEvents.UuidMap()[dbevent.UUID.String()]
+			if uc.UserID == me.ID {
+				pbEvent.LocalUuid = event.LocalUuid
+			}
 
 			if err = components.PubSubClient.Publish(topic, pbEvent); err != nil {
 				log.Printf("failed to notify user channel: %+v", err)

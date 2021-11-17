@@ -5,9 +5,10 @@
 package caches
 
 import (
-	"errors"
 	uuid2 "github.com/satori/go.uuid"
 	"github.com/talkiewalkie/talkiewalkie/models"
+
+	"errors"
 )
 
 var MessageCacheByIntErrNotFound = errors.New("MessageCacheByInt error did not find values for keys")

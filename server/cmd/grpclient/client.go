@@ -54,7 +54,7 @@ func main() {
 		log.Panic(err)
 	}
 
-	client := pb.NewMessageServiceClient(conn)
+	client := pb.NewEventServiceClient(conn)
 	audioContent, err := ioutil.ReadFile(*audio)
 	if err != nil {
 		log.Panic(err)
@@ -62,25 +62,32 @@ func main() {
 
 	authHeader := metadata.New(map[string]string{"Authorization": fmt.Sprintf("Bearer %s", token)})
 	ctx := metadata.NewOutgoingContext(context.Background(), authHeader)
-	if _, err = client.Send(ctx, &pb.MessageSendInput{
-		Recipients: &pb.MessageSendInput_ConvUuid{ConvUuid: *convUuid},
-		Content: &pb.MessageSendInput_VoiceMessage{VoiceMessage: &pb.VoiceMessage{
-			RawContent: audioContent,
-			SiriTranscript: &pb.AlignedTranscript{Items: []*pb.TranscriptItem{
-				{
-					Word:            "Hello",
-					OffsetMs:        413,
-					DurationMs:      200,
-					SubstringOffset: 0,
-				},
-				{
-					Word:            "Alex",
-					OffsetMs:        700,
-					DurationMs:      200,
-					SubstringOffset: 5,
-				}}, Rendered: "Hello Alex!"},
-		}},
-	}); err != nil {
+	if _, err = client.Sync(
+		ctx,
+		&pb.UpSync{
+			Events: []*pb.Event{{
+				Content: &pb.Event_SentNewMessage_{
+					SentNewMessage: &pb.Event_SentNewMessage{Message: &pb.MessageSendInput{
+						Content: &pb.MessageSendInput_VoiceMessage{VoiceMessage: &pb.VoiceMessage{
+							RawContent: audioContent,
+							SiriTranscript: &pb.AlignedTranscript{Items: []*pb.TranscriptItem{
+								{
+									Word:            "Hello",
+									OffsetMs:        413,
+									DurationMs:      200,
+									SubstringOffset: 0,
+								},
+								{
+									Word:            "Alex",
+									OffsetMs:        700,
+									DurationMs:      200,
+									SubstringOffset: 5,
+								}}, Rendered: "Hello Alex!"},
+						}},
+					}},
+				}}},
+		},
+	); err != nil {
 		log.Panicf("failed: %+v", err)
 	}
 	log.Printf("success!")

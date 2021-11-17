@@ -4,15 +4,15 @@ import (
 	"fmt"
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
+	"github.com/talkiewalkie/talkiewalkie/pb"
 	"google.golang.org/protobuf/encoding/protojson"
-	"google.golang.org/protobuf/proto"
 	"log"
 	"time"
 )
 
 type PubSubClient interface {
 	Subscribe(string) (chan *pq.Notification, func(), error)
-	Publish(string, proto.Message) error
+	Publish(string, *pb.Event) error
 }
 
 type PgPubSub struct {
@@ -65,7 +65,7 @@ func (ps PgPubSub) Subscribe(topic string) (chan *pq.Notification, func(), error
 	}, nil
 }
 
-func (ps PgPubSub) Publish(topic string, event proto.Message) error {
+func (ps PgPubSub) Publish(topic string, event *pb.Event) error {
 	payload, err := protojson.Marshal(event)
 	if err != nil {
 		return fmt.Errorf("could not serialize event: %+v", err)

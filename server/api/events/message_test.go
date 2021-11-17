@@ -16,9 +16,8 @@ import (
 
 func TestNewMessage(t *testing.T) {
 	db := testutils.SetupDb()
-	ctx := context.Background()
 
-	testutils.TearDownDb(ctx, db)
+	testutils.TearDownDb(db)
 	t.Run("send new message notifies others", func(t *testing.T) {
 		components, me, ctx := testutils.NewContext(db, t)
 
@@ -40,10 +39,9 @@ func TestNewMessage(t *testing.T) {
 				Message:      &pb.MessageSendInput{Content: &pb.MessageSendInput_TextMessage{TextMessage: &pb.TextMessage{Content: "hello"}}},
 				Conversation: &pb.Event_SentNewMessage_ConvUuid{ConvUuid: conv.UUID.String()}},
 			}}
-		pbE, _, err := OnNewMessage(components, me, event)
+		pbE, _, err := OnNewMessage(components, me, event, false)
 		if err != nil {
-			t.Log(err)
-			t.Fail()
+			t.Fatal(err)
 		}
 		require.Equal(t, localUuid.String(), pbE.LocalUuid)
 
@@ -54,16 +52,14 @@ func TestNewMessage(t *testing.T) {
 		case m := <-u1mq:
 			event := &pb.Event{}
 			if err := protojson.Unmarshal([]byte(m.Extra), event); err != nil {
-				t.Log(err)
-				t.Fail()
+				t.Fatal(err)
 			}
 			require.IsType(t, &pb.Event_ReceivedNewMessage_{}, event.Content)
 
 		case m := <-u2mq:
 			event := &pb.Event{}
 			if err := protojson.Unmarshal([]byte(m.Extra), event); err != nil {
-				t.Log(err)
-				t.Fail()
+				t.Fatal(err)
 			}
 			require.IsType(t, &pb.Event_ReceivedNewMessage_{}, event.Content)
 

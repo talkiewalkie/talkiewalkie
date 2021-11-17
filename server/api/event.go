@@ -48,9 +48,11 @@ func (e EventService) Connect(server pb.EventService_ConnectServer) error {
 
 		case <-server.Context().Done():
 			return nil
+
+		case ierr := <-incomingErrs:
+			return ierr
 		}
 	}
-	panic("implement me")
 }
 
 func (e EventService) Sync(ctx context.Context, sync *pb.UpSync) (*pb.DownSync, error) {
@@ -89,7 +91,7 @@ func (e EventService) Sync(ctx context.Context, sync *pb.UpSync) (*pb.DownSync, 
 	var pbNewEvents events.EventSlice
 	var dbNewEvents models.EventSlice
 	for _, event := range sync.Events {
-		dbEvs, pbEvs, err := events.HandleNewEvent(components, me, event)
+		dbEvs, pbEvs, err := events.HandleNewEvent(components, me, event, false)
 		if err != nil {
 			return nil, err
 		}
