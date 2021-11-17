@@ -213,6 +213,15 @@ func (o *EventSlice) ConversationIDs() []int {
 	}
 	return out
 }
+func (o *EventSlice) GroupByConversationIDs() map[int]EventSlice {
+	ids := map[int]EventSlice{}
+	for _, item := range *o {
+		if item.ConversationID.Valid {
+			ids[item.ConversationID.Int] = append(ids[item.ConversationID.Int], item)
+		}
+	}
+	return ids
+}
 func (o *EventSlice) MessageIDs() []int {
 	ids := map[int]bool{}
 	for _, item := range *o {
@@ -227,6 +236,15 @@ func (o *EventSlice) MessageIDs() []int {
 	}
 	return out
 }
+func (o *EventSlice) GroupByMessageIDs() map[int]EventSlice {
+	ids := map[int]EventSlice{}
+	for _, item := range *o {
+		if item.MessageID.Valid {
+			ids[item.MessageID.Int] = append(ids[item.MessageID.Int], item)
+		}
+	}
+	return ids
+}
 func (o *EventSlice) RecipientIDs() []int {
 	ids := map[int]bool{}
 	for _, item := range *o {
@@ -239,6 +257,14 @@ func (o *EventSlice) RecipientIDs() []int {
 		out = append(out, id)
 	}
 	return out
+}
+func (o *EventSlice) GroupByRecipientIDs() map[int]EventSlice {
+	ids := map[int]EventSlice{}
+	for _, item := range *o {
+
+		ids[item.RecipientID] = append(ids[item.RecipientID], item)
+	}
+	return ids
 }
 
 var (

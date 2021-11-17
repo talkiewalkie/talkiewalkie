@@ -223,6 +223,15 @@ func (o *MessageSlice) AuthorIDs() []int {
 	}
 	return out
 }
+func (o *MessageSlice) GroupByAuthorIDs() map[int]MessageSlice {
+	ids := map[int]MessageSlice{}
+	for _, item := range *o {
+		if item.AuthorID.Valid {
+			ids[item.AuthorID.Int] = append(ids[item.AuthorID.Int], item)
+		}
+	}
+	return ids
+}
 func (o *MessageSlice) ConversationIDs() []int {
 	ids := map[int]bool{}
 	for _, item := range *o {
@@ -235,6 +244,14 @@ func (o *MessageSlice) ConversationIDs() []int {
 		out = append(out, id)
 	}
 	return out
+}
+func (o *MessageSlice) GroupByConversationIDs() map[int]MessageSlice {
+	ids := map[int]MessageSlice{}
+	for _, item := range *o {
+
+		ids[item.ConversationID] = append(ids[item.ConversationID], item)
+	}
+	return ids
 }
 func (o *MessageSlice) RawAudioIDs() []int {
 	ids := map[int]bool{}
@@ -249,6 +266,15 @@ func (o *MessageSlice) RawAudioIDs() []int {
 		out = append(out, id)
 	}
 	return out
+}
+func (o *MessageSlice) GroupByRawAudioIDs() map[int]MessageSlice {
+	ids := map[int]MessageSlice{}
+	for _, item := range *o {
+		if item.RawAudioID.Valid {
+			ids[item.RawAudioID.Int] = append(ids[item.RawAudioID.Int], item)
+		}
+	}
+	return ids
 }
 
 var (

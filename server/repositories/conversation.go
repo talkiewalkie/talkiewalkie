@@ -207,6 +207,8 @@ func (s Repositories) ConversationUsers(conv *models.Conversation) ([]*models.Us
 }
 
 func (s Repositories) ConversationHasAccess(me *models.User, convs ...*models.Conversation) (bool, error) {
+	// TODO: fix this: when we go through this we populate the UserConversation cache with false info (all my
+	// 		 conversations will have only me as participant because that's how the query is made.)
 	myConvs, err := s.UserConversations(me)
 	if err != nil {
 		return false, err

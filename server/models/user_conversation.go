@@ -128,6 +128,14 @@ func (o *UserConversationSlice) ConversationIDs() []int {
 	}
 	return out
 }
+func (o *UserConversationSlice) GroupByConversationIDs() map[int]UserConversationSlice {
+	ids := map[int]UserConversationSlice{}
+	for _, item := range *o {
+
+		ids[item.ConversationID] = append(ids[item.ConversationID], item)
+	}
+	return ids
+}
 func (o *UserConversationSlice) UserIDs() []int {
 	ids := map[int]bool{}
 	for _, item := range *o {
@@ -140,6 +148,14 @@ func (o *UserConversationSlice) UserIDs() []int {
 		out = append(out, id)
 	}
 	return out
+}
+func (o *UserConversationSlice) GroupByUserIDs() map[int]UserConversationSlice {
+	ids := map[int]UserConversationSlice{}
+	for _, item := range *o {
+
+		ids[item.UserID] = append(ids[item.UserID], item)
+	}
+	return ids
 }
 
 var (

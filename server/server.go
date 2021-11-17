@@ -84,8 +84,8 @@ func main() {
 	pb.RegisterUserServiceServer(server, us)
 	cs := api.NewConversationService()
 	pb.RegisterConversationServiceServer(server, cs)
-	ms := api.NewMessageService()
-	pb.RegisterMessageServiceServer(server, ms)
+	es := api.EventService{}
+	pb.RegisterEventServiceServer(server, es)
 
 	grpc_health_v1.RegisterHealthServer(server, health.NewServer())
 

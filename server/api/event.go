@@ -5,8 +5,10 @@ import (
 	"fmt"
 	uuid2 "github.com/satori/go.uuid"
 	"github.com/talkiewalkie/talkiewalkie/api/events"
+	"github.com/talkiewalkie/talkiewalkie/repositories"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/encoding/protojson"
 	"sort"
 
 	"github.com/talkiewalkie/talkiewalkie/models"
@@ -16,7 +18,41 @@ import (
 type EventService struct{}
 
 func (e EventService) Connect(server pb.EventService_ConnectServer) error {
-	panic("implement me")
+	components, me, err := WithAuthedContext(server.Context())
+	if err != nil {
+		return err
+	}
+
+	topic := repositories.UserPubSubTopic(me)
+	mq, cancel, err := components.PubSubClient.Subscribe(topic)
+	if err != nil {
+		return status.Error(codes.Internal, fmt.Sprintf("could not subscribe to pubsub topic: %+v", err))
+	}
+	defer cancel()
+
+	incomingErrs := make(chan error, 1)
+	go events.HandleIncomingEvents(components, me, server, incomingErrs)
+
+	for {
+		select {
+		case m := <-mq:
+			components.ResetEntityStores(server.Context())
+			event := &pb.Event{}
+			if err := protojson.Unmarshal([]byte(m.Extra), event); err != nil {
+				return status.Errorf(codes.Internal, "could not process pubsub message: %+v", err)
+			}
+
+			if err := server.Send(event); err != nil {
+				return status.Errorf(codes.Internal, "failed to send new event: %+v", err)
+			}
+
+		case <-server.Context().Done():
+			return nil
+
+		case ierr := <-incomingErrs:
+			return ierr
+		}
+	}
 }
 
 func (e EventService) Sync(ctx context.Context, sync *pb.UpSync) (*pb.DownSync, error) {
@@ -55,52 +91,25 @@ func (e EventService) Sync(ctx context.Context, sync *pb.UpSync) (*pb.DownSync, 
 	var pbNewEvents events.EventSlice
 	var dbNewEvents models.EventSlice
 	for _, event := range sync.Events {
-		switch event.Content.(type) {
-		case *pb.Event_SentNewMessage_:
-			pbNewEvent, dbNewEvent, err := events.OnNewMessage(components, me, event)
-			if err != nil {
-				return nil, err
-			}
-
-			pbNewEvents = append(pbNewEvents, pbNewEvent)
-			dbNewEvents = append(dbNewEvents, dbNewEvent)
-
-		case *pb.Event_ReceivedNewMessage_:
-			break
-
-		case *pb.Event_DeletedMessage_:
-			break
-
-		case *pb.Event_ChangedPicture_:
-			break
-
-		case *pb.Event_JoinedConversation_:
-			break
-
-		case *pb.Event_LeftConversation_:
-			break
-
-		case *pb.Event_ConversationTitleChanged_:
-			break
-
-		default:
-			return nil, fmt.Errorf("unknown kind of event '%q'", event.Content)
+		dbEvs, pbEvs, err := events.HandleNewEvent(components, me, event)
+		if err != nil {
+			return nil, err
 		}
+
+		pbNewEvents = append(pbNewEvents, pbEvs...)
+		dbNewEvents = append(dbNewEvents, dbEvs...)
 	}
 
-	//
-	// -- FILTER TO ONLY OUTPUT RELEVANT EVENTS
-	//
 	out = append(out, pbNewEvents...)
 
 	//
 	// -- LAST UUID COMPUTE
 	//
 	var uid string
-	events := append(catchUp, dbNewEvents...)
-	sort.Slice(events, func(i, j int) bool { return events[i].ID > events[j].ID })
-	if len(events) > 0 {
-		uid = events[len(events)-1].UUID.String()
+	dbEvents := append(catchUp, dbNewEvents...)
+	sort.Slice(dbEvents, func(i, j int) bool { return dbEvents[i].ID > dbEvents[j].ID })
+	if len(dbEvents) > 0 {
+		uid = dbEvents[len(dbEvents)-1].UUID.String()
 	}
 
 	return &pb.DownSync{Events: out, LastEventUuid: uid}, nil

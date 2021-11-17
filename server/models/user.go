@@ -301,6 +301,15 @@ func (o *UserSlice) ProfilePictures() []int {
 	}
 	return out
 }
+func (o *UserSlice) GroupByProfilePictures() map[int]UserSlice {
+	ids := map[int]UserSlice{}
+	for _, item := range *o {
+		if item.ProfilePicture.Valid {
+			ids[item.ProfilePicture.Int] = append(ids[item.ProfilePicture.Int], item)
+		}
+	}
+	return ids
+}
 
 var (
 	userAllColumns            = []string{"id", "uuid", "firebase_uid", "profile_picture", "created_at", "updated_at", "status", "phone_number", "onboarding_finished", "display_name", "locales", "broadcast_arrival", "last_connected_at", "is_online", "last_online_at"}

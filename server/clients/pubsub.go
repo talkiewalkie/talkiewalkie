@@ -1,18 +1,18 @@
 package clients
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
-	uuid2 "github.com/satori/go.uuid"
+	"github.com/talkiewalkie/talkiewalkie/pb"
+	"google.golang.org/protobuf/encoding/protojson"
 	"log"
 	"time"
 )
 
 type PubSubClient interface {
-	Subscribe(string) (chan *pq.Notification, func() error, error)
-	Publish(string, IPubSubEvent) error
+	Subscribe(string) (chan *pq.Notification, func(), error)
+	Publish(string, *pb.Event) error
 }
 
 type PgPubSub struct {
@@ -24,31 +24,7 @@ type PgPubSub struct {
 
 var _ PubSubClient = PgPubSub{}
 
-type PubSubEventType int
-
-const (
-	PubSubEventTypeNewMessage PubSubEventType = iota // 0
-)
-
-type PubSubEvent struct {
-	Timestamp time.Time       `json:"timestamp"`
-	Type      PubSubEventType `json:"type"`
-}
-
-type IPubSubEvent interface {
-	Str() string
-}
-
-func (p PubSubEvent) Str() string {
-	return "base event"
-}
-
-type NewMessageEvent struct {
-	PubSubEvent
-	MessageUuid uuid2.UUID `json:"message_uuid"`
-}
-
-func (ps PgPubSub) Subscribe(topic string) (chan *pq.Notification, func() error, error) {
+func (ps PgPubSub) Subscribe(topic string) (chan *pq.Notification, func(), error) {
 	listener := pq.NewListener(
 		ps.connInfo,
 		ps.minReconnectInterval,
@@ -80,17 +56,17 @@ func (ps PgPubSub) Subscribe(topic string) (chan *pq.Notification, func() error,
 	}
 	log.Printf("subscribed to topic '%s'", topic)
 
-	return listener.Notify, func() error {
-		_, err := ps.db.Exec(fmt.Sprintf("UNLISTEN %s", topic))
-		if err2 := listener.Close(); err == nil {
-			return err2
+	return listener.Notify, func() {
+		if _, err := ps.db.Exec(fmt.Sprintf("UNLISTEN %s", topic)); err != nil {
+			log.Printf("ERR: failed to cancel subscription to topic[%s]: %+v", topic, err)
+		} else if err := listener.Close(); err == nil {
+			log.Printf("ERR: failed to close topic[%s] listener: %+v", topic, err)
 		}
-		return err
 	}, nil
 }
 
-func (ps PgPubSub) Publish(topic string, event IPubSubEvent) error {
-	payload, err := json.Marshal(event)
+func (ps PgPubSub) Publish(topic string, event *pb.Event) error {
+	payload, err := protojson.Marshal(event)
 	if err != nil {
 		return fmt.Errorf("could not serialize event: %+v", err)
 	}

@@ -5,10 +5,10 @@
 package caches
 
 import (
+	uuid2 "github.com/satori/go.uuid"
 	"github.com/talkiewalkie/talkiewalkie/models"
 
 	"errors"
-	uuid2 "github.com/satori/go.uuid"
 )
 
 var UserCacheByIntErrNotFound = errors.New("UserCacheByInt error did not find values for keys")

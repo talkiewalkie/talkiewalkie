@@ -31,7 +31,7 @@ func (slice EventSlice) LocalUuidMap() map[string]*pb.Event {
 	return out
 }
 
-func EventsToProto(components *common.Components, events models.EventSlice) (out []*pb.Event, err error) {
+func EventsToProto(components *common.Components, events models.EventSlice) (out EventSlice, err error) {
 	// EAGER LOADS
 	messages, err := components.MessageRepository.ByIds(events.MessageIDs()...)
 	if err != nil {
