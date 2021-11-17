@@ -93,19 +93,10 @@ message MessageSendInputRecipientUuids {
 }
 
 message MessageSendInput {
-  oneof recipients {
-    string convUuid = 1;
-    MessageSendInputRecipientUuids recipientUuids = 2;
-  }
   oneof content {
     TextMessage textMessage = 3;
     VoiceMessage voiceMessage = 4;
   }
-}
-
-service MessageService {
-  rpc Send(MessageSendInput) returns (Message) {}
-  rpc Incoming(Empty) returns (stream Message) {}
 }
 
 // ----------------------

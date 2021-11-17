@@ -10,12 +10,10 @@ import (
 	uuid2 "github.com/satori/go.uuid"
 	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
-	"github.com/volatiletech/sqlboiler/v4/queries"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/proto"
 
-	"github.com/talkiewalkie/talkiewalkie/clients"
 	"github.com/talkiewalkie/talkiewalkie/common"
 	"github.com/talkiewalkie/talkiewalkie/models"
 	"github.com/talkiewalkie/talkiewalkie/pb"
@@ -37,6 +35,10 @@ func OnNewMessage(components *common.Components, me *models.User, event *pb.Even
 		conv, err = components.ConversationRepository.ByUuid(uid)
 		if err != nil {
 			return nil, nil, status.Errorf(codes.Internal, "could not find conversation: %+v", err)
+		}
+
+		if ok, err := components.ConversationHasAccess(me, conv); !ok || err != nil {
+			return nil, nil, status.Errorf(codes.PermissionDenied, "can't send message to this conversation: (err = %+v)", err)
 		}
 
 	case *pb.Event_SentNewMessage_NewConversation:
@@ -62,9 +64,6 @@ func OnNewMessage(components *common.Components, me *models.User, event *pb.Even
 	}
 
 	components.ResetEntityStores(components.Ctx)
-	if ok, err := components.ConversationHasAccess(me, conv); !ok || err != nil {
-		return nil, nil, status.Errorf(codes.PermissionDenied, "can't send message to this conversation: (err = %+v)", err)
-	}
 
 	//
 	// -- MAKE MESSAGE
@@ -131,67 +130,72 @@ func OnNewMessage(components *common.Components, me *models.User, event *pb.Even
 		return nil, nil, err
 	}
 	participants, err := components.UserRepository.FromUserConversations([][]*models.UserConversation{ucs})
-	q := sq.Insert(models.TableNames.Event).Columns(
-		models.EventColumns.Type,
-		models.EventColumns.RecipientID,
-		models.EventColumns.MessageID,
-	)
-	for _, p := range participants {
-		q = q.Values(models.EventTypeNewMessage, p.ID, msg.ID)
-	}
-	query, args, _ := q.Suffix("RETURNING *").
-		PlaceholderFormat(sq.Dollar).
-		ToSql()
 
-	var dbEvs models.EventSlice
-	if err = queries.Raw(query, args...).Bind(components.Ctx, components.Db, &dbEvs); err != nil {
-		return nil, nil, err
+	dbEvInputs := models.EventSlice{}
+	for _, p := range participants {
+		dbEvInputs = append(dbEvInputs, &models.Event{
+			Type:        models.EventTypeNewMessage,
+			RecipientID: p.ID,
+			MessageID:   null.IntFrom(msg.ID),
+		})
+	}
+	dbEvs, err := BatchInsert(components.Ctx, components.Db, dbEvInputs)
+	if err != nil {
+		return nil, nil, status.Errorf(codes.Internal, "could not insert new events: %+v", err)
 	}
 
 	//
 	// -- SEND EVENTS TO CONNECTED USERS
 	//
+	pbNewEvents, err := EventsToProto(components, dbEvs)
+	if err != nil {
+		return nil, nil, err
+	}
+	userToEvents := dbEvs.GroupByRecipientIDs()
+
 	for _, uc := range ucs {
 		if uc.UserID == me.ID {
 			// TODO: Send an event to acknowledge that the message was effectively sent
 			continue
 		}
-
 		user, err := components.UserRepository.ById(uc.UserID)
 		if err != nil {
 			return nil, nil, err
 		}
 
 		topic := repositories.UserPubSubTopic(user)
-		err = components.PubSubClient.Publish(topic, clients.NewMessageEvent{
-			PubSubEvent: clients.PubSubEvent{Type: clients.PubSubEventTypeNewMessage, Timestamp: time.Now()},
-			MessageUuid: msg.UUID,
-		})
-		if err != nil {
-			log.Printf("failed to notify user channel: %+v", err)
-		} else {
-			log.Printf("sent message on pubsub[%s]!", topic)
+
+		userEvents := userToEvents[uc.UserID]
+		for _, event := range userEvents {
+			pbEvent := pbNewEvents.UuidMap()[event.UUID.String()]
+
+			if err = components.PubSubClient.Publish(topic, pbEvent); err != nil {
+				log.Printf("failed to notify user channel: %+v", err)
+			} else {
+				log.Printf("sent message on pubsub[%s]!", topic)
+			}
 		}
+
 	}
 
 	//
 	// -- OUTPUT PROTO
 	//
-	var myEvent *models.Event
+	var mydbEvent *models.Event
 	for _, event := range dbEvs {
 		if event.RecipientID == me.ID {
-			myEvent = event
+			mydbEvent = event
 		}
 	}
 
-	pbNewEvents, err := EventsToProto(components, []*models.Event{myEvent})
+	mypbEvents, err := EventsToProto(components, []*models.Event{mydbEvent})
 	if err != nil {
 		return nil, nil, err
 	}
 
-	pbNewEvent := pbNewEvents[0]
-	pbNewEvent.LocalUuid = event.LocalUuid
-	return pbNewEvent, myEvent, nil
+	mypbEvent := mypbEvents[0]
+	mypbEvent.LocalUuid = event.LocalUuid
+	return mypbEvent, mydbEvent, nil
 }
 
 func getOrCreateConvForUsers(
