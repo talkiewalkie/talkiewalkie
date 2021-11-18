@@ -59,7 +59,7 @@ jobs:
 
       - name: Test
         run: |
-          pushd server && go test ./common/... ./cmd/... ./testutils/... ./api/... && popd
+          pushd server && go test -count=1 -parallel=1 ./common/... ./cmd/... ./testutils/... ./api/... && popd
 
       # Setup gcloud CLI
       - uses: google-github-actions/setup-gcloud@master
