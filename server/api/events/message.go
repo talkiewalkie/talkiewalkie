@@ -3,8 +3,9 @@ package events
 import (
 	"bytes"
 	"fmt"
-	"log"
 	"time"
+
+	"github.com/talkiewalkie/talkiewalkie/clients"
 
 	sq "github.com/Masterminds/squirrel"
 	uuid2 "github.com/satori/go.uuid"
@@ -160,26 +161,20 @@ func OnNewMessage(
 		return nil, nil, err
 	}
 	userToEvents := dbEvs.GroupByRecipientIDs()
+	eventUuidToPbEvent := pbNewEvents.UuidMap()
 
-	for _, uc := range ucs {
-		user, err := components.UserRepository.ById(uc.UserID)
-		if err != nil {
-			return nil, nil, err
-		}
-
+	for _, user := range participants {
 		topic := repositories.UserPubSubTopic(user)
 
-		userEvents := userToEvents[uc.UserID]
+		userEvents := userToEvents[user.ID]
 		for _, dbevent := range userEvents {
-			pbEvent := pbNewEvents.UuidMap()[dbevent.UUID.String()]
-			if uc.UserID == me.ID {
+			pbEvent := eventUuidToPbEvent[dbevent.UUID.String()]
+			if user.ID == me.ID {
 				pbEvent.LocalUuid = event.LocalUuid
 			}
 
 			if err = components.PubSubClient.Publish(topic, pbEvent); err != nil {
-				log.Printf("failed to notify user channel: %+v", err)
-			} else {
-				log.Printf("sent message on pubsub[%s]!", topic)
+				clients.PubSubLogf(topic, "failed to notify user channel: %+v", err)
 			}
 		}
 

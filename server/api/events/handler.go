@@ -59,7 +59,7 @@ func HandleIncomingEvents(components *common.Components, me *models.User, server
 			return
 		}
 
-		log.Printf("processing new event: %T", event.Content)
+		log.Printf("[grpc:Connect:%s] processing new event: %T", me.UUID.String(), event.Content)
 		_, _, err = HandleNewEvent(components, me, event)
 		if err != nil {
 			errChan <- err

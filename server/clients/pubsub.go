@@ -46,9 +46,9 @@ func (ps PgPubSub) Subscribe(topic string) (chan *pq.Notification, func(), error
 				estr = "Unknown listener event"
 			}
 
-			log.Printf("received new event in listener created for '%s': %+v", topic, estr)
+			PubSubLogf(topic, "%s", estr)
 			if err != nil {
-				log.Printf("could not subscribe to topic '%s': %+v", topic, err)
+				PubSubLogf(topic, "could not subscribe: %+v", err)
 			}
 		},
 	)
@@ -56,13 +56,12 @@ func (ps PgPubSub) Subscribe(topic string) (chan *pq.Notification, func(), error
 	if err := listener.Listen(topic); err != nil {
 		return nil, nil, err
 	}
-	log.Printf("subscribed to topic '%s'", topic)
 
 	return listener.Notify, func() {
 		if _, err := ps.db.Exec(fmt.Sprintf("UNLISTEN %s", topic)); err != nil {
-			log.Printf("ERR: failed to cancel subscription to topic[%s]: %+v", topic, err)
+			PubSubLogf(topic, "ERR: failed to cancel subscription: %+v", err)
 		} else if err := listener.Close(); err == nil {
-			log.Printf("ERR: failed to close topic[%s] listener: %+v", topic, err)
+			PubSubLogf(topic, "ERR: failed to close listener: %+v", err)
 		}
 	}, nil
 }
@@ -72,13 +71,17 @@ func (ps PgPubSub) Publish(topic string, event *pb.Event) error {
 	if err != nil {
 		return fmt.Errorf("could not serialize event: %+v", err)
 	}
-	log.Printf("publishing to '%s' (%T)", topic, event.Content)
+	PubSubLogf(topic, "pushing %T with local uuid set to '%s'", event.Content, event.LocalUuid)
 	_, err = ps.db.Exec(fmt.Sprintf("NOTIFY %s, '%s'", topic, string(payload)))
 	if err != nil {
 		return fmt.Errorf("could not notify of event in topic '%s': %+v", topic, err)
 	} else {
 		return err
 	}
+}
+
+func PubSubLogf(topic, msg string, args ...interface{}) {
+	log.Printf("[pubsub:%s] %s", topic, fmt.Sprintf(msg, args...))
 }
 
 func NewPgPubSub(db *sqlx.DB, connInfo string) PgPubSub {

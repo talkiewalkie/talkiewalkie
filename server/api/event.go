@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"sort"
 
+	"github.com/talkiewalkie/talkiewalkie/clients"
+
 	uuid2 "github.com/satori/go.uuid"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -38,10 +40,11 @@ func (e EventService) Connect(server pb.EventService_ConnectServer) error {
 	for {
 		select {
 		case m := <-mq:
+			clients.PubSubLogf(topic, "handling new message")
 			components.ResetEntityStores(server.Context())
 			event := &pb.Event{}
 			if err := protojson.Unmarshal([]byte(m.Extra), event); err != nil {
-				return status.Errorf(codes.Internal, "could not process pubsub message: %+v", err)
+				return status.Errorf(codes.Internal, "[pubsub:%s] could not process pubsub message: %+v", topic, err)
 			}
 
 			if err := server.Send(event); err != nil {
