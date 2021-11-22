@@ -55,8 +55,6 @@ extension Conversation {
     func seenMessages(for me: Me) -> [Message] {
         guard let myUC: UserConversation = users.first(where: { $0.user?.uuid == me.uuid }) else {
             os_log(.debug, "no uc found...")
-            print("\(self.users.count) users in the conv, \(self.users.compactMap { $0.user }.count) non null, \(self.users.compactMap { $0.user?.uuid }.count) non null uuid")
-            print("\(me.uuid) \(self.users.map { $0.user?.displayName })")
             return self.messages
         }
 

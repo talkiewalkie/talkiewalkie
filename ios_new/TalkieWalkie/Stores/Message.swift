@@ -43,7 +43,7 @@ extension Message {
         return localM
     }
 
-    static func getByLocalUuidOrThrow(_ uuid: UUID, context: NSManagedObjectContext) -> Message {
+    static func getByLocalUuid(_ uuid: UUID, context: NSManagedObjectContext) -> Message? {
         let request = Message.fetchRequest()
         request.predicate = NSPredicate(format: "localUuid_ = %@", uuid as NSUUID)
 
@@ -52,6 +52,83 @@ extension Message {
             fatalError("this should not happen: \(result.count) messages found for local uuid:[\(uuid)]")
         }
 
-        return result.first!
+        return result.first
+    }
+    
+    @discardableResult
+    static func fromEventProto(_ event: App_Event, context: NSManagedObjectContext, block: (_ event: App_Event) -> Void = { _ in }) -> Message {
+        let conv: Conversation
+        let message: Message
+        switch (event.content) {
+        case .some(.receivedNewMessage(let rnm)):
+            if event.localUuid != "" , let localMessage = Message.getByLocalUuid(event.localUuid.uuidOrThrow(), context: context) {
+                message = localMessage
+                message.status_ = 1
+            } else {
+                if rnm.hasConversation {
+                    os_log(.debug, "message from new conv!: \(rnm.conversation.uuid)")
+                    conv = Conversation.fromProto(rnm.conversation, context: context)
+                } else {
+                    conv = Conversation.getByUuidOrCreate(rnm.message.convUuid.uuidOrThrow(), context: context)
+                }
+
+                message = Message.fromProto(rnm.message, context: context)
+                conv.addToMessages_(message)
+            }
+        
+        case .some(.sentNewMessage(let snm)):
+            switch (snm.conversation) {
+            case .some(.convUuid(let convUuid)):
+                conv = Conversation.getByUuidOrCreate(convUuid.uuidOrThrow(), context: context)
+            
+            case .some(.newConversation(let convInput)):
+                conv = Conversation(context: context)
+                conv.title = convInput.title
+                let users: [UserConversation] = convInput.userUuids.map { uuid in
+                    let u = User.getByUuidOrCreate(uuid.uuidOrThrow(), context: context)
+                    let uc = UserConversation(context: context)
+                    uc.user = u
+                    uc.conversation = conv
+                    uc.readUntil = Date()
+                    
+                    return uc
+                }
+                conv.addToUsers_(NSSet(array: users))
+                
+            default:
+                fatalError()
+            }
+            
+            let content: MessageContent
+            message = Message(context: context)
+            message.localUuid_ = event.localUuid.uuidOrThrow()
+            switch (snm.message.content) {
+            case .none:
+            fatalError()
+            case .some(.textMessage(let tm)):
+                let ttm = TextMessage(context: context)
+                ttm.text = tm.content
+            
+                content = ttm
+            
+            case .some(.voiceMessage(let vm)):
+                let ctt = VoiceMessage(context: context)
+                ctt.processedAudio = vm.rawContent
+                ctt.rawAudio = vm.rawContent
+                ctt.siriTranscript = try! vm.siriTranscript.serializedData() 
+                
+                content = ctt
+            }
+            message.content = content
+            
+        
+        default:
+            // TODO: find a better way and fail at compile time.
+            fatalError()
+        }
+        
+       
+        
+        return message
     }
 }

@@ -20,17 +20,21 @@ enum GrpcConnectionState {
 
 class GrpcConnectivityState: ConnectivityStateDelegate, ObservableObject {
     private let url: URL
+    var onReconnection: () -> ()
+    
     private let logger = Logger.withLabel("grpc-status")
     @Published var state = GrpcConnectionState.Disconnected
 
-    init(_ url: URL) {
+    init(_ url: URL, onReconnection: @escaping () -> ()) {
         self.url = url
+        self.onReconnection = onReconnection
     }
 
     func connectivityStateDidChange(from oldState: ConnectivityState, to newState: ConnectivityState) {
         if oldState != .ready, newState == .ready {
             logger.debug("got connected [\(self.url.absoluteString)]")
             state = .Connected
+            self.onReconnection()
         } else if oldState == .ready, newState != .ready {
             logger.debug("got disconnected (\(String(describing: newState))) [\(self.url.absoluteString)]")
             state = .Disconnected
@@ -60,23 +64,42 @@ class AuthedGrpcApi {
     let stateDelegate: GrpcConnectivityState
 
     private let url: URL
-
+    private var stream: BidirectionalStreamingCall<App_Event, App_Event>?
+    
     private let logger = Logger.withLabel("grpc-client")
     private let empty = App_Empty()
+    private let eventQueue = [App_Event]()
 
     private let group: EventLoopGroup
     private let channel: ClientConnection
     private let token: String
+    
     private let userClient: App_UserServiceClient
     private let convClient: App_ConversationServiceClient
-    private let mssgClient: App_MessageServiceClient
-    private let persistentContainer: NSPersistentContainer
+    private let eventClient: App_EventServiceClient
 
-    init(url: URL, token: String, persistentContainer: NSPersistentContainer) {
+    static func withUrlAndToken(url: URL, token: String, writer: @escaping (_: @escaping (_ context: NSManagedObjectContext, _ me: Me?) -> Void) -> Void) -> AuthedGrpcApi {
+        let api = AuthedGrpcApi(url: url, token: token)
+        api.stateDelegate.onReconnection = {
+            let (down, _) = api.sync()
+            if let down = down {
+                down.events.forEach { e in writer { ctx, _ in LoadEventToCoreData(e, ctx: ctx) } }
+            }
+            
+            api.logger.debug("reconnecting to stream")
+            api.connect { newEvent in
+                api.logger.debug("handling new message from stream")
+                writer { ctx,_ in LoadEventToCoreData(newEvent, ctx: ctx)}
+            }
+        }
+        
+        return api
+    }
+    
+    private init(url: URL, token: String) {
         self.url = url
         self.token = token
-        self.persistentContainer = persistentContainer
-        stateDelegate = GrpcConnectivityState(url)
+        stateDelegate = GrpcConnectivityState(url, onReconnection: {})
 
         group = PlatformSupport.makeEventLoopGroup(loopCount: 1)
 
@@ -101,8 +124,8 @@ class AuthedGrpcApi {
         convClient = App_ConversationServiceClient(channel: channel)
         convClient.defaultCallOptions = token.toCallOption()
 
-        mssgClient = App_MessageServiceClient(channel: channel)
-        mssgClient.defaultCallOptions = token.toCallOption()
+        eventClient = App_EventServiceClient(channel: channel)
+        eventClient.defaultCallOptions = token.toCallOption()
     }
 
     deinit {
@@ -151,26 +174,47 @@ class AuthedGrpcApi {
 
         return convClient.get(input).waitForOutput()
     }
-
-    func sendMessage(text: String, convUuid: UUID) -> (App_Message?, Error?) {
-        let input = App_MessageSendInput.with {
-            $0.content = App_MessageSendInput.OneOf_Content.textMessage(App_TextMessage.with { tm in tm.content = text })
-            $0.recipients = App_MessageSendInput.OneOf_Recipients.convUuid(convUuid.uuidString)
+    
+    func sync() -> (App_DownSync?, Error?) {
+        let input = App_UpSync.with { this in
+            this.events = eventQueue
+            this.lastEventUuid = UserDefaults.standard.value(forKey: "lastEventUuid") as! String
         }
-
-        return mssgClient.send(input).waitForOutput()
+        
+        let (down, error) = eventClient.sync(input).waitForOutput()
+        if let down = down {
+            UserDefaults.standard.set(down.lastEventUuid, forKey: "lastEventUuid")
+        }
+        
+        return (down, error)
     }
 
-    func subscribeIncomingMessages(completion: @escaping (App_Message) -> Void) {
-        let call = mssgClient.incoming(empty, callOptions: token.toStreamingCallOption(.hours(1)), handler: completion)
-        _ = call.status.recover { err in
-            self.logger.error("received error from incoming messages stream: \(err.localizedDescription)")
-
-            return .processingError
+    func connect(completion: @escaping (App_Event) -> Void) {
+        let stream = self.eventClient.connect(callOptions: token.toStreamingCallOption(.hours(1))) { newEvent in
+            UserDefaults.standard.set(newEvent.uuid, forKey: "lastEventUuid")
+            completion(newEvent)
         }
-        call.status.whenFailure { err in
-            self.logger.error("another callback to notify of failure: \(err.localizedDescription)")
+        
+        self.stream = stream
+    }
+    
+    func sendMessage(text: String, convUuid: UUID) -> App_Event {
+        let message = App_Event.with { this in
+            this.localUuid = UUID().uuidString
+            this.content = .sentNewMessage(App_Event.SentNewMessage.with{ msg in
+                msg.message = App_MessageSendInput.with { input in
+                    input.content = App_MessageSendInput.OneOf_Content.textMessage(App_TextMessage.with { $0.content = text })
+                }
+                
+                msg.conversation = .convUuid(convUuid.uuidString)
+            })
+            
         }
+        self.stream?.sendMessage(message)
+            .whenFailure { err in
+                self.logger.error("could not send message: \(err.localizedDescription)")
+            }
+        return message
     }
 }
 
@@ -179,19 +223,22 @@ extension UnaryCall {
     func waitForOutput() -> (ResponsePayload?, Error?) {
         os_log(.debug, "[grpc] \(path) waiting")
 
+        var msg = "[grpc] \(path)"
         do {
             let st = try status.wait()
-            let msg = "\(st.code) - \(st.message)"
-            os_log(.debug, "\(msg)")
+            msg += " status:(\(st.code.description))"
+            if let m = st.message, !m.isEmpty { msg += " message:(\(m))" }
         } catch {
             os_log(.error, "\(error.localizedDescription)")
+            return (nil, error)
         }
+        
         do {
             let res = try response.wait()
-            os_log(.debug, "[grpc] \(path) returned")
+            os_log(.debug, "\(msg)")
             return (res, nil)
         } catch {
-            os_log(.error, "[grpc] \(path) failed with: \(error.localizedDescription)")
+            os_log(.error, "\(msg) failed with: \(error.localizedDescription)")
             return (nil, error)
         }
     }
@@ -219,5 +266,38 @@ extension ServerStreamingCall {
 
         os_log(.debug, "[grpc] \(path) completed")
         return nil
+    }
+}
+
+func LoadEventToCoreData(_ event: App_Event, ctx: NSManagedObjectContext) {
+    switch (event.content) {
+    case .some(.receivedNewMessage(_)):
+            Message.fromEventProto(event, context: ctx)
+       
+    case .some(.deletedMessage(_)):
+        break
+        
+        
+    case .some(.changedPicture(_)):
+        break
+        
+        
+    case .some(.joinedConversation(_)):
+        break
+        
+        
+    case .some(.leftConversation(_)):
+        break
+        
+        
+    case .some(.conversationTitleChanged(_)):
+        break
+        
+        
+    case .some(.sentNewMessage(_)):
+        fatalError()
+            
+    case .none:
+        fatalError()
     }
 }

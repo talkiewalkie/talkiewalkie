@@ -43,10 +43,6 @@ extension Me {
             os_log(.debug, "no [Me] object found in core data in ctx(\(context.description))")
         }
         
-        let me = res.first { $0.uuid != nil }
-        if let _ = me {
-            os_log(.debug, "found [Me] object in core data in ctx(\(context.description))")
-        }
 
         return res.first { $0.uuid != nil }
     }

@@ -141,14 +141,9 @@ struct ComposerView: View {
             // Sync
             if case .Connected(let api, _) = authed.state {
                 DispatchQueue.global(qos: .background).async {
-                    let (msg, _) = api.sendMessage(text: text, convUuid: conversationUuid)
-                    if let msg = msg {
-                        authed.withWriteContext { ctx, _ in
-                            let localMsg = Message.getByLocalUuidOrThrow(messageLocalUuid, context: ctx)
-                            localMsg.uuid = msg.uuid.uuidOrThrow()
-                            localMsg.createdAt = msg.createdAt.date
-                            localMsg.status_ = 1
-                        }
+                    let localMessage = api.sendMessage(text: text, convUuid: conversationUuid)
+                    authed.withWriteContext {ctx,_ in
+                        Message.fromEventProto(localMessage, context: ctx)
                     }
                 }
             }

@@ -12,8 +12,8 @@ type Repositories struct {
 	context context.Context
 	db      *sqlx.DB
 
-	CloudStorage clients.StorageClient
-	PubSubClient clients.PubSubClient
+	StorageClient clients.StorageClient
+	PubSubClient  clients.PubSubClient
 
 	AssetRepository            AssetRepository
 	ConversationRepository     ConversationRepository
@@ -32,9 +32,8 @@ func New(
 		context: ctx,
 		db:      db,
 
-		// TODO
-		CloudStorage: storage,
-		PubSubClient: pubsub,
+		StorageClient: storage,
+		PubSubClient:  pubsub,
 
 		AssetRepository:            NewAssetRepository(ctx, db),
 		ConversationRepository:     NewConversationRepository(ctx, db),

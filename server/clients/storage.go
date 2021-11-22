@@ -21,6 +21,7 @@ type StorageClient interface {
 	Download(blobName string, writer io.Writer) error
 	SignedUrl(bucket, blobName string) (string, error)
 	AssetUrl(asset *models.Asset) (string, error)
+	BlobName(asset *models.Asset) string
 	DefaultBucket() string
 }
 
@@ -29,6 +30,16 @@ var _ StorageClient = GoogleStorage{}
 type GoogleStorage struct {
 	*storage.Client
 	BucketName string
+}
+
+func (g GoogleStorage) BlobName(asset *models.Asset) string {
+	// TODO: coming back to this, it feels like superfluous complexity, should always precise the bucket name and not
+	// 		 rely on inference when nil.
+	if asset.Bucket.Valid {
+		return asset.BlobName.String
+	} else {
+		return asset.UUID.String()
+	}
 }
 
 func (g GoogleStorage) AssetUrl(asset *models.Asset) (string, error) {
@@ -134,6 +145,16 @@ func (s S3Storage) SignedUrl(bucket, blobName string) (string, error) {
 	}
 
 	return urlStr, nil
+}
+
+func (g S3Storage) BlobName(asset *models.Asset) string {
+	// TODO: coming back to this, it feels like superfluous complexity, should always precise the bucket name and not
+	// 		 rely on inference when nil.
+	if asset.Bucket.Valid {
+		return asset.BlobName.String
+	} else {
+		return asset.UUID.String()
+	}
 }
 
 func (s S3Storage) AssetUrl(asset *models.Asset) (string, error) {

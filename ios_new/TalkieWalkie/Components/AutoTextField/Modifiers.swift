@@ -130,7 +130,7 @@ public extension AutoTextField {
     /// Specifies whether the field can be scrolled. If true, auto-sizing will be disabled
     /// - Parameter isScrollingEnabled: If true, scrolling will be enabled
     func enableScrolling(_ isScrollingEnabled: Bool) -> AutoTextField {
-        var view = self
+        let view = self
         view.isScrollingEnabled = isScrollingEnabled
         return view
     }

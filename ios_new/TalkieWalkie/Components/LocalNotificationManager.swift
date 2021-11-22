@@ -120,7 +120,7 @@ class LocalNotificationManager: ObservableObject {
         
         DispatchQueue.main.asyncAfter(deadline: .now() + displayDuration) {
             if let index = self.notifications.firstIndex(where: { $0.id == notification.id }) {
-                withAnimation(.easeInOut) {
+                _ = withAnimation(.easeInOut) {
                     self.notifications.remove(at: index)
                 }
             }

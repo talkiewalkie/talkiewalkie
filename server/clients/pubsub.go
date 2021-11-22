@@ -7,7 +7,6 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
-	"google.golang.org/protobuf/encoding/protojson"
 
 	"github.com/talkiewalkie/talkiewalkie/pb"
 )
@@ -67,12 +66,8 @@ func (ps PgPubSub) Subscribe(topic string) (chan *pq.Notification, func(), error
 }
 
 func (ps PgPubSub) Publish(topic string, event *pb.Event) error {
-	payload, err := protojson.Marshal(event)
-	if err != nil {
-		return fmt.Errorf("could not serialize event: %+v", err)
-	}
-	PubSubLogf(topic, "pushing %T with local uuid set to '%s'", event.Content, event.LocalUuid)
-	_, err = ps.db.Exec(fmt.Sprintf("NOTIFY %s, '%s'", topic, string(payload)))
+	PubSubLogf(topic, "pushing [%T] with local uuid set to '%s'", event.Content, event.LocalUuid)
+	_, err := ps.db.Exec(fmt.Sprintf("NOTIFY %s, '%s'", topic, event.Uuid))
 	if err != nil {
 		return fmt.Errorf("could not notify of event in topic '%s': %+v", topic, err)
 	} else {

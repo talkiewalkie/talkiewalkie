@@ -21,6 +21,7 @@ import (
 var (
 	convUuid = flag.String("convUuid", "", "")
 	audio    = flag.String("audio", "", "")
+	msg      = flag.String("msg", "", "")
 
 	host  = flag.String("host", "localhost:8080", "")
 	fbUid = flag.String("asUser", "k6WhmQLnpvUCeKuDdpknVzBUu9r1", "firebase uid")
@@ -57,9 +58,13 @@ func main() {
 	}
 
 	client := pb.NewEventServiceClient(conn)
-	audioContent, err := ioutil.ReadFile(*audio)
-	if err != nil {
-		log.Panic(err)
+	var content pb.MessageSendInputContentOneOf
+	if *audio != "" {
+		content = voiceMessage(*audio)
+	} else if *msg != "" {
+		content = &pb.MessageSendInput_TextMessage{TextMessage: &pb.TextMessage{Content: *msg}}
+	} else {
+		log.Panic("need -msg or -audio to be set")
 	}
 
 	authHeader := metadata.New(map[string]string{"Authorization": fmt.Sprintf("Bearer %s", token)})
@@ -69,28 +74,37 @@ func main() {
 		&pb.UpSync{
 			Events: []*pb.Event{{
 				Content: &pb.Event_SentNewMessage_{
-					SentNewMessage: &pb.Event_SentNewMessage{Message: &pb.MessageSendInput{
-						Content: &pb.MessageSendInput_VoiceMessage{VoiceMessage: &pb.VoiceMessage{
-							RawContent: audioContent,
-							SiriTranscript: &pb.AlignedTranscript{Items: []*pb.TranscriptItem{
-								{
-									Word:            "Hello",
-									OffsetMs:        413,
-									DurationMs:      200,
-									SubstringOffset: 0,
-								},
-								{
-									Word:            "Alex",
-									OffsetMs:        700,
-									DurationMs:      200,
-									SubstringOffset: 5,
-								}}, Rendered: "Hello Alex!"},
-						}},
-					}},
+					SentNewMessage: &pb.Event_SentNewMessage{
+						Message:      &pb.MessageSendInput{Content: content},
+						Conversation: &pb.Event_SentNewMessage_ConvUuid{ConvUuid: *convUuid}},
 				}}},
 		},
 	); err != nil {
 		log.Panicf("failed: %+v", err)
 	}
 	log.Printf("success!")
+}
+
+func voiceMessage(p string) *pb.MessageSendInput_VoiceMessage {
+	audioContent, err := ioutil.ReadFile(*audio)
+	if err != nil {
+		log.Panic(err)
+	}
+
+	return &pb.MessageSendInput_VoiceMessage{VoiceMessage: &pb.VoiceMessage{
+		RawContent: audioContent,
+		SiriTranscript: &pb.AlignedTranscript{Items: []*pb.TranscriptItem{
+			{
+				Word:            "Hello",
+				OffsetMs:        413,
+				DurationMs:      200,
+				SubstringOffset: 0,
+			},
+			{
+				Word:            "Alex",
+				OffsetMs:        700,
+				DurationMs:      200,
+				SubstringOffset: 5,
+			}}, Rendered: "Hello Alex!"},
+	}}
 }

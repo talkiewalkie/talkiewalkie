@@ -36,11 +36,7 @@ type Components struct {
 
 func (components *Components) ResetEntityStores(ctx context.Context) {
 	components.Ctx = ctx
-	components.AssetRepository = repositories.NewAssetRepository(ctx, components.Db)
-	components.ConversationRepository = repositories.NewConversationRepository(ctx, components.Db)
-	components.MessageRepository = repositories.NewMessageRepository(ctx, components.Db)
-	components.UserRepository = repositories.NewUserRepository(ctx, components.Db)
-	components.UserConversationRepository = repositories.NewUserConversationRepository(ctx, components.Db)
+	components.Repositories = repositories.New(ctx, components.Db, components.StorageClient, components.PubSubClient)
 }
 
 func InitComponents() *Components {

@@ -75,7 +75,7 @@ class AuthState: ObservableObject {
                 return
             }
 
-            let api = AuthedGrpcApi(url: self.config.apiUrl, token: res.token, persistentContainer: self.persistentContainer)
+            let api = AuthedGrpcApi.withUrlAndToken(url: self.config.apiUrl, token: res.token, writer: {fn in self.withWriteContext { ctx, me in fn(ctx, me)}})
 
             if let me = Me.fromCache(context: self.readContext) {
                 self.logger.debug("loaded my user info from cache")

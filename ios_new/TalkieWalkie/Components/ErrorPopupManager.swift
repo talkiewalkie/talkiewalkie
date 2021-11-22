@@ -76,7 +76,7 @@ class ErrorPopupManager: ObservableObject {
         
         DispatchQueue.main.asyncAfter(deadline: .now() + displayDuration) {
             if let index = self.errorMessages.firstIndex(where: { $0.id == errorMessage.id }) {
-                withAnimation(.easeInOut) {
+                _ = withAnimation(.easeInOut) {
                     self.errorMessages.remove(at: index)
                 }
             }

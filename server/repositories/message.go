@@ -216,7 +216,8 @@ func (s Repositories) MessagesToProto(messages models.MessageSlice) (PbMessageSl
 			}
 
 			buf := &bytes.Buffer{}
-			if err := s.CloudStorage.Download(rawAudio.BlobName.String, buf); err != nil {
+
+			if err := s.StorageClient.Download(s.StorageClient.BlobName(rawAudio), buf); err != nil {
 				return nil, fmt.Errorf("could not download audio file from bucket: %+v", err)
 			}
 

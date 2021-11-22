@@ -15,37 +15,16 @@ class InboxViewModel: ObservableObject {
 
     init(_ authed: AuthState) {
         self.authed = authed
-
-        if case .Connected(let api, _) = authed.state {
-            os_log(.debug, "subscribing to grpc inbox stream...")
-            api.subscribeIncomingMessages { msg in
-                os_log("hello i received a new message")
-
-                authed.withWriteContext { ctx, _ in
-                    let savedMsg = Message.fromProto(msg, context: ctx)
-                    let conversation = Conversation.getByUuidOrCreate(msg.convUuid.uuidOrThrow(), context: ctx)
-
-                    conversation.addToMessages_(savedMsg)
-
-                    DispatchQueue.main.async {
-                        savedMsg.objectWillChange.send()
-                        conversation.objectWillChange.send()
-                    }
-                }
-            }
-        }
     }
-
-    func syncConversations() {
-        self.loading = true
-        DispatchQueue.global(qos: .background).async {
-            if case .Connected(let api, _) = self.authed.state {
-                let (convs, _) = api.listConvs()
-                self.authed.withWriteContext { ctx, _ in
-                    convs.forEach { remoteConv in Conversation.fromProto(remoteConv, context: ctx) }
+    
+    func sync() {
+        if case .Connected(let api, _) = authed.state {
+            let (down, _) = api.sync()
+            if let down = down {
+                authed.withWriteContext {ctx, _ in
+                    down.events.forEach { LoadEventToCoreData($0, ctx: ctx) }
                 }
             }
-            DispatchQueue.main.async { self.loading = false }
         }
     }
 }

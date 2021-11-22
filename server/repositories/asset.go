@@ -38,7 +38,7 @@ func NewAssetRepository(context context.Context, db *sqlx.DB) *AssetRepositoryIm
 		Db:      db,
 		Context: context,
 		IdCache: caches.NewAssetCacheByInt(func(ints []int) ([]*models.Asset, error) {
-			return models.Assets(models.ConversationWhere.ID.IN(ints)).All(context, db)
+			return models.Assets(models.AssetWhere.ID.IN(ints)).All(context, db)
 		}, func(value *models.Asset) int {
 			return value.ID
 		}),

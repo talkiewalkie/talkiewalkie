@@ -10,7 +10,6 @@ import (
 	uuid2 "github.com/satori/go.uuid"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"google.golang.org/protobuf/encoding/protojson"
 
 	"github.com/talkiewalkie/talkiewalkie/api/events"
 	"github.com/talkiewalkie/talkiewalkie/repositories"
@@ -42,12 +41,21 @@ func (e EventService) Connect(server pb.EventService_ConnectServer) error {
 		case m := <-mq:
 			clients.PubSubLogf(topic, "handling new message")
 			components.ResetEntityStores(server.Context())
-			event := &pb.Event{}
-			if err := protojson.Unmarshal([]byte(m.Extra), event); err != nil {
-				return status.Errorf(codes.Internal, "[pubsub:%s] could not process pubsub message: %+v", topic, err)
+
+			uid, err := uuid2.FromString(m.Extra)
+			if err != nil {
+				return status.Errorf(codes.Internal, "new message has bad uuid: %+v", err)
+			}
+			dbEvent, err := models.Events(models.EventWhere.UUID.EQ(uid)).One(components.Ctx, components.Db)
+			if err != nil {
+				return status.Errorf(codes.Internal, "could not retrieve event: %+v", err)
+			}
+			pbEvents, err := events.EventsToProto(components, []*models.Event{dbEvent})
+			if err != nil {
+				return status.Errorf(codes.Internal, "failed to send new event: %+v", err)
 			}
 
-			if err := server.Send(event); err != nil {
+			if err := server.Send(pbEvents[0]); err != nil {
 				return status.Errorf(codes.Internal, "failed to send new event: %+v", err)
 			}
 

@@ -112,12 +112,6 @@ public protocol App_UserServiceClientProtocol: GRPCClient {
     _ request: App_UserGetInput,
     callOptions: CallOptions?
   ) -> UnaryCall<App_UserGetInput, App_User>
-
-  func list(
-    _ request: App_UserListInput,
-    callOptions: CallOptions?,
-    handler: @escaping (App_User) -> Void
-  ) -> ServerStreamingCall<App_UserListInput, App_User>
 }
 
 extension App_UserServiceClientProtocol {
@@ -196,27 +190,6 @@ extension App_UserServiceClientProtocol {
       interceptors: self.interceptors?.makeGetInterceptors() ?? []
     )
   }
-
-  /// Server streaming call to List
-  ///
-  /// - Parameters:
-  ///   - request: Request to send to List.
-  ///   - callOptions: Call options.
-  ///   - handler: A closure called when each response is received from the server.
-  /// - Returns: A `ServerStreamingCall` with futures for the metadata and status.
-  public func list(
-    _ request: App_UserListInput,
-    callOptions: CallOptions? = nil,
-    handler: @escaping (App_User) -> Void
-  ) -> ServerStreamingCall<App_UserListInput, App_User> {
-    return self.makeServerStreamingCall(
-      path: "/app.UserService/List",
-      request: request,
-      callOptions: callOptions ?? self.defaultCallOptions,
-      interceptors: self.interceptors?.makeListInterceptors() ?? [],
-      handler: handler
-    )
-  }
 }
 
 public protocol App_UserServiceClientInterceptorFactoryProtocol {
@@ -232,9 +205,6 @@ public protocol App_UserServiceClientInterceptorFactoryProtocol {
 
   /// - Returns: Interceptors to use when invoking 'get'.
   func makeGetInterceptors() -> [ClientInterceptor<App_UserGetInput, App_User>]
-
-  /// - Returns: Interceptors to use when invoking 'list'.
-  func makeListInterceptors() -> [ClientInterceptor<App_UserListInput, App_User>]
 }
 
 public final class App_UserServiceClient: App_UserServiceClientProtocol {
@@ -259,83 +229,82 @@ public final class App_UserServiceClient: App_UserServiceClientProtocol {
   }
 }
 
-/// Usage: instantiate `App_MessageServiceClient`, then call methods of this protocol to make API calls.
-public protocol App_MessageServiceClientProtocol: GRPCClient {
+/// Usage: instantiate `App_EventServiceClient`, then call methods of this protocol to make API calls.
+public protocol App_EventServiceClientProtocol: GRPCClient {
   var serviceName: String { get }
-  var interceptors: App_MessageServiceClientInterceptorFactoryProtocol? { get }
+  var interceptors: App_EventServiceClientInterceptorFactoryProtocol? { get }
 
-  func send(
-    _ request: App_MessageSendInput,
+  func sync(
+    _ request: App_UpSync,
     callOptions: CallOptions?
-  ) -> UnaryCall<App_MessageSendInput, App_Message>
+  ) -> UnaryCall<App_UpSync, App_DownSync>
 
-  func incoming(
-    _ request: App_Empty,
+  func connect(
     callOptions: CallOptions?,
-    handler: @escaping (App_Message) -> Void
-  ) -> ServerStreamingCall<App_Empty, App_Message>
+    handler: @escaping (App_Event) -> Void
+  ) -> BidirectionalStreamingCall<App_Event, App_Event>
 }
 
-extension App_MessageServiceClientProtocol {
+extension App_EventServiceClientProtocol {
   public var serviceName: String {
-    return "app.MessageService"
+    return "app.EventService"
   }
 
-  /// Unary call to Send
+  /// Unary call to Sync
   ///
   /// - Parameters:
-  ///   - request: Request to send to Send.
+  ///   - request: Request to send to Sync.
   ///   - callOptions: Call options.
   /// - Returns: A `UnaryCall` with futures for the metadata, status and response.
-  public func send(
-    _ request: App_MessageSendInput,
+  public func sync(
+    _ request: App_UpSync,
     callOptions: CallOptions? = nil
-  ) -> UnaryCall<App_MessageSendInput, App_Message> {
+  ) -> UnaryCall<App_UpSync, App_DownSync> {
     return self.makeUnaryCall(
-      path: "/app.MessageService/Send",
+      path: "/app.EventService/Sync",
       request: request,
       callOptions: callOptions ?? self.defaultCallOptions,
-      interceptors: self.interceptors?.makeSendInterceptors() ?? []
+      interceptors: self.interceptors?.makeSyncInterceptors() ?? []
     )
   }
 
-  /// Server streaming call to Incoming
+  /// Bidirectional streaming call to Connect
+  ///
+  /// Callers should use the `send` method on the returned object to send messages
+  /// to the server. The caller should send an `.end` after the final message has been sent.
   ///
   /// - Parameters:
-  ///   - request: Request to send to Incoming.
   ///   - callOptions: Call options.
   ///   - handler: A closure called when each response is received from the server.
-  /// - Returns: A `ServerStreamingCall` with futures for the metadata and status.
-  public func incoming(
-    _ request: App_Empty,
+  /// - Returns: A `ClientStreamingCall` with futures for the metadata and status.
+  public func connect(
     callOptions: CallOptions? = nil,
-    handler: @escaping (App_Message) -> Void
-  ) -> ServerStreamingCall<App_Empty, App_Message> {
-    return self.makeServerStreamingCall(
-      path: "/app.MessageService/Incoming",
-      request: request,
+    handler: @escaping (App_Event) -> Void
+  ) -> BidirectionalStreamingCall<App_Event, App_Event> {
+    return self.makeBidirectionalStreamingCall(
+      path: "/app.EventService/Connect",
       callOptions: callOptions ?? self.defaultCallOptions,
-      interceptors: self.interceptors?.makeIncomingInterceptors() ?? [],
+      interceptors: self.interceptors?.makeConnectInterceptors() ?? [],
       handler: handler
     )
   }
 }
 
-public protocol App_MessageServiceClientInterceptorFactoryProtocol {
+public protocol App_EventServiceClientInterceptorFactoryProtocol {
 
-  /// - Returns: Interceptors to use when invoking 'send'.
-  func makeSendInterceptors() -> [ClientInterceptor<App_MessageSendInput, App_Message>]
+  /// - Returns: Interceptors to use when invoking 'sync'.
+  func makeSyncInterceptors() -> [ClientInterceptor<App_UpSync, App_DownSync>]
 
-  /// - Returns: Interceptors to use when invoking 'incoming'.
-  func makeIncomingInterceptors() -> [ClientInterceptor<App_Empty, App_Message>]
+  /// - Returns: Interceptors to use when invoking 'connect'.
+  func makeConnectInterceptors() -> [ClientInterceptor<App_Event, App_Event>]
 }
 
-public final class App_MessageServiceClient: App_MessageServiceClientProtocol {
+public final class App_EventServiceClient: App_EventServiceClientProtocol {
   public let channel: GRPCChannel
   public var defaultCallOptions: CallOptions
-  public var interceptors: App_MessageServiceClientInterceptorFactoryProtocol?
+  public var interceptors: App_EventServiceClientInterceptorFactoryProtocol?
 
-  /// Creates a client for the app.MessageService service.
+  /// Creates a client for the app.EventService service.
   ///
   /// - Parameters:
   ///   - channel: `GRPCChannel` to the service host.
@@ -344,7 +313,7 @@ public final class App_MessageServiceClient: App_MessageServiceClientProtocol {
   public init(
     channel: GRPCChannel,
     defaultCallOptions: CallOptions = CallOptions(),
-    interceptors: App_MessageServiceClientInterceptorFactoryProtocol? = nil
+    interceptors: App_EventServiceClientInterceptorFactoryProtocol? = nil
   ) {
     self.channel = channel
     self.defaultCallOptions = defaultCallOptions
@@ -494,8 +463,6 @@ public protocol App_UserServiceProvider: CallHandlerProvider {
   func me(request: App_Empty, context: StatusOnlyCallContext) -> EventLoopFuture<App_MeUser>
 
   func get(request: App_UserGetInput, context: StatusOnlyCallContext) -> EventLoopFuture<App_User>
-
-  func list(request: App_UserListInput, context: StreamingResponseCallContext<App_User>) -> EventLoopFuture<GRPCStatus>
 }
 
 extension App_UserServiceProvider {
@@ -544,15 +511,6 @@ extension App_UserServiceProvider {
         userFunction: self.get(request:context:)
       )
 
-    case "List":
-      return ServerStreamingServerHandler(
-        context: context,
-        requestDeserializer: ProtobufDeserializer<App_UserListInput>(),
-        responseSerializer: ProtobufSerializer<App_User>(),
-        interceptors: self.interceptors?.makeListInterceptors() ?? [],
-        userFunction: self.list(request:context:)
-      )
-
     default:
       return nil
     }
@@ -576,22 +534,18 @@ public protocol App_UserServiceServerInterceptorFactoryProtocol {
   /// - Returns: Interceptors to use when handling 'get'.
   ///   Defaults to calling `self.makeInterceptors()`.
   func makeGetInterceptors() -> [ServerInterceptor<App_UserGetInput, App_User>]
-
-  /// - Returns: Interceptors to use when handling 'list'.
-  ///   Defaults to calling `self.makeInterceptors()`.
-  func makeListInterceptors() -> [ServerInterceptor<App_UserListInput, App_User>]
 }
 /// To build a server, implement a class that conforms to this protocol.
-public protocol App_MessageServiceProvider: CallHandlerProvider {
-  var interceptors: App_MessageServiceServerInterceptorFactoryProtocol? { get }
+public protocol App_EventServiceProvider: CallHandlerProvider {
+  var interceptors: App_EventServiceServerInterceptorFactoryProtocol? { get }
 
-  func send(request: App_MessageSendInput, context: StatusOnlyCallContext) -> EventLoopFuture<App_Message>
+  func sync(request: App_UpSync, context: StatusOnlyCallContext) -> EventLoopFuture<App_DownSync>
 
-  func incoming(request: App_Empty, context: StreamingResponseCallContext<App_Message>) -> EventLoopFuture<GRPCStatus>
+  func connect(context: StreamingResponseCallContext<App_Event>) -> EventLoopFuture<(StreamEvent<App_Event>) -> Void>
 }
 
-extension App_MessageServiceProvider {
-  public var serviceName: Substring { return "app.MessageService" }
+extension App_EventServiceProvider {
+  public var serviceName: Substring { return "app.EventService" }
 
   /// Determines, calls and returns the appropriate request handler, depending on the request's method.
   /// Returns nil for methods not handled by this service.
@@ -600,22 +554,22 @@ extension App_MessageServiceProvider {
     context: CallHandlerContext
   ) -> GRPCServerHandlerProtocol? {
     switch name {
-    case "Send":
+    case "Sync":
       return UnaryServerHandler(
         context: context,
-        requestDeserializer: ProtobufDeserializer<App_MessageSendInput>(),
-        responseSerializer: ProtobufSerializer<App_Message>(),
-        interceptors: self.interceptors?.makeSendInterceptors() ?? [],
-        userFunction: self.send(request:context:)
+        requestDeserializer: ProtobufDeserializer<App_UpSync>(),
+        responseSerializer: ProtobufSerializer<App_DownSync>(),
+        interceptors: self.interceptors?.makeSyncInterceptors() ?? [],
+        userFunction: self.sync(request:context:)
       )
 
-    case "Incoming":
-      return ServerStreamingServerHandler(
+    case "Connect":
+      return BidirectionalStreamingServerHandler(
         context: context,
-        requestDeserializer: ProtobufDeserializer<App_Empty>(),
-        responseSerializer: ProtobufSerializer<App_Message>(),
-        interceptors: self.interceptors?.makeIncomingInterceptors() ?? [],
-        userFunction: self.incoming(request:context:)
+        requestDeserializer: ProtobufDeserializer<App_Event>(),
+        responseSerializer: ProtobufSerializer<App_Event>(),
+        interceptors: self.interceptors?.makeConnectInterceptors() ?? [],
+        observerFactory: self.connect(context:)
       )
 
     default:
@@ -624,15 +578,15 @@ extension App_MessageServiceProvider {
   }
 }
 
-public protocol App_MessageServiceServerInterceptorFactoryProtocol {
+public protocol App_EventServiceServerInterceptorFactoryProtocol {
 
-  /// - Returns: Interceptors to use when handling 'send'.
+  /// - Returns: Interceptors to use when handling 'sync'.
   ///   Defaults to calling `self.makeInterceptors()`.
-  func makeSendInterceptors() -> [ServerInterceptor<App_MessageSendInput, App_Message>]
+  func makeSyncInterceptors() -> [ServerInterceptor<App_UpSync, App_DownSync>]
 
-  /// - Returns: Interceptors to use when handling 'incoming'.
+  /// - Returns: Interceptors to use when handling 'connect'.
   ///   Defaults to calling `self.makeInterceptors()`.
-  func makeIncomingInterceptors() -> [ServerInterceptor<App_Empty, App_Message>]
+  func makeConnectInterceptors() -> [ServerInterceptor<App_Event, App_Event>]
 }
 /// To build a server, implement a class that conforms to this protocol.
 public protocol App_ConversationServiceProvider: CallHandlerProvider {
