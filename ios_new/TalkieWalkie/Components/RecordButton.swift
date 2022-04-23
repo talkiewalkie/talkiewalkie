@@ -12,16 +12,16 @@ struct RecordButton: View {
 
     @State var isOuterCircleThin = true
     @State var timer: Timer?
-    
+
     var animation: Animation?
     var buttonAnimation: Animation = .easeInOut(duration: 0.3)
-    
+
     func toggleRecording() {
-        withAnimation(self.animation) {
+        withAnimation(animation) {
             isRecording.toggle()
         }
     }
-    
+
     var body: some View {
         ZStack {
             Rectangle()
@@ -33,8 +33,8 @@ struct RecordButton: View {
 
             Circle()
                 .strokeBorder(Color.red,
-                        style: StrokeStyle(lineWidth: !isRecording ? 6 : isOuterCircleThin ? 4 : 7,
-                                           lineCap: .round, lineJoin: .round))
+                              style: StrokeStyle(lineWidth: !isRecording ? 6 : isOuterCircleThin ? 4 : 7,
+                                                 lineCap: .round, lineJoin: .round))
                 .animation(.easeOut(duration: 0.4), value: isOuterCircleThin)
                 .opacity(DrawingConstraints.outerCircleOpacity)
                 .frame(width: DrawingConstraints.outerCircleSize, height: DrawingConstraints.outerCircleSize)
@@ -43,7 +43,7 @@ struct RecordButton: View {
         }
         .padding(5)
         .contentShape(Circle().scale(DrawingConstraints.tapAreaScale))
-        .onLongPressGesture(minimumDuration: 10000, maximumDistance: 1000, perform: { }, onPressingChanged: { pressing in
+        .onLongPressGesture(minimumDuration: 10000, maximumDistance: 1000, perform: {}, onPressingChanged: { _ in
             toggleRecording()
         })
         .simultaneousGesture(
@@ -65,16 +65,16 @@ struct RecordButton: View {
             }
         }
     }
-    
-    struct DrawingConstraints {
+
+    enum DrawingConstraints {
         static let innerCircleSize: CGFloat = 60
         static let innerCircleRadius: CGFloat = 10
         static let innerCircleScale: CGFloat = 0.7
-        
+
         static let outerCircleOpacity: Double = 0.6
         static let outerCircleSize: CGFloat = 75
         static let outerCircleScale: CGFloat = 1.75
-        
+
         static let tapAreaScale: CGFloat = 1.75
     }
 }

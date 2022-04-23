@@ -48,7 +48,7 @@ struct TWButton_Previews: PreviewProvider {
             TWButton(action: {}, primary: false, compact: false) {
                 Text("Continue".uppercased())
             }
-            
+
             TWButton(action: {}, primary: true, compact: true) {
                 Text("Continue".uppercased())
             }

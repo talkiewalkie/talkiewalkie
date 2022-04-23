@@ -16,6 +16,14 @@ ios_dev_install() {
   popd || exit
 }
 
+help() {
+  declare -F
+}
+
+format() {
+  swiftformat .
+}
+
 codegen() {
   protoc -I=../server/protos \
       --proto_path=../server/protos \

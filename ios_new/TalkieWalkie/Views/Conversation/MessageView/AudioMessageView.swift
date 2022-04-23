@@ -8,10 +8,10 @@
 import SwiftUI
 
 struct AudioMessageView: View {
-    // TODO
-    
+    // TODO:
+
     var text: String
-    
+
     var body: some View {
         Text("Hello world")
     }

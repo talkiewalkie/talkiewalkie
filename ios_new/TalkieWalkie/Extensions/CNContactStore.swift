@@ -5,8 +5,8 @@
 //  Created by Théo Matussière on 17/10/2021.
 //
 
-import Foundation
 import Contacts
+import Foundation
 import OSLog
 
 struct ContactItem: Identifiable {
@@ -22,13 +22,13 @@ extension CNContactStore {
     func allLocalPhoneNumbers() -> [ContactItem] {
         var contacts = [ContactItem]()
         let keys = [
-                CNContactFormatter.descriptorForRequiredKeys(for: .fullName),
-                        CNContactPhoneNumbersKey,
-                        CNContactEmailAddressesKey
-                ] as [Any]
+            CNContactFormatter.descriptorForRequiredKeys(for: .fullName),
+            CNContactPhoneNumbersKey,
+            CNContactEmailAddressesKey,
+        ] as [Any]
         let request = CNContactFetchRequest(keysToFetch: keys as! [CNKeyDescriptor])
         do {
-            try self.enumerateContacts(with: request) { contact, _ in
+            try enumerateContacts(with: request) { contact, _ in
                 for phoneNumber in contact.phoneNumbers {
                     if let number = phoneNumber.value as? CNPhoneNumber, let label = phoneNumber.label {
                         let localizedLabel = CNLabeledValue<CNPhoneNumber>.localizedString(forLabel: label)

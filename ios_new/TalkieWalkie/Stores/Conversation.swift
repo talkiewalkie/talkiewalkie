@@ -40,12 +40,12 @@ extension Conversation {
         return localC
     }
 
-    var lastMessage: Message? { self.messages.last }
+    var lastMessage: Message? { messages.last }
 
-    var lastActivity: Date? { self.lastMessage?.createdAt }
+    var lastActivity: Date? { lastMessage?.createdAt }
 
     var messages: [Message] {
-        let msgs: [Message] = self.messages_?.array as? [Message] ?? []
+        let msgs: [Message] = messages_?.array as? [Message] ?? []
         return msgs.sorted(by: {
             guard let tsA = $0.createdAt, let tsB = $1.createdAt else { return true }
             return tsA < tsB
@@ -55,10 +55,10 @@ extension Conversation {
     func seenMessages(for me: Me) -> [Message] {
         guard let myUC: UserConversation = users.first(where: { $0.user?.uuid == me.uuid }) else {
             os_log(.debug, "no uc found...")
-            return self.messages
+            return messages
         }
 
-        return self.messages.filter {
+        return messages.filter {
             guard let ts = $0.createdAt else {
                 os_log(.debug, "message without creation date...")
                 return true
@@ -73,7 +73,7 @@ extension Conversation {
             return []
         }
 
-        return self.messages.filter {
+        return messages.filter {
             guard let ts = $0.createdAt else {
                 os_log(.debug, "message without creation date...")
                 return false
@@ -82,10 +82,10 @@ extension Conversation {
         }
     }
 
-    var users: [UserConversation] { Array(self.users_ as? Set<UserConversation> ?? Set()) }
+    var users: [UserConversation] { Array(users_ as? Set<UserConversation> ?? Set()) }
 
     func firstParticipant(thatIsNot me: Me) -> User? {
-        let others: [User] = self.users.filter { $0.user?.uuid != me.uuid }.map { $0.user }.compactMap { $0 }
+        let others: [User] = users.filter { $0.user?.uuid != me.uuid }.map { $0.user }.compactMap { $0 }
         return others.sorted(by: { $0.uuid?.uuidString ?? "a" < $1.uuid?.uuidString ?? "b" }).first
     }
 }

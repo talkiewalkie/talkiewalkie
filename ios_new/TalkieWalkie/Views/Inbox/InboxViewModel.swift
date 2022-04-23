@@ -16,12 +16,12 @@ class InboxViewModel: ObservableObject {
     init(_ authed: AuthState) {
         self.authed = authed
     }
-    
+
     func sync() {
-        if case .Connected(let api, _) = authed.state {
+        if case let .Connected(api, _) = authed.state {
             let (down, _) = api.sync()
             if let down = down {
-                authed.withWriteContext {ctx, _ in
+                authed.withWriteContext { ctx, _ in
                     down.events.forEach { LoadEventToCoreData($0, ctx: ctx) }
                 }
             }

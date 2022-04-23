@@ -19,7 +19,7 @@ extension View {
         overlay(GeometryReader { proxy in
             Color.clear.preference(key: SizeKey.self, value: proxy.size)
         })
-            .onPreferenceChange(SizeKey.self) { size in binding.wrappedValue = size }
+        .onPreferenceChange(SizeKey.self) { size in binding.wrappedValue = size }
     }
 }
 

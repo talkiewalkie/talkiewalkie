@@ -30,17 +30,18 @@ type User struct {
 	UUID               uuid.UUID         `db:"uuid" boil:"uuid" json:"uuid" toml:"uuid" yaml:"uuid"`
 	FirebaseUID        null.String       `db:"firebase_uid" boil:"firebase_uid" json:"firebase_uid,omitempty" toml:"firebase_uid" yaml:"firebase_uid,omitempty"`
 	ProfilePicture     null.Int          `db:"profile_picture" boil:"profile_picture" json:"profile_picture,omitempty" toml:"profile_picture" yaml:"profile_picture,omitempty"`
-	CreatedAt          null.Time         `db:"created_at" boil:"created_at" json:"created_at,omitempty" toml:"created_at" yaml:"created_at,omitempty"`
-	UpdatedAt          null.Time         `db:"updated_at" boil:"updated_at" json:"updated_at,omitempty" toml:"updated_at" yaml:"updated_at,omitempty"`
+	CreatedAt          time.Time         `db:"created_at" boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
+	UpdatedAt          time.Time         `db:"updated_at" boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
 	Status             null.String       `db:"status" boil:"status" json:"status,omitempty" toml:"status" yaml:"status,omitempty"`
 	PhoneNumber        string            `db:"phone_number" boil:"phone_number" json:"phone_number" toml:"phone_number" yaml:"phone_number"`
 	OnboardingFinished bool              `db:"onboarding_finished" boil:"onboarding_finished" json:"onboarding_finished" toml:"onboarding_finished" yaml:"onboarding_finished"`
-	DisplayName        null.String       `db:"display_name" boil:"display_name" json:"display_name,omitempty" toml:"display_name" yaml:"display_name,omitempty"`
+	DisplayName        string            `db:"display_name" boil:"display_name" json:"display_name" toml:"display_name" yaml:"display_name"`
 	Locales            types.StringArray `db:"locales" boil:"locales" json:"locales,omitempty" toml:"locales" yaml:"locales,omitempty"`
 	BroadcastArrival   bool              `db:"broadcast_arrival" boil:"broadcast_arrival" json:"broadcast_arrival" toml:"broadcast_arrival" yaml:"broadcast_arrival"`
 	LastConnectedAt    time.Time         `db:"last_connected_at" boil:"last_connected_at" json:"last_connected_at" toml:"last_connected_at" yaml:"last_connected_at"`
 	IsOnline           bool              `db:"is_online" boil:"is_online" json:"is_online" toml:"is_online" yaml:"is_online"`
 	LastOnlineAt       time.Time         `db:"last_online_at" boil:"last_online_at" json:"last_online_at" toml:"last_online_at" yaml:"last_online_at"`
+	Handle             string            `db:"handle" boil:"handle" json:"handle" toml:"handle" yaml:"handle"`
 
 	R *userR `db:"-" boil:"-" json:"-" toml:"-" yaml:"-"`
 	L userL  `db:"-" boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -62,6 +63,7 @@ var UserColumns = struct {
 	LastConnectedAt    string
 	IsOnline           string
 	LastOnlineAt       string
+	Handle             string
 }{
 	ID:                 "id",
 	UUID:               "uuid",
@@ -78,6 +80,7 @@ var UserColumns = struct {
 	LastConnectedAt:    "last_connected_at",
 	IsOnline:           "is_online",
 	LastOnlineAt:       "last_online_at",
+	Handle:             "handle",
 }
 
 var UserTableColumns = struct {
@@ -96,6 +99,7 @@ var UserTableColumns = struct {
 	LastConnectedAt    string
 	IsOnline           string
 	LastOnlineAt       string
+	Handle             string
 }{
 	ID:                 "user.id",
 	UUID:               "user.uuid",
@@ -112,33 +116,10 @@ var UserTableColumns = struct {
 	LastConnectedAt:    "user.last_connected_at",
 	IsOnline:           "user.is_online",
 	LastOnlineAt:       "user.last_online_at",
+	Handle:             "user.handle",
 }
 
 // Generated where
-
-type whereHelpernull_Time struct{ field string }
-
-func (w whereHelpernull_Time) EQ(x null.Time) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, false, x)
-}
-func (w whereHelpernull_Time) NEQ(x null.Time) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, true, x)
-}
-func (w whereHelpernull_Time) LT(x null.Time) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LT, x)
-}
-func (w whereHelpernull_Time) LTE(x null.Time) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LTE, x)
-}
-func (w whereHelpernull_Time) GT(x null.Time) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GT, x)
-}
-func (w whereHelpernull_Time) GTE(x null.Time) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GTE, x)
-}
-
-func (w whereHelpernull_Time) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
-func (w whereHelpernull_Time) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
 
 type whereHelperbool struct{ field string }
 
@@ -180,33 +161,35 @@ var UserWhere = struct {
 	UUID               whereHelperuuid_UUID
 	FirebaseUID        whereHelpernull_String
 	ProfilePicture     whereHelpernull_Int
-	CreatedAt          whereHelpernull_Time
-	UpdatedAt          whereHelpernull_Time
+	CreatedAt          whereHelpertime_Time
+	UpdatedAt          whereHelpertime_Time
 	Status             whereHelpernull_String
 	PhoneNumber        whereHelperstring
 	OnboardingFinished whereHelperbool
-	DisplayName        whereHelpernull_String
+	DisplayName        whereHelperstring
 	Locales            whereHelpertypes_StringArray
 	BroadcastArrival   whereHelperbool
 	LastConnectedAt    whereHelpertime_Time
 	IsOnline           whereHelperbool
 	LastOnlineAt       whereHelpertime_Time
+	Handle             whereHelperstring
 }{
 	ID:                 whereHelperint{field: "\"user\".\"id\""},
 	UUID:               whereHelperuuid_UUID{field: "\"user\".\"uuid\""},
 	FirebaseUID:        whereHelpernull_String{field: "\"user\".\"firebase_uid\""},
 	ProfilePicture:     whereHelpernull_Int{field: "\"user\".\"profile_picture\""},
-	CreatedAt:          whereHelpernull_Time{field: "\"user\".\"created_at\""},
-	UpdatedAt:          whereHelpernull_Time{field: "\"user\".\"updated_at\""},
+	CreatedAt:          whereHelpertime_Time{field: "\"user\".\"created_at\""},
+	UpdatedAt:          whereHelpertime_Time{field: "\"user\".\"updated_at\""},
 	Status:             whereHelpernull_String{field: "\"user\".\"status\""},
 	PhoneNumber:        whereHelperstring{field: "\"user\".\"phone_number\""},
 	OnboardingFinished: whereHelperbool{field: "\"user\".\"onboarding_finished\""},
-	DisplayName:        whereHelpernull_String{field: "\"user\".\"display_name\""},
+	DisplayName:        whereHelperstring{field: "\"user\".\"display_name\""},
 	Locales:            whereHelpertypes_StringArray{field: "\"user\".\"locales\""},
 	BroadcastArrival:   whereHelperbool{field: "\"user\".\"broadcast_arrival\""},
 	LastConnectedAt:    whereHelpertime_Time{field: "\"user\".\"last_connected_at\""},
 	IsOnline:           whereHelperbool{field: "\"user\".\"is_online\""},
 	LastOnlineAt:       whereHelpertime_Time{field: "\"user\".\"last_online_at\""},
+	Handle:             whereHelperstring{field: "\"user\".\"handle\""},
 }
 
 // UserRels is where relationship names are stored.
@@ -312,8 +295,8 @@ func (o *UserSlice) GroupByProfilePictures() map[int]UserSlice {
 }
 
 var (
-	userAllColumns            = []string{"id", "uuid", "firebase_uid", "profile_picture", "created_at", "updated_at", "status", "phone_number", "onboarding_finished", "display_name", "locales", "broadcast_arrival", "last_connected_at", "is_online", "last_online_at"}
-	userColumnsWithoutDefault = []string{"firebase_uid", "profile_picture", "status", "phone_number", "display_name", "locales"}
+	userAllColumns            = []string{"id", "uuid", "firebase_uid", "profile_picture", "created_at", "updated_at", "status", "phone_number", "onboarding_finished", "display_name", "locales", "broadcast_arrival", "last_connected_at", "is_online", "last_online_at", "handle"}
+	userColumnsWithoutDefault = []string{"firebase_uid", "profile_picture", "status", "phone_number", "display_name", "locales", "handle"}
 	userColumnsWithDefault    = []string{"id", "uuid", "created_at", "updated_at", "onboarding_finished", "broadcast_arrival", "last_connected_at", "is_online", "last_online_at"}
 	userPrimaryKeyColumns     = []string{"id"}
 )
@@ -1432,11 +1415,11 @@ func (o *User) Insert(ctx context.Context, exec boil.ContextExecutor, columns bo
 	if !boil.TimestampsAreSkipped(ctx) {
 		currTime := time.Now().In(boil.GetLocation())
 
-		if queries.MustTime(o.CreatedAt).IsZero() {
-			queries.SetScanner(&o.CreatedAt, currTime)
+		if o.CreatedAt.IsZero() {
+			o.CreatedAt = currTime
 		}
-		if queries.MustTime(o.UpdatedAt).IsZero() {
-			queries.SetScanner(&o.UpdatedAt, currTime)
+		if o.UpdatedAt.IsZero() {
+			o.UpdatedAt = currTime
 		}
 	}
 
@@ -1517,7 +1500,7 @@ func (o *User) Update(ctx context.Context, exec boil.ContextExecutor, columns bo
 	if !boil.TimestampsAreSkipped(ctx) {
 		currTime := time.Now().In(boil.GetLocation())
 
-		queries.SetScanner(&o.UpdatedAt, currTime)
+		o.UpdatedAt = currTime
 	}
 
 	var err error
@@ -1653,10 +1636,10 @@ func (o *User) Upsert(ctx context.Context, exec boil.ContextExecutor, updateOnCo
 	if !boil.TimestampsAreSkipped(ctx) {
 		currTime := time.Now().In(boil.GetLocation())
 
-		if queries.MustTime(o.CreatedAt).IsZero() {
-			queries.SetScanner(&o.CreatedAt, currTime)
+		if o.CreatedAt.IsZero() {
+			o.CreatedAt = currTime
 		}
-		queries.SetScanner(&o.UpdatedAt, currTime)
+		o.UpdatedAt = currTime
 	}
 
 	if err := o.doBeforeUpsertHooks(ctx, exec); err != nil {

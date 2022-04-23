@@ -15,7 +15,6 @@ public extension UIFont {
 }
 
 public extension UIFont {
-
     enum Leading {
         case loose
         case tight
@@ -29,8 +28,8 @@ public extension UIFont {
         let descriptor = UIFont.systemFont(ofSize: size).fontDescriptor
             .addingAttributes([
                 UIFontDescriptor.AttributeName.traits: [
-                    UIFontDescriptor.TraitKey.weight: weight.rawValue
-                ]
+                    UIFontDescriptor.TraitKey.weight: weight.rawValue,
+                ],
             ]).withDesign(design)!
         return UIFont(descriptor: descriptor, size: size)
     }
@@ -43,8 +42,8 @@ public extension UIFont {
     func weight(_ weight: UIFont.Weight) -> UIFont {
         return addingAttributes([
             UIFontDescriptor.AttributeName.traits: [
-                UIFontDescriptor.TraitKey.weight: weight.rawValue
-            ]
+                UIFontDescriptor.TraitKey.weight: weight.rawValue,
+            ],
         ])
     }
 
@@ -68,13 +67,13 @@ public extension UIFont {
             .featureSettings: [
                 [
                     UIFontDescriptor.FeatureKey.featureIdentifier: kLowerCaseType,
-                    UIFontDescriptor.FeatureKey.typeIdentifier: kLowerCaseSmallCapsSelector
+                    UIFontDescriptor.FeatureKey.typeIdentifier: kLowerCaseSmallCapsSelector,
                 ],
                 [
                     UIFontDescriptor.FeatureKey.featureIdentifier: kUpperCaseType,
-                    UIFontDescriptor.FeatureKey.typeIdentifier: kUpperCaseSmallCapsSelector
-                ]
-            ]
+                    UIFontDescriptor.FeatureKey.typeIdentifier: kUpperCaseSmallCapsSelector,
+                ],
+            ],
         ])
     }
 
@@ -83,9 +82,9 @@ public extension UIFont {
             .featureSettings: [
                 [
                     UIFontDescriptor.FeatureKey.featureIdentifier: kLowerCaseType,
-                    UIFontDescriptor.FeatureKey.typeIdentifier: kLowerCaseSmallCapsSelector
-                ]
-            ]
+                    UIFontDescriptor.FeatureKey.typeIdentifier: kLowerCaseSmallCapsSelector,
+                ],
+            ],
         ])
     }
 
@@ -94,9 +93,9 @@ public extension UIFont {
             .featureSettings: [
                 [
                     UIFontDescriptor.FeatureKey.featureIdentifier: kUpperCaseType,
-                    UIFontDescriptor.FeatureKey.typeIdentifier: kUpperCaseSmallCapsSelector
-                ]
-            ]
+                    UIFontDescriptor.FeatureKey.typeIdentifier: kUpperCaseSmallCapsSelector,
+                ],
+            ],
         ])
     }
 
@@ -105,10 +104,9 @@ public extension UIFont {
             .featureSettings: [
                 [
                     UIFontDescriptor.FeatureKey.featureIdentifier: kNumberSpacingType,
-                    UIFontDescriptor.FeatureKey.typeIdentifier: kMonospacedNumbersSelector
-                ]
-            ]
+                    UIFontDescriptor.FeatureKey.typeIdentifier: kMonospacedNumbersSelector,
+                ],
+            ],
         ])
     }
-
 }

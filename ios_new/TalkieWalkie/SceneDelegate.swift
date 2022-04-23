@@ -22,7 +22,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
 
         let appDelegate = (UIApplication.shared.delegate as! AppDelegate)
-        
+
         let auth = appDelegate.auth
 
         let contentView = HomeView()

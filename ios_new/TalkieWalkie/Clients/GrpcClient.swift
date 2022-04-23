@@ -20,12 +20,12 @@ enum GrpcConnectionState {
 
 class GrpcConnectivityState: ConnectivityStateDelegate, ObservableObject {
     private let url: URL
-    var onReconnection: () -> ()
-    
+    var onReconnection: () -> Void
+
     private let logger = Logger.withLabel("grpc-status")
     @Published var state = GrpcConnectionState.Disconnected
 
-    init(_ url: URL, onReconnection: @escaping () -> ()) {
+    init(_ url: URL, onReconnection: @escaping () -> Void) {
         self.url = url
         self.onReconnection = onReconnection
     }
@@ -34,7 +34,7 @@ class GrpcConnectivityState: ConnectivityStateDelegate, ObservableObject {
         if oldState != .ready, newState == .ready {
             logger.debug("got connected [\(self.url.absoluteString)]")
             state = .Connected
-            self.onReconnection()
+            onReconnection()
         } else if oldState == .ready, newState != .ready {
             logger.debug("got disconnected (\(String(describing: newState))) [\(self.url.absoluteString)]")
             state = .Disconnected
@@ -65,7 +65,7 @@ class AuthedGrpcApi {
 
     private let url: URL
     private var stream: BidirectionalStreamingCall<App_Event, App_Event>?
-    
+
     private let logger = Logger.withLabel("grpc-client")
     private let empty = App_Empty()
     private let eventQueue = [App_Event]()
@@ -73,7 +73,7 @@ class AuthedGrpcApi {
     private let group: EventLoopGroup
     private let channel: ClientConnection
     private let token: String
-    
+
     private let userClient: App_UserServiceClient
     private let convClient: App_ConversationServiceClient
     private let eventClient: App_EventServiceClient
@@ -85,17 +85,17 @@ class AuthedGrpcApi {
             if let down = down {
                 down.events.forEach { e in writer { ctx, _ in LoadEventToCoreData(e, ctx: ctx) } }
             }
-            
+
             api.logger.debug("reconnecting to stream")
             api.connect { newEvent in
                 api.logger.debug("handling new message from stream")
-                writer { ctx,_ in LoadEventToCoreData(newEvent, ctx: ctx)}
+                writer { ctx, _ in LoadEventToCoreData(newEvent, ctx: ctx) }
             }
         }
-        
+
         return api
     }
-    
+
     private init(url: URL, token: String) {
         self.url = url
         self.token = token
@@ -104,9 +104,9 @@ class AuthedGrpcApi {
         group = PlatformSupport.makeEventLoopGroup(loopCount: 1)
 
         #if DEBUG
-        let channelBuilder = ClientConnection.insecure(group: group)
+            let channelBuilder = ClientConnection.insecure(group: group)
         #else
-        let channelBuilder = ClientConnection.usingPlatformAppropriateTLS(for: group)
+            let channelBuilder = ClientConnection.usingPlatformAppropriateTLS(for: group)
         #endif
         channel = channelBuilder
             .withConnectionReestablishment(enabled: true)
@@ -174,43 +174,42 @@ class AuthedGrpcApi {
 
         return convClient.get(input).waitForOutput()
     }
-    
+
     func sync() -> (App_DownSync?, Error?) {
         let input = App_UpSync.with { this in
             this.events = eventQueue
             this.lastEventUuid = UserDefaults.standard.value(forKey: "lastEventUuid") as! String
         }
-        
+
         let (down, error) = eventClient.sync(input).waitForOutput()
         if let down = down {
             UserDefaults.standard.set(down.lastEventUuid, forKey: "lastEventUuid")
         }
-        
+
         return (down, error)
     }
 
     func connect(completion: @escaping (App_Event) -> Void) {
-        let stream = self.eventClient.connect(callOptions: token.toStreamingCallOption(.hours(1))) { newEvent in
+        let stream = eventClient.connect(callOptions: token.toStreamingCallOption(.hours(1))) { newEvent in
             UserDefaults.standard.set(newEvent.uuid, forKey: "lastEventUuid")
             completion(newEvent)
         }
-        
+
         self.stream = stream
     }
-    
+
     func sendMessage(text: String, convUuid: UUID) -> App_Event {
         let message = App_Event.with { this in
             this.localUuid = UUID().uuidString
-            this.content = .sentNewMessage(App_Event.SentNewMessage.with{ msg in
+            this.content = .sentNewMessage(App_Event.SentNewMessage.with { msg in
                 msg.message = App_MessageSendInput.with { input in
                     input.content = App_MessageSendInput.OneOf_Content.textMessage(App_TextMessage.with { $0.content = text })
                 }
-                
+
                 msg.conversation = .convUuid(convUuid.uuidString)
             })
-            
         }
-        self.stream?.sendMessage(message)
+        stream?.sendMessage(message)
             .whenFailure { err in
                 self.logger.error("could not send message: \(err.localizedDescription)")
             }
@@ -232,7 +231,7 @@ extension UnaryCall {
             os_log(.error, "\(error.localizedDescription)")
             return (nil, error)
         }
-        
+
         do {
             let res = try response.wait()
             os_log(.debug, "\(msg)")
@@ -270,33 +269,28 @@ extension ServerStreamingCall {
 }
 
 func LoadEventToCoreData(_ event: App_Event, ctx: NSManagedObjectContext) {
-    switch (event.content) {
+    switch event.content {
     case .some(.receivedNewMessage(_)):
-            Message.fromEventProto(event, context: ctx)
-       
+        Message.fromEventProto(event, context: ctx)
+
     case .some(.deletedMessage(_)):
         break
-        
-        
+
     case .some(.changedPicture(_)):
         break
-        
-        
+
     case .some(.joinedConversation(_)):
         break
-        
-        
+
     case .some(.leftConversation(_)):
         break
-        
-        
+
     case .some(.conversationTitleChanged(_)):
         break
-        
-        
+
     case .some(.sentNewMessage(_)):
         fatalError()
-            
+
     case .none:
         fatalError()
     }

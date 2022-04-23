@@ -12,17 +12,49 @@ import OSLog
 import PhoneNumberKit
 import SwiftUI
 
+enum OnboardingPage: CaseIterable {
+    case Welcome
+    case DisplayName
+    case Handle
+    case Phone
+    case PhoneVerif
+    case PhoneSuccess
+    case Authorizations
+    case Contacts
+    case Success
+}
+
+extension CaseIterable where Self: Equatable {
+    func next() -> Self {
+        let all = Self.allCases
+        let idx = all.firstIndex(of: self)!
+        let next = all.index(after: idx)
+        return all[next == all.endIndex ? all.startIndex : next]
+    }
+
+    func previous() -> Self {
+        let all = Self.allCases
+        let idx = all.firstIndex(of: self)!
+        let prev = all.index(idx, offsetBy: -1)
+        return all[prev == all.startIndex ? all.endIndex : prev]
+    }
+}
+
 class OnboardingViewModel: ObservableObject {
-    @Published var page: Int = Auth.auth().currentUser != nil ? 5 : 0
+    @Published var page: OnboardingPage = Auth.auth().currentUser != nil ? .Authorizations : .Welcome
+
     @Binding var name: String
+    @Binding var handle: String
     @Published var phoneCountryCode: Int
     @Published var phoneRegionID: String?
     @Published var phoneNumber: String
+
     @Published var verificationCode: String = ""
     @Published var verificationID: String = ""
 
-    init(name: Binding<String>, phoneCountryCode: Int, phoneRegionID: String, phoneNumber: String) {
+    init(name: Binding<String>, handle: Binding<String>, phoneCountryCode: Int, phoneRegionID: String, phoneNumber: String) {
         _name = name
+        _handle = handle
         self.phoneCountryCode = phoneCountryCode
         self.phoneRegionID = phoneRegionID.isEmpty ? nil : phoneRegionID
         self.phoneNumber = phoneNumber
@@ -33,22 +65,23 @@ class OnboardingViewModel: ObservableObject {
     }
 
     func next() {
-        page += 1
+        page = page.next()
     }
 }
 
 struct OnboardingView: View {
     var onboardingDone: () -> Void
 
-    @AppStorage("name") var name: String = ""
-    @AppStorage("phoneCountryCode") var phoneCountryCode: Int = 33
-    @AppStorage("phoneRegionID") var phoneRegionID: String = "FR"
-    @AppStorage("phoneNumber") var phoneNumber: String = ""
+    @AppStorage(UserDefaults.Keys.displayName.rawValue) var name: String = ""
+    @AppStorage(UserDefaults.Keys.handle.rawValue) var handle: String = ""
+    @AppStorage(UserDefaults.Keys.phoneCountryCode.rawValue) var phoneCountryCode: Int = 33
+    @AppStorage(UserDefaults.Keys.phoneRegionID.rawValue) var phoneRegionID: String = "FR"
+    @AppStorage(UserDefaults.Keys.phoneNumber.rawValue) var phoneNumber: String = ""
 
     var body: some View {
         Onboarding(
             onboardingDone: onboardingDone,
-            model: .init(name: $name,
+            model: .init(name: $name, handle: $handle,
                          phoneCountryCode: phoneCountryCode,
                          phoneRegionID: phoneRegionID,
                          phoneNumber: phoneNumber)
@@ -67,18 +100,15 @@ struct Onboarding: View {
 
             Group {
                 switch model.page {
-                case 0: FirstScreen()
-                case 1: TypeNameView()
-                case 2: TypePhoneNumberView()
-                case 3: VerifyPhoneNumberView()
-                case 4: PhoneNumberSuccessView()
-                case 5: TurnOnNotificationsView()
-                case 6: MicrophoneAuthorizationView()
-                case 7: ContactListView()
-                case 8: AddTalkieWalkieContactsView()
-                case 9: AddOtherContactsView()
-                case 10: FinalSuccessView(onboardingDone: onboardingDone)
-                default: EmptyView()
+                case .Welcome: WelcomeScreen()
+                case .DisplayName: DisplayNameScreen()
+                case .Handle: HandleScreen()
+                case .Phone: PhoneScreen()
+                case .PhoneVerif: PhoneVerifScreen()
+                case .PhoneSuccess: PhoneSuccessScreen()
+                case .Authorizations: AuthorizationsScreen()
+                case .Contacts: ContactsScreen()
+                case .Success: SuccessScreen(onboardingDone: onboardingDone)
                 }
             }
         }
@@ -88,7 +118,7 @@ struct Onboarding: View {
 }
 
 struct OnboardingNavControls: View {
-    @Binding var page: Int
+    @Binding var page: OnboardingPage
 
     var showPrev: Bool = true
     var showNext: Bool = true
@@ -103,7 +133,7 @@ struct OnboardingNavControls: View {
             HStack {
                 if showPrev && !loading {
                     TWButton(action: {
-                        page -= 1
+                        page = page.previous()
                     }, primary: false) {
                         Image(systemName: "arrow.backward")
                             .font(.system(size: 22, weight: .heavy))
@@ -114,7 +144,7 @@ struct OnboardingNavControls: View {
 
                 if showNext {
                     TWButton(action: {
-                        guard let next = onNext else { return page += 1 }
+                        guard let next = onNext else { return page = page.next() }
                         next()
                     }) {
                         Group {
@@ -149,7 +179,7 @@ struct OnboardingTitle: View {
 
 // MARK: First Screen
 
-struct FirstScreen: View {
+struct WelcomeScreen: View {
     @EnvironmentObject var model: OnboardingViewModel
 
     var body: some View {
@@ -207,9 +237,9 @@ struct FirstScreen: View {
     }
 }
 
-// MARK: Type Name
+// MARK: Display Name
 
-struct TypeNameView: View {
+struct DisplayNameScreen: View {
     @EnvironmentObject var model: OnboardingViewModel
 
     @State var showInvalidNameAlert: Bool = false
@@ -247,6 +277,46 @@ struct TypeNameView: View {
     }
 }
 
+// MARK: Handle
+
+struct HandleScreen: View {
+    @EnvironmentObject var model: OnboardingViewModel
+
+    @State var showInvalidNameAlert: Bool = false
+
+    var body: some View {
+        ZStack {
+            VStack {
+                OnboardingTitle(text: "Choose your unique handle!")
+
+                Spacer()
+            }
+
+            TextField("Your handle", text: $model.handle, onCommit: validate)
+                .disableAutocorrection(true)
+                .textContentType(UITextContentType.givenName)
+                .multilineTextAlignment(.center)
+                .accentColor(Color("Cyan"))
+                .font(.title2.weight(.heavy))
+                .introspectTextField { textField in
+                    textField.becomeFirstResponder()
+                }
+
+            OnboardingNavControls(page: $model.page, showPrev: false, onNext: validate)
+        }
+        .alert(isPresented: $showInvalidNameAlert) {
+            Alert(title: Text("This doesn't look like a real name! 😛"))
+        }
+        .padding()
+    }
+
+    func validate() {
+        guard model.name.count > 0 else { return showInvalidNameAlert = true }
+        // TODO: verify the handle is slugged.
+        model.next()
+    }
+}
+
 // MARK: Type Phone
 
 struct PhoneCountryCodeButtonView: View {
@@ -274,16 +344,16 @@ struct PhoneCountryCodeButtonView: View {
     }
 }
 
-struct TypePhoneNumberView: View {
+struct PhoneScreen: View {
     @EnvironmentObject var model: OnboardingViewModel
 
     @State var showInvalidPhoneNumberAlert: Bool = false
     @State var showSendingSMSAlert: Bool = false
     @State var phoneNumberKit = PhoneNumberKit()
 
-    @AppStorage("phoneCountryCode") var storedPhoneCountryCode: Int = 33
-    @AppStorage("phoneRegionID") var storedPhoneRegionID: String = "FR"
-    @AppStorage("phoneNumber") var storedPhoneNumber: String = ""
+    @AppStorage(UserDefaults.Keys.phoneCountryCode.rawValue) var storedPhoneCountryCode: Int = 33
+    @AppStorage(UserDefaults.Keys.phoneRegionID.rawValue) var storedPhoneRegionID: String = "FR"
+    @AppStorage(UserDefaults.Keys.phoneNumber.rawValue) var storedPhoneNumber: String = ""
 
     var body: some View {
         let phoneNumber = Binding<String>(
@@ -369,7 +439,7 @@ struct TypePhoneNumberView: View {
     }
 }
 
-struct VerifyPhoneNumberView: View {
+struct PhoneVerifScreen: View {
     @EnvironmentObject var model: OnboardingViewModel
 
     @State var showInvalidVerificationCodeAlert: Bool = false
@@ -434,7 +504,7 @@ struct VerifyPhoneNumberView: View {
     }
 }
 
-struct PhoneNumberSuccessView: View {
+struct PhoneSuccessScreen: View {
     @EnvironmentObject var model: OnboardingViewModel
 
     var body: some View {
@@ -452,7 +522,7 @@ struct PhoneNumberSuccessView: View {
 
 // MARK: Allow Notifications
 
-struct TurnOnNotificationsView: View {
+struct AuthorizationsScreen: View {
     @EnvironmentObject var model: OnboardingViewModel
 
     @State var notificationAuthorizationStatus: AVCaptureDevice.AuthorizationStatus?
@@ -480,7 +550,7 @@ struct TurnOnNotificationsView: View {
                 }, primary: true) {
                     Text("Activate!")
                 }
-                
+
                 Spacer()
                 HStack {
                     Spacer()
@@ -589,35 +659,9 @@ struct MicrophoneAuthorizationView: View {
     }
 }
 
-struct AddTalkieWalkieContactsView: View {
-    @EnvironmentObject var model: OnboardingViewModel
-
-    var body: some View {
-        ZStack {
-            Text("Hello")
-
-            OnboardingNavControls(page: $model.page)
-        }
-        .padding()
-    }
-}
-
-struct AddOtherContactsView: View {
-    @EnvironmentObject var model: OnboardingViewModel
-
-    var body: some View {
-        ZStack {
-            Text("Hello")
-
-            OnboardingNavControls(page: $model.page)
-        }
-        .padding()
-    }
-}
-
 // MARK: Final Screen
 
-struct FinalSuccessView: View {
+struct SuccessScreen: View {
     @EnvironmentObject var model: OnboardingViewModel
     var onboardingDone: () -> Void
 
@@ -634,24 +678,5 @@ struct FinalSuccessView: View {
             }
         }
         .padding()
-    }
-}
-
-struct Onboarding_Previews: PreviewProvider {
-    static var previews: some View {
-        TestView()
-            .withDummmyEnvironments()
-    }
-
-    struct TestView: View {
-        @StateObject var model: OnboardingViewModel = {
-            let model = OnboardingViewModel(name: .constant("Alex"), phoneCountryCode: 33, phoneRegionID: "FR", phoneNumber: "")
-            model.page = 6
-            return model
-        }()
-
-        var body: some View {
-            Onboarding(onboardingDone: {}, model: model)
-        }
     }
 }

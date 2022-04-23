@@ -7,37 +7,32 @@
 
 import SwiftUI
 
-
 struct DummyStore {
     static let shared = DummyStore()
-    
+
     @AppStorage("isDarkMode") var isDarkMode: Bool = false
-    
+
     var auth = AuthState()
     var messageViewModel = MessageViewModel()
-    var onboardingViewModel = OnboardingViewModel(name: .constant(""), phoneCountryCode: 33, phoneRegionID: "FR", phoneNumber: "")
-    
+    var onboardingViewModel = OnboardingViewModel(name: .constant(""), handle: .constant(""), phoneCountryCode: 33, phoneRegionID: "FR", phoneNumber: "")
+
     var tooltipManager = TooltipManager()
     var partialSheetManager = PartialSheetManager()
-    
-    init() {
-        
-    }
-}
 
+    init() {}
+}
 
 extension View {
     func withDummmyEnvironments() -> some View {
-        self
-            .environmentObject(DummyStore.shared.auth)
+        environmentObject(DummyStore.shared.auth)
             .environmentObject(DummyStore.shared.messageViewModel)
             .environmentObject(DummyStore.shared.onboardingViewModel)
-        
+
 //            .environment(\.managedObjectContext, DummyStore.shared.auth.moc)
-        
+
             .preferredColorScheme(DummyStore.shared.isDarkMode ? .dark : .light)
             .environment(\.colorScheme, DummyStore.shared.isDarkMode ? .dark : .light)
-        
+
             .addTooltip()
             .environmentObject(DummyStore.shared.tooltipManager)
             .addPartialSheet()

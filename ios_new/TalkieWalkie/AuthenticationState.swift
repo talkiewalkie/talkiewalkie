@@ -11,9 +11,9 @@ import Foundation
 import OSLog
 
 #if DEBUG
-private let env = "dev"
+    private let env = "dev"
 #else
-private let env = "prod"
+    private let env = "prod"
 #endif
 
 enum AuthenticationState {
@@ -57,7 +57,7 @@ class AuthState: ObservableObject {
         }
         self.persistentContainer = persistentContainer
 
-        self.writeContext = persistentContainer.newBackgroundContext()
+        writeContext = persistentContainer.newBackgroundContext()
         writeContext.mergePolicy = NSMergePolicy.error
         writeContext.automaticallyMergesChangesFromParent = true
     }
@@ -75,7 +75,7 @@ class AuthState: ObservableObject {
                 return
             }
 
-            let api = AuthedGrpcApi.withUrlAndToken(url: self.config.apiUrl, token: res.token, writer: {fn in self.withWriteContext { ctx, me in fn(ctx, me)}})
+            let api = AuthedGrpcApi.withUrlAndToken(url: self.config.apiUrl, token: res.token, writer: { fn in self.withWriteContext { ctx, me in fn(ctx, me) }})
 
             if let me = Me.fromCache(context: self.readContext) {
                 self.logger.debug("loaded my user info from cache")
@@ -125,6 +125,8 @@ class AuthState: ObservableObject {
         context.deleteAndMergeChanges(using: NSBatchDeleteRequest(fetchRequest: NSFetchRequest(entityName: MessageContent.entity().name!)))
         context.deleteAndMergeChanges(using: NSBatchDeleteRequest(fetchRequest: NSFetchRequest(entityName: TextMessage.entity().name!)))
         context.deleteAndMergeChanges(using: NSBatchDeleteRequest(fetchRequest: NSFetchRequest(entityName: VoiceMessage.entity().name!)))
+
+        UserDefaults.standard.reset()
     }
 
     func setConnecting() {
@@ -158,9 +160,9 @@ private class Config: Decodable, ObservableObject {
 
     var apiUrl: URL {
         #if DEBUG
-        let transport = "http://"
+            let transport = "http://"
         #else
-        let transport = "https://"
+            let transport = "https://"
         #endif
 
         return URL(string: "\(transport)\(apiHost):\(apiPort)")!

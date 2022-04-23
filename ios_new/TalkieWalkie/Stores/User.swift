@@ -18,9 +18,9 @@ extension User {
         localU.uuid = u.uuid.uuidOrThrow()
         localU.displayName = u.displayName
         localU.phone = u.phone
-    
+
         block(localU)
-        
+
         return localU
     }
 }
@@ -42,7 +42,6 @@ extension Me {
         } else if res.isEmpty {
             os_log(.debug, "no [Me] object found in core data in ctx(\(context.description))")
         }
-        
 
         return res.first { $0.uuid != nil }
     }

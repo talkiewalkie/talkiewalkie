@@ -51,7 +51,7 @@ struct InboxView: View {
             .toolbar {
                 ToolbarItem(placement: .principal) {
                     // TODO: Not working
-                    if case .Connected(let api, _) = authed.state {
+                    if case let .Connected(api, _) = authed.state {
                         switch api.stateDelegate.state {
                         case .Disconnected:
                             Text("disconnected")

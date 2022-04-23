@@ -54,14 +54,14 @@ extension Message {
 
         return result.first
     }
-    
+
     @discardableResult
-    static func fromEventProto(_ event: App_Event, context: NSManagedObjectContext, block: (_ event: App_Event) -> Void = { _ in }) -> Message {
+    static func fromEventProto(_ event: App_Event, context: NSManagedObjectContext, block _: (_ event: App_Event) -> Void = { _ in }) -> Message {
         let conv: Conversation
         let message: Message
-        switch (event.content) {
-        case .some(.receivedNewMessage(let rnm)):
-            if event.localUuid != "" , let localMessage = Message.getByLocalUuid(event.localUuid.uuidOrThrow(), context: context) {
+        switch event.content {
+        case let .some(.receivedNewMessage(rnm)):
+            if event.localUuid != "", let localMessage = Message.getByLocalUuid(event.localUuid.uuidOrThrow(), context: context) {
                 message = localMessage
                 message.status_ = 1
             } else {
@@ -75,13 +75,13 @@ extension Message {
                 message = Message.fromProto(rnm.message, context: context)
                 conv.addToMessages_(message)
             }
-        
-        case .some(.sentNewMessage(let snm)):
-            switch (snm.conversation) {
-            case .some(.convUuid(let convUuid)):
+
+        case let .some(.sentNewMessage(snm)):
+            switch snm.conversation {
+            case let .some(.convUuid(convUuid)):
                 conv = Conversation.getByUuidOrCreate(convUuid.uuidOrThrow(), context: context)
-            
-            case .some(.newConversation(let convInput)):
+
+            case let .some(.newConversation(convInput)):
                 conv = Conversation(context: context)
                 conv.title = convInput.title
                 let users: [UserConversation] = convInput.userUuids.map { uuid in
@@ -90,45 +90,42 @@ extension Message {
                     uc.user = u
                     uc.conversation = conv
                     uc.readUntil = Date()
-                    
+
                     return uc
                 }
                 conv.addToUsers_(NSSet(array: users))
-                
+
             default:
                 fatalError()
             }
-            
+
             let content: MessageContent
             message = Message(context: context)
             message.localUuid_ = event.localUuid.uuidOrThrow()
-            switch (snm.message.content) {
+            switch snm.message.content {
             case .none:
-            fatalError()
-            case .some(.textMessage(let tm)):
+                fatalError()
+            case let .some(.textMessage(tm)):
                 let ttm = TextMessage(context: context)
                 ttm.text = tm.content
-            
+
                 content = ttm
-            
-            case .some(.voiceMessage(let vm)):
+
+            case let .some(.voiceMessage(vm)):
                 let ctt = VoiceMessage(context: context)
                 ctt.processedAudio = vm.rawContent
                 ctt.rawAudio = vm.rawContent
-                ctt.siriTranscript = try! vm.siriTranscript.serializedData() 
-                
+                ctt.siriTranscript = try! vm.siriTranscript.serializedData()
+
                 content = ctt
             }
             message.content = content
-            
-        
+
         default:
             // TODO: find a better way and fail at compile time.
             fatalError()
         }
-        
-       
-        
+
         return message
     }
 }

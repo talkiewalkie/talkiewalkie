@@ -47,7 +47,7 @@ func main() {
 	if err != nil {
 		if errors.Cause(err) == sql.ErrNoRows {
 			u = &models.User{
-				DisplayName:        null.StringFrom(os.Getenv("USER")),
+				DisplayName:        os.Getenv("USER"),
 				FirebaseUID:        null.StringFrom(fbuid),
 				PhoneNumber:        *phone,
 				OnboardingFinished: true,
@@ -68,7 +68,8 @@ func main() {
 		friends := []*models.User{u}
 		for j := 0; j < rand.Intn(6)+1; j += 1 {
 			friend := &models.User{
-				DisplayName:        null.StringFrom(faker.FirstName()),
+				Handle:             faker.Username(),
+				DisplayName:        faker.FirstName(),
 				FirebaseUID:        null.String{},
 				PhoneNumber:        faker.Phonenumber(),
 				OnboardingFinished: true,
@@ -85,7 +86,7 @@ func main() {
 			log.Panicf("could not insert new conv: %+v", err)
 		}
 
-		fmt.Printf("[%s] new conv[%s]", u.DisplayName.String, conv.UUID.String())
+		fmt.Printf("[%s] new conv[%s]", u.DisplayName, conv.UUID.String())
 
 		for _, f := range friends {
 			uc := models.UserConversation{UserID: f.ID, ConversationID: conv.ID}

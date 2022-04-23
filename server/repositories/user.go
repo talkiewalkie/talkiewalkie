@@ -116,21 +116,14 @@ var _ UserRepository = UserRepositoryImpl{}
 
 // UTILS
 
-func UserDisplayName(user *models.User) string {
-	if user.DisplayName.Valid {
-		return user.DisplayName.String
-	} else {
-		return user.PhoneNumber
-	}
-}
-
 func UserPubSubTopic(user *models.User) string {
 	return strings.Replace(fmt.Sprintf("user-conn-%s", user.UUID), "-", "_", -1)
 }
 
 func UserToProto(u *models.User) *pb.User {
 	return &pb.User{
-		DisplayName:   UserDisplayName(u),
+		DisplayName:   u.DisplayName,
+		Handle:        u.Handle,
 		Uuid:          u.UUID.String(),
 		Conversations: nil,
 		Phone:         u.PhoneNumber,

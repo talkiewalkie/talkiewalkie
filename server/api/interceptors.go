@@ -91,8 +91,10 @@ func ServerStreamRequestComponentsInterceptor(components *common.Components) fun
 
 func UnaryAuthInterceptor(components *common.Components) func(context.Context, interface{}, *grpc.UnaryServerInfo, grpc.UnaryHandler) (resp interface{}, err error) {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
+		// Bypass JWT verification for these routes:
 		if strings.HasPrefix(info.FullMethod, "/grpc.health.v1.Health/") ||
-			strings.HasPrefix(info.FullMethod, "/grpc.reflection") {
+			strings.HasPrefix(info.FullMethod, "/grpc.reflection") ||
+			info.FullMethod == "/app.UserService/CreateUser" {
 			return handler(ctx, req)
 		} else {
 			return grpcauth.UnaryServerInterceptor(common.AuthInterceptor(components))(ctx, req, info, handler)

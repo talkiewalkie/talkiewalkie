@@ -23,13 +23,13 @@ extension NSManagedObjectContext {
         }
     }
 
-    /// Debug method to inspect core data 
+    /// Debug method to inspect core data
     func stats(_ prefix: String = "core data state") {
         let convs = Conversation.getAll(self) ?? []
         let users = User.getAll(self) ?? []
         let mes = Me.getAll(self) ?? []
         let messages = Message.getAll(self) ?? []
-        
+
         os_log(.debug, "\(prefix): \(convs.count) conversations - \(users.count) users (\(mes.count) me objects) - \(messages.count) messages")
     }
 
@@ -37,7 +37,7 @@ extension NSManagedObjectContext {
         var res: NSPersistentStoreResult?
         do { res = try execute(request) }
         catch { os_log("failed to execute request: \(error.localizedDescription)") }
-        
+
         return res
     }
 
@@ -64,21 +64,21 @@ extension NSManagedObject {
 
         let request = NSFetchRequest<Self>(entityName: ename)
         request.predicate = NSPredicate(format: "uuid = %@", uuid as NSUUID)
-        
+
         let entities = try! context.fetch(request)
 
         if entities.count > 1 {
             os_log(.error, "[coredata:\(ename)] found \(entities.count) objects for uuid:[\(uuid)]")
             fatalError()
         }
-        
+
         if let me = entities.first {
             os_log(.debug, "[coredata:\(ename)] found item for uuid:[\(uuid)]")
             return me
         } else {
             os_log(.debug, "[coredata:\(ename)] creating item for uuid:[\(uuid)]")
             let new = Self(context: context)
-            
+
             return new
         }
     }
@@ -86,14 +86,14 @@ extension NSManagedObject {
     static func getAll(_ context: NSManagedObjectContext) -> [NSFetchRequestResult]? {
         guard let ename = Self.entity().name else {
             os_log(.error, "NSManagedObject is attached to a nameless entity: \(String(describing: Self.entity()))")
-            
+
             return nil
         }
 
         do { return try context.fetch(Self.fetchRequest()) }
         catch {
             os_log("failed to fetch \(ename): \(error.localizedDescription)")
-            
+
             return nil
         }
     }

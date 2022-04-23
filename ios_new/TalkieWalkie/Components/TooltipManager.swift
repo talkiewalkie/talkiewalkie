@@ -277,9 +277,9 @@ struct TooltipManager_Previews: PreviewProvider {
                                     .padding()
                                     .background(Capsule().fill(Color.white))
                             })
-                                .tooltip(selectionState: selectionState, options: TooltipOptions(floating: true), content: {
-                                    Text("Lorem Ipsum")
-                                })
+                            .tooltip(selectionState: selectionState, options: TooltipOptions(floating: true), content: {
+                                Text("Lorem Ipsum")
+                            })
 
                             Spacer()
                         }

@@ -5,9 +5,17 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"time"
+
+	"github.com/volatiletech/null/v8"
+
+	"github.com/talkiewalkie/talkiewalkie/common"
+
+	"github.com/volatiletech/sqlboiler/v4/queries/qm"
+
+	"github.com/talkiewalkie/talkiewalkie/models"
 
 	uuid2 "github.com/satori/go.uuid"
-	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -20,10 +28,53 @@ import (
 type UserService struct {
 }
 
-var _ pb.UserServiceServer = UserService{}
+func (us UserService) CreateUser(ctx context.Context, input *pb.CreateUserInput) (*pb.User, error) {
+	components, ok := ctx.Value("components").(*common.Components)
+	if !ok {
+		return nil, status.Errorf(codes.Internal, "no components in context")
+	}
 
-func NewUserService() UserService {
-	return UserService{}
+	existing, err := models.Users(models.UserWhere.Handle.EQ(input.Handle), models.UserWhere.FirebaseUID.EQ(null.StringFromPtr(nil)), models.UserWhere.CreatedAt.GT(time.Now().Add(-time.Hour*24*7))).One(components.Ctx, components.Db)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "could not check for existing users with this handle: %+v", err)
+	}
+	if existing != nil {
+		if _, err := existing.Delete(components.Ctx, components.Db); err != nil {
+			return nil, status.Errorf(codes.Internal, "could not delete old user with this handle: %+v", err)
+		}
+	}
+
+	me := &models.User{
+		PhoneNumber: input.PhoneNumber,
+		DisplayName: input.DisplayName,
+		Handle:      input.Handle,
+	}
+	if err := me.Insert(components.Ctx, components.Db, boil.Infer()); err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to create user: %+v", err)
+	}
+
+	return repositories.UserToProto(me), nil
+}
+
+func (us UserService) Search(ctx context.Context, input *pb.SearchInput) (*pb.SearchOutput, error) {
+	components, _, err := WithAuthedContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	users, err := models.Users(
+		qm.Where(fmt.Sprintf("%s like '%$1'", models.UserColumns.Handle), input.Prefix),
+		qm.Limit(20),
+	).All(components.Ctx, components.Db)
+	if err != nil {
+		return nil, err
+	}
+
+	out := []*pb.User{}
+	for _, user := range users {
+		out = append(out, repositories.UserToProto(user))
+	}
+	return &pb.SearchOutput{Users: out}, nil
 }
 
 func (us UserService) Get(ctx context.Context, input *pb.UserGetInput) (*pb.User, error) {
@@ -67,7 +118,7 @@ func (us UserService) Onboarding(ctx context.Context, input *pb.OnboardingInput)
 		return nil, err
 	}
 
-	me.DisplayName = null.StringFrom(strings.TrimSpace(input.DisplayName))
+	me.DisplayName = strings.TrimSpace(input.DisplayName)
 	me.Locales = input.Locales
 	me.OnboardingFinished = true
 	if _, err = me.Update(ctx, components.Db, boil.Infer()); err != nil {
@@ -107,7 +158,7 @@ func (us UserService) SyncContacts(ctx context.Context, input *pb.SyncContactsIn
 				Topic: user.FirebaseUID.String,
 				Data:  map[string]string{"uuid": user.UUID.String()},
 				Title: "Good news 🎙!",
-				Body:  fmt.Sprintf("%s has joined TalkieWalkie! ❤️", repositories.UserDisplayName(user)),
+				Body:  fmt.Sprintf("%s has joined TalkieWalkie! ❤️", user.DisplayName),
 			})
 		}
 		res, err := components.MessagingClient.SendAll(ctx, messages)
@@ -120,4 +171,10 @@ func (us UserService) SyncContacts(ctx context.Context, input *pb.SyncContactsIn
 	}
 
 	return &pb.SyncContactsOutput{Users: pbUsers}, nil
+}
+
+var _ pb.UserServiceServer = UserService{}
+
+func NewUserService() UserService {
+	return UserService{}
 }

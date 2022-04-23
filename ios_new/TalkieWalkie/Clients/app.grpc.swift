@@ -24,621 +24,615 @@ import GRPC
 import NIO
 import SwiftProtobuf
 
-
 /// Usage: instantiate `App_UtilsClient`, then call methods of this protocol to make API calls.
 public protocol App_UtilsClientProtocol: GRPCClient {
-  var serviceName: String { get }
-  var interceptors: App_UtilsClientInterceptorFactoryProtocol? { get }
+    var serviceName: String { get }
+    var interceptors: App_UtilsClientInterceptorFactoryProtocol? { get }
 
-  func healthCheck(
-    _ request: App_Empty,
-    callOptions: CallOptions?
-  ) -> UnaryCall<App_Empty, App_Empty>
+    func healthCheck(
+        _ request: App_Empty,
+        callOptions: CallOptions?
+    ) -> UnaryCall<App_Empty, App_Empty>
 }
 
-extension App_UtilsClientProtocol {
-  public var serviceName: String {
-    return "app.Utils"
-  }
+public extension App_UtilsClientProtocol {
+    var serviceName: String {
+        return "app.Utils"
+    }
 
-  /// Unary call to HealthCheck
-  ///
-  /// - Parameters:
-  ///   - request: Request to send to HealthCheck.
-  ///   - callOptions: Call options.
-  /// - Returns: A `UnaryCall` with futures for the metadata, status and response.
-  public func healthCheck(
-    _ request: App_Empty,
-    callOptions: CallOptions? = nil
-  ) -> UnaryCall<App_Empty, App_Empty> {
-    return self.makeUnaryCall(
-      path: "/app.Utils/HealthCheck",
-      request: request,
-      callOptions: callOptions ?? self.defaultCallOptions,
-      interceptors: self.interceptors?.makeHealthCheckInterceptors() ?? []
-    )
-  }
+    /// Unary call to HealthCheck
+    ///
+    /// - Parameters:
+    ///   - request: Request to send to HealthCheck.
+    ///   - callOptions: Call options.
+    /// - Returns: A `UnaryCall` with futures for the metadata, status and response.
+    func healthCheck(
+        _ request: App_Empty,
+        callOptions: CallOptions? = nil
+    ) -> UnaryCall<App_Empty, App_Empty> {
+        return makeUnaryCall(
+            path: "/app.Utils/HealthCheck",
+            request: request,
+            callOptions: callOptions ?? defaultCallOptions,
+            interceptors: interceptors?.makeHealthCheckInterceptors() ?? []
+        )
+    }
 }
 
 public protocol App_UtilsClientInterceptorFactoryProtocol {
-
-  /// - Returns: Interceptors to use when invoking 'healthCheck'.
-  func makeHealthCheckInterceptors() -> [ClientInterceptor<App_Empty, App_Empty>]
+    /// - Returns: Interceptors to use when invoking 'healthCheck'.
+    func makeHealthCheckInterceptors() -> [ClientInterceptor<App_Empty, App_Empty>]
 }
 
 public final class App_UtilsClient: App_UtilsClientProtocol {
-  public let channel: GRPCChannel
-  public var defaultCallOptions: CallOptions
-  public var interceptors: App_UtilsClientInterceptorFactoryProtocol?
+    public let channel: GRPCChannel
+    public var defaultCallOptions: CallOptions
+    public var interceptors: App_UtilsClientInterceptorFactoryProtocol?
 
-  /// Creates a client for the app.Utils service.
-  ///
-  /// - Parameters:
-  ///   - channel: `GRPCChannel` to the service host.
-  ///   - defaultCallOptions: Options to use for each service call if the user doesn't provide them.
-  ///   - interceptors: A factory providing interceptors for each RPC.
-  public init(
-    channel: GRPCChannel,
-    defaultCallOptions: CallOptions = CallOptions(),
-    interceptors: App_UtilsClientInterceptorFactoryProtocol? = nil
-  ) {
-    self.channel = channel
-    self.defaultCallOptions = defaultCallOptions
-    self.interceptors = interceptors
-  }
+    /// Creates a client for the app.Utils service.
+    ///
+    /// - Parameters:
+    ///   - channel: `GRPCChannel` to the service host.
+    ///   - defaultCallOptions: Options to use for each service call if the user doesn't provide them.
+    ///   - interceptors: A factory providing interceptors for each RPC.
+    public init(
+        channel: GRPCChannel,
+        defaultCallOptions: CallOptions = CallOptions(),
+        interceptors: App_UtilsClientInterceptorFactoryProtocol? = nil
+    ) {
+        self.channel = channel
+        self.defaultCallOptions = defaultCallOptions
+        self.interceptors = interceptors
+    }
 }
 
 /// Usage: instantiate `App_UserServiceClient`, then call methods of this protocol to make API calls.
 public protocol App_UserServiceClientProtocol: GRPCClient {
-  var serviceName: String { get }
-  var interceptors: App_UserServiceClientInterceptorFactoryProtocol? { get }
+    var serviceName: String { get }
+    var interceptors: App_UserServiceClientInterceptorFactoryProtocol? { get }
 
-  func syncContacts(
-    _ request: App_SyncContactsInput,
-    callOptions: CallOptions?
-  ) -> UnaryCall<App_SyncContactsInput, App_SyncContactsOutput>
+    func syncContacts(
+        _ request: App_SyncContactsInput,
+        callOptions: CallOptions?
+    ) -> UnaryCall<App_SyncContactsInput, App_SyncContactsOutput>
 
-  func onboarding(
-    _ request: App_OnboardingInput,
-    callOptions: CallOptions?
-  ) -> UnaryCall<App_OnboardingInput, App_MeUser>
+    func onboarding(
+        _ request: App_OnboardingInput,
+        callOptions: CallOptions?
+    ) -> UnaryCall<App_OnboardingInput, App_MeUser>
 
-  func me(
-    _ request: App_Empty,
-    callOptions: CallOptions?
-  ) -> UnaryCall<App_Empty, App_MeUser>
+    func me(
+        _ request: App_Empty,
+        callOptions: CallOptions?
+    ) -> UnaryCall<App_Empty, App_MeUser>
 
-  func get(
-    _ request: App_UserGetInput,
-    callOptions: CallOptions?
-  ) -> UnaryCall<App_UserGetInput, App_User>
+    func get(
+        _ request: App_UserGetInput,
+        callOptions: CallOptions?
+    ) -> UnaryCall<App_UserGetInput, App_User>
 }
 
-extension App_UserServiceClientProtocol {
-  public var serviceName: String {
-    return "app.UserService"
-  }
+public extension App_UserServiceClientProtocol {
+    var serviceName: String {
+        return "app.UserService"
+    }
 
-  /// Unary call to SyncContacts
-  ///
-  /// - Parameters:
-  ///   - request: Request to send to SyncContacts.
-  ///   - callOptions: Call options.
-  /// - Returns: A `UnaryCall` with futures for the metadata, status and response.
-  public func syncContacts(
-    _ request: App_SyncContactsInput,
-    callOptions: CallOptions? = nil
-  ) -> UnaryCall<App_SyncContactsInput, App_SyncContactsOutput> {
-    return self.makeUnaryCall(
-      path: "/app.UserService/SyncContacts",
-      request: request,
-      callOptions: callOptions ?? self.defaultCallOptions,
-      interceptors: self.interceptors?.makeSyncContactsInterceptors() ?? []
-    )
-  }
+    /// Unary call to SyncContacts
+    ///
+    /// - Parameters:
+    ///   - request: Request to send to SyncContacts.
+    ///   - callOptions: Call options.
+    /// - Returns: A `UnaryCall` with futures for the metadata, status and response.
+    func syncContacts(
+        _ request: App_SyncContactsInput,
+        callOptions: CallOptions? = nil
+    ) -> UnaryCall<App_SyncContactsInput, App_SyncContactsOutput> {
+        return makeUnaryCall(
+            path: "/app.UserService/SyncContacts",
+            request: request,
+            callOptions: callOptions ?? defaultCallOptions,
+            interceptors: interceptors?.makeSyncContactsInterceptors() ?? []
+        )
+    }
 
-  /// Unary call to Onboarding
-  ///
-  /// - Parameters:
-  ///   - request: Request to send to Onboarding.
-  ///   - callOptions: Call options.
-  /// - Returns: A `UnaryCall` with futures for the metadata, status and response.
-  public func onboarding(
-    _ request: App_OnboardingInput,
-    callOptions: CallOptions? = nil
-  ) -> UnaryCall<App_OnboardingInput, App_MeUser> {
-    return self.makeUnaryCall(
-      path: "/app.UserService/Onboarding",
-      request: request,
-      callOptions: callOptions ?? self.defaultCallOptions,
-      interceptors: self.interceptors?.makeOnboardingInterceptors() ?? []
-    )
-  }
+    /// Unary call to Onboarding
+    ///
+    /// - Parameters:
+    ///   - request: Request to send to Onboarding.
+    ///   - callOptions: Call options.
+    /// - Returns: A `UnaryCall` with futures for the metadata, status and response.
+    func onboarding(
+        _ request: App_OnboardingInput,
+        callOptions: CallOptions? = nil
+    ) -> UnaryCall<App_OnboardingInput, App_MeUser> {
+        return makeUnaryCall(
+            path: "/app.UserService/Onboarding",
+            request: request,
+            callOptions: callOptions ?? defaultCallOptions,
+            interceptors: interceptors?.makeOnboardingInterceptors() ?? []
+        )
+    }
 
-  /// Unary call to Me
-  ///
-  /// - Parameters:
-  ///   - request: Request to send to Me.
-  ///   - callOptions: Call options.
-  /// - Returns: A `UnaryCall` with futures for the metadata, status and response.
-  public func me(
-    _ request: App_Empty,
-    callOptions: CallOptions? = nil
-  ) -> UnaryCall<App_Empty, App_MeUser> {
-    return self.makeUnaryCall(
-      path: "/app.UserService/Me",
-      request: request,
-      callOptions: callOptions ?? self.defaultCallOptions,
-      interceptors: self.interceptors?.makeMeInterceptors() ?? []
-    )
-  }
+    /// Unary call to Me
+    ///
+    /// - Parameters:
+    ///   - request: Request to send to Me.
+    ///   - callOptions: Call options.
+    /// - Returns: A `UnaryCall` with futures for the metadata, status and response.
+    func me(
+        _ request: App_Empty,
+        callOptions: CallOptions? = nil
+    ) -> UnaryCall<App_Empty, App_MeUser> {
+        return makeUnaryCall(
+            path: "/app.UserService/Me",
+            request: request,
+            callOptions: callOptions ?? defaultCallOptions,
+            interceptors: interceptors?.makeMeInterceptors() ?? []
+        )
+    }
 
-  /// Unary call to Get
-  ///
-  /// - Parameters:
-  ///   - request: Request to send to Get.
-  ///   - callOptions: Call options.
-  /// - Returns: A `UnaryCall` with futures for the metadata, status and response.
-  public func get(
-    _ request: App_UserGetInput,
-    callOptions: CallOptions? = nil
-  ) -> UnaryCall<App_UserGetInput, App_User> {
-    return self.makeUnaryCall(
-      path: "/app.UserService/Get",
-      request: request,
-      callOptions: callOptions ?? self.defaultCallOptions,
-      interceptors: self.interceptors?.makeGetInterceptors() ?? []
-    )
-  }
+    /// Unary call to Get
+    ///
+    /// - Parameters:
+    ///   - request: Request to send to Get.
+    ///   - callOptions: Call options.
+    /// - Returns: A `UnaryCall` with futures for the metadata, status and response.
+    func get(
+        _ request: App_UserGetInput,
+        callOptions: CallOptions? = nil
+    ) -> UnaryCall<App_UserGetInput, App_User> {
+        return makeUnaryCall(
+            path: "/app.UserService/Get",
+            request: request,
+            callOptions: callOptions ?? defaultCallOptions,
+            interceptors: interceptors?.makeGetInterceptors() ?? []
+        )
+    }
 }
 
 public protocol App_UserServiceClientInterceptorFactoryProtocol {
+    /// - Returns: Interceptors to use when invoking 'syncContacts'.
+    func makeSyncContactsInterceptors() -> [ClientInterceptor<App_SyncContactsInput, App_SyncContactsOutput>]
 
-  /// - Returns: Interceptors to use when invoking 'syncContacts'.
-  func makeSyncContactsInterceptors() -> [ClientInterceptor<App_SyncContactsInput, App_SyncContactsOutput>]
+    /// - Returns: Interceptors to use when invoking 'onboarding'.
+    func makeOnboardingInterceptors() -> [ClientInterceptor<App_OnboardingInput, App_MeUser>]
 
-  /// - Returns: Interceptors to use when invoking 'onboarding'.
-  func makeOnboardingInterceptors() -> [ClientInterceptor<App_OnboardingInput, App_MeUser>]
+    /// - Returns: Interceptors to use when invoking 'me'.
+    func makeMeInterceptors() -> [ClientInterceptor<App_Empty, App_MeUser>]
 
-  /// - Returns: Interceptors to use when invoking 'me'.
-  func makeMeInterceptors() -> [ClientInterceptor<App_Empty, App_MeUser>]
-
-  /// - Returns: Interceptors to use when invoking 'get'.
-  func makeGetInterceptors() -> [ClientInterceptor<App_UserGetInput, App_User>]
+    /// - Returns: Interceptors to use when invoking 'get'.
+    func makeGetInterceptors() -> [ClientInterceptor<App_UserGetInput, App_User>]
 }
 
 public final class App_UserServiceClient: App_UserServiceClientProtocol {
-  public let channel: GRPCChannel
-  public var defaultCallOptions: CallOptions
-  public var interceptors: App_UserServiceClientInterceptorFactoryProtocol?
+    public let channel: GRPCChannel
+    public var defaultCallOptions: CallOptions
+    public var interceptors: App_UserServiceClientInterceptorFactoryProtocol?
 
-  /// Creates a client for the app.UserService service.
-  ///
-  /// - Parameters:
-  ///   - channel: `GRPCChannel` to the service host.
-  ///   - defaultCallOptions: Options to use for each service call if the user doesn't provide them.
-  ///   - interceptors: A factory providing interceptors for each RPC.
-  public init(
-    channel: GRPCChannel,
-    defaultCallOptions: CallOptions = CallOptions(),
-    interceptors: App_UserServiceClientInterceptorFactoryProtocol? = nil
-  ) {
-    self.channel = channel
-    self.defaultCallOptions = defaultCallOptions
-    self.interceptors = interceptors
-  }
+    /// Creates a client for the app.UserService service.
+    ///
+    /// - Parameters:
+    ///   - channel: `GRPCChannel` to the service host.
+    ///   - defaultCallOptions: Options to use for each service call if the user doesn't provide them.
+    ///   - interceptors: A factory providing interceptors for each RPC.
+    public init(
+        channel: GRPCChannel,
+        defaultCallOptions: CallOptions = CallOptions(),
+        interceptors: App_UserServiceClientInterceptorFactoryProtocol? = nil
+    ) {
+        self.channel = channel
+        self.defaultCallOptions = defaultCallOptions
+        self.interceptors = interceptors
+    }
 }
 
 /// Usage: instantiate `App_EventServiceClient`, then call methods of this protocol to make API calls.
 public protocol App_EventServiceClientProtocol: GRPCClient {
-  var serviceName: String { get }
-  var interceptors: App_EventServiceClientInterceptorFactoryProtocol? { get }
+    var serviceName: String { get }
+    var interceptors: App_EventServiceClientInterceptorFactoryProtocol? { get }
 
-  func sync(
-    _ request: App_UpSync,
-    callOptions: CallOptions?
-  ) -> UnaryCall<App_UpSync, App_DownSync>
+    func sync(
+        _ request: App_UpSync,
+        callOptions: CallOptions?
+    ) -> UnaryCall<App_UpSync, App_DownSync>
 
-  func connect(
-    callOptions: CallOptions?,
-    handler: @escaping (App_Event) -> Void
-  ) -> BidirectionalStreamingCall<App_Event, App_Event>
+    func connect(
+        callOptions: CallOptions?,
+        handler: @escaping (App_Event) -> Void
+    ) -> BidirectionalStreamingCall<App_Event, App_Event>
 }
 
-extension App_EventServiceClientProtocol {
-  public var serviceName: String {
-    return "app.EventService"
-  }
+public extension App_EventServiceClientProtocol {
+    var serviceName: String {
+        return "app.EventService"
+    }
 
-  /// Unary call to Sync
-  ///
-  /// - Parameters:
-  ///   - request: Request to send to Sync.
-  ///   - callOptions: Call options.
-  /// - Returns: A `UnaryCall` with futures for the metadata, status and response.
-  public func sync(
-    _ request: App_UpSync,
-    callOptions: CallOptions? = nil
-  ) -> UnaryCall<App_UpSync, App_DownSync> {
-    return self.makeUnaryCall(
-      path: "/app.EventService/Sync",
-      request: request,
-      callOptions: callOptions ?? self.defaultCallOptions,
-      interceptors: self.interceptors?.makeSyncInterceptors() ?? []
-    )
-  }
+    /// Unary call to Sync
+    ///
+    /// - Parameters:
+    ///   - request: Request to send to Sync.
+    ///   - callOptions: Call options.
+    /// - Returns: A `UnaryCall` with futures for the metadata, status and response.
+    func sync(
+        _ request: App_UpSync,
+        callOptions: CallOptions? = nil
+    ) -> UnaryCall<App_UpSync, App_DownSync> {
+        return makeUnaryCall(
+            path: "/app.EventService/Sync",
+            request: request,
+            callOptions: callOptions ?? defaultCallOptions,
+            interceptors: interceptors?.makeSyncInterceptors() ?? []
+        )
+    }
 
-  /// Bidirectional streaming call to Connect
-  ///
-  /// Callers should use the `send` method on the returned object to send messages
-  /// to the server. The caller should send an `.end` after the final message has been sent.
-  ///
-  /// - Parameters:
-  ///   - callOptions: Call options.
-  ///   - handler: A closure called when each response is received from the server.
-  /// - Returns: A `ClientStreamingCall` with futures for the metadata and status.
-  public func connect(
-    callOptions: CallOptions? = nil,
-    handler: @escaping (App_Event) -> Void
-  ) -> BidirectionalStreamingCall<App_Event, App_Event> {
-    return self.makeBidirectionalStreamingCall(
-      path: "/app.EventService/Connect",
-      callOptions: callOptions ?? self.defaultCallOptions,
-      interceptors: self.interceptors?.makeConnectInterceptors() ?? [],
-      handler: handler
-    )
-  }
+    /// Bidirectional streaming call to Connect
+    ///
+    /// Callers should use the `send` method on the returned object to send messages
+    /// to the server. The caller should send an `.end` after the final message has been sent.
+    ///
+    /// - Parameters:
+    ///   - callOptions: Call options.
+    ///   - handler: A closure called when each response is received from the server.
+    /// - Returns: A `ClientStreamingCall` with futures for the metadata and status.
+    func connect(
+        callOptions: CallOptions? = nil,
+        handler: @escaping (App_Event) -> Void
+    ) -> BidirectionalStreamingCall<App_Event, App_Event> {
+        return makeBidirectionalStreamingCall(
+            path: "/app.EventService/Connect",
+            callOptions: callOptions ?? defaultCallOptions,
+            interceptors: interceptors?.makeConnectInterceptors() ?? [],
+            handler: handler
+        )
+    }
 }
 
 public protocol App_EventServiceClientInterceptorFactoryProtocol {
+    /// - Returns: Interceptors to use when invoking 'sync'.
+    func makeSyncInterceptors() -> [ClientInterceptor<App_UpSync, App_DownSync>]
 
-  /// - Returns: Interceptors to use when invoking 'sync'.
-  func makeSyncInterceptors() -> [ClientInterceptor<App_UpSync, App_DownSync>]
-
-  /// - Returns: Interceptors to use when invoking 'connect'.
-  func makeConnectInterceptors() -> [ClientInterceptor<App_Event, App_Event>]
+    /// - Returns: Interceptors to use when invoking 'connect'.
+    func makeConnectInterceptors() -> [ClientInterceptor<App_Event, App_Event>]
 }
 
 public final class App_EventServiceClient: App_EventServiceClientProtocol {
-  public let channel: GRPCChannel
-  public var defaultCallOptions: CallOptions
-  public var interceptors: App_EventServiceClientInterceptorFactoryProtocol?
+    public let channel: GRPCChannel
+    public var defaultCallOptions: CallOptions
+    public var interceptors: App_EventServiceClientInterceptorFactoryProtocol?
 
-  /// Creates a client for the app.EventService service.
-  ///
-  /// - Parameters:
-  ///   - channel: `GRPCChannel` to the service host.
-  ///   - defaultCallOptions: Options to use for each service call if the user doesn't provide them.
-  ///   - interceptors: A factory providing interceptors for each RPC.
-  public init(
-    channel: GRPCChannel,
-    defaultCallOptions: CallOptions = CallOptions(),
-    interceptors: App_EventServiceClientInterceptorFactoryProtocol? = nil
-  ) {
-    self.channel = channel
-    self.defaultCallOptions = defaultCallOptions
-    self.interceptors = interceptors
-  }
+    /// Creates a client for the app.EventService service.
+    ///
+    /// - Parameters:
+    ///   - channel: `GRPCChannel` to the service host.
+    ///   - defaultCallOptions: Options to use for each service call if the user doesn't provide them.
+    ///   - interceptors: A factory providing interceptors for each RPC.
+    public init(
+        channel: GRPCChannel,
+        defaultCallOptions: CallOptions = CallOptions(),
+        interceptors: App_EventServiceClientInterceptorFactoryProtocol? = nil
+    ) {
+        self.channel = channel
+        self.defaultCallOptions = defaultCallOptions
+        self.interceptors = interceptors
+    }
 }
 
 /// Usage: instantiate `App_ConversationServiceClient`, then call methods of this protocol to make API calls.
 public protocol App_ConversationServiceClientProtocol: GRPCClient {
-  var serviceName: String { get }
-  var interceptors: App_ConversationServiceClientInterceptorFactoryProtocol? { get }
+    var serviceName: String { get }
+    var interceptors: App_ConversationServiceClientInterceptorFactoryProtocol? { get }
 
-  func get(
-    _ request: App_ConversationGetInput,
-    callOptions: CallOptions?
-  ) -> UnaryCall<App_ConversationGetInput, App_Conversation>
+    func get(
+        _ request: App_ConversationGetInput,
+        callOptions: CallOptions?
+    ) -> UnaryCall<App_ConversationGetInput, App_Conversation>
 
-  func list(
-    _ request: App_ConversationListInput,
-    callOptions: CallOptions?,
-    handler: @escaping (App_Conversation) -> Void
-  ) -> ServerStreamingCall<App_ConversationListInput, App_Conversation>
+    func list(
+        _ request: App_ConversationListInput,
+        callOptions: CallOptions?,
+        handler: @escaping (App_Conversation) -> Void
+    ) -> ServerStreamingCall<App_ConversationListInput, App_Conversation>
 }
 
-extension App_ConversationServiceClientProtocol {
-  public var serviceName: String {
-    return "app.ConversationService"
-  }
+public extension App_ConversationServiceClientProtocol {
+    var serviceName: String {
+        return "app.ConversationService"
+    }
 
-  /// Unary call to Get
-  ///
-  /// - Parameters:
-  ///   - request: Request to send to Get.
-  ///   - callOptions: Call options.
-  /// - Returns: A `UnaryCall` with futures for the metadata, status and response.
-  public func get(
-    _ request: App_ConversationGetInput,
-    callOptions: CallOptions? = nil
-  ) -> UnaryCall<App_ConversationGetInput, App_Conversation> {
-    return self.makeUnaryCall(
-      path: "/app.ConversationService/Get",
-      request: request,
-      callOptions: callOptions ?? self.defaultCallOptions,
-      interceptors: self.interceptors?.makeGetInterceptors() ?? []
-    )
-  }
+    /// Unary call to Get
+    ///
+    /// - Parameters:
+    ///   - request: Request to send to Get.
+    ///   - callOptions: Call options.
+    /// - Returns: A `UnaryCall` with futures for the metadata, status and response.
+    func get(
+        _ request: App_ConversationGetInput,
+        callOptions: CallOptions? = nil
+    ) -> UnaryCall<App_ConversationGetInput, App_Conversation> {
+        return makeUnaryCall(
+            path: "/app.ConversationService/Get",
+            request: request,
+            callOptions: callOptions ?? defaultCallOptions,
+            interceptors: interceptors?.makeGetInterceptors() ?? []
+        )
+    }
 
-  /// TODO: Use ConversationService as output, delayed for demo
-  ///
-  /// - Parameters:
-  ///   - request: Request to send to List.
-  ///   - callOptions: Call options.
-  ///   - handler: A closure called when each response is received from the server.
-  /// - Returns: A `ServerStreamingCall` with futures for the metadata and status.
-  public func list(
-    _ request: App_ConversationListInput,
-    callOptions: CallOptions? = nil,
-    handler: @escaping (App_Conversation) -> Void
-  ) -> ServerStreamingCall<App_ConversationListInput, App_Conversation> {
-    return self.makeServerStreamingCall(
-      path: "/app.ConversationService/List",
-      request: request,
-      callOptions: callOptions ?? self.defaultCallOptions,
-      interceptors: self.interceptors?.makeListInterceptors() ?? [],
-      handler: handler
-    )
-  }
+    /// TODO: Use ConversationService as output, delayed for demo
+    ///
+    /// - Parameters:
+    ///   - request: Request to send to List.
+    ///   - callOptions: Call options.
+    ///   - handler: A closure called when each response is received from the server.
+    /// - Returns: A `ServerStreamingCall` with futures for the metadata and status.
+    func list(
+        _ request: App_ConversationListInput,
+        callOptions: CallOptions? = nil,
+        handler: @escaping (App_Conversation) -> Void
+    ) -> ServerStreamingCall<App_ConversationListInput, App_Conversation> {
+        return makeServerStreamingCall(
+            path: "/app.ConversationService/List",
+            request: request,
+            callOptions: callOptions ?? defaultCallOptions,
+            interceptors: interceptors?.makeListInterceptors() ?? [],
+            handler: handler
+        )
+    }
 }
 
 public protocol App_ConversationServiceClientInterceptorFactoryProtocol {
+    /// - Returns: Interceptors to use when invoking 'get'.
+    func makeGetInterceptors() -> [ClientInterceptor<App_ConversationGetInput, App_Conversation>]
 
-  /// - Returns: Interceptors to use when invoking 'get'.
-  func makeGetInterceptors() -> [ClientInterceptor<App_ConversationGetInput, App_Conversation>]
-
-  /// - Returns: Interceptors to use when invoking 'list'.
-  func makeListInterceptors() -> [ClientInterceptor<App_ConversationListInput, App_Conversation>]
+    /// - Returns: Interceptors to use when invoking 'list'.
+    func makeListInterceptors() -> [ClientInterceptor<App_ConversationListInput, App_Conversation>]
 }
 
 public final class App_ConversationServiceClient: App_ConversationServiceClientProtocol {
-  public let channel: GRPCChannel
-  public var defaultCallOptions: CallOptions
-  public var interceptors: App_ConversationServiceClientInterceptorFactoryProtocol?
+    public let channel: GRPCChannel
+    public var defaultCallOptions: CallOptions
+    public var interceptors: App_ConversationServiceClientInterceptorFactoryProtocol?
 
-  /// Creates a client for the app.ConversationService service.
-  ///
-  /// - Parameters:
-  ///   - channel: `GRPCChannel` to the service host.
-  ///   - defaultCallOptions: Options to use for each service call if the user doesn't provide them.
-  ///   - interceptors: A factory providing interceptors for each RPC.
-  public init(
-    channel: GRPCChannel,
-    defaultCallOptions: CallOptions = CallOptions(),
-    interceptors: App_ConversationServiceClientInterceptorFactoryProtocol? = nil
-  ) {
-    self.channel = channel
-    self.defaultCallOptions = defaultCallOptions
-    self.interceptors = interceptors
-  }
+    /// Creates a client for the app.ConversationService service.
+    ///
+    /// - Parameters:
+    ///   - channel: `GRPCChannel` to the service host.
+    ///   - defaultCallOptions: Options to use for each service call if the user doesn't provide them.
+    ///   - interceptors: A factory providing interceptors for each RPC.
+    public init(
+        channel: GRPCChannel,
+        defaultCallOptions: CallOptions = CallOptions(),
+        interceptors: App_ConversationServiceClientInterceptorFactoryProtocol? = nil
+    ) {
+        self.channel = channel
+        self.defaultCallOptions = defaultCallOptions
+        self.interceptors = interceptors
+    }
 }
 
 /// To build a server, implement a class that conforms to this protocol.
 public protocol App_UtilsProvider: CallHandlerProvider {
-  var interceptors: App_UtilsServerInterceptorFactoryProtocol? { get }
+    var interceptors: App_UtilsServerInterceptorFactoryProtocol? { get }
 
-  func healthCheck(request: App_Empty, context: StatusOnlyCallContext) -> EventLoopFuture<App_Empty>
+    func healthCheck(request: App_Empty, context: StatusOnlyCallContext) -> EventLoopFuture<App_Empty>
 }
 
-extension App_UtilsProvider {
-  public var serviceName: Substring { return "app.Utils" }
+public extension App_UtilsProvider {
+    var serviceName: Substring { return "app.Utils" }
 
-  /// Determines, calls and returns the appropriate request handler, depending on the request's method.
-  /// Returns nil for methods not handled by this service.
-  public func handle(
-    method name: Substring,
-    context: CallHandlerContext
-  ) -> GRPCServerHandlerProtocol? {
-    switch name {
-    case "HealthCheck":
-      return UnaryServerHandler(
-        context: context,
-        requestDeserializer: ProtobufDeserializer<App_Empty>(),
-        responseSerializer: ProtobufSerializer<App_Empty>(),
-        interceptors: self.interceptors?.makeHealthCheckInterceptors() ?? [],
-        userFunction: self.healthCheck(request:context:)
-      )
+    /// Determines, calls and returns the appropriate request handler, depending on the request's method.
+    /// Returns nil for methods not handled by this service.
+    func handle(
+        method name: Substring,
+        context: CallHandlerContext
+    ) -> GRPCServerHandlerProtocol? {
+        switch name {
+        case "HealthCheck":
+            return UnaryServerHandler(
+                context: context,
+                requestDeserializer: ProtobufDeserializer<App_Empty>(),
+                responseSerializer: ProtobufSerializer<App_Empty>(),
+                interceptors: interceptors?.makeHealthCheckInterceptors() ?? [],
+                userFunction: healthCheck(request:context:)
+            )
 
-    default:
-      return nil
+        default:
+            return nil
+        }
     }
-  }
 }
 
 public protocol App_UtilsServerInterceptorFactoryProtocol {
-
-  /// - Returns: Interceptors to use when handling 'healthCheck'.
-  ///   Defaults to calling `self.makeInterceptors()`.
-  func makeHealthCheckInterceptors() -> [ServerInterceptor<App_Empty, App_Empty>]
+    /// - Returns: Interceptors to use when handling 'healthCheck'.
+    ///   Defaults to calling `self.makeInterceptors()`.
+    func makeHealthCheckInterceptors() -> [ServerInterceptor<App_Empty, App_Empty>]
 }
+
 /// To build a server, implement a class that conforms to this protocol.
 public protocol App_UserServiceProvider: CallHandlerProvider {
-  var interceptors: App_UserServiceServerInterceptorFactoryProtocol? { get }
+    var interceptors: App_UserServiceServerInterceptorFactoryProtocol? { get }
 
-  func syncContacts(request: App_SyncContactsInput, context: StatusOnlyCallContext) -> EventLoopFuture<App_SyncContactsOutput>
+    func syncContacts(request: App_SyncContactsInput, context: StatusOnlyCallContext) -> EventLoopFuture<App_SyncContactsOutput>
 
-  func onboarding(request: App_OnboardingInput, context: StatusOnlyCallContext) -> EventLoopFuture<App_MeUser>
+    func onboarding(request: App_OnboardingInput, context: StatusOnlyCallContext) -> EventLoopFuture<App_MeUser>
 
-  func me(request: App_Empty, context: StatusOnlyCallContext) -> EventLoopFuture<App_MeUser>
+    func me(request: App_Empty, context: StatusOnlyCallContext) -> EventLoopFuture<App_MeUser>
 
-  func get(request: App_UserGetInput, context: StatusOnlyCallContext) -> EventLoopFuture<App_User>
+    func get(request: App_UserGetInput, context: StatusOnlyCallContext) -> EventLoopFuture<App_User>
 }
 
-extension App_UserServiceProvider {
-  public var serviceName: Substring { return "app.UserService" }
+public extension App_UserServiceProvider {
+    var serviceName: Substring { return "app.UserService" }
 
-  /// Determines, calls and returns the appropriate request handler, depending on the request's method.
-  /// Returns nil for methods not handled by this service.
-  public func handle(
-    method name: Substring,
-    context: CallHandlerContext
-  ) -> GRPCServerHandlerProtocol? {
-    switch name {
-    case "SyncContacts":
-      return UnaryServerHandler(
-        context: context,
-        requestDeserializer: ProtobufDeserializer<App_SyncContactsInput>(),
-        responseSerializer: ProtobufSerializer<App_SyncContactsOutput>(),
-        interceptors: self.interceptors?.makeSyncContactsInterceptors() ?? [],
-        userFunction: self.syncContacts(request:context:)
-      )
+    /// Determines, calls and returns the appropriate request handler, depending on the request's method.
+    /// Returns nil for methods not handled by this service.
+    func handle(
+        method name: Substring,
+        context: CallHandlerContext
+    ) -> GRPCServerHandlerProtocol? {
+        switch name {
+        case "SyncContacts":
+            return UnaryServerHandler(
+                context: context,
+                requestDeserializer: ProtobufDeserializer<App_SyncContactsInput>(),
+                responseSerializer: ProtobufSerializer<App_SyncContactsOutput>(),
+                interceptors: interceptors?.makeSyncContactsInterceptors() ?? [],
+                userFunction: syncContacts(request:context:)
+            )
 
-    case "Onboarding":
-      return UnaryServerHandler(
-        context: context,
-        requestDeserializer: ProtobufDeserializer<App_OnboardingInput>(),
-        responseSerializer: ProtobufSerializer<App_MeUser>(),
-        interceptors: self.interceptors?.makeOnboardingInterceptors() ?? [],
-        userFunction: self.onboarding(request:context:)
-      )
+        case "Onboarding":
+            return UnaryServerHandler(
+                context: context,
+                requestDeserializer: ProtobufDeserializer<App_OnboardingInput>(),
+                responseSerializer: ProtobufSerializer<App_MeUser>(),
+                interceptors: interceptors?.makeOnboardingInterceptors() ?? [],
+                userFunction: onboarding(request:context:)
+            )
 
-    case "Me":
-      return UnaryServerHandler(
-        context: context,
-        requestDeserializer: ProtobufDeserializer<App_Empty>(),
-        responseSerializer: ProtobufSerializer<App_MeUser>(),
-        interceptors: self.interceptors?.makeMeInterceptors() ?? [],
-        userFunction: self.me(request:context:)
-      )
+        case "Me":
+            return UnaryServerHandler(
+                context: context,
+                requestDeserializer: ProtobufDeserializer<App_Empty>(),
+                responseSerializer: ProtobufSerializer<App_MeUser>(),
+                interceptors: interceptors?.makeMeInterceptors() ?? [],
+                userFunction: me(request:context:)
+            )
 
-    case "Get":
-      return UnaryServerHandler(
-        context: context,
-        requestDeserializer: ProtobufDeserializer<App_UserGetInput>(),
-        responseSerializer: ProtobufSerializer<App_User>(),
-        interceptors: self.interceptors?.makeGetInterceptors() ?? [],
-        userFunction: self.get(request:context:)
-      )
+        case "Get":
+            return UnaryServerHandler(
+                context: context,
+                requestDeserializer: ProtobufDeserializer<App_UserGetInput>(),
+                responseSerializer: ProtobufSerializer<App_User>(),
+                interceptors: interceptors?.makeGetInterceptors() ?? [],
+                userFunction: get(request:context:)
+            )
 
-    default:
-      return nil
+        default:
+            return nil
+        }
     }
-  }
 }
 
 public protocol App_UserServiceServerInterceptorFactoryProtocol {
+    /// - Returns: Interceptors to use when handling 'syncContacts'.
+    ///   Defaults to calling `self.makeInterceptors()`.
+    func makeSyncContactsInterceptors() -> [ServerInterceptor<App_SyncContactsInput, App_SyncContactsOutput>]
 
-  /// - Returns: Interceptors to use when handling 'syncContacts'.
-  ///   Defaults to calling `self.makeInterceptors()`.
-  func makeSyncContactsInterceptors() -> [ServerInterceptor<App_SyncContactsInput, App_SyncContactsOutput>]
+    /// - Returns: Interceptors to use when handling 'onboarding'.
+    ///   Defaults to calling `self.makeInterceptors()`.
+    func makeOnboardingInterceptors() -> [ServerInterceptor<App_OnboardingInput, App_MeUser>]
 
-  /// - Returns: Interceptors to use when handling 'onboarding'.
-  ///   Defaults to calling `self.makeInterceptors()`.
-  func makeOnboardingInterceptors() -> [ServerInterceptor<App_OnboardingInput, App_MeUser>]
+    /// - Returns: Interceptors to use when handling 'me'.
+    ///   Defaults to calling `self.makeInterceptors()`.
+    func makeMeInterceptors() -> [ServerInterceptor<App_Empty, App_MeUser>]
 
-  /// - Returns: Interceptors to use when handling 'me'.
-  ///   Defaults to calling `self.makeInterceptors()`.
-  func makeMeInterceptors() -> [ServerInterceptor<App_Empty, App_MeUser>]
-
-  /// - Returns: Interceptors to use when handling 'get'.
-  ///   Defaults to calling `self.makeInterceptors()`.
-  func makeGetInterceptors() -> [ServerInterceptor<App_UserGetInput, App_User>]
+    /// - Returns: Interceptors to use when handling 'get'.
+    ///   Defaults to calling `self.makeInterceptors()`.
+    func makeGetInterceptors() -> [ServerInterceptor<App_UserGetInput, App_User>]
 }
+
 /// To build a server, implement a class that conforms to this protocol.
 public protocol App_EventServiceProvider: CallHandlerProvider {
-  var interceptors: App_EventServiceServerInterceptorFactoryProtocol? { get }
+    var interceptors: App_EventServiceServerInterceptorFactoryProtocol? { get }
 
-  func sync(request: App_UpSync, context: StatusOnlyCallContext) -> EventLoopFuture<App_DownSync>
+    func sync(request: App_UpSync, context: StatusOnlyCallContext) -> EventLoopFuture<App_DownSync>
 
-  func connect(context: StreamingResponseCallContext<App_Event>) -> EventLoopFuture<(StreamEvent<App_Event>) -> Void>
+    func connect(context: StreamingResponseCallContext<App_Event>) -> EventLoopFuture<(StreamEvent<App_Event>) -> Void>
 }
 
-extension App_EventServiceProvider {
-  public var serviceName: Substring { return "app.EventService" }
+public extension App_EventServiceProvider {
+    var serviceName: Substring { return "app.EventService" }
 
-  /// Determines, calls and returns the appropriate request handler, depending on the request's method.
-  /// Returns nil for methods not handled by this service.
-  public func handle(
-    method name: Substring,
-    context: CallHandlerContext
-  ) -> GRPCServerHandlerProtocol? {
-    switch name {
-    case "Sync":
-      return UnaryServerHandler(
-        context: context,
-        requestDeserializer: ProtobufDeserializer<App_UpSync>(),
-        responseSerializer: ProtobufSerializer<App_DownSync>(),
-        interceptors: self.interceptors?.makeSyncInterceptors() ?? [],
-        userFunction: self.sync(request:context:)
-      )
+    /// Determines, calls and returns the appropriate request handler, depending on the request's method.
+    /// Returns nil for methods not handled by this service.
+    func handle(
+        method name: Substring,
+        context: CallHandlerContext
+    ) -> GRPCServerHandlerProtocol? {
+        switch name {
+        case "Sync":
+            return UnaryServerHandler(
+                context: context,
+                requestDeserializer: ProtobufDeserializer<App_UpSync>(),
+                responseSerializer: ProtobufSerializer<App_DownSync>(),
+                interceptors: interceptors?.makeSyncInterceptors() ?? [],
+                userFunction: sync(request:context:)
+            )
 
-    case "Connect":
-      return BidirectionalStreamingServerHandler(
-        context: context,
-        requestDeserializer: ProtobufDeserializer<App_Event>(),
-        responseSerializer: ProtobufSerializer<App_Event>(),
-        interceptors: self.interceptors?.makeConnectInterceptors() ?? [],
-        observerFactory: self.connect(context:)
-      )
+        case "Connect":
+            return BidirectionalStreamingServerHandler(
+                context: context,
+                requestDeserializer: ProtobufDeserializer<App_Event>(),
+                responseSerializer: ProtobufSerializer<App_Event>(),
+                interceptors: interceptors?.makeConnectInterceptors() ?? [],
+                observerFactory: connect(context:)
+            )
 
-    default:
-      return nil
+        default:
+            return nil
+        }
     }
-  }
 }
 
 public protocol App_EventServiceServerInterceptorFactoryProtocol {
+    /// - Returns: Interceptors to use when handling 'sync'.
+    ///   Defaults to calling `self.makeInterceptors()`.
+    func makeSyncInterceptors() -> [ServerInterceptor<App_UpSync, App_DownSync>]
 
-  /// - Returns: Interceptors to use when handling 'sync'.
-  ///   Defaults to calling `self.makeInterceptors()`.
-  func makeSyncInterceptors() -> [ServerInterceptor<App_UpSync, App_DownSync>]
-
-  /// - Returns: Interceptors to use when handling 'connect'.
-  ///   Defaults to calling `self.makeInterceptors()`.
-  func makeConnectInterceptors() -> [ServerInterceptor<App_Event, App_Event>]
+    /// - Returns: Interceptors to use when handling 'connect'.
+    ///   Defaults to calling `self.makeInterceptors()`.
+    func makeConnectInterceptors() -> [ServerInterceptor<App_Event, App_Event>]
 }
+
 /// To build a server, implement a class that conforms to this protocol.
 public protocol App_ConversationServiceProvider: CallHandlerProvider {
-  var interceptors: App_ConversationServiceServerInterceptorFactoryProtocol? { get }
+    var interceptors: App_ConversationServiceServerInterceptorFactoryProtocol? { get }
 
-  func get(request: App_ConversationGetInput, context: StatusOnlyCallContext) -> EventLoopFuture<App_Conversation>
+    func get(request: App_ConversationGetInput, context: StatusOnlyCallContext) -> EventLoopFuture<App_Conversation>
 
-  /// TODO: Use ConversationService as output, delayed for demo
-  func list(request: App_ConversationListInput, context: StreamingResponseCallContext<App_Conversation>) -> EventLoopFuture<GRPCStatus>
+    // TODO: Use ConversationService as output, delayed for demo
+    func list(request: App_ConversationListInput, context: StreamingResponseCallContext<App_Conversation>) -> EventLoopFuture<GRPCStatus>
 }
 
-extension App_ConversationServiceProvider {
-  public var serviceName: Substring { return "app.ConversationService" }
+public extension App_ConversationServiceProvider {
+    var serviceName: Substring { return "app.ConversationService" }
 
-  /// Determines, calls and returns the appropriate request handler, depending on the request's method.
-  /// Returns nil for methods not handled by this service.
-  public func handle(
-    method name: Substring,
-    context: CallHandlerContext
-  ) -> GRPCServerHandlerProtocol? {
-    switch name {
-    case "Get":
-      return UnaryServerHandler(
-        context: context,
-        requestDeserializer: ProtobufDeserializer<App_ConversationGetInput>(),
-        responseSerializer: ProtobufSerializer<App_Conversation>(),
-        interceptors: self.interceptors?.makeGetInterceptors() ?? [],
-        userFunction: self.get(request:context:)
-      )
+    /// Determines, calls and returns the appropriate request handler, depending on the request's method.
+    /// Returns nil for methods not handled by this service.
+    func handle(
+        method name: Substring,
+        context: CallHandlerContext
+    ) -> GRPCServerHandlerProtocol? {
+        switch name {
+        case "Get":
+            return UnaryServerHandler(
+                context: context,
+                requestDeserializer: ProtobufDeserializer<App_ConversationGetInput>(),
+                responseSerializer: ProtobufSerializer<App_Conversation>(),
+                interceptors: interceptors?.makeGetInterceptors() ?? [],
+                userFunction: get(request:context:)
+            )
 
-    case "List":
-      return ServerStreamingServerHandler(
-        context: context,
-        requestDeserializer: ProtobufDeserializer<App_ConversationListInput>(),
-        responseSerializer: ProtobufSerializer<App_Conversation>(),
-        interceptors: self.interceptors?.makeListInterceptors() ?? [],
-        userFunction: self.list(request:context:)
-      )
+        case "List":
+            return ServerStreamingServerHandler(
+                context: context,
+                requestDeserializer: ProtobufDeserializer<App_ConversationListInput>(),
+                responseSerializer: ProtobufSerializer<App_Conversation>(),
+                interceptors: interceptors?.makeListInterceptors() ?? [],
+                userFunction: list(request:context:)
+            )
 
-    default:
-      return nil
+        default:
+            return nil
+        }
     }
-  }
 }
 
 public protocol App_ConversationServiceServerInterceptorFactoryProtocol {
+    /// - Returns: Interceptors to use when handling 'get'.
+    ///   Defaults to calling `self.makeInterceptors()`.
+    func makeGetInterceptors() -> [ServerInterceptor<App_ConversationGetInput, App_Conversation>]
 
-  /// - Returns: Interceptors to use when handling 'get'.
-  ///   Defaults to calling `self.makeInterceptors()`.
-  func makeGetInterceptors() -> [ServerInterceptor<App_ConversationGetInput, App_Conversation>]
-
-  /// - Returns: Interceptors to use when handling 'list'.
-  ///   Defaults to calling `self.makeInterceptors()`.
-  func makeListInterceptors() -> [ServerInterceptor<App_ConversationListInput, App_Conversation>]
+    /// - Returns: Interceptors to use when handling 'list'.
+    ///   Defaults to calling `self.makeInterceptors()`.
+    func makeListInterceptors() -> [ServerInterceptor<App_ConversationListInput, App_Conversation>]
 }

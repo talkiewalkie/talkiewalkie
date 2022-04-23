@@ -119,6 +119,7 @@
 		E434221127294AF9006976ED /* GiphyUISDK in Frameworks */ = {isa = PBXBuildFile; productRef = E434221027294AF9006976ED /* GiphyUISDK */; };
 		E482102E271AD91E00A84A2C /* InboxViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E482102D271AD91E00A84A2C /* InboxViewModel.swift */; };
 		E4821030271B0CF600A84A2C /* ConversationViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E482102F271B0CF500A84A2C /* ConversationViewModel.swift */; };
+		E4B42078274C657A00D1B191 /* UserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4B42077274C657A00D1B191 /* UserDefaults.swift */; };
 		E4CC791A271B3310003C359A /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = E4CC7919271B3310003C359A /* FirebaseAnalytics */; };
 		E4CC791C271B3310003C359A /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = E4CC791B271B3310003C359A /* FirebaseAuth */; };
 		E4CC791E271B3310003C359A /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = E4CC791D271B3310003C359A /* FirebaseCrashlytics */; };
@@ -257,6 +258,7 @@
 		73B63B4C2710879A00994B92 /* mic-off.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = "mic-off.json"; sourceTree = "<group>"; };
 		E482102D271AD91E00A84A2C /* InboxViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InboxViewModel.swift; sourceTree = "<group>"; };
 		E482102F271B0CF500A84A2C /* ConversationViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationViewModel.swift; sourceTree = "<group>"; };
+		E4B42077274C657A00D1B191 /* UserDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaults.swift; sourceTree = "<group>"; };
 		E4CC7921271B3C28003C359A /* ContactListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactListView.swift; sourceTree = "<group>"; };
 		E4CC7923271C1149003C359A /* CNContactStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CNContactStore.swift; sourceTree = "<group>"; };
 		E4CC7925271C136D003C359A /* AutomaticAvatar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutomaticAvatar.swift; sourceTree = "<group>"; };
@@ -524,6 +526,7 @@
 				E4CC7923271C1149003C359A /* CNContactStore.swift */,
 				E4CC7929271D4F86003C359A /* Published.swift */,
 				73ABB4B52728971E00592F38 /* View+hideKeyboard.swift */,
+				E4B42077274C657A00D1B191 /* UserDefaults.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -878,6 +881,7 @@
 				73ABB4B22728146000592F38 /* TextView.swift in Sources */,
 				73AB53CD27204CF200AA6033 /* _FlexibleView.swift in Sources */,
 				73853D4F270C4ED900B0B4BF /* SettingsView.swift in Sources */,
+				E4B42078274C657A00D1B191 /* UserDefaults.swift in Sources */,
 				737660B4270DDFB9001BA79F /* MessageDetailView.swift in Sources */,
 				E4821030271B0CF600A84A2C /* ConversationViewModel.swift in Sources */,
 				734BF831270CB6E5008438D9 /* RecordButton.swift in Sources */,

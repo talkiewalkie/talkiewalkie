@@ -38,36 +38,37 @@ func AuthInterceptor(c *Components) func(ctx context.Context) (context.Context, 
 		if err != nil {
 			return nil, err
 		}
-
-		u, err := models.Users(models.UserWhere.FirebaseUID.EQ(null.StringFrom(uid))).One(ctx, c.Db)
+		var me *models.User
+		me, err = models.Users(models.UserWhere.FirebaseUID.EQ(null.StringFrom(uid))).One(ctx, c.Db)
 		if err != nil && errors2.Cause(err) == sql.ErrNoRows {
-			u = &models.User{
-				PhoneNumber: phone,
-				FirebaseUID: null.StringFrom(uid),
-
-				DisplayName:    null.StringFromPtr(nil),
-				ProfilePicture: null.IntFromPtr(nil), // TODO reupload picture
-			}
-			if err = u.Insert(ctx, c.Db, boil.Infer()); err != nil {
-				return nil, status.Error(codes.Internal, fmt.Sprintf("could not create matching db user for new firebase user: %+v", err))
+			me, err = models.Users(models.UserWhere.PhoneNumber.EQ(phone)).One(ctx, c.Db)
+			if err != nil && errors2.Cause(err) == sql.ErrNoRows {
+				return nil, status.Errorf(codes.InvalidArgument, "no known user locally for the uid: (%s)", uid)
 			}
 
-			if err = CreateDefaultConversation(c, ctx, u); err != nil {
-				return nil, err
+			if me.FirebaseUID.Valid {
+				return nil, status.Error(codes.InvalidArgument, "could not login via phone number for a user with a registered Firebase UID")
+			}
+			// Registering new user.
+			me.FirebaseUID = null.StringFrom(uid)
+			if _, err = me.Update(ctx, c.Db, boil.Infer()); err != nil {
+				return nil, status.Errorf(codes.Internal, "failed to update new user's Firebase UID: %+v", err)
 			}
 		} else if err != nil {
-			return nil, status.Error(codes.Internal, fmt.Sprintf("failed to query for user uid: %+v", err))
+			return nil, status.Errorf(codes.Internal, "failed to query for user uid: %+v", err)
+		} else if me.PhoneNumber != phone {
+			return nil, status.Errorf(codes.Internal, "could not match the firebase user phone number (%s) with the one in db (%s)", phone, me.PhoneNumber)
 		}
 
-		newCtx := context.WithValue(ctx, "me", u)
+		newCtx := context.WithValue(ctx, "me", me)
 		return newCtx, nil
 	}
 }
 
 func CreateDefaultConversation(c *Components, ctx context.Context, u *models.User) error {
 	// TODO: fetch only once in component init
-	twDefaultFriends := []string{"k6WhmQLnpvUCeKuDdpknVzBUu9r1", "YUqVmo08xvXqPZLTYXX7qkvuvGn2"}
-	firstFriend := twDefaultFriends[rand.Intn(2)]
+	twDefaultFriends := []string{"k6WhmQLnpvUCeKuDdpknVzBUu9r1"}
+	firstFriend := twDefaultFriends[rand.Intn(1)]
 	friend, err := models.Users(models.UserWhere.FirebaseUID.EQ(null.StringFrom(firstFriend))).One(ctx, c.Db)
 	if err != nil {
 		return status.Error(codes.Internal, fmt.Sprintf("could not create find default friend: %+v", err))
@@ -91,7 +92,7 @@ func CreateDefaultConversation(c *Components, ctx context.Context, u *models.Use
 	}
 	if err = (&models.Message{
 		Type:           models.MessageTypeText,
-		Text:           null.StringFrom("Hey! This is your open line with the TalkieWalkie team 🤓!"),
+		Text:           null.StringFrom("Hey! This is your open line with me, Théo, from the TalkieWalkie team 🤓!"),
 		ConversationID: firstConv.ID,
 		AuthorID:       null.IntFrom(friend.ID),
 	}).Insert(ctx, tx, boil.Infer()); err != nil {

@@ -2,16 +2,15 @@ import SwiftUI
 
 /// A SwiftUI TextView implementation that supports both scrolling and auto-sizing layouts
 public struct AutoTextField: View {
-
     @Environment(\.layoutDirection) private var layoutDirection
 
     @Binding private var text: NSAttributedString
     @Binding private var isEmpty: Bool
     @Binding private var isFocused: Bool
-    
+
     @State private var fixedLinesHeight: CGFloat = 22
     @State private var flexibleHeight: CGFloat = 44
-    
+
     @State var isScrollingEnabled: Bool = true
 
     private var onEditingChanged: (() -> Void)?
@@ -34,7 +33,7 @@ public struct AutoTextField: View {
     var autoDetectionTypes: UIDataDetectorTypes = []
     var allowRichText: Bool
     var maxHeight: CGFloat = .infinity
-    
+
     /// Makes a new TextView with the specified configuration
     /// - Parameters:
     ///   - text: A binding to the text
@@ -45,8 +44,8 @@ public struct AutoTextField: View {
                 isFocused: Binding<Bool>,
                 shouldEditInRange: ((Range<String.Index>, String) -> Bool)? = nil,
                 onEditingChanged: (() -> Void)? = nil,
-                onCommit: (() -> Void)? = nil
-    ) {
+                onCommit: (() -> Void)? = nil)
+    {
         _text = Binding(
             get: { NSAttributedString(string: text.wrappedValue) },
             set: { text.wrappedValue = $0.string }
@@ -56,8 +55,8 @@ public struct AutoTextField: View {
             get: { text.wrappedValue.isEmpty },
             set: { _ in }
         )
-        
-        self._isFocused = isFocused
+
+        _isFocused = isFocused
         self.onCommit = onCommit
         self.shouldEditInRange = shouldEditInRange
         self.onEditingChanged = onEditingChanged
@@ -73,15 +72,15 @@ public struct AutoTextField: View {
     public init(_ text: Binding<NSAttributedString>,
                 isFocused: Binding<Bool>,
                 onEditingChanged: (() -> Void)? = nil,
-                onCommit: (() -> Void)? = nil
-    ) {
+                onCommit: (() -> Void)? = nil)
+    {
         _text = text
         _isEmpty = Binding(
             get: { text.wrappedValue.string.isEmpty },
             set: { _ in }
         )
-        
-        self._isFocused = isFocused
+
+        _isFocused = isFocused
         self.onCommit = onCommit
         self.onEditingChanged = onEditingChanged
 
@@ -90,7 +89,7 @@ public struct AutoTextField: View {
 
     public var body: some View {
         let height = min(maximumNumberOfLines > 0 ? fixedLinesHeight : flexibleHeight, maxHeight)
-        
+
         Representable(
             text: $text,
             isFocused: $isFocused,
@@ -128,19 +127,16 @@ public struct AutoTextField: View {
             alignment: .topLeading
         )
     }
-
 }
 
 final class UIKitTextView: UITextView {
-
     override var keyCommands: [UIKeyCommand]? {
         return (super.keyCommands ?? []) + [
-            UIKeyCommand(input: UIKeyCommand.inputEscape, modifierFlags: [], action: #selector(escape(_:)))
+            UIKeyCommand(input: UIKeyCommand.inputEscape, modifierFlags: [], action: #selector(escape(_:))),
         ]
     }
 
-    @objc private func escape(_ sender: Any) {
+    @objc private func escape(_: Any) {
         resignFirstResponder()
     }
-
 }

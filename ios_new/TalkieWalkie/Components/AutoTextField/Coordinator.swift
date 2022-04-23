@@ -1,11 +1,10 @@
-import SwiftUI
 import OSLog
+import SwiftUI
 
 extension AutoTextField.Representable {
     final class Coordinator: NSObject, UITextViewDelegate {
-
         internal let textView: UIKitTextView
-        
+
         private var originalText: NSAttributedString = .init()
         private var text: Binding<NSAttributedString>
         private var isFocused: Binding<Bool>
@@ -26,12 +25,12 @@ extension AutoTextField.Representable {
              maxHeight: CGFloat,
              shouldEditInRange: ((Range<String.Index>, String) -> Bool)?,
              onEditingChanged: (() -> Void)?,
-             onCommit: (() -> Void)?
-        ) {
+             onCommit: (() -> Void)?)
+        {
             textView = UIKitTextView()
             textView.backgroundColor = .clear
             textView.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
-            
+
             self.text = text
             self.isFocused = isFocused
             self.flexibleHeight = flexibleHeight
@@ -46,11 +45,11 @@ extension AutoTextField.Representable {
             textView.delegate = self
         }
 
-        func textViewDidBeginEditing(_ textView: UITextView) {
+        func textViewDidBeginEditing(_: UITextView) {
             DispatchQueue.main.async {
                 self.isFocused.wrappedValue = true
             }
-            
+
             originalText = text.wrappedValue
         }
 
@@ -60,7 +59,7 @@ extension AutoTextField.Representable {
             onEditingChanged?()
         }
 
-        func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
+        func textView(_ textView: UITextView, shouldChangeTextIn _: NSRange, replacementText text: String) -> Bool {
             if onCommit != nil, text == "\n" {
                 onCommit?()
                 originalText = NSAttributedString(attributedString: textView.attributedText)
@@ -71,23 +70,20 @@ extension AutoTextField.Representable {
             return true
         }
 
-        func textViewDidEndEditing(_ textView: UITextView) {
+        func textViewDidEndEditing(_: UITextView) {
             DispatchQueue.main.async {
                 self.isFocused.wrappedValue = false
             }
-            
+
             // this check is to ensure we always commit text when we're not using a closure
             if onCommit != nil {
                 text.wrappedValue = originalText
             }
         }
-
     }
-
 }
 
 extension AutoTextField.Representable.Coordinator {
-
     func update(representable: AutoTextField.Representable) {
         textView.attributedText = representable.text
         textView.font = representable.font
@@ -126,33 +122,33 @@ extension AutoTextField.Representable.Coordinator {
             textView.textContainer.lineFragmentPadding = 0
             textView.textContainerInset = .zero
         }
-        
+
         recalculateHeight(newMaximumNumberOfLines: representable.maximumNumberOfLines)
-        
+
         textView.textContainer.maximumNumberOfLines = representable.maximumNumberOfLines
         if representable.maximumNumberOfLines > 0 {
             textView.textContainer.lineBreakMode = representable.truncationMode
         } else {
             textView.textContainer.lineBreakMode = .byWordWrapping
         }
-        
+
         if representable.isFocused {
             textView.becomeFirstResponder()
         }
-        
+
         textView.setNeedsDisplay()
     }
 
     private func recalculateHeight(newMaximumNumberOfLines: Int) {
         let currentMaximumNumberOfLines = textView.textContainer.maximumNumberOfLines
         let currentHeight = newMaximumNumberOfLines > 0 ? fixedLinesHeight : flexibleHeight
-        
+
         let newSize = textView.sizeThatFits(CGSize(width: textView.frame.width, height: .greatestFiniteMagnitude))
         let enableScrolling: Bool
-        
+
         if currentMaximumNumberOfLines == newMaximumNumberOfLines || textView.attributedText.string.isEmpty {
-            enableScrolling = newSize.height > self.maxHeight
-            
+            enableScrolling = newSize.height > maxHeight
+
             if currentHeight.wrappedValue != newSize.height {
                 DispatchQueue.main.async {
                     currentHeight.wrappedValue = newSize.height
@@ -162,10 +158,10 @@ extension AutoTextField.Representable.Coordinator {
             if newMaximumNumberOfLines > 0 {
                 enableScrolling = false
             } else {
-                enableScrolling = currentHeight.wrappedValue > self.maxHeight
+                enableScrolling = currentHeight.wrappedValue > maxHeight
             }
         }
-        
+
         if isScrollingEnabled.wrappedValue != enableScrolling {
             DispatchQueue.main.async {
                 self.isScrollingEnabled.wrappedValue = enableScrolling
@@ -173,7 +169,6 @@ extension AutoTextField.Representable.Coordinator {
         }
     }
 }
-
 
 extension UITextView {
     func numberOfLines() -> Int {

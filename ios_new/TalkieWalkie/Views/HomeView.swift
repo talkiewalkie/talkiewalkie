@@ -19,8 +19,8 @@ class MessageViewModel: ObservableObject {
 struct HomeView: View {
     @EnvironmentObject var authed: AuthState
 
-    @AppStorage("name") var name: String = ""
-    @AppStorage("showOnboarding") var showOnboarding: Bool = false
+    @AppStorage(UserDefaults.Keys.displayName.rawValue) var name: String = ""
+    @AppStorage(UserDefaults.Keys.showOnboarding.rawValue) var showOnboarding: Bool = false
 
     var body: some View {
         if showOnboarding {
@@ -28,12 +28,12 @@ struct HomeView: View {
                 self.showOnboarding = false
 
                 DispatchQueue.global().async {
-                    if case .Connected(let api, _) = authed.state {
+                    if case let .Connected(api, _) = authed.state {
                         _ = api.onboardingComplete(displayName: name, locales: ["fr"])
                     }
                 }
             })
-        } else if authed.me == nil || authed.firebaseUser == nil {
+        } else if authed.firebaseUser == nil {
             ProgressView().onAppear {
                 sleep(1)
                 authed.logout()

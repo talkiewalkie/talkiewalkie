@@ -15,6 +15,7 @@ message Empty {}
 
 message User {
   string displayName = 1;
+  string handle = 5;
   string uuid = 2;
   repeated Conversation conversations = 3;
   string phone = 4;
@@ -46,10 +47,28 @@ message SyncContactsOutput {
   repeated User users = 1;
 }
 
+message SearchInput {
+  string prefix = 1;
+}
+
+message SearchOutput {
+  repeated User users = 1;
+}
+
+message CreateUserInput {
+  string handle = 1;
+  string displayName = 2;
+  string phoneNumber = 3;
+}
+
 service UserService {
-  rpc SyncContacts(SyncContactsInput) returns (SyncContactsOutput) {}
+  rpc CreateUser(CreateUserInput) returns (User) {}
   rpc Onboarding(OnboardingInput) returns (MeUser) {}
+
+  rpc SyncContacts(SyncContactsInput) returns (SyncContactsOutput) {}
   rpc Me(Empty)  returns (MeUser) {}
+
+  rpc Search(SearchInput) returns (SearchOutput) {}
   rpc Get(UserGetInput)  returns (User) {}
 }
 
@@ -205,4 +224,3 @@ service ConversationService {
   // TODO: Use ConversationService as output, delayed for demo
   rpc List(ConversationListInput) returns (stream Conversation) {}
 }
-

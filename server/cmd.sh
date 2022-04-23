@@ -8,10 +8,15 @@ install_golang_migrate_cli() {
   brew install golang-migrate
 }
 
+fmt() {
+  gofmt -w testutils/ api/ common/ cmd/ clients/ repositories/**/* pkg/
+  goimports -local github.com/talkiewalkie -w testutils/ api/ common/ cmd/ clients/ repositories/**/* pkg/
+}
+
 migrate_up() {
-    source .env.dev && \
-      migrate -path migrations -database postgres://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST:5432/talkiewalkie?sslmode=disable up
-    go generate
+  source .env.dev &&
+    migrate -path migrations -database postgres://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST:5432/talkiewalkie?sslmode=disable up
+  go generate
 }
 
 nukedb() {
@@ -61,7 +66,7 @@ kube_back() {
 }
 
 install_proto_plugins() {
-  go get google.golang.org/protobuf/cmd/protoc-gen-go  google.golang.org/grpc/cmd/protoc-gen-go-grpc
+  go get google.golang.org/protobuf/cmd/protoc-gen-go google.golang.org/grpc/cmd/protoc-gen-go-grpc
 }
 
 grpc() {
@@ -70,6 +75,10 @@ grpc() {
     --go_out=pb --go-grpc_out=pb \
     --go_opt=paths=source_relative --go-grpc_opt=paths=source_relative,require_unimplemented_servers=false \
     protos/audio_proc.proto
+}
+
+help() {
+  declare -F
 }
 
 "$@"

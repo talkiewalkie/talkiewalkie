@@ -11,7 +11,7 @@ import FirebaseAuth
 import PhoneNumberKit
 import SwiftUI
 
-struct ContactListView: View {
+struct ContactsScreen: View {
     @EnvironmentObject var model: OnboardingViewModel
     @EnvironmentObject var authState: AuthState
 
@@ -21,7 +21,7 @@ struct ContactListView: View {
 
     @State var phoneNumberKit = PhoneNumberKit()
 
-    @AppStorage("hasRefusedSharingContactList") var hasRefusedSharingContactList: Bool = false
+    @AppStorage(UserDefaults.Keys.hasRefusedSharingContacts.rawValue) var hasRefusedSharingContactList: Bool = false
 
     var body: some View {
         ZStack {
@@ -85,7 +85,7 @@ struct ContactListView: View {
                     hasRefusedSharingContactList = false
                     let contactStore = CNContactStore()
                     let contactList = contactStore.allLocalPhoneNumbers()
-                    if case .Connected(let api, _) = authState.state {
+                    if case let .Connected(api, _) = authState.state {
                         loading = true
                         DispatchQueue.global(qos: .background).async {
                             let (twCL, _) = api.syncContactList(phones: contactList.map {
@@ -112,12 +112,5 @@ struct ContactListView: View {
                 }
             }
         }
-    }
-}
-
-struct ContactListView_Previews: PreviewProvider {
-    static var previews: some View {
-        ContactListView()
-            .withDummmyEnvironments()
     }
 }

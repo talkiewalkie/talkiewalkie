@@ -1,7 +1,6 @@
 import SwiftUI
 
 public extension AutoTextField {
-
     /// Specifies whether or not this view allows rich text
     /// - Parameter enabled: If `true`, rich text editing controls will be enabled for the user
     func allowsRichText(_ enabled: Bool) -> AutoTextField {
@@ -37,7 +36,7 @@ public extension AutoTextField {
         view.placeholderView = AnyView(placeholder)
         return view
     }
-    
+
     /// Specify the maximum height
     func setMaxHeight(_ maxHeight: CGFloat) -> AutoTextField {
         var view = self
@@ -164,11 +163,10 @@ public extension AutoTextField {
         }
         return view
     }
-    
+
     func maxLines(_ maximumNumberOfLines: Int) -> AutoTextField {
         var view = self
         view.maximumNumberOfLines = maximumNumberOfLines
         return view
     }
-
 }

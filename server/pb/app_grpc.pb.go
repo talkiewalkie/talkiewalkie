@@ -102,9 +102,11 @@ var Utils_ServiceDesc = grpc.ServiceDesc{
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type UserServiceClient interface {
-	SyncContacts(ctx context.Context, in *SyncContactsInput, opts ...grpc.CallOption) (*SyncContactsOutput, error)
+	CreateUser(ctx context.Context, in *CreateUserInput, opts ...grpc.CallOption) (*User, error)
 	Onboarding(ctx context.Context, in *OnboardingInput, opts ...grpc.CallOption) (*MeUser, error)
+	SyncContacts(ctx context.Context, in *SyncContactsInput, opts ...grpc.CallOption) (*SyncContactsOutput, error)
 	Me(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*MeUser, error)
+	Search(ctx context.Context, in *SearchInput, opts ...grpc.CallOption) (*SearchOutput, error)
 	Get(ctx context.Context, in *UserGetInput, opts ...grpc.CallOption) (*User, error)
 }
 
@@ -116,9 +118,9 @@ func NewUserServiceClient(cc grpc.ClientConnInterface) UserServiceClient {
 	return &userServiceClient{cc}
 }
 
-func (c *userServiceClient) SyncContacts(ctx context.Context, in *SyncContactsInput, opts ...grpc.CallOption) (*SyncContactsOutput, error) {
-	out := new(SyncContactsOutput)
-	err := c.cc.Invoke(ctx, "/app.UserService/SyncContacts", in, out, opts...)
+func (c *userServiceClient) CreateUser(ctx context.Context, in *CreateUserInput, opts ...grpc.CallOption) (*User, error) {
+	out := new(User)
+	err := c.cc.Invoke(ctx, "/app.UserService/CreateUser", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -134,9 +136,27 @@ func (c *userServiceClient) Onboarding(ctx context.Context, in *OnboardingInput,
 	return out, nil
 }
 
+func (c *userServiceClient) SyncContacts(ctx context.Context, in *SyncContactsInput, opts ...grpc.CallOption) (*SyncContactsOutput, error) {
+	out := new(SyncContactsOutput)
+	err := c.cc.Invoke(ctx, "/app.UserService/SyncContacts", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *userServiceClient) Me(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*MeUser, error) {
 	out := new(MeUser)
 	err := c.cc.Invoke(ctx, "/app.UserService/Me", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) Search(ctx context.Context, in *SearchInput, opts ...grpc.CallOption) (*SearchOutput, error) {
+	out := new(SearchOutput)
+	err := c.cc.Invoke(ctx, "/app.UserService/Search", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -156,9 +176,11 @@ func (c *userServiceClient) Get(ctx context.Context, in *UserGetInput, opts ...g
 // All implementations should embed UnimplementedUserServiceServer
 // for forward compatibility
 type UserServiceServer interface {
-	SyncContacts(context.Context, *SyncContactsInput) (*SyncContactsOutput, error)
+	CreateUser(context.Context, *CreateUserInput) (*User, error)
 	Onboarding(context.Context, *OnboardingInput) (*MeUser, error)
+	SyncContacts(context.Context, *SyncContactsInput) (*SyncContactsOutput, error)
 	Me(context.Context, *Empty) (*MeUser, error)
+	Search(context.Context, *SearchInput) (*SearchOutput, error)
 	Get(context.Context, *UserGetInput) (*User, error)
 }
 
@@ -166,14 +188,20 @@ type UserServiceServer interface {
 type UnimplementedUserServiceServer struct {
 }
 
-func (UnimplementedUserServiceServer) SyncContacts(context.Context, *SyncContactsInput) (*SyncContactsOutput, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SyncContacts not implemented")
+func (UnimplementedUserServiceServer) CreateUser(context.Context, *CreateUserInput) (*User, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateUser not implemented")
 }
 func (UnimplementedUserServiceServer) Onboarding(context.Context, *OnboardingInput) (*MeUser, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Onboarding not implemented")
 }
+func (UnimplementedUserServiceServer) SyncContacts(context.Context, *SyncContactsInput) (*SyncContactsOutput, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SyncContacts not implemented")
+}
 func (UnimplementedUserServiceServer) Me(context.Context, *Empty) (*MeUser, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Me not implemented")
+}
+func (UnimplementedUserServiceServer) Search(context.Context, *SearchInput) (*SearchOutput, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Search not implemented")
 }
 func (UnimplementedUserServiceServer) Get(context.Context, *UserGetInput) (*User, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
@@ -190,20 +218,20 @@ func RegisterUserServiceServer(s grpc.ServiceRegistrar, srv UserServiceServer) {
 	s.RegisterService(&UserService_ServiceDesc, srv)
 }
 
-func _UserService_SyncContacts_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SyncContactsInput)
+func _UserService_CreateUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateUserInput)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(UserServiceServer).SyncContacts(ctx, in)
+		return srv.(UserServiceServer).CreateUser(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/app.UserService/SyncContacts",
+		FullMethod: "/app.UserService/CreateUser",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserServiceServer).SyncContacts(ctx, req.(*SyncContactsInput))
+		return srv.(UserServiceServer).CreateUser(ctx, req.(*CreateUserInput))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -226,6 +254,24 @@ func _UserService_Onboarding_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UserService_SyncContacts_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SyncContactsInput)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).SyncContacts(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/app.UserService/SyncContacts",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).SyncContacts(ctx, req.(*SyncContactsInput))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _UserService_Me_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Empty)
 	if err := dec(in); err != nil {
@@ -240,6 +286,24 @@ func _UserService_Me_Handler(srv interface{}, ctx context.Context, dec func(inte
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(UserServiceServer).Me(ctx, req.(*Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserService_Search_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SearchInput)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).Search(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/app.UserService/Search",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).Search(ctx, req.(*SearchInput))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -270,16 +334,24 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*UserServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "SyncContacts",
-			Handler:    _UserService_SyncContacts_Handler,
+			MethodName: "CreateUser",
+			Handler:    _UserService_CreateUser_Handler,
 		},
 		{
 			MethodName: "Onboarding",
 			Handler:    _UserService_Onboarding_Handler,
 		},
 		{
+			MethodName: "SyncContacts",
+			Handler:    _UserService_SyncContacts_Handler,
+		},
+		{
 			MethodName: "Me",
 			Handler:    _UserService_Me_Handler,
+		},
+		{
+			MethodName: "Search",
+			Handler:    _UserService_Search_Handler,
 		},
 		{
 			MethodName: "Get",

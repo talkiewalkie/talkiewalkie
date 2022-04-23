@@ -8,8 +8,8 @@
 import SwiftUI
 
 struct TextMessageView: View {
-    // TODO
-    
+    // TODO:
+
     var body: some View {
         Text("Hello, World!")
     }

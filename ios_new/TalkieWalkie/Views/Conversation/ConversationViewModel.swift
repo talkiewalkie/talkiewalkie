@@ -20,7 +20,7 @@ class ConversationViewModel: ObservableObject {
 
     func loadMessages() {
         DispatchQueue.global(qos: .background).async {
-            if case .Connected(let api, _) = self.authed.state, let uuid = self.conversation.uuid {
+            if case let .Connected(api, _) = self.authed.state, let uuid = self.conversation.uuid {
                 self.loading = true
                 let (remoteConv, _) = api.convByUuid(uuid)
                 self.loading = false

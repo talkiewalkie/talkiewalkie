@@ -41,6 +41,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         // Push Notifcations
         UNUserNotificationCenter.current().delegate = self
+        let authOptions: UNAuthorizationOptions = [.alert, .badge, .sound]
+        UNUserNotificationCenter.current().requestAuthorization(
+            options: authOptions,
+            completionHandler: { _, _ in }
+        )
 
         application.registerForRemoteNotifications()
 
@@ -52,7 +57,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         Giphy.configure(apiKey: "9eyAVdK8MCwzgBwTN1vTi0cNoIHNQ3oM")
 
         // HACK: display LaunchScreen 1s longer
-        sleep(1)
+        // sleep(1)
 
         return true
     }
@@ -84,9 +89,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func applicationWillTerminate(_: UIApplication) {
-        if case .Connected(_, _) = self.auth.state {
+        if case .Connected = auth.state {
             // TODO: send last connected at
-            
         }
     }
 }
@@ -99,7 +103,7 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
     {
         let userInfo = notification.request.content.userInfo
 
-        if case .Connected(let api, _) = self.auth.state {
+        if case let .Connected(api, _) = auth.state {
             if let uuidString = (userInfo["uuid"] as? String), let uuid = UUID(uuidString: uuidString) {
                 let (user, _) = api.userByUuid(uuid)
                 if let user = user {

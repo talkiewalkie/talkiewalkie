@@ -12,6 +12,7 @@ require (
 	github.com/friendsofgo/errors v0.9.2
 	github.com/golang-migrate/migrate/v4 v4.15.1
 	github.com/golang/protobuf v1.5.2
+	github.com/gosimple/slug v1.11.2
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
 	github.com/jmoiron/sqlx v1.3.4
 	github.com/joho/godotenv v1.4.0
@@ -39,6 +40,7 @@ require (
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/google/go-cmp v0.5.6 // indirect
 	github.com/googleapis/gax-go/v2 v2.1.1 // indirect
+	github.com/gosimple/unidecode v1.0.1 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect

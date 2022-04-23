@@ -1,9 +1,8 @@
-import SwiftUI
 import OSLog
+import SwiftUI
 
 extension AutoTextField {
     struct Representable: UIViewRepresentable {
-
         @Binding var text: NSAttributedString
         @Binding var isFocused: Bool
         @Binding var flexibleHeight: CGFloat
@@ -34,7 +33,7 @@ extension AutoTextField {
             context.coordinator.textView
         }
 
-        func updateUIView(_ view: UIKitTextView, context: Context) {
+        func updateUIView(_: UIKitTextView, context: Context) {
             context.coordinator.update(representable: self)
         }
 
@@ -51,7 +50,5 @@ extension AutoTextField {
                 onCommit: onCommit
             )
         }
-
     }
-
 }

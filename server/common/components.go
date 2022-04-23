@@ -10,12 +10,14 @@ import (
 	"strconv"
 
 	firebase "firebase.google.com/go/v4"
+	"github.com/gosimple/slug"
 	"github.com/jmoiron/sqlx"
+	"github.com/volatiletech/sqlboiler/v4/boil"
 
 	"github.com/talkiewalkie/talkiewalkie/clients"
-	"github.com/talkiewalkie/talkiewalkie/repositories"
-
+	"github.com/talkiewalkie/talkiewalkie/models"
 	"github.com/talkiewalkie/talkiewalkie/pb"
+	"github.com/talkiewalkie/talkiewalkie/repositories"
 )
 
 type Components struct {
@@ -54,6 +56,19 @@ func InitComponents() *Components {
 	if err != nil {
 		log.Panicf("could not connect to '%s': %+v", dbUri, err)
 	}
+
+	models.AddUserHook(boil.BeforeInsertHook, func(ctx context.Context, db boil.ContextExecutor, u *models.User) error {
+		u.Handle = slug.Make(u.Handle)
+		return nil
+	})
+	models.AddUserHook(boil.BeforeUpdateHook, func(ctx context.Context, db boil.ContextExecutor, u *models.User) error {
+		u.Handle = slug.Make(u.Handle)
+		return nil
+	})
+	models.AddUserHook(boil.BeforeUpsertHook, func(ctx context.Context, db boil.ContextExecutor, u *models.User) error {
+		u.Handle = slug.Make(u.Handle)
+		return nil
+	})
 
 	authClient := clients.NewFirebaseAuthClient(app)
 	messagingClient := clients.NewFirebaseMessagingClient(app)

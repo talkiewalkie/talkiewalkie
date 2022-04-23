@@ -7,7 +7,6 @@
 
 import SwiftUI
 
-
 struct LocalNotification: Identifiable {
     let id = UUID()
     var title: String
@@ -15,7 +14,6 @@ struct LocalNotification: Identifiable {
     var image: UIImage?
     var date: Date?
 }
-
 
 public extension View {
     func addLocalNotification() -> some View {
@@ -27,12 +25,12 @@ public extension View {
 
 struct LocalNotificationModifier: ViewModifier {
     @EnvironmentObject private var manager: LocalNotificationManager
-    
+
     func body(content: Content) -> some View {
         GeometryReader { _ in
             ZStack {
                 content
-                
+
                 ZStack {
                     ForEach(manager.notifications) {
                         LocalNotificationView(notification: $0)
@@ -44,7 +42,6 @@ struct LocalNotificationModifier: ViewModifier {
                 }
                 .padding(.horizontal, 10)
                 .frame(maxHeight: .infinity, alignment: .top)
-                
             }
         }
     }
@@ -52,14 +49,14 @@ struct LocalNotificationModifier: ViewModifier {
 
 struct LocalNotificationView: View {
     var notification: LocalNotification
-    
+
     var formattedDate: String {
         if let date = notification.date {
             return Self.dateFormatter.string(from: date)
         }
         return "now"
     }
-    
+
     var body: some View {
         HStack {
             Image(uiImage: notification.image ?? UIImage(named: "AppIcon")!)
@@ -69,7 +66,7 @@ struct LocalNotificationView: View {
                        height: DrawingConstraints.imageSize)
                 .cornerRadius(10)
                 .clipped()
-            
+
             HStack(alignment: .top) {
                 VStack(alignment: .leading) {
                     Text(notification.title)
@@ -77,9 +74,9 @@ struct LocalNotificationView: View {
                     Text(notification.message)
                         .lineLimit(1)
                 }
-                
+
                 Spacer()
-                
+
                 Text(formattedDate)
                     .font(.subheadline)
                     .foregroundColor(.secondary)
@@ -92,24 +89,22 @@ struct LocalNotificationView: View {
         )
         .shadow(color: .black.opacity(0.15), radius: 3)
     }
-    
+
     static let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateFormat = "HH:mm"
         return formatter
     }()
-    
-    struct DrawingConstraints {
+
+    enum DrawingConstraints {
         static let imageSize: CGFloat = 50
         static let padding: CGFloat = 12
     }
 }
 
-
 class LocalNotificationManager: ObservableObject {
-    
     @Published fileprivate var notifications: [LocalNotification] = []
-    
+
     public func showNotification(_ notification: LocalNotification, displayDuration: Double = 2) {
         withAnimation(.easeInOut) {
             self.notifications.append(notification)
@@ -117,7 +112,7 @@ class LocalNotificationManager: ObservableObject {
         withAnimation(.easeInOut.delay(0.1)) {
             self.notifications.removeFirst(self.notifications.count - 1)
         }
-        
+
         DispatchQueue.main.asyncAfter(deadline: .now() + displayDuration) {
             if let index = self.notifications.firstIndex(where: { $0.id == notification.id }) {
                 _ = withAnimation(.easeInOut) {
@@ -128,7 +123,6 @@ class LocalNotificationManager: ObservableObject {
     }
 }
 
-
 struct LocalNotificationManager_Previews: PreviewProvider {
     static var previews: some View {
         VStack {
@@ -137,10 +131,10 @@ struct LocalNotificationManager_Previews: PreviewProvider {
                 .environmentObject(LocalNotificationManager())
         }
     }
-    
+
     struct TestView: View {
         @EnvironmentObject var localNotificationManager: LocalNotificationManager
-        
+
         var body: some View {
             VStack {
                 Button(action: {
@@ -154,5 +148,4 @@ struct LocalNotificationManager_Previews: PreviewProvider {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
     }
-    
 }
